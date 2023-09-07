@@ -2,23 +2,29 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_templates_2017p8'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_templates_2017p8_diff_xsecs'), size=(700,700), log=True, pdf=True, pdf_log=True)
+
+hide_overlap_with_x_axis = True
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
+ps.c.SetLogy()
 
 f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
+# excluded xsec from previous analysis (2016) is:
+# 0.8 at 300 microns, 0.25 at 1mm, 0.15 at 10mm
+
 which = [
-    ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
-    ('mfv_neu_tau001000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
-    ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
+    ('mfv_neu_tau000300um_M1600', 'c#tau = 0.3 mm', ROOT.kRed,     2, 0.8), 
+    ('mfv_neu_tau001000um_M1600', 'c#tau = 1.0 mm', ROOT.kGreen+2, 5, 0.25), 
+    ('mfv_neu_tau010000um_M1600', 'c#tau = 10 mm',  ROOT.kBlue,    7, 0.15), 
     ]
 
-def fmt(z, title, color, style, save=[]):
+def fmt(z, title, color, style, xsec=None, save=[]):
     if type(z) == str: # signal name
         name = z
         h = f.Get('h_signal_%i_dvv_2017' % name2isample(f, z))
@@ -48,46 +54,159 @@ def fmt(z, title, color, style, save=[]):
     elif title == 'bkg_2018': 
         norm = 0.111
     else:
-        norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017'])
-        norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018'])
-        norm = (norm2017 + norm2018) * 0.3
+        rate_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']
+        rate_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']
+
+        uncert_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2017']
+        uncert_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2018']
+
+        # just to be safe
+        assert(len(rate_per_bin_2017) == len(uncert_per_bin_2017))
+        assert(len(rate_per_bin_2018) == len(uncert_per_bin_2018))
+        assert(len(rate_per_bin_2017) == len(rate_per_bin_2018))
+
+        # scale rate by the xsec of interest
+        yield_per_bin_2017 = tuple([rate*xsec for rate in rate_per_bin_2017])
+        yield_per_bin_2018 = tuple([rate*xsec for rate in rate_per_bin_2018])
+
+        yield_per_bin_tot = tuple(map(lambda val17, val18 : val17 + val18, yield_per_bin_2017, yield_per_bin_2018))
+        norm = sum(yield_per_bin_tot)
+
+        # turn the 1+x uncertainties into the actual abs uncertainties on the yield
+        abs_err_per_bin_2017 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2017, uncert_per_bin_2017))
+        abs_err_per_bin_2018 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2018, uncert_per_bin_2018))
+
+        # years are correlated ==> add errors linearly rather than adding in quadrature
+        abs_err_per_bin_tot = tuple(map(lambda err17, err18 : err17 + err18, abs_err_per_bin_2017, abs_err_per_bin_2018))
+
+        print ""
+        print name
+        for ibin, (val, err) in enumerate(zip(yield_per_bin_tot, abs_err_per_bin_tot)) :
+            print("bin %i: %.2f \pm %.2f" % (ibin, val, round(err,2)))
+
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
     return h
 
-hbkg = fmt(f.Get('h_bkg_dvv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
+def print_bkg_table(h17,h18) :
+    print ""
+    print "2017 bkg: total of %.3f events" % round(h17.Integral(0,h17.GetNbinsX()+2),3)
+    print "2018 bkg: total of %.3f events" % round(h18.Integral(0,h18.GetNbinsX()+2),3)
+    print ""
+
+    bin0_range = (0,h17.FindBin(0.4)-1)
+    bin1_range = (h17.FindBin(0.4),h17.FindBin(0.7)-1)
+    bin2_range = (h17.FindBin(0.7),h17.GetNbinsX()+2)
+
+    # rel stat errs come from statmodel.py
+    bin0_2017_stat = 0.0148*h17.Integral(*bin0_range)
+    bin1_2017_stat = 0.0431*h17.Integral(*bin1_range)
+    bin2_2017_stat = 0.1546*h17.Integral(*bin2_range)
+
+    bin0_2018_stat = 0.0175*h18.Integral(*bin0_range)
+    bin1_2018_stat = 0.0508*h18.Integral(*bin1_range)
+    bin2_2018_stat = 0.1854*h18.Integral(*bin2_range)
+
+    bin0_stat = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
+    bin1_stat = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
+    bin2_stat = math.sqrt(bin2_2017_stat**2 + bin2_2018_stat**2)
+
+    # All rel syst uncertainties taken from the combine card, with stat uncs fully uncorrelated across years
+    # and syst shift fully correlated across years within a single bin.
+    # Note bin 1 syst was anticorrelated with the others, hence <1 and the "1-"
+    bin0_2017_syst_uncorr = 0.173*h17.Integral(*bin0_range)
+    bin1_2017_syst_uncorr = 0.216*h17.Integral(*bin1_range)
+    bin2_2017_syst_uncorr = 0.454*h17.Integral(*bin2_range)
+
+    bin0_2017_syst_corr = (1-0.743)*h17.Integral(*bin0_range)
+    bin1_2017_syst_corr = 0.338*h17.Integral(*bin1_range)
+    bin2_2017_syst_corr = 0.389*h17.Integral(*bin2_range)
+
+    bin0_2018_syst_uncorr = 0.217*h18.Integral(*bin0_range)
+    bin1_2018_syst_uncorr = 0.238*h18.Integral(*bin1_range)
+    bin2_2018_syst_uncorr = 0.586*h18.Integral(*bin2_range)
+
+    bin0_2018_syst_corr = (1-0.766)*h18.Integral(*bin0_range)
+    bin1_2018_syst_corr = 0.315*h18.Integral(*bin1_range)
+    bin2_2018_syst_corr = 0.760*h18.Integral(*bin2_range)
+
+    bin0_tot = h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
+    bin1_tot = h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
+    bin2_tot = h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
+
+    bin0_syst_uncorr = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
+    bin1_syst_uncorr = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
+    bin2_syst_uncorr = math.sqrt(bin2_2017_stat**2 + bin2_2018_stat**2)
+
+    bin0_syst_corr = bin0_2017_syst_corr + bin0_2018_syst_corr
+    bin1_syst_corr = bin1_2017_syst_corr + bin1_2018_syst_corr
+    bin2_syst_corr = bin2_2017_syst_corr + bin2_2018_syst_corr
+
+    bin0_syst = math.sqrt(bin0_syst_uncorr**2 + bin0_syst_corr**2)
+    bin1_syst = math.sqrt(bin1_syst_uncorr**2 + bin1_syst_corr**2)
+    bin2_syst = math.sqrt(bin2_syst_uncorr**2 + bin2_syst_corr**2)
+
+    print "0-400 um:   %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin0_tot,3), round(bin0_stat,3), round(bin0_syst,3))
+    print "400-700 um: %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin1_tot,3), round(bin1_stat,3), round(bin1_syst,3))
+    print "700-40 mm:  %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin2_tot,3), round(bin2_stat,3), round(bin2_syst,3))
+    print ""
+
+
+
+hbkg2017 = fmt(f.Get('h_bkg_dvv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
 hbkg2018 = fmt(f.Get('h_bkg_dvv_2018'), 'bkg_2018', ROOT.kBlack, ROOT.kSolid)
+print_bkg_table(hbkg2017, hbkg2018)
+
+hbkg = hbkg2017
 hbkg.Add(hbkg2018)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3002)
 
-const = 0.05
-leg1 = ROOT.TLegend(0.400, 0.810-const, 0.909, 0.867-const)
+xoffset = 0.0
+yoffset = 0.008
+leg1 = ROOT.TLegend(0.400+xoffset, 0.805+yoffset, 0.909+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Background template', 'F')
-leg2 = ROOT.TLegend(0.383, 0.698-const, 0.893, 0.815-const)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 0.3 fb:}}', '')
-leg3 = ROOT.TLegend(0.400, 0.572-const, 0.909, 0.705-const)
+leg2 = ROOT.TLegend(0.400+xoffset, 0.748+yoffset, 0.909+xoffset, 0.815+yoffset)
+leg2.AddEntry(0, '#kern[-0.22]{Multijet signals, m = 1600 GeV}', '')
+leg3 = ROOT.TLegend(0.400+xoffset, 0.612+yoffset, 0.909+xoffset, 0.745+yoffset)
 legs = leg1, leg2, leg3
 
 for lg in legs:
     lg.SetBorderSize(0)
     lg.SetTextSize(0.04)
+    lg.SetFillStyle(0)
 
-htobreak = None
-for zzz, (name, title, color, style) in enumerate(which):
-    h = fmt(name, title, color, style)
-    if name == 'mfv_neu_tau010000um_M0800':
-        htobreak = h
-    if zzz == 0:
-        h.Draw('hist')
-    else:
+hbkg.Draw('hist')
+ymin = 4e-3
+ymax = 20
+xmax = 4
+hbkg.GetXaxis().SetRangeUser(0,xmax)
+hbkg.GetYaxis().SetRangeUser(ymin,ymax)
+
+if hide_overlap_with_x_axis :
+    magic = 0.0131 # fun magic number for covering over bold lines on x-axis
+    horiz_line = ROOT.TLine()
+    horiz_line.SetLineColor(ROOT.kWhite)
+    horiz_line.SetLineWidth(5)
+    horiz_line.SetLineStyle(1)
+    horiz_line.DrawLine(0.8+magic, ymin, 4, ymin)
+    horiz_line.DrawLine(0.78, ymin*.96, 0.82, ymin*.96)
+
+for zzz, (name, title, color, style, xsec) in enumerate(which):
+    h = fmt(name, title, color, style, xsec)
+
+    # Sort of hacky way to not have the vertical line drawn for the signals w/ many entries in last bin
+    # while keeping the other signal's cosmetics looking okay. Should revisit someday.
+    if h.GetBinContent(h.FindBin(xmax)-1) < ymin :
         h.Draw('hist same')
-    h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(0,1.05)
+    else :
+        h.Draw('hist ][ same')
+
+    if xsec :
+        print "assuming xsec = %s fb for %s" % (xsec, name)
+
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
-
-hbkg.Draw('hist same')
 
 for lg in legs:
     lg.Draw()
@@ -100,64 +219,38 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.415, 0.825, 'CMS')
+write(61, 0.050, 0.280, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
-# do broken y-axis. replace the "1" label with "18.2" and replace the
-# last bin of that one hist's contents with 1 + contents - 18.2.
-
-yax = htobreak.GetYaxis()
-lastibin = htobreak.FindBin(3.999)
-lastbin = htobreak.GetBinLowEdge(lastibin)
-lastbc = htobreak.GetBinContent(lastibin)
-print lastbc
-assert abs(lastbc - 10.5544394292) < 1e-6
-htobreak.SetBinContent(lastibin, lastbc - 10.5544394292 + 1)
-boxxcenter = 0.
-boxxwidth = 0.06
-boxycenter = 0.9
-boxywidth = 0.0205
-boxx1, boxx2 = boxxcenter - boxxwidth, boxxcenter + boxxwidth
-boxy1, boxy2 = boxycenter - boxywidth, boxycenter + boxywidth
-boxxcenter2 = 4.
-boxx21, boxx22 = boxxcenter2 - boxxwidth, boxxcenter2 + boxxwidth
-boxes = [
-    ROOT.TBox(boxx1, boxy1, boxx2, boxy2), # this does the break in the left x-axis
-    ROOT.TBox(boxx21,boxy1, boxx22,boxy2), # ditto right x-axis
-    ROOT.TBox(lastbin-0.02,boxy1,lastbin+0.02,boxy2), # wipes the part of the curve
-    ROOT.TBox(-0.3, 0.95, -0.018, 1.05) # this wipes the end "1" label
-    ]
-for box in boxes:
-    box.SetLineColor(ROOT.kWhite)
-    box.SetFillColor(ROOT.kWhite)
-    box.Draw()
-
-# draw the new end label
-lab2 = ROOT.TText(-0.408, 0.982, '10.6')
-lab2.SetTextFont(yax.GetLabelFont())
-lab2.SetTextSize(yax.GetLabelSize())
-lab2.Draw()
-
-# draw the break lines
-slantdy = 0.005
-lines = [ROOT.TLine(x1, y - slantdy, x2, y + slantdy) for y in boxy1, boxy2 for x1,x2 in (boxx1, boxx2), (boxx21, boxx22)]
-for line in lines:
-    line.SetLineWidth(1)
-    line.Draw()
-
 dvvlines = [
-        ROOT.TLine(0.4, 0, 0.4, 1.05),
-        ROOT.TLine(0.7, 0, 0.7, 1.05),
+        ROOT.TLine(0.4, 0, 0.4, ymax),
+        ROOT.TLine(0.7, 0, 0.7, ymax),
         ]
 
 for ll in dvvlines:
-        ll.SetLineColor(ROOT.kRed)
+        ll.SetLineColor(ROOT.kMagenta)
         ll.SetLineWidth(2)
-        ll.SetLineStyle(2)
+        ll.SetLineStyle(3)
         ll.Draw()
+
+if hide_overlap_with_x_axis :
+    horiz_line.SetLineStyle(1)
+    horiz_line.DrawLine(2.5+magic, ymin, 2.7-magic, ymin)
+    horiz_line.DrawLine(2.48, ymin*.96, 2.52, ymin*.96)
+    horiz_line.DrawLine(2.8+magic, ymin, 4.000025, ymin)
+    horiz_line.DrawLine(2.68, ymin*.96, 2.72, ymin*.96)
+    horiz_line.DrawLine(2.78, ymin*.96, 2.82, ymin*.96)
+
+    # for the weird single-pixel-wide lines that stubbornly remain
+    horiz_line.DrawLine(3.98, ymin*.955, 4.02, ymin*.955)
+
+    hbkg.Draw('axis same')
 
 ps.save('templates')
 
-write(52, 0.047, 0.48, 0.82, 'Preliminary')
+write(52, 0.047, 0.52+xoffset, 0.825, 'Preliminary')
 
 ps.save('templates_prelim')
+
+if hide_overlap_with_x_axis :
+    print "NOTE! hide_overlap_with_x_axis = True, so some cosmetic magic has been applied (only relevant for EXO-19-013, and should be removed/adjusted in future analyses)"

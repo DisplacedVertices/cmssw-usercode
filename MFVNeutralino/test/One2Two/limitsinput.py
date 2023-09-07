@@ -230,6 +230,43 @@ def sig_uncert_pdf(name_year):
 
     return p
 
+def sig_uncert_alphas(name_year):
+    name, year = name_year.rsplit('_',1)
+    kind, tau, mass = name2details(name)
+    tau = int(tau*1000) # back to um
+
+    fcns = {
+            ('mfv_neu', 300, '2017') : lambda x: 8.412357E-02 + -1.492608E-04*x if x < 500 else 1.366428E-02 + -8.342191E-06*x if x < 1000 else 5.163025E-03,
+            ('mfv_stopdbardbar', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_neu', 1000, '2017') : lambda x: 2.482616E-02 + -1.677113E-05*x if x < 500 else 2.930580E-02 + -2.573041E-05*x if x < 1000 else 3.386116E-03,
+            ('mfv_stopdbardbar', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_neu', 10000, '2017') : lambda x: 7.566047E-02 + -1.147594E-04*x if x < 500 else 3.476814E-02 + -3.297473E-05*x if x < 1000 else 1.611145E-03,
+            ('mfv_stopdbardbar', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_neu', 300, '2018') : lambda x: 3.826184E-02 + -3.562455E-05*x if x < 500 else 3.727006E-02 + -3.570847E-05*x if x < 1000 else 4.543582E-03,
+            ('mfv_stopdbardbar', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_neu', 1000, '2018') : lambda x: 1.381364E-01 + -2.434682E-04*x if x < 500 else 3.364486E-02 + -3.615300E-05*x if x < 1000 else 2.315426E-03,
+            ('mfv_stopdbardbar', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_neu', 10000, '2018') : lambda x: 1.395761E-01 + -2.494418E-04*x if x < 500 else 2.779135E-02 + -2.693736E-05*x if x < 1000 else 1.683538E-03,
+            ('mfv_stopdbardbar', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+          }
+
+    ab = None
+    if tau <= 300:
+        p = fcns[(kind, 300, year)](mass)
+    elif tau >= 10000:
+        p = fcns[(kind, 10000, year)](mass)
+    elif 300 < tau <= 1000:
+        ab = 300,1000
+    elif 1000 < tau <= 10000:
+        ab = 1000,10000
+    if ab is not None:
+        a,b = ab
+        fa = fcns[(kind, a, year)](mass)
+        fb = fcns[(kind, b, year)](mass)
+        p = lerp(tau, a, b, fa, fb)
+
+    return p
+
 def make_signals_2015p6(f, name_list):
     # Pull 2015+6 values from previous-format limitsinput file(s).
     # (Not all 2017+8 signal points exist in the final one for the
@@ -319,13 +356,31 @@ def make_signals_2015p6(f, name_list):
 
         print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
-def sig_datamcSF_2017p8(name_year, debug=False):
+
+def hlp(x,l):
+    x = int(x)
+    l,n = sorted(l), len(l)
+    if x < l[0]:
+        x = l[0]
+        a = b = 0
+    elif x >= l[-1]:
+        x = l[-1]
+        a = b = n-1
+    else:
+        for i,y in enumerate(l[:-1]):
+            if y <= x < l[i+1]:
+                a,b = i, i+1
+                break
+    return x, l, a, b, l[a], l[b]
+
+def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
 
     masses = [400,600,800,1200,1600,3000]
     taus = [100,300,1000,10000,30000]
+    kind = kind + syst
 
     trackmover = { # after kind and year indices, rows are masses, cols are taus, each in same order as above two lists
         'mfv_stopdbardbar': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
@@ -352,37 +407,57 @@ def sig_datamcSF_2017p8(name_year, debug=False):
                                         (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
                                         (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
                                         (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
-        'mfv_neu':          { '2017': ( (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722), ),
-                              '2018': ( (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101), ), }, }
+        'mfv_neu':          { '2017': ( (0.276, 0.193, 0.11, 0.058, 0.059),
+                                        (0.243, 0.166, 0.093, 0.043, 0.044),
+                                        (0.22, 0.153, 0.088, 0.036, 0.037),
+                                        (0.189, 0.138, 0.081, 0.029, 0.029),
+                                        (0.163, 0.124, 0.075, 0.024, 0.024),
+                                        (0.132, 0.101, 0.063, 0.019, 0.016), ),
+                              '2018': ( (-0.054, -0.002, 0.015, 0.01, 0.008),
+                                        (-0.012, 0.019, 0.018, 0.008, 0.01),
+                                        (0.003, 0.022, 0.018, 0.009, 0.009),
+                                        (0.017, 0.028, 0.022, 0.009, 0.01),
+                                        (0.029, 0.034, 0.027, 0.01, 0.009),
+                                        (0.042, 0.043, 0.032, 0.011, 0.009), ), }, 
+        'mfv_neu_stat_unc': { '2017': ( (5.157, 2.619, 1.565, 1.108, 1.516),
+                                        (2.543, 1.175, 0.667, 0.395, 0.48),
+                                        (1.811, 0.766, 0.422, 0.218, 0.245),
+                                        (1.522, 0.592, 0.323, 0.151, 0.16),
+                                        (1.381, 0.536, 0.286, 0.128, 0.133),
+                                        (1.471, 0.486, 0.253, 0.107, 0.098), ),
+                              '2018': ( (8.097, 3.639, 2.159, 1.6, 2.058),
+                                        (3.7, 1.563, 0.836, 0.511, 0.608),
+                                        (2.675, 1.024, 0.522, 0.273, 0.31),
+                                        (2.186, 0.784, 0.399, 0.189, 0.202),
+                                        (2.036, 0.694, 0.358, 0.165, 0.166),
+                                        (1.966, 0.622, 0.313, 0.133, 0.127), ), },
+         'mfv_neu_toc_unc': { '2017': ( (4.769, 1.527, 1.973, 4.487, 4.841),
+                                        (4.752, 1.456, 1.061, 2.644, 3.087),
+                                        (2.92, 0.477, 0.324, 1.73, 2.078),
+                                        (0.176, 1.229, 0.894, 0.64, 0.972),
+                                        (1.346, 2.293, 1.784, 0.181, 0.423),
+                                        (3.692, 3.568, 2.717, 0.492, 0.182), ),
+                              '2018': ( (13.768, 8.186, 6.416, 8.13, 7.676),
+                                        (13.729, 7.804, 4.942, 4.641, 5.165),
+                                        (12.017, 6.554, 4.069, 3.446, 3.771),
+                                        (8.099, 4.175, 2.24, 2.102, 2.355),
+                                        (5.819, 2.845, 1.346, 1.337, 1.51),
+                                        (1.54, 0.141, 0.598, 0.28, 0.511), ), },
+'mfv_neu_closeseedtk_unc':  { '2017': ( (3.155, 1.88, 1.087, 0.666, 0.718),
+                                        (2.656, 1.586, 0.875, 0.481, 0.502),
+                                        (2.248, 1.424, 0.807, 0.389, 0.409),
+                                        (1.767, 1.191, 0.687, 0.291, 0.307),
+                                        (1.423, 1.003, 0.593, 0.229, 0.24),
+                                        (0.97, 0.7, 0.43, 0.156, 0.145), ),
+                              '2018': ( (4.168, 2.175, 1.178, 0.791, 0.799),
+                                        (3.21, 1.829, 0.936, 0.484, 0.497),
+                                        (2.838, 1.633, 0.858, 0.393, 0.394),
+                                        (2.2, 1.386, 0.762, 0.304, 0.296),
+                                        (1.835, 1.17, 0.667, 0.249, 0.23),
+                                        (1.182, 0.838, 0.507, 0.174, 0.159), ), }, }
     vtm = trackmover[kind][year]
 
     # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
-
-    def hlp(x,l): # find which points to interpolate between, pinning inside the ranges defined by the above lists
-        x = int(x)
-        l,n = sorted(l), len(l)
-        if x < l[0]:
-            x = l[0]
-            a = b = 0
-        elif x >= l[-1]:
-            x = l[-1]
-            a = b = n-1
-        else:
-            for i,y in enumerate(l[:-1]):
-                if y <= x < l[i+1]:
-                    a,b = i, i+1
-                    break
-        return x, l, a, b, l[a], l[b]
 
     mass, ms, mia, mib, mxa, mxb = mmm = hlp(mass, masses)
     tau,  ts, tia, tib, txa, txb = ttt = hlp(tau,  taus)
@@ -400,13 +475,24 @@ def sig_datamcSF_2017p8(name_year, debug=False):
     if debug:
         print name_year, 'mmm', mmm, 'ttt', ttt
 
+    return vtm
+
+def sig_datamcSF_2017p8(name_year, debug=False):
+    vtm = sig_trackmover_per_event_unc(name_year, debug)
     return 1 - vtm / 2 # trackmover is in the form 2 * (1 - TM_data / TM_MC)
 
 def sig_uncert_2017p8(name_year, debug=False):
     vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
-    uncerts = [max(vtm, 0.1)] # we agreed to assign a minimum of 10%, which comes into play for the high-efficiency mfv_neu points
+    uncerts = [vtm]
     uncerts += [sig_uncert_pdf(name_year)]
+    uncerts += [sig_uncert_alphas(name_year)]
+
+    if 'mfv_neu' in name_year:
+        for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
+            uncerts += [sig_trackmover_per_event_unc(name_year, debug, unc) / 100.]
+
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
+
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
     if debug:
         print name_year, '->', vtm, '    u = %.4f' % u
@@ -467,7 +553,7 @@ def make_signals_2017p8(f, name_list):
         data_mc_scale = sig_datamcSF_2017p8(name_year)
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
-        h_dbv  = ROOT.TH1D(n('dbv'),  '', 125, 0, 2.5)
+        h_dbv  = ROOT.TH1D(n('dbv'),  '', 1250, 0, 2.5)
         h_dvv  = ROOT.TH1D(n('dvv'),  '', 400, 0, 4)
         h_dphi = ROOT.TH1D(n('dphi'), '', 10, -3.15, 3.15)
         t.Draw('dist0>>%s'  % n('dbv'),  'weight*(limitsinput_pass && nvtx==1)')
@@ -785,6 +871,62 @@ def signal_efficiency():
         out_f.Write()
         out_f.Close()
 
+def event_scale_factors():
+    from signal_efficiency import SignalEfficiencyCombiner
+    for which, years in ('2017p8', [2017,2018]), :
+        combiner = SignalEfficiencyCombiner(years)
+        in_f = combiner.inputs[0].f
+        out_f = ROOT.TFile('event_TrackMover_scale_factors_%s.root' % which, 'recreate')
+
+        kinds, masses, taus, nmasses, ntaus = axes(in_f)
+        taus.remove(30.)
+        ntaus -= 1
+
+        for kind in kinds:
+            h = ROOT.TH2D('event_TrackMover_scale_factors_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+            for ibin in xrange(1, nmasses+1):
+                mass = h.GetXaxis().GetBinLowEdge(ibin)
+                for jbin in xrange(1, ntaus+1):
+                    tau = h.GetYaxis().GetBinLowEdge(jbin)
+                    pt = kind, tau, mass
+
+                    try:
+                        name = details2name(*pt)
+                        isample = name2isample(in_f, name)
+                    except ValueError as exc:
+                        if tau < 100:
+                            print colors.warning('problem getting %r : isample %r exc %s' % (pt, isample, exc))
+                        continue # leave holes in the plot to know which samples are missing
+
+                    event_SF = None
+                    if which == '2017p8' :
+                        vtx_SF_2017 = sig_datamcSF_2017p8(name+"_2017")
+                        vtx_SF_2018 = sig_datamcSF_2017p8(name+"_2018")
+                        event_SF_2017 = vtx_SF_2017**2
+                        event_SF_2018 = vtx_SF_2018**2
+                        lumi2017 = gp.int_lumis[gp.years.index("2017")]
+                        lumi2018 = gp.int_lumis[gp.years.index("2018")]
+                        event_SF = (event_SF_2017*lumi2017 + event_SF_2018*lumi2018) / (lumi2017+lumi2018)
+                        
+                        # for table of SFs, with bins 0.1--0.3\mm & 0.3--1\mm & 1--10\mm & 10--100\mm,
+                        # take the ~midpoint of each bin and put its SF in the table (averaged where necessary)
+                        if mass == 1600 :
+                            if tau == 0.2 or tau == 0.6 or tau == 0.7 or tau == 4 or tau == 7 or tau == 55 :
+                                print("for SF table:",name, round(event_SF, 4))
+
+                    else : 
+                        sys.exit('event_scale_factors not set up to handle %s! Exiting.' % which)
+
+                    h.SetBinContent(ibin, jbin, event_SF)
+                    h.SetBinError  (ibin, jbin, 0) # JMTBAD
+
+            out_f.cd()
+            h.Write()
+
+        out_f.Write()
+        out_f.Close()
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
@@ -818,5 +960,7 @@ if __name__ == '__main__':
             print sample.isample, sample.name, 'signal_%05i' % sample.isample
     elif 'signal_efficiency' in sys.argv:
         signal_efficiency()
+    elif 'event_scale_factors' in sys.argv:
+        event_scale_factors()
     else:
         sys.exit('no cmd recognized from argv=%r' % sys.argv[1:])

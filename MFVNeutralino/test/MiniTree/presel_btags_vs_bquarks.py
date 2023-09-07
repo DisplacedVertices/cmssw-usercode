@@ -60,9 +60,9 @@ y = []
 for i,btag in enumerate([0,1,2]):
   h = f.Get('mfvEventHistosJetPreSel/h_nbtags_%s' % btag)
   x.append(2*i+1)
-  y.append(h.Integral(2,11)/h.Integral(1,11))
+  y.append(h.Integral(2,11)/h.Integral(1,11) if h.Integral(1,11) > 0 else 1)
   x.append(2*i+2)
-  y.append(h.Integral(3,11)/h.Integral(1,11))
+  y.append(h.Integral(3,11)/h.Integral(1,11) if h.Integral(1,11) > 0 else 1)
 
 g = ROOT.TGraph(len(x), array('d',x), array('d',y))
 g.SetTitle('preselected events;;fraction with btag')
@@ -73,7 +73,7 @@ g.GetYaxis().SetRangeUser(0,1)
 g.SetMarkerStyle(21)
 g.Draw('AP')
 h = f.Get('mfvEventHistosJetPreSel/h_gen_flavor_code')
-bquark_fraction = h.GetBinContent(3)/h.Integral()
+bquark_fraction = h.GetBinContent(3)/h.Integral() if h.Integral() > 0 else 1
 line = ROOT.TLine(x[0]-0.5, bquark_fraction, x[-1]+0.5, bquark_fraction)
 line.SetLineStyle(2)
 line.SetLineWidth(2)
@@ -89,10 +89,10 @@ y = []
 for i,btag in enumerate([0,1,2]):
   h1 = f.Get('mfvEventHistosJetPreSel/h_nbtags_v_bquark_code_%s' % btag).ProjectionY('h_nbtags_%s_bquarks' % btag, 3, 3)
   h2 = f.Get('mfvEventHistosJetPreSel/h_nbtags_v_bquark_code_%s' % btag).ProjectionY('h_nbtags_%s_nobquarks' % btag, 1, 2)
-  x.append(h1.Integral(2,4)/h1.Integral(1,4))
-  y.append(h2.Integral(2,4)/h2.Integral(1,4))
-  x.append(h1.Integral(3,4)/h1.Integral(1,4))
-  y.append(h2.Integral(3,4)/h2.Integral(1,4))
+  x.append(h1.Integral(2,4)/h1.Integral(1,4) if h1.Integral(1,4) > 0 else 1)
+  y.append(h2.Integral(2,4)/h2.Integral(1,4) if h2.Integral(1,4) > 0 else 1)
+  x.append(h1.Integral(3,4)/h1.Integral(1,4) if h1.Integral(1,4) > 0 else 1)
+  y.append(h2.Integral(3,4)/h2.Integral(1,4) if h2.Integral(1,4) > 0 else 1)
 
 g = ROOT.TGraph(len(x), array('d',x), array('d',y))
 g.SetTitle('preselected events;btag efficiency;fake rate')

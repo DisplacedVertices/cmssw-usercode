@@ -47,6 +47,9 @@ def setup_event_filter(process,
     elif mode == 'leptons only novtx':
         trigger_filter = event_filter = 'leptons only'
         event_filter_require_vertex = False
+    elif mode == 'bjets OR displaced dijet veto HT novtx':
+        trigger_filter = event_filter = 'bjets OR displaced dijet veto HT'
+        event_filter_require_vertex = False
     elif mode == 'novtx':
         event_filter = True
         event_filter_require_vertex = False

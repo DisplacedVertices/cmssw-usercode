@@ -5,7 +5,7 @@ ROOT.TH1.AddDirectory(0)
 do_bquark = False
 is_mc = False
 only_10pc = False
-year = '2018'
+year = '2017p8'
 version = 'V27m'
 set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=True, log=False)

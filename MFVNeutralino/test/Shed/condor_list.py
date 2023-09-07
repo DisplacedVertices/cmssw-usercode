@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from JMTucker.Tools import DBS, colors, Samples
 
-at_sites = ['T3_US_FNALLPC', 'T1_US_FNAL_Disk', 'T2_DE_DESY'] # ordered by priority
+at_sites = ['T3_US_FNALLPC', 'T1_US_FNAL_Disk', 'T2_DE_DESY', 'T2_US_MIT', 'T2_US_Florida', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_Wisconsin'] # ordered by priority
 at = { x:defaultdict(list) for x in at_sites }
 
 if 'main' in argv:

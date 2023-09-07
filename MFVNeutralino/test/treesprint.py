@@ -154,7 +154,7 @@ for ntk in ntks:
 
         is_sig = sname.startswith('mfv_')
         is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
-        is_bkg = any((sname.startswith(s) for s in ('qcdht0700', 'qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbarht0600', 'ttbarht0800', 'ttbarht1200', 'ttbarht2500')))
+        is_bkg = any((sname.startswith(s) for s in ('qcd', 'ttbar')))
         is_other = not any((is_sig, is_data, is_bkg))
         include_in_sum = sumall or (sumbkg and is_bkg)
 

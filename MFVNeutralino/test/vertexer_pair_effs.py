@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 dataset += '_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
@@ -28,12 +28,18 @@ process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCuts * process.mfvVe
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset, all_signal=False)
+    if use_btag_triggers :
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        pset_modifier = chain_modifiers(per_sample_pileup_weights_modifier())
+    else :
+        samples = pick_samples(dataset, all_signal=False)
+        pset_modifier = chain_modifiers(per_sample_pileup_weights_modifier())
+
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
     cs = CondorSubmitter('VertexerPairEffs' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = per_sample_pileup_weights_modifier(),
+                         pset_modifier = pset_modifier,
                          )
     cs.submit_all(samples)

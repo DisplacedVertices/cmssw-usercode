@@ -108,12 +108,13 @@ def effs(fn):
             for icut, cut in enumerate(cuts):
                 h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
                 h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-                nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
+                nm1 = get_n('%sevtHst%sVNo%s' % (ntk, nvtx, cut))
                 nm1_abs = float(nm1)/den
                 nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
                 h_nm1_abs.SetBinContent(icut+1, nm1_abs)
                 h_nm1_rel.SetBinContent(icut+1, nm1_rel)
                 print '    remove %s cut: %5i -> %5.3e (n-1: %5.3e)' % (cut.ljust(max_cut_name_len), nm1, nm1_abs, nm1_rel)
+                print '    weighted to %.1f/pb: %5.2f +/- %5.2f' % (int_lumi, nm1*weight, abs(nm1)**0.5 * weight)
             h_nm1_abs.GetXaxis().SetBinLabel(len(cuts)+1, 'all')
             h_nm1_abs.SetBinContent(len(cuts)+1, float(numall)/den)
             def draw(h):

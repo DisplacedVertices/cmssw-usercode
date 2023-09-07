@@ -59,6 +59,7 @@ private:
   EffectiveAreas electron_effective_areas;
   std::vector<edm::EDGetTokenT<double>> misc_tokens;
   const bool lightweight;
+  LHAPDF::PDF* lhapdf;
 };
 
 namespace {
@@ -105,6 +106,9 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   assert(MFVEvent::n_lep_mu_idrequired == MFVEvent::n_lep_mu_idbits);
   assert(electron_EB_selectors.size() == electron_EE_selectors.size());
   assert(electron_EB_selectors.size() == MFVEvent::n_lep_el_idrequired);
+
+  // setup LHAPDF for scale uncertainties
+  lhapdf = mfv::setupLHAPDF();
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -147,13 +151,28 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->misc.push_back(x);
 
     if (gen_info->hasPDF()) {
-      mevent->misc.push_back(gen_info->pdf()->id.first);
-      mevent->misc.push_back(gen_info->pdf()->id.second);
-      mevent->misc.push_back(gen_info->pdf()->x.first);
-      mevent->misc.push_back(gen_info->pdf()->x.second);
-      mevent->misc.push_back(gen_info->pdf()->xPDF.first);
-      mevent->misc.push_back(gen_info->pdf()->xPDF.second);
-      mevent->misc.push_back(gen_info->pdf()->scalePDF);
+
+      int id1 = gen_info->pdf()->id.first;
+      int id2 = gen_info->pdf()->id.second;
+      double x1 = gen_info->pdf()->x.first;
+      double x2 = gen_info->pdf()->x.second;
+      double xpdf1 = gen_info->pdf()->xPDF.first;
+      double xpdf2 = gen_info->pdf()->xPDF.second;
+      double qscale = gen_info->pdf()->scalePDF;
+
+      // TODO move these to their own branches? but would need to propagate to MiniTree too
+      mevent->misc.push_back(id1);
+      mevent->misc.push_back(id2);
+      mevent->misc.push_back(x1);
+      mevent->misc.push_back(x2);
+      mevent->misc.push_back(xpdf1);
+      mevent->misc.push_back(xpdf2);
+      mevent->misc.push_back(qscale);
+
+      mevent->ren_weight_up = mfv::renormalization_weight(qscale,  1);
+      mevent->ren_weight_dn = mfv::renormalization_weight(qscale, -1);
+      mevent->fac_weight_up = mfv::factorization_weight(lhapdf, id1, id2, x1, x2, qscale,  1);
+      mevent->fac_weight_dn = mfv::factorization_weight(lhapdf, id1, id2, x1, x2, qscale, -1);
     }
 
     edm::Handle<reco::GenJetCollection> gen_jets;
@@ -498,6 +517,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     // for njets and ht40: jet_pt vector
     // jet_id vector
     // beamspot and slopes, pvx,y,z
+    // HLT jet pt, offline bdisc, and offline jet eta information for trigger matching
 
     mevent->gen_valid = 0;
     mevent->gen_flavor_code = 0;
@@ -535,15 +555,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvsscores.clear();
     mevent->jet_pudisc.clear();
     mevent->jet_raw_pt.clear();
-    mevent->jet_bdisc.clear();
-    mevent->jet_eta.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
-    mevent->jet_hlt_pt.clear();
     mevent->jet_hlt_eta.clear();
     mevent->jet_hlt_phi.clear();
     mevent->jet_hlt_energy.clear();
-    mevent->displaced_jet_hlt_pt.clear();
     mevent->displaced_jet_hlt_eta.clear();
     mevent->displaced_jet_hlt_phi.clear();
     mevent->displaced_jet_hlt_energy.clear();

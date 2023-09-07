@@ -39,6 +39,10 @@ if options.from_merge:
     options.partial = True
     options.coderep = False
 
+# as far as I know, it should be fine to always use lowercase for these,
+# and can be a problem when it's not...
+options.dataset = options.dataset.lower()
+
 ########################################################################
 
 wds = cs_dirs_from_argv() + crab_dirs_from_argv()

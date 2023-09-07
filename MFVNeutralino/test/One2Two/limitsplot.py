@@ -40,11 +40,12 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     if eyh is None:
         eyh = [0]*l
     eyh = array('f', eyh)
+    #print l, x, y, exl, exh, eyl, eyh
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
 def parse_theory(which, include_errors=True, cache={}):
-    if which not in ('gluglu', 'stopstop'):
+    if which not in ('gluglu', 'stopstop', 'higgsino_N2N1'):
         raise ValueError('bad which %r' % which)
     fn = which + '.csv'
     if not cache.has_key(fn):
@@ -56,7 +57,7 @@ def parse_theory(which, include_errors=True, cache={}):
     return cache[fn]
 
 def fmt_theory(which, g, xtitle):
-    fmt(g, '', xtitle, 9 if which == 'gluglu' else 46)
+    fmt(g, '', xtitle, 9 if which == 'gluglu' else 94 if which == 'higgsino_N2N1' else 46)
 
 def make_theory(which, include_errors=True, return_list=False):
     xsecs = parse_theory(which, include_errors)
@@ -151,11 +152,11 @@ def make_1d_plot(d, name, xkey='mass'):
     else:
         assert type(xkey) == tuple
         xkey, which_mass = xkey
-        xtitle = 'lifetime (#mum)'
+        xtitle = 'lifetime (mm)'
 
     class G:
         def __iter__(self):
-            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 theory'.split():
+            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 theory theory2'.split():
                 if hasattr(self, x):
                     y = getattr(self, x)
                     y.SetName(x)
@@ -172,13 +173,19 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect84  =  tgae(d[xkey], d['expect84'],  None, None, None, None, '', xtitle, 1)
     g.expect97p5 = tgae(d[xkey], d['expect97p5'], None, None, None, None, '', xtitle, 1)
 
+    which_theory = None
+    which_theory2 = None
+
     if name.startswith('multijet') or name.startswith('splitSUSY'):
         which_theory = 'gluglu'
+        which_theory2 = 'higgsino_N2N1'
     elif name.startswith('dijet'):
         which_theory = 'stopstop'
 
     if xkey == 'mass':
         g.theory = make_theory(which_theory)
+        if which_theory2:
+            g.theory2 = make_theory(which_theory2)
     else:
         xsecs = parse_theory(which_theory)
         zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
@@ -191,6 +198,19 @@ def make_1d_plot(d, name, xkey='mass'):
         ey = [unc]*len(x)
         g.theory = tge(zip(x,y,ey))
         fmt_theory(which_theory, g.theory, xtitle)
+
+        if which_theory2:
+            xsecs = parse_theory(which_theory2)
+            zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
+            if zz:
+                xsec, unc = zz[0]
+            else:
+                xsec, unc = 1e-99, 1e-99
+            x = d[xkey]
+            y = [xsec]*len(x)
+            ey = [unc]*len(x)
+            g.theory2 = tge(zip(x,y,ey))
+            fmt_theory(which_theory2, g.theory2, xtitle)
 
     return g
 
@@ -229,7 +249,8 @@ def save_1d_plots():
             for sample in sample_iterator(in_f, years, slices_1d=True):
                 if use(sample):
                     #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
-                    d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
+                    #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                    d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
             d.points.sort(key=sorter)
 
             out_f.mkdir(name).cd()
@@ -264,7 +285,8 @@ def save_2d_plots():
                     continue
                 if sample.kind != kind:
                     continue
-                d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
+                #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
 
             taus, masses = axisize(d['tau']), axisize(d['mass'])
             taus.remove(30.)
@@ -285,7 +307,7 @@ def theory_exclude(which, h, opt, use_error):
     max_mass = max(theory.keys())
     min_mass = min(theory.keys())
 
-    hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
+    hexc = h.Clone(h.GetName() + '_%s' % which +'_exc_%s' % opt)
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
@@ -432,7 +454,8 @@ def dbg_exclude():
         c.SaveAs('/uscms/home/tucker/asdf/a%s.root' % interp)
 
 def to_r():
-    f = ROOT.TFile('limits_1d_2017p8.root')
+    #f = ROOT.TFile('limits_1d_2017p8.root')
+    f = ROOT.TFile('limits_run2.root')
     print '''
 # if you didn't set up already, do this
 . /cvmfs/sft.cern.ch/lcg/views/LCG_89/x86_64-slc6-gcc62-opt/setup.sh
@@ -453,7 +476,8 @@ env R_LIBS=~/.R R --no-save <<EOF
             print h
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,100,by=10)))' # gluino interpretation
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.16,0.915,by=0.1), seq(1,19,by=1), seq(20,100,by=5)))' # higgsino interpretation, for plot cosmetic reasons
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
     print 'EOF'
@@ -462,7 +486,8 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(os.path.join('.',fn)).read().replace('"', '').split('\n') if x.strip()]
+        #lines = [x.strip() for x in open(os.path.join('.',fn)).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('/uscms/home/joeyr/public/to_r/run2',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
@@ -503,15 +528,18 @@ def from_r():
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
                 if k == 'mfv_stopdbardbar':
-                    which = 'stopstop' 
+                    whichlist = ['stopstop']
                 elif k == 'mfv_neu' or k == 'mfv_splitSUSY':
-                    which = 'gluglu'
-                hexc = theory_exclude(which, h, opt, 'expect' not in ex)
-                g = exc_graph(hexc, 1, 1)
-                g.SetName(n + '_%s_exc_g' % opt)
+                    whichlist = ['gluglu', 'higgsino_N2N1']
+
+                for which in whichlist :
+                    hexc = theory_exclude(which, h, opt, 'expect' not in ex)
+                    g = exc_graph(hexc, 1, 1)
+                    g.SetName(n + '_%s' % which + '_%s_exc_g' % opt)
+                    hexc.Write()
+                    g.Write()
+
                 h.Write()
-                hexc.Write()
-                g.Write()
     f.Close()
 
 if __name__ == '__main__':
@@ -523,8 +551,10 @@ if __name__ == '__main__':
             ps = plot_saver(plot_dir('limitsplot_theory'), size=(600,600))
             g1 = make_theory('gluglu')
             g2 = make_theory('stopstop')
+            g3 = make_theory('higgsino_N2N1')
             g1.Draw('A3')
             g2.Draw('3')
+            g3.Draw('3')
             ps.save('theory')
 
         elif cmd == 'save_1d_plots':

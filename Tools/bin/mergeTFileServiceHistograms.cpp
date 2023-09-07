@@ -213,6 +213,7 @@ void fill(TDirectory & out, TObject * o, double w) {
   TH2D * th2d;
   TH3F * th3f;
   TH3D * th3d;
+  double entries;
   if((dir  = dynamic_cast<TDirectory*>(o)) != 0) {
     const char * name = dir->GetName();
     TDirectory * outDir = dynamic_cast<TDirectory*>(out.Get(name));
@@ -239,7 +240,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH1F" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     }
+    entries = th1f->GetEntries() + outTh1f->GetEntries();
     outTh1f->Add(th1f, w);
+    outTh1f->SetEntries(entries);
   } else if((th1d = dynamic_cast<TH1D*>(o)) != 0) {
     const char * name = th1d->GetName();
     TH1D * outTh1d = dynamic_cast<TH1D*>(out.Get(name));
@@ -247,7 +250,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH1D" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     } 
+    entries = th1d->GetEntries() + outTh1d->GetEntries();
     outTh1d->Add(th1d, w);
+    outTh1d->SetEntries(entries);
   } else if((th2f = dynamic_cast<TH2F*>(o)) != 0) {
     const char * name = th2f->GetName();
     TH2F * outTh2f = dynamic_cast<TH2F*>(out.Get(name));
@@ -255,7 +260,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH2F" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     }
+    entries = th2f->GetEntries() + outTh2f->GetEntries();
     outTh2f->Add(th2f, w);
+    outTh2f->SetEntries(entries);
   } else if((th2d = dynamic_cast<TH2D*>(o)) != 0) {
     const char * name = th2d->GetName();
     TH2D * outTh2d = dynamic_cast<TH2D*>(out.Get(name));
@@ -263,7 +270,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH2D" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     }
+    entries = th2d->GetEntries() + outTh2d->GetEntries();
     outTh2d->Add(th2d, w);
+    outTh2d->SetEntries(entries);
   } else if((th3f = dynamic_cast<TH3F*>(o)) != 0) {
     const char * name = th3f->GetName();
     TH3F * outTh3f = dynamic_cast<TH3F*>(out.Get(name));
@@ -271,7 +280,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH3F" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     }
+    entries = th3f->GetEntries() + outTh3f->GetEntries();
     outTh3f->Add(th3f, w);
+    outTh3f->SetEntries(entries);
   } else if((th3d = dynamic_cast<TH3D*>(o)) != 0) {
     const char * name = th3d->GetName();
     TH3D * outTh3d = dynamic_cast<TH3D*>(out.Get(name));
@@ -279,7 +290,9 @@ void fill(TDirectory & out, TObject * o, double w) {
       cerr <<"error: histogram TH3D" << name << " not found in directory " << out.GetName() << endl;
       exit(-1);	
     }
+    entries = th3d->GetEntries() + outTh3d->GetEntries();
     outTh3d->Add(th3d, w);
+    outTh3d->SetEntries(entries);
   }
 }
 

@@ -22,10 +22,10 @@ TH1D* h_dbv_Bjet = 0;
 TH1D* h_dbv_Bjet_coarse = 0;
 TH1D* h_dbv_DisplacedDijet = 0;
 TH1D* h_dbv_DisplacedDijet_coarse = 0;
-TH1D* h_dbv_passHT_failBjet = 0;
-TH1D* h_dbv_passHT_failBjet_coarse = 0;
-TH1D* h_dbv_failHT_passBjet = 0;
-TH1D* h_dbv_failHT_passBjet_coarse = 0;
+TH1D* h_dbv_passDisplacedDijet_failBjet = 0;
+TH1D* h_dbv_passDisplacedDijet_failBjet_coarse = 0;
+TH1D* h_dbv_failDisplacedDijet_passBjet = 0;
+TH1D* h_dbv_failDisplacedDijet_passBjet_coarse = 0;
 
 TH1D* h_dvv_all = 0;
 TH1D* h_dvv_all_coarse = 0;
@@ -35,10 +35,10 @@ TH1D* h_dvv_Bjet = 0;
 TH1D* h_dvv_Bjet_coarse = 0;
 TH1D* h_dvv_DisplacedDijet = 0;
 TH1D* h_dvv_DisplacedDijet_coarse = 0;
-TH1D* h_dvv_passHT_failBjet = 0;
-TH1D* h_dvv_passHT_failBjet_coarse = 0;
-TH1D* h_dvv_failHT_passBjet = 0;
-TH1D* h_dvv_failHT_passBjet_coarse = 0;
+TH1D* h_dvv_passDisplacedDijet_failBjet = 0;
+TH1D* h_dvv_passDisplacedDijet_failBjet_coarse = 0;
+TH1D* h_dvv_failDisplacedDijet_passBjet = 0;
+TH1D* h_dvv_failDisplacedDijet_passBjet_coarse = 0;
 
 bool pass_hlt(const mfv::MiniNtuple& nt, size_t i){
   return bool((nt.pass_hlt >> i) & 1);
@@ -48,16 +48,7 @@ bool pass_hlt(const mfv::MiniNtuple& nt, size_t i){
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   if (prints) std::cout << "Entry " << j << "\n";
 
-  // count nbjets for the bjet triggers
-  int nbjets = 0;
-  for(int ijet = 0; ijet < nt.njets; ++ijet){
-    double bdisc = nt.jet_bdisc[ijet];
-    
-    // Tight WP, 2017
-    if(bdisc >= 0.7489) ++nbjets;
-  }
-
-  bool passesHTTrigger = pass_hlt(nt, mfv::b_HLT_PFHT1050);
+  bool passesHTTrigger = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT1050);
 
   // pt requirements: go 40 GeV above threshold based on https://twiki.cern.ch/twiki/bin/view/CMSPublic/HLTplots2018DataJets
   // HT requirements: go 150 GeV above threshold based on what we've done with the HT1050 trigger
@@ -65,22 +56,10 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   // should think about whether we can be more aggressive with the offline HT threshold
   // e.g. from https://twiki.cern.ch/twiki/pub/CMSPublic/HighLevelTriggerRunIIResults/SUSY2015_trig-Ele15_HT350__var-HT.png
   // it looks like the HT350 leg is 95% efficient already at ~400 GeV
-  bool passesBjetTrigger = 
-   (pass_hlt(nt, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) && nt.njets >= 2 && nt.jet_pt[0] > 140 && nt.jet_pt[1] > 140 && fabs(nt.jet_eta[0] - nt.jet_eta[1]) < 1.6 && nbjets >= 2)
-|| (pass_hlt(nt, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) && nt.ht(30) > 450 && nt.njets >= 4 && nt.jet_pt[0] > 115 && nt.jet_pt[1] > 100 && nt.jet_pt[2] > 85 && nt.jet_pt[3] > 80 && nbjets >= 3)
-|| (pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2) && nt.ht() > 530 && nt.njets >= 6 && nt.jet_pt[0] > 72 && nt.jet_pt[1] > 72 && nt.jet_pt[2] > 72 && nt.jet_pt[3] > 72 && nt.jet_pt[4] > 72 && nt.jet_pt[5] > 72 && nbjets >= 2)
-|| (pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2)     && nt.ht() > 530 && nt.njets >= 6 && nt.jet_pt[0] > 72 && nt.jet_pt[1] > 72 && nt.jet_pt[2] > 72 && nt.jet_pt[3] > 72 && nt.jet_pt[4] > 72 && nt.jet_pt[5] > 72 && nbjets >= 2)
-|| (pass_hlt(nt, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5) && nt.ht() > 580 && nt.njets >= 6 && nt.jet_pt[0] > 80 && nt.jet_pt[1] > 80 && nt.jet_pt[2] > 80 && nt.jet_pt[3] > 80 && nt.jet_pt[4] > 80 && nt.jet_pt[5] > 80 && nbjets >= 1);
+  bool passesBjetTrigger = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) || nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0);
 
-  /*
-  bool passesBjetTrigger = pass_hlt(nt, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) 
-                        || pass_hlt(nt, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) 
-                        || pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2) 
-                        || pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2) 
-                        || pass_hlt(nt, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5);
-  */
 
-  bool passesDisplacedDijetTrigger = pass_hlt(nt, mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack); // ignore the other one with a higher HT threshold for now...
+  bool passesDisplacedDijetTrigger = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) || nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT650_DisplacedDijet60_Inclusive);
 
   double w = nt.weight; // modify as needed before filling hists
 
@@ -122,29 +101,29 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_dbv_all_coarse->Fill(dbvs[0], w);
 
     // HT trigger
-    if(passesHTTrigger && nt.njets >= 4 && nt.ht() > 1200){
+    if(passesHTTrigger){
       h_dbv_HT->Fill(dbvs[0], w);
       h_dbv_HT_coarse->Fill(dbvs[0], w);
     }
     // Bjet trigger
-    if(passesBjetTrigger && nt.njets >= 4){
+    if(passesBjetTrigger){
       h_dbv_Bjet->Fill(dbvs[0], w);
       h_dbv_Bjet_coarse->Fill(dbvs[0], w);
     }
     // Displaced Dijet trigger
-    if(passesDisplacedDijetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    if(passesDisplacedDijetTrigger){
       h_dbv_DisplacedDijet->Fill(dbvs[0], w);
       h_dbv_DisplacedDijet_coarse->Fill(dbvs[0], w);
     }
-    // pass HT trigger fail Bjet trigger (to study the shape differences)
-    if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
-      h_dbv_passHT_failBjet->Fill(dbvs[0], w);
-      h_dbv_passHT_failBjet_coarse->Fill(dbvs[0], w);
+    // pass DisplacedDijet trigger fail Bjet trigger (to study the shape differences)
+    if(passesDisplacedDijetTrigger && !passesBjetTrigger){
+      h_dbv_passDisplacedDijet_failBjet->Fill(dbvs[0], w);
+      h_dbv_passDisplacedDijet_failBjet_coarse->Fill(dbvs[0], w);
     }
-    // pass Bjet trigger fail HT trigger (to study the shape differences)
-    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4){
-      h_dbv_failHT_passBjet->Fill(dbvs[0], w);
-      h_dbv_failHT_passBjet_coarse->Fill(dbvs[0], w);
+    // pass Bjet trigger fail DisplacedDijet trigger (to study the shape differences)
+    if(!passesDisplacedDijetTrigger && passesBjetTrigger){
+      h_dbv_failDisplacedDijet_passBjet->Fill(dbvs[0], w);
+      h_dbv_failDisplacedDijet_passBjet_coarse->Fill(dbvs[0], w);
     }
   }
   else if (dbvs.size() == 2){
@@ -153,29 +132,29 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_dvv_all_coarse->Fill(dvv, w);
 
     // HT trigger
-    if(passesHTTrigger && nt.njets >= 4 && nt.ht() > 1200){
+    if(passesHTTrigger){
       h_dvv_HT->Fill(dvv, w);
       h_dvv_HT_coarse->Fill(dvv, w);
     }
     // Bjet trigger
-    if(passesBjetTrigger && nt.njets >= 4){
+    if(passesBjetTrigger){
       h_dvv_Bjet->Fill(dvv, w);
       h_dvv_Bjet_coarse->Fill(dvv, w);
     }
     // Displaced Dijet trigger
-    if(passesDisplacedDijetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    if(passesDisplacedDijetTrigger){
       h_dvv_DisplacedDijet->Fill(dvv, w);
       h_dvv_DisplacedDijet_coarse->Fill(dvv, w);
     }
-    // pass HT trigger fail Bjet trigger (to study the shape differences)
-    if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
-      h_dvv_passHT_failBjet->Fill(dvv, w);
-      h_dvv_passHT_failBjet_coarse->Fill(dvv, w);
+    // pass DisplacedDijet trigger fail Bjet trigger (to study the shape differences)
+    if(passesDisplacedDijetTrigger && !passesBjetTrigger){
+      h_dvv_passDisplacedDijet_failBjet->Fill(dvv, w);
+      h_dvv_passDisplacedDijet_failBjet_coarse->Fill(dvv, w);
     }
-    // pass Bjet trigger fail HT trigger (to study the shape differences)
-    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4){
-      h_dvv_failHT_passBjet->Fill(dvv, w);
-      h_dvv_failHT_passBjet_coarse->Fill(dvv, w);
+    // pass Bjet trigger fail DisplacedDijet trigger (to study the shape differences)
+    if(!passesDisplacedDijetTrigger && passesBjetTrigger){
+      h_dvv_failDisplacedDijet_passBjet->Fill(dvv, w);
+      h_dvv_failDisplacedDijet_passBjet_coarse->Fill(dvv, w);
     }
   }
 
@@ -229,10 +208,10 @@ int main(int argc, char** argv) {
   h_dbv_Bjet_coarse = new TH1D("h_dbv_Bjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_DisplacedDijet = new TH1D("h_dbv_DisplacedDijet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_DisplacedDijet_coarse = new TH1D("h_dbv_DisplacedDijet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_passHT_failBjet = new TH1D("h_dbv_passHT_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
-  h_dbv_passHT_failBjet_coarse = new TH1D("h_dbv_passHT_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_failHT_passBjet = new TH1D("h_dbv_failHT_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
-  h_dbv_failHT_passBjet_coarse = new TH1D("h_dbv_failHT_passBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_passDisplacedDijet_failBjet = new TH1D("h_dbv_passDisplacedDijet_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_passDisplacedDijet_failBjet_coarse = new TH1D("h_dbv_passDisplacedDijet_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_failDisplacedDijet_passBjet = new TH1D("h_dbv_failDisplacedDijet_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_failDisplacedDijet_passBjet_coarse = new TH1D("h_dbv_failDisplacedDijet_passBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
 
   h_dvv_all = new TH1D("h_dvv_all", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_all_coarse = new TH1D("h_dvv_all_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
@@ -242,10 +221,10 @@ int main(int argc, char** argv) {
   h_dvv_Bjet_coarse = new TH1D("h_dvv_Bjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_DisplacedDijet = new TH1D("h_dvv_DisplacedDijet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_DisplacedDijet_coarse = new TH1D("h_dvv_DisplacedDijet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_passHT_failBjet = new TH1D("h_dvv_passHT_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
-  h_dvv_passHT_failBjet_coarse = new TH1D("h_dvv_passHT_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_failHT_passBjet = new TH1D("h_dvv_failHT_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
-  h_dvv_failHT_passBjet_coarse = new TH1D("h_dvv_failHT_passBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_passDisplacedDijet_failBjet = new TH1D("h_dvv_passDisplacedDijet_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_passDisplacedDijet_failBjet_coarse = new TH1D("h_dvv_passDisplacedDijet_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_failDisplacedDijet_passBjet = new TH1D("h_dvv_failDisplacedDijet_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_failDisplacedDijet_passBjet_coarse = new TH1D("h_dvv_failDisplacedDijet_passBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
 
   const char* tree_path =
     ntk == 3 ? "mfvMiniTreeNtk3/t" :

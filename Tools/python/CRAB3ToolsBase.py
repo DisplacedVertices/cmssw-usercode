@@ -120,6 +120,7 @@ def crab_print_config(c):
         print line
 
 def crab_requestcache(working_dir):
+    import CRABClient # allows WMCore to be imported which is implicit in the unpickle
     return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
 
 def crab_print_requestcache(working_dir):

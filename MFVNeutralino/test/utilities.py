@@ -5,7 +5,8 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 ####
 
 _leptonpresel = bool_from_argv('leptonpresel')
-_presel_s = '_leptonpresel' if _leptonpresel else ''
+_btagpresel = bool_from_argv('btagpresel')
+_presel_s = '_leptonpresel' if _leptonpresel else '_btagpresel' if _btagpresel else ''
 
 ####
 
@@ -120,6 +121,9 @@ def _background_samples(trigeff=False, year=2017):
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    elif _btagpresel:
+        x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
+        x += ['ttbar']
     else:
         x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
@@ -153,7 +157,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive')):
             if os.system(cmd) != 0:
                 ok = False
     if ok:
-        cmd = 'hadd.py background_2017p8.root background_2017.root background_2018.root'
+        cmd = 'hadd.py background%s_2017p8.root background%s_2017.root background%s_2018.root' % (_presel_s, _presel_s, _presel_s)
         print cmd
         os.system(cmd)
 
