@@ -1422,7 +1422,7 @@ _add_ds("miniaod", {
 'mfv_ZprimetoLLPto4j_tau100mm_M4500_2200_2018': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_4500_mX_2200_ctau_100_4j_2018_privateMC_MINI_v4_generationForDSReview", 10, fnbase="output", numbereddirs=False),
 'mfv_ZprimetoLLPto4j_tau100mm_M4500_450_2016': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_4500_mX_450_ctau_100_4j_2016_privateMC_MINI_v4_generationForDSReview", 9, fnbase="output", numbereddirs=False),
 'mfv_ZprimetoLLPto4j_tau100mm_M4500_450_2017': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_4500_mX_450_ctau_100_4j_2017_privateMC_MINI_v4_generationForDSReview", 10, fnbase="output", numbereddirs=False),
-'mfv_ZprimetoLLPto4j_tau100mm_M4500_450_2018': _fromnum0("/store/user/joeyr/dark_sector_review/zPrime_mZ_4500_mX_450_ctau_100_4j_2018_privateMC_MINI_v4_generationForDSReview", 9, fnbase="output", numbereddirs=False),
+'mfv_ZprimetoLLPto4j_tau100mm_M4500_450_2018': (9, ['/store/user/joeyr/dark_sector_review/zPrime_mZ_4500_mX_450_ctau_100_4j_2018_privateMC_MINI_v4_generationForDSReview' + '/output_%i.root' % (i) for i in chain(xrange(2,11))]),
 'mfv_ZprimetoLLPto4j_tau10mm_M1000_100_2016': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_1000_mX_100_ctau_10_4j_2016_privateMC_MINI_v4_generationForDSReview", 10, fnbase="output", numbereddirs=False),
 'mfv_ZprimetoLLPto4j_tau10mm_M1000_100_2017': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_1000_mX_100_ctau_10_4j_2017_privateMC_MINI_v4_generationForDSReview", 10, fnbase="output", numbereddirs=False),
 'mfv_ZprimetoLLPto4j_tau10mm_M1000_100_2018': _fromnum1("/store/user/joeyr/dark_sector_review/zPrime_mZ_1000_mX_100_ctau_10_4j_2018_privateMC_MINI_v4_generationForDSReview", 10, fnbase="output", numbereddirs=False),
