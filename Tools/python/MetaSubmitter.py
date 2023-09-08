@@ -306,13 +306,13 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
 def pick_samples(dataset, both_years=False,
                  qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False, bjet=False,
-                 span_signal=False, mfv_splitSUSY=False, mfv_HtoLLPto4j=False, mfv_HtoLLPto4b=False):
+                 span_signal=False, mfv_splitSUSY=False, mfv_HtoLLPto4j=False, mfv_HtoLLPto4b=False, mfv_ZprimetoLLPto4j=False, mfv_ZprimetoLLPto4b=False):
 
     if span_signal:
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'mfv_splitSUSY', 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'mfv_splitSUSY', 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')

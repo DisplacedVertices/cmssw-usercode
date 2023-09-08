@@ -29,7 +29,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     else :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, mfv_splitSUSY=False, mfv_HtoLLPto4j=True, mfv_HtoLLPto4b=True)
+        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, mfv_splitSUSY=False, mfv_HtoLLPto4j=True, mfv_HtoLLPto4b=True, mfv_ZprimetoLLPto4j=True, mfv_ZprimetoLLPto4b=True)
 
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
