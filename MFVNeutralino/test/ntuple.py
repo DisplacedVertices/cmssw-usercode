@@ -13,7 +13,7 @@ prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
-version = 'V27m'
+version = 'V27darksectorreviewm'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -163,7 +163,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             Samples.all_signal_samples_2015
     elif year == 2016:
-        samples = Samples.mfv_splitSUSY_samples_2016
+        #samples = Samples.mfv_splitSUSY_samples_2016
+        samples = Samples.mfv_HtoLLPto4j_samples_2016 + Samples.mfv_HtoLLPto4b_samples_2016 + Samples.mfv_ZprimetoLLPto4j_samples_2016 + Samples.mfv_ZprimetoLLPto4b_samples_2016
         #samples = \
         #    Samples.data_samples + \
         #    Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
