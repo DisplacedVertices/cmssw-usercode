@@ -1,1 +1,3 @@
 CMSSW_8_0_25 was too old for the 2016 samples used (some dictionaries were not present), but 8_0_35 was sufficient (and I went through the changes and nothing significant between the two to affect us). The HIP (APV) effect isn't relevant for these samples, so the mitigation should not be applied--though it anyway seemed like applying the mitigation incorrectly had no effect anyway.
+
+Also note that this 2016 setup *only* relies on AOD or RECO inputs, rather than the usual MiniAOD that we use in 2017 and 2018!
