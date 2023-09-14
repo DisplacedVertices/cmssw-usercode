@@ -3,7 +3,7 @@ from collections import defaultdict
 from glob import glob
 from gzip import GzipFile
 from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp
+from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp, plot_saver, plot_dir
 
 set_style()
 
@@ -37,27 +37,51 @@ def isample_available(f, isample, years):
     ac = available_code(f, isample)
     return all((ac & (1 << y)) for y, year in enumerate(gp.years) if year in years)
     
-def details2name(kind, tau, mass):
+# NOTE! Resonance mass is only needed for bookkeeping, since the resonance itself is prompt while its decay products are the LLPs
+def details2name(kind, tau, mass, massResonance=None):
     # same convention as scanpack: tau float:mm, mass int:GeV
     if "splitSUSY" in kind :
         return '%s_tau%09ium_M%04i_100' % (kind, int(tau*1000), mass) # FIXME assumes the LSP is 100 GeV always
+    elif "HtoLLP" in kind or "ZprimetoLLP" in kind :
+        if tau < 1 :
+            taustr = "0p%i" % int(tau*10)
+        else :
+            taustr = int(tau)
+        return '%s_tau%smm_M%i_%i' % (kind, taustr, massResonance, mass)
     else :
         return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
+
 def _nameok(name):
-    assert name.count('_tau') == 1 and name.count('um_') == 1 and name.count('_M') == 1
+    assert name.count('_tau') == 1 and (name.count('um_') == 1 or name.count('mm_') == 1) and name.count('_M') == 1
+
 def name2kind(name):
     _nameok(name)
     return name.split('_tau')[0]
+
 def name2tau(name):
     _nameok(name)
+    if 'mm_' in name :
+        return float((name.split('_tau')[1].split('mm_')[0]).replace('p','.'))
     return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+
 def name2mass(name):
     _nameok(name)
-    return int(name.split('_M')[1].split('_')[0])
+    listOfMasses = name.split('_M')[1].split('_')
+    if len(listOfMasses) == 1 :
+        mass = int(listOfMasses[0])
+        massResonance = None
+    else :
+        mass = int(listOfMasses[1])
+        massResonance = int(listOfMasses[0])
+    return mass, massResonance
+
 def name2details(name):
-    return name2kind(name), name2tau(name), name2mass(name)
+    mass, massResonance = name2mass(name) 
+    return name2kind(name), name2tau(name), mass, massResonance
+
 def name2taumass(name):
-    return name2tau(name), name2mass(name)
+    mass, massResonance = name2mass(name) 
+    return name2tau(name), mass, massResonance
 
 def name2isample(f, name):
     h = name_list(f)
@@ -89,7 +113,7 @@ class sample_iterator(object):
         def __init__(self, isample, name):
             self.isample = isample
             self.name = name
-            self.kind, self.tau, self.mass = name2details(self.name)
+            self.kind, self.tau, self.mass, self.massResonance = name2details(self.name)
 
     def __iter__(self):
         for ibin in xrange(1, self.h.GetNbinsX()+1):
@@ -204,7 +228,7 @@ class signalset(object):
 
 def sig_uncert_pdf(name_year):
     name, _ = name_year.rsplit('_',1)
-    kind, tau, mass = name2details(name)
+    kind, tau, mass, massResonance = name2details(name)
     tau = int(tau*1000) # back to um
 
     fcns = {
@@ -232,22 +256,46 @@ def sig_uncert_pdf(name_year):
 
 def sig_uncert_alphas(name_year):
     name, year = name_year.rsplit('_',1)
-    kind, tau, mass = name2details(name)
+    kind, tau, mass, massResonance = name2details(name)
     tau = int(tau*1000) # back to um
 
     fcns = {
             ('mfv_neu', 300, '2017') : lambda x: 8.412357E-02 + -1.492608E-04*x if x < 500 else 1.366428E-02 + -8.342191E-06*x if x < 1000 else 5.163025E-03,
-            ('mfv_stopdbardbar', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
             ('mfv_neu', 1000, '2017') : lambda x: 2.482616E-02 + -1.677113E-05*x if x < 500 else 2.930580E-02 + -2.573041E-05*x if x < 1000 else 3.386116E-03,
-            ('mfv_stopdbardbar', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
             ('mfv_neu', 10000, '2017') : lambda x: 7.566047E-02 + -1.147594E-04*x if x < 500 else 3.476814E-02 + -3.297473E-05*x if x < 1000 else 1.611145E-03,
-            ('mfv_stopdbardbar', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
             ('mfv_neu', 300, '2018') : lambda x: 3.826184E-02 + -3.562455E-05*x if x < 500 else 3.727006E-02 + -3.570847E-05*x if x < 1000 else 4.543582E-03,
-            ('mfv_stopdbardbar', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
             ('mfv_neu', 1000, '2018') : lambda x: 1.381364E-01 + -2.434682E-04*x if x < 500 else 3.364486E-02 + -3.615300E-05*x if x < 1000 else 2.315426E-03,
-            ('mfv_stopdbardbar', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
             ('mfv_neu', 10000, '2018') : lambda x: 1.395761E-01 + -2.494418E-04*x if x < 500 else 2.779135E-02 + -2.693736E-05*x if x < 1000 else 1.683538E-03,
+            ('mfv_stopdbardbar', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_stopdbardbar', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_stopdbardbar', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_stopdbardbar', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_stopdbardbar', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
             ('mfv_stopdbardbar', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_HtoLLPto4b', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_HtoLLPto4b', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_HtoLLPto4b', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_HtoLLPto4b', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_HtoLLPto4b', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_HtoLLPto4b', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_HtoLLPto4j', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_HtoLLPto4j', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_HtoLLPto4j', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_HtoLLPto4j', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_HtoLLPto4j', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_HtoLLPto4j', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_ZprimetoLLPto4b', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_ZprimetoLLPto4b', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_ZprimetoLLPto4b', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_ZprimetoLLPto4b', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_ZprimetoLLPto4b', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_ZprimetoLLPto4b', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_ZprimetoLLPto4j', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_ZprimetoLLPto4j', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_ZprimetoLLPto4j', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_ZprimetoLLPto4j', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_ZprimetoLLPto4j', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_ZprimetoLLPto4j', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
           }
 
     ab = None
@@ -314,8 +362,8 @@ def make_signals_2015p6(f, name_list):
 
             # convert sample name to new format--really only more digits in tau field
             old_name = f_2016.Get(old_bn + 'norm').GetTitle()
-            mass = name2mass(old_name) # needed in scalefactor too
-            new_name = details2name(name2kind(old_name), name2tau(old_name), mass)
+            mass, massResonance = name2mass(old_name) # needed in scalefactor too
+            new_name = details2name(name2kind(old_name), name2tau(old_name), mass, massResonance)
 
             if name_list.has_key(new_name):
                 print colors.warning('\nwarning: %s found in ipair %i with isample %i was found in previous ipair %s with isample %i, skipping' % (new_name, ipair, old_isample, name_list[new_name].ipair, name_list[new_name].isample))
@@ -333,6 +381,7 @@ def make_signals_2015p6(f, name_list):
                 for h,ng,sf,il in zip(hs, ngens, sfs, int_lumis):
                     if n == 'dbv' or n == 'dvv':
                         h.Rebin(10) # did too many bins last time
+
                     h.Scale(sf(mass) * 1e-3 * il / ng)
 
                 h = hs.pop(0)
@@ -375,7 +424,7 @@ def hlp(x,l):
 
 def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
     name, year = name_year.rsplit('_',1)
-    kind, tau, mass = name2details(name)
+    kind, tau, mass, massResonance = name2details(name)
     tau = int(tau*1000) # back to um
 
     masses = [400,600,800,1200,1600,3000]
@@ -396,6 +445,54 @@ def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
                                         (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
                                         (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
         'mfv_splitSUSY':    { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_HtoLLPto4b':   { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_HtoLLPto4j':   { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_ZprimetoLLPto4b': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_ZprimetoLLPto4j': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
                                         (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
                                         (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
                                         (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
@@ -458,7 +555,6 @@ def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
     vtm = trackmover[kind][year]
 
     # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
-
     mass, ms, mia, mib, mxa, mxb = mmm = hlp(mass, masses)
     tau,  ts, tia, tib, txa, txb = ttt = hlp(tau,  taus)
 
@@ -502,7 +598,7 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = None
-    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27m/mfv*.root'
+    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreviewm/mfv*.root'
     title = []
     sigs = {}
 
@@ -511,7 +607,7 @@ def make_signals_2017p8(f, name_list):
         sigs.update(eval(GzipFile(scanpack_list).read()))
     if trees:
         title.append(trees)
-        sigs.update({os.path.basename(fn).replace('.root', '') : [fn] for fn in sorted(glob(trees))}) # overrides scanpack entries
+        sigs.update({os.path.basename(fn).replace('.root', '') : [fn] for fn in sorted(glob(trees)) if not "2016" in fn}) # overrides scanpack entries
     name_list['title'] = name_list.get('title', '') + '+' + '+'.join(title)
 
     nsigs = len(sigs)
@@ -596,9 +692,11 @@ def make():
     ROOT.TH1.AddDirectory(0)
     f = ROOT.TFile(gp.fn, 'recreate')
 
-    make_bkg(f)
+    # FIXME!!! we should have the old 2017p8 bkgs to reuse here
+    #make_bkg(f)
 
     name_list = {}
+    # FIXME!!! need to do the same for 2016 before this will properly work
     make_signals_2015p6(f, name_list)
     make_signals_2017p8(f, name_list)
 
@@ -784,6 +882,7 @@ def compare(fn1, fn2, outbase):
 
     print 'all same? %r statistically? %r' % (all_same, all_stat_same)
 
+# FIXME probably need to do something here for the resonance mass
 def points(f=None):
     if f is None:
         f = ROOT.TFile(gp.fn)
@@ -798,12 +897,14 @@ def axisize(l):
     l.append(l[-1] + delta)
     return to_array(l)
 
+# FIXME probably need to do something here for the resonance mass
 def axes(f=None):
     kinds, masses, taus = points(f)
     masses = axisize(masses)
     taus   = axisize(taus)
     return kinds, masses, taus, len(masses)-1, len(taus)-1
 
+# FIXME probably need to do something here for the resonance mass
 def nevents_plot():
     in_f = ROOT.TFile(gp.fn)
     out_f = ROOT.TFile('nevents.root', 'recreate')
@@ -833,6 +934,7 @@ def nevents_plot():
     out_f.Write()
     out_f.Close()
 
+# FIXME probably need to do something here for the resonance mass
 def signal_efficiency():
     from signal_efficiency import SignalEfficiencyCombiner
     for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
@@ -871,6 +973,7 @@ def signal_efficiency():
         out_f.Write()
         out_f.Close()
 
+# FIXME probably need to do something here for the resonance mass
 def event_scale_factors():
     from signal_efficiency import SignalEfficiencyCombiner
     for which, years in ('2017p8', [2017,2018]), :
