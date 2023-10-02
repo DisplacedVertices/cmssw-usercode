@@ -7,7 +7,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'electrons only novtx'
 #settings.event_filter = 'muons only novtx' #FIXME miss leading because there is no process.mfvEventFilterSequence applied nor signals_no_event_filter_modifier  
-version = settings.version + 'v7'
+version = settings.version + 'v8'
 
 process = ntuple_process(settings)
 tfileservice(process, 'mctruth.root')
@@ -46,7 +46,7 @@ process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles*pro
 #n.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
 tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                              jmtNtupleFiller_pset(settings.is_miniaod, True, False),
-                                             sel_tracks_src = cms.InputTag('mfvVertexTracks','seed'),
+                                             sel_tracks_src = cms.InputTag('mfvVertexTracks','all'),
                                              mover_src = cms.string(''),
                                              vertices_src = cms.InputTag('mfvVerticesAux'),
                                              max_dist2move = cms.double(-1),

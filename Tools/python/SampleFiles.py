@@ -466,11 +466,19 @@ _add_ds("trackmovermctruthulv30mv7", {
 'WplusHToSSTodddd_tau1mm_M15_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv7_2017/230901_162407", 50, fnbase="mctruth"),
 })
 
-
+#input seed tracks
 _add_ds("trackmovermctruthulv30lepmumv7", {
 'WplusHToSSTodddd_tau1mm_M55_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv7_2017/230901_193542", 50, fnbase="mctruth"),
 'WplusHToSSTodddd_tau1mm_M15_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv7_2017/230901_193632", 50, fnbase="mctruth"),
 })
+
+i
+#input all tracks
+_add_ds("trackmovermctruthulv30lepmumv8", {
+'WplusHToSSTodddd_tau1mm_M55_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv8_2017/230908_004304", 50, fnbase="mctruth"),
+'WplusHToSSTodddd_tau1mm_M15_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv8_2017/230908_004622", 50, fnbase="mctruth"),
+})
+
 
 
 _add_ds("trackmovermctruthulv30lepelemv7", {
