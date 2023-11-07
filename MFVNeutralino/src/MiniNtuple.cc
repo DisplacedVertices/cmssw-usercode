@@ -84,10 +84,10 @@ namespace mfv {
     tree->Branch("gen_lsp_eta", nt.gen_lsp_eta, "gen_lsp_eta[2]/F");
     tree->Branch("gen_lsp_phi", nt.gen_lsp_phi, "gen_lsp_phi[2]/F");
     tree->Branch("gen_lsp_mass", nt.gen_lsp_mass, "gen_lsp_mass[2]/F");
-    tree->Branch("gen_daughters", &nt.gen_daughters, 32000, 0);
-    tree->Branch("gen_daughter_id", &nt.gen_daughter_id);
-    tree->Branch("gen_bquarks", &nt.gen_bquarks, 32000, 0);
-    tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
+    //tree->Branch("gen_daughters", &nt.gen_daughters, 32000, 0);
+    //tree->Branch("gen_daughter_id", &nt.gen_daughter_id);
+    //tree->Branch("gen_bquarks", &nt.gen_bquarks, 32000, 0);
+    //tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
     tree->Branch("gen_jet_ht", &nt.gen_jet_ht);
     tree->Branch("gen_jet_ht40", &nt.gen_jet_ht40);
 
@@ -168,10 +168,10 @@ namespace mfv {
     tree->SetBranchAddress("gen_lsp_eta", nt.gen_lsp_eta);
     tree->SetBranchAddress("gen_lsp_phi", nt.gen_lsp_phi);
     tree->SetBranchAddress("gen_lsp_mass", nt.gen_lsp_mass);
-    tree->SetBranchAddress("gen_daughters", &nt.p_gen_daughters);
-    tree->SetBranchAddress("gen_daughter_id", &nt.p_gen_daughter_id);
-    tree->SetBranchAddress("gen_bquarks", &nt.p_gen_bquarks);
-    tree->SetBranchAddress("gen_leptons", &nt.p_gen_leptons);
+    //tree->SetBranchAddress("gen_daughters", &nt.p_gen_daughters);
+    //tree->SetBranchAddress("gen_daughter_id", &nt.p_gen_daughter_id);
+    //tree->SetBranchAddress("gen_bquarks", &nt.p_gen_bquarks);
+    //tree->SetBranchAddress("gen_leptons", &nt.p_gen_leptons);
     tree->SetBranchAddress("gen_jet_ht", &nt.gen_jet_ht);
     tree->SetBranchAddress("gen_jet_ht40", &nt.gen_jet_ht40);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
@@ -214,10 +214,10 @@ namespace mfv {
   MiniNtuple* clone(const MiniNtuple& nt) {
     MiniNtuple* nnt = new MiniNtuple(nt);
 
-    if (nt.p_gen_daughters) nnt->gen_daughters = *nt.p_gen_daughters;
-    if (nt.p_gen_daughter_id) nnt->gen_daughter_id = *nt.p_gen_daughter_id;
-    if (nt.p_gen_bquarks) nnt->gen_bquarks = *nt.p_gen_bquarks;
-    if (nt.p_gen_leptons) nnt->gen_leptons = *nt.p_gen_leptons;
+    //if (nt.p_gen_daughters) nnt->gen_daughters = *nt.p_gen_daughters;
+    //if (nt.p_gen_daughter_id) nnt->gen_daughter_id = *nt.p_gen_daughter_id;
+    //if (nt.p_gen_bquarks) nnt->gen_bquarks = *nt.p_gen_bquarks;
+    //if (nt.p_gen_leptons) nnt->gen_leptons = *nt.p_gen_leptons;
     
     if (nt.p_tk0_qchi2) nnt->tk0_qchi2 = *nt.p_tk0_qchi2;
     if (nt.p_tk0_ndof ) nnt->tk0_ndof  = *nt.p_tk0_ndof;
@@ -241,8 +241,8 @@ namespace mfv {
     if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
 
-    nnt->p_gen_daughters = nnt->p_gen_bquarks = nnt->p_gen_leptons = 0;
-    nnt->p_gen_daughter_id = 0;
+    //nnt->p_gen_daughters = nnt->p_gen_bquarks = nnt->p_gen_leptons = 0;
+    //nnt->p_gen_daughter_id = 0;
     
     nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
     nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;

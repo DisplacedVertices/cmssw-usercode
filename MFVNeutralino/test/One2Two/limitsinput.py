@@ -21,7 +21,7 @@ in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
 #in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.list.gz'
 #in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.list.gz'
-in_trees, in_scanpack_list = '/uscms/home/joeyr/crabdirs/MiniTreeV27m/2016/mfv*.root', None
+in_trees, in_scanpack_list = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreviewm/mfv*2016.root', None
 
 limitsinput_fn = 'limitsinput.root'
 
@@ -49,19 +49,52 @@ def name_list(f):
 def nsamples(f):
     return name_list(f).GetNbinsX()
 
-def details2name(kind, tau, mass):
+# NOTE! Resonance mass is only needed for bookkeeping, since the resonance itself is prompt while its decay products are the LLPs
+def details2name(kind, tau, mass, massResonance=None):
     # same convention as scanpack: tau float:mm, mass int:GeV
-    return '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
+    if "splitSUSY" in kind :
+        return '%s_tau%09ium_M%04i_100' % (kind, int(tau*1000), mass) # FIXME assumes the LSP is 100 GeV always
+    elif "HtoLLP" in kind or "ZprimetoLLP" in kind :
+        if tau < 1 :
+            taustr = "0p%i" % int(tau*10)
+        else :
+            taustr = int(tau)
+        return '%s_tau%smm_M%i_%i' % (kind, taustr, massResonance, mass)
+    else :
+        return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
+
+# NOTE this was used for the actual 2016 result, comment it out here
+#def details2name(kind, tau, mass):
+#    # same convention as scanpack: tau float:mm, mass int:GeV
+#    return '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
+
 def name2kind(name):
     return name.split('_tau')[0]
+
 def name2tau(name):
-    return int(name.split('tau')[1].split('um')[0]) / 1000.
+    _nameok(name)
+    if 'mm_' in name :
+        return float((name.split('_tau')[1].split('mm_')[0]).replace('p','.'))
+    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+
 def name2mass(name):
-    return int(name.split('M')[1])
+    _nameok(name)
+    listOfMasses = name.split('_M')[1].split('_')
+    if len(listOfMasses) == 1 :
+        mass = int(listOfMasses[0])
+        massResonance = None
+    else :
+        mass = int(listOfMasses[1])
+        massResonance = int(listOfMasses[0])
+    return mass, massResonance
+
 def name2details(name):
-    return name2kind(name), name2tau(name), name2mass(name)
+    mass, massResonance = name2mass(name) 
+    return name2kind(name), name2tau(name), mass, massResonance
+
 def name2taumass(name):
-    return name2tau(name), name2mass(name)
+    mass, massResonance = name2mass(name) 
+    return name2tau(name), mass, massResonance
 
 def name2isample(f, name):
     h = name_list(f)
@@ -102,7 +135,7 @@ def sample_iterator(f):
         s = sample()
         s.isample = isample
         s.name = name
-        s.kind, s.tau, s.mass = name2details(name)
+        s.kind, s.tau, s.mass, self.massResonance = name2details(name)
         yield s
 
 def test_sample_iterator(f):
