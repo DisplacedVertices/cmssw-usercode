@@ -17,6 +17,7 @@
 #include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/UncertTools.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -28,7 +29,7 @@
 class MFVJetTksHistos : public edm::EDAnalyzer {
  public:
   explicit MFVJetTksHistos(const edm::ParameterSet&);
-  bool refactor_survival(const int, const bool);
+  //bool refactor_survival(const int, const bool, const float);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
@@ -36,25 +37,31 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
-  static const int CATEGORIES = 5;
+  std::mt19937 rng;
+  std::uniform_real_distribution<float> distribution;
+  std::normal_distribution<double> gaussian;
+
+  static const int CATEGORIES = 6;
   const int ALL      = 0;
   const int PASS_HLT = 1;
   const int FAIL_HLT = 2;
   const int PASS_OFF = 3;
   const int FAIL_OFF = 4;
+  const int PASS_HLT_CALO_BJET = 5;
 
-  static const int CALO_CATEGORIES = 5;
+  static const int CALO_CATEGORIES = 4;
   // const int ALL       = 0;
   const int PASS_CALO_PROMPT = 1;
-  const int FAIL_CALO_PROMPT = 2;
-  const int PASS_CALO_DISP   = 3;
-  const int FAIL_CALO_DISP   = 4;
+  const int PASS_CALO_DISP   = 2;
+  const int PASS_HLT_BTAG    = 3;
 
   static const int   dxy_nbins = 9;
   Double_t dxy_edges[dxy_nbins+1] = {0.0, 0.025, 0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50};
 
   const double offline_csv;
   const double pt_thresh_shift;
+  const double pt_lo_for_tag_probe;
+  const double pt_hi_for_tag_probe;
   const double tk_match_shift;
   const double soft_tk_thresh;
   const bool plot_soft_tks;
@@ -63,7 +70,12 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   const bool veto_bjet_events;
   const bool require_tk_quality;
   const bool require_gen_sumdbv;
+  const bool require_two_good_leptons;
   const bool do_tk_filt_refactor;
+  const bool study_hlt_btagging;
+  const bool study_offline_dxy_res;
+  const bool study_hlt_tagged_jets;
+  const bool study_hlt_nontagged_jets;
   const int calojet_category;
   const int trigger_bit;
 
@@ -101,12 +113,19 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_ntks[CATEGORIES];
   TH1F* h_jet_bdisc_deepflav[CATEGORIES];
   TH1F* h_jet_bdisc_deepcsv[CATEGORIES];
+  TH1F* h_jet_bdisc_csv[CATEGORIES];
+  TH1F* h_jet_min_hlt_dR[CATEGORIES];
+  TH1F* h_jet_min_hlt_bjet_dR[CATEGORIES];
+  TH1F* h_jet_min_hlt_calo_bjet_dR[CATEGORIES];
+  TH1F* h_jet_matches_hlt[CATEGORIES];
+  TH1F* h_jet_matches_hlt_bjet[CATEGORIES];
+  TH1F* h_jet_matches_hlt_calo_bjet[CATEGORIES];
 
   TH1F* h_calojet_ntagged;
   TH1F* h_calojet_npasshlt;
+  TH1F* h_calojet_npassprompt;
 
   TH1F* h_calo_jettk_dxy;
-  TH2F* h_calo_jettk_dxy_mult;
   TH3F* h_calo_jettk_dxy_ic_mult;  // ugh ... 
   TH1F* h_calo_jettk_dxyerr;
   TH1F* h_calo_jettk_nsigmadxy;
@@ -130,14 +149,13 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_calojet_dxy[CALO_CATEGORIES];
   TH1F* h_calojet_pf_dR[CALO_CATEGORIES];
   TH1F* h_calojet_pf_next_dR[CALO_CATEGORIES];
+  TH1F* h_calojet_csv[CALO_CATEGORIES];
   TH1F* h_calojet_pudisc[CALO_CATEGORIES];
   TH1F* h_calojet_filtscore[CALO_CATEGORIES];
   TH1F* h_calojet_ntks[CALO_CATEGORIES];
   TH1F* h_calojet_njettks[CALO_CATEGORIES];
   TH1F* h_calojet_nprompttks[CALO_CATEGORIES];
   TH1F* h_calojet_ndisptks[CALO_CATEGORIES];
-//  TH1F* h_calojet_nhlttks[CALO_CATEGORIES];
-//  TH2F* h_calojet_nhlttks_njettks[CALO_CATEGORIES];
   TH1F* h_calojet_jettk_dxy[CALO_CATEGORIES];
   TH2F* h_calojet_jettk_iclose_dxy[CALO_CATEGORIES];
   TH2F* h_calojet_jettk_iclose_pt[CALO_CATEGORIES];
@@ -155,6 +173,8 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_tks_eta[CATEGORIES];  
   TH1F* h_jet_tks_eta_rel[CATEGORIES];  
   TH1F* h_jet_tks_dR[CATEGORIES];  
+  TH1F* h_jet_tks_dxy[CATEGORIES];
+  TH1F* h_jet_tks_dxyz[CATEGORIES];
   TH1F* h_jet_tks_nsigmadxy[CATEGORIES];  
   TH1F* h_jet_tks_nsigmadxyz[CATEGORIES];  
   TH1F* h_jet_sum_nsigmadxy[CATEGORIES];  
@@ -173,15 +193,23 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_sumtk_pt_ratio[CATEGORIES];
   TH1F* h_jet_sumtk_dR[CATEGORIES];
 
-  TH2F* h_proxy_grid[CATEGORIES];
+  TH1F* h_online_btags;
+  TH1F* h_hard_online_btags;
+  TH1F* h_satisfies_online_tags;
+
 };
 
 MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    rng(8675309),
+    distribution(0.0f, 1.0f),
+    gaussian(0.0, 0.004),
     offline_csv(cfg.getParameter<double>("offline_csv")),
     pt_thresh_shift(cfg.getParameter<double>("pt_thresh_shift")),
+    pt_lo_for_tag_probe(cfg.getParameter<double>("pt_lo_for_tag_probe")),
+    pt_hi_for_tag_probe(cfg.getParameter<double>("pt_hi_for_tag_probe")),
     tk_match_shift(cfg.getParameter<double>("tk_match_shift")),
     soft_tk_thresh(cfg.getParameter<double>("soft_tk_thresh")),
     plot_soft_tks(cfg.getParameter<bool>("plot_soft_tks")),
@@ -190,7 +218,12 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     veto_bjet_events(cfg.getParameter<bool>("veto_bjet_events")),
     require_tk_quality(cfg.getParameter<bool>("require_tk_quality")),
     require_gen_sumdbv(cfg.getParameter<bool>("require_gen_sumdbv")),
+    require_two_good_leptons(cfg.getParameter<bool>("require_two_good_leptons")),
     do_tk_filt_refactor(cfg.getParameter<bool>("do_tk_filt_refactor")),
+    study_hlt_btagging(cfg.getParameter<bool>("study_hlt_btagging")),
+    study_offline_dxy_res(cfg.getParameter<bool>("study_offline_dxy_res")),
+    study_hlt_tagged_jets(cfg.getParameter<bool>("study_hlt_tagged_jets")),
+    study_hlt_nontagged_jets(cfg.getParameter<bool>("study_hlt_nontagged_jets")),
     calojet_category(cfg.getParameter<int>("calojet_category")),
     trigger_bit(cfg.getParameter<int>("trigger_bit"))
 
@@ -225,20 +258,30 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   h_calojet_dxy_num1   = fs->make<TH1F>("h_calojet_dxy_num1", ";calojet d_{xy}(BS) (cm); entries", 250, 0, 0.5);
 
   for (int i = 0; i < CATEGORIES; ++i) {
-    TString bres = i == 4 ? TString("fail_off") : (i == 3 ? TString("pass_off") : (i == 2 ? TString("fail_hlt") : (i == 1 ? TString("pass_hlt") : "pass_or_fail")));
+    TString bres = i == 5 ? TString("pass_hlt_calo") : (i == 4 ? TString("fail_off") : (i == 3 ? TString("pass_off") : (i == 2 ? TString("fail_hlt") : (i == 1 ? TString("pass_hlt") : "pass_or_fail"))));
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", bres.Data()), TString::Format(";p_{T} of jets that %s b-tag(GeV);events/10 GeV", bres.Data()), 200, 0, 800);
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", bres.Data()), TString::Format(";absv#eta of jets that %s b-tag;events/bin", bres.Data()), 120, 0, 2.5);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", bres.Data()), TString::Format(";#phi of jets that %s b-tag;entries/bin", bres.Data()), 100, -3.1416, 3.1416);
     h_jet_dbv[i] = fs->make<TH1F>(TString::Format("h_jet_dbv_%s", bres.Data()), TString::Format(";d_{BV} of jets that %s b-tag;entries/bin", bres.Data()), 100, 0.0, 2.0);
     h_jet_ntks[i] = fs->make<TH1F>(TString::Format("h_jet_ntks_%s", bres.Data()), TString::Format(";#tks in jets that %s b-tag;entries/bin", bres.Data()), 40, 0, 40);
     h_jet_bdisc_deepflav[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepflav_%s", bres.Data()), TString::Format(";DeepJet of jets that %s b-tag;entries/bin", bres.Data()), 100, 0, 1.0);
-    h_jet_bdisc_deepcsv[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepcsv_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;entries/bin", bres.Data()), 100, 0, 1.0);
+    h_jet_bdisc_deepcsv[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepcsv_%s", bres.Data()), TString::Format(";DeepCSV of jets that %s b-tag;entries/bin", bres.Data()), 100, 0, 1.0);
+    h_jet_bdisc_csv[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_csv_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;entries/bin", bres.Data()), 100, 0, 1.0);
+
+    h_jet_min_hlt_dR[i] = fs->make<TH1F>(TString::Format("h_jet_min_hlt_dR_%s", bres.Data()), TString::Format(";min #DeltaR between PF jets that %s and HLT jets", bres.Data()), 80, 0.0, 0.80);
+    h_jet_min_hlt_bjet_dR[i] = fs->make<TH1F>(TString::Format("h_jet_min_hlt_bjet_dR_%s", bres.Data()), TString::Format(";min #DeltaR between PF jets that %s and HLT bjets", bres.Data()), 80, 0.0, 0.80);
+    h_jet_min_hlt_calo_bjet_dR[i] = fs->make<TH1F>(TString::Format("h_jet_min_hlt_calo_bjet_dR_%s", bres.Data()), TString::Format(";min #DeltaR between PF jets that %s and HLT calo bjets", bres.Data()), 80, 0.0, 0.80);
+    h_jet_matches_hlt[i] = fs->make<TH1F>(TString::Format("h_jet_matches_hlt_%s", bres.Data()), TString::Format(";PF jet that %s matches to HLT jet?", bres.Data()), 2, -0.1, 1.1);
+    h_jet_matches_hlt_bjet[i] = fs->make<TH1F>(TString::Format("h_jet_matches_hlt_bjet_%s", bres.Data()), TString::Format(";PF jet that %s matches to HLT bjet?", bres.Data()), 2, -0.1, 1.1);
+    h_jet_matches_hlt_calo_bjet[i] = fs->make<TH1F>(TString::Format("h_jet_matches_hlt_calo_bjet_%s", bres.Data()), TString::Format(";PF jet that %s matches to HLT calo bjet?", bres.Data()), 2, -0.1, 1.1);
 
     h_jet_tks_pt[i] = fs->make<TH1F>(TString::Format("h_jet_tks_pt_%s", bres.Data()), TString::Format(";p_{T} of all tks in jets that %s b-tag (GeV);entries/bin", bres.Data()), 200, 0, 40);
     h_jet_tks_pt_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_ptrel_%s", bres.Data()), TString::Format(";rel p_{T} of all tks in jets that %s b-tag (GeV);entries/bin", bres.Data()), 200, 0, 20);
     h_jet_tks_eta[i] = fs->make<TH1F>(TString::Format("h_jet_tks_eta_%s", bres.Data()), TString::Format(";abs #eta of all tks in jets that %s b-tag;entries/bin", bres.Data()), 100, 0, 4);
     h_jet_tks_eta_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_etarel_%s", bres.Data()), TString::Format(";rel #eta of all tks in jets that %s b-tag;entries/bin", bres.Data()), 300, 0, 10);
     h_jet_tks_dR[i] = fs->make<TH1F>(TString::Format("h_jet_tks_dR_%s", bres.Data()), TString::Format(";dR between jet and all tks in jets - %s b-tag;entries/bin", bres.Data()), 100, 0, 0.6);
+    h_jet_tks_dxy[i]  = fs->make<TH1F>(TString::Format("h_jet_tks_dxy_%s",  bres.Data()), TString::Format(";dxy of all tks in jets - %s b-tag (cm); entries/bin", bres.Data()), 250, 0, 0.5);
+    h_jet_tks_dxyz[i] = fs->make<TH1F>(TString::Format("h_jet_tks_dxyz_%s", bres.Data()), TString::Format(";dxyz of all tks in jets - %s b-tag (cm); entries/bin", bres.Data()), 250, 0, 2.5);
     h_jet_tks_nsigmadxy[i] = fs->make<TH1F>(TString::Format("h_jet_tks_nsigmadxy_%s", bres.Data()), TString::Format("; n #sigma(dxy) of all tks in jets which %s b-tag;entries/bin", bres.Data()), 150, 0, 15);
     h_jet_tks_nsigmadxyz[i] = fs->make<TH1F>(TString::Format("h_jet_tks_nsigmadxyz_%s", bres.Data()), TString::Format("; n#sigma(dxyz) of tks in jets which %s b-tag;entries/bin", bres.Data()), 150, 0, 15);
     h_jet_sum_nsigmadxy[i] = fs->make<TH1F>(TString::Format("h_jet_sum_nsigmadxy_%s", bres.Data()), TString::Format(";#Sigma n#sigma(dxy) of tks in jets which %s b-tag;entries/bin", bres.Data()), 500, 0, 1500);
@@ -257,14 +300,13 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     h_jet_sumtk_pt_ratio[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_pt_ratio_%s", bres.Data()), TString::Format(";pT(jet tracks) / pT(jet) - %s b-tag;entries/bin", bres.Data()), 100, 0, 4);
     h_jet_sumtk_dR[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_dR_%s", bres.Data()), TString::Format(";dR between jet and tks in jets - %s b-tag;entries/bin", bres.Data()), 100, 0, 0.6);
     
-    h_proxy_grid[i] = fs->make<TH2F>(TString::Format("h_proxy_grid_%s", bres.Data()), ";b-score cut value; >=3 offline proxies?", 100, 0, 1, 2, 0, 1.2);
   }
 
   h_calojet_ntagged = fs->make<TH1F>("h_calojet_ntagged", "; # of tagged offline calojets; entries", 20, 0, 20);
   h_calojet_npasshlt = fs->make<TH1F>("h_calojet_npasshlt", "; # of offline calojets passing HLT; entries", 20, 0, 20);
+  h_calojet_npassprompt = fs->make<TH1F>("h_calojet_npassprompt", "; # of offline calojets passing prompt veto; entries", 20, 0, 20);
 
   h_calo_jettk_dxy = fs->make<TH1F>("h_calo_jettk_dxy", ";dxy of pfjettks in calojets (cm);entries", 500, 0, 0.5);
-  h_calo_jettk_dxy_mult = fs->make<TH2F>("h_calo_jettk_dxy_mult", ";dxy of pfjettks in calojets (cm); ntks per jet with dxy", dxy_nbins, dxy_edges, 20, -0.5, 19.5);
   h_calo_jettk_dxy_ic_mult = fs->make<TH3F>("h_calo_jettk_dxy_ic_mult", ";nth-promptest track index;d_{xy};# of tracks per jet",
                                               15, 0, 15,
                                              500, 0, 0.5,
@@ -284,7 +326,7 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   h_calo_jettk_nsthits = fs->make<TH1F>("h_calo_jettk_nsthits", ";nsthits of pfjettks in calojets;entries", 40, 0, 40);
 
   for (int i = 0; i < CALO_CATEGORIES; ++i) {
-    TString bres = (i==4 ? TString("fail_disp") : (i==3 ? TString("pass_disp") : (i == 2 ? TString("fail_prmpt") : (i == 1 ? TString("pass_prmpt") : "all"))));
+    TString bres = (i==3 ? TString("pass_c_btag") : (i == 2 ? TString("pass_disp") : (i == 1 ? TString("pass_prmpt") : "all")));
     h_calojet_pt[i] = fs->make<TH1F>(TString::Format("h_calojet_pt_%s", bres.Data()), TString::Format(";p_{T} of calojets that %s (GeV);entries/bin", bres.Data()), 100, 0, 800);
     h_calojet_pt_raw[i] = fs->make<TH1F>(TString::Format("h_calojet_pt_raw_%s", bres.Data()), TString::Format(";'raw' p_{T} of calojets that %s (GeV);entries/bin", bres.Data()), 100, 0, 800);
     h_calojet_eta[i] = fs->make<TH1F>(TString::Format("h_calojet_eta_%s", bres.Data()), TString::Format(";absv#eta of calojets that %s;entries/bin", bres.Data()), 60, 0, 2.5);
@@ -293,14 +335,13 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     h_calojet_dxy[i] = fs->make<TH1F>(TString::Format("h_calojet_dxy_%s", bres.Data()), TString::Format(";best guess d_{xy} of calojets that %s; entries/bin", bres.Data()), 50, 0, 2.0);
     h_calojet_pf_dR[i] = fs->make<TH1F>(TString::Format("h_calojet_pf_dR_%s", bres.Data()), TString::Format(";#DeltaR (calojet, pfjet) of calojets that %s; entries/bin", bres.Data()), 40, 0, 0.4);
     h_calojet_pf_next_dR[i] = fs->make<TH1F>(TString::Format("h_calojet_pf_next_dR_%s", bres.Data()), TString::Format(";#DeltaR (calojet, 2nd-closest pfjet) of calojets that %s; entries/bin", bres.Data()), 60, 0, 0.6);
+    h_calojet_csv[i] = fs->make<TH1F>(TString::Format("h_calojet_csv_%s", bres.Data()), TString::Format(";CSV of calojets that %s;entries/bin", bres.Data()), 100, 0.0, 1.0);
     h_calojet_pudisc[i] = fs->make<TH1F>(TString::Format("h_calojet_pudisc_%s", bres.Data()), TString::Format(";pudisc of calojets that %s;entries/bin", bres.Data()), 200, -1.0, 1.0);
     h_calojet_filtscore[i] = fs->make<TH1F>(TString::Format("h_calojet_filtscore_%s", bres.Data()), TString::Format(";filtscore of calojets that %s; entries/bin", bres.Data()), 4, 0, 4);
     h_calojet_ntks[i] = fs->make<TH1F>(TString::Format("h_calojet_ntks_%s", bres.Data()), TString::Format(";ntks in calojets that %s ;entries/bin", bres.Data()), 40, 0, 40);
     h_calojet_njettks[i] = fs->make<TH1F>(TString::Format("h_calojet_njettks_%s", bres.Data()), TString::Format(";n(pfjet tks) in calojets that %s ;entries/bin", bres.Data()), 40, 0, 40);
     h_calojet_nprompttks[i] = fs->make<TH1F>(TString::Format("h_calojet_nprompttks_%s", bres.Data()), TString::Format(";n(prompt pfjet tks) in calojets that %s ;entries/bin", bres.Data()), 40, 0, 40);
     h_calojet_ndisptks[i] = fs->make<TH1F>(TString::Format("h_calojet_ndisptks_%s", bres.Data()), TString::Format(";n(disp pfjet tks) in calojets that %s ;entries/bin", bres.Data()), 40, 0, 40);
-//    h_calojet_nhlttks[i] = fs->make<TH1F>(TString::Format("h_calojet_nhlttks_%s", bres.Data()), TString::Format(";n(hlt tk candidates) in calojets that %s ;entries/bin", bres.Data()), 40, 0, 40);
-//    h_calojet_nhlttks_njettks[i] = fs->make<TH2F>(TString::Format("h_calojet_nhlttks_njettks%s", bres.Data()), ";n(hlt tk cands.) in calojets; n(pfjet tks) in calojets", 40, 0, 40, 40, 0, 40);
 
     h_calojet_jettk_dxy[i] = fs->make<TH1F>(TString::Format("h_calojet_jettk_dxy_%s", bres.Data()), TString::Format(";dxy of pfjettks in calojets that %s (cm); entires/bin", bres.Data()), 250, 0, 0.5);
     h_calojet_jettk_iclose_dxy[i] = fs->make<TH2F>(TString::Format("h_calojet_jettk_iclose_dxy_%s", bres.Data()), TString::Format(";nth-closest tk index;dxy of pfjettks in calojets that %s (cm);", bres.Data()), 15, 0, 15, 250, 0, 0.5);
@@ -317,6 +358,9 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
 
   }
 
+  h_online_btags = fs->make<TH1F>("h_online_btags", ";# of offline jets tagged @ HLT; entries", 15, 0, 15);
+  h_hard_online_btags = fs->make<TH1F>("h_hard_online_btags", ";# of offline jets tagged @ HLT w/ online p_{T} > 80GeV; entries", 15, 0, 15);
+  h_satisfies_online_tags = fs->make<TH1F>("h_satisfies_online_tags", ";Event has enough online btags?; entries", 2, -0.01, 1.01);
 }
 
 struct Track_Helper {
@@ -337,39 +381,31 @@ struct Track_Helper {
     int nsthits = -9;
 };
 
-bool MFVJetTksHistos::refactor_survival(const int nprompt, const bool current_pass_status) {
-  // FIXME need a better way for this, but here are the survival factors for now
-  std::vector<float> veto_factors = {-0.866, 0.999, -0.837, -0.891, -0.934, -0.894, 0.990, -0.915, -0.966, -0.909, 0.996, 0.995,
-                                      0.999, 0.999, 0.999, -0.799, -0.874, 0.998, 0.989, 0.999, 0.997, 0.995, -0.000, -0.000,
-                                      1.000, 0.990, 1.000, 1.000, 1.000, -0.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000,
-                                      1.000, 1.000};
-
-  // Initialize random seed
-  std::mt19937 rng;
-  unsigned int rng_seed = 8675309;
-  rng.seed(rng_seed);
-  std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
-  float rand_x = distribution(rng);
-
-  float veto_factor = nprompt < (int)(veto_factors.size()) ? veto_factors[nprompt] : 1.000;
-  bool data_eff_greater = (veto_factor > 0.0);
-  veto_factor = fabs(veto_factor);
-
-  // This commented-out section will give some jets a second chance at the prompt-track veto.
-  // But what do we do about the subsequent displaced track req?
-  //if (data_eff_greater and not current_pass_status) {
-  //    if (rand_x > veto_factor) return true;
-  //}
-
-  if (not current_pass_status) return false; //FIXME Placeholder until above commented-out block gets figured out
-
-  else if (not data_eff_greater and current_pass_status) {
-      if (rand_x > veto_factor) return false;
-  }
-  
-  return current_pass_status;
-
-}
+//bool MFVJetTksHistos::refactor_survival(const int nprompt, const bool current_pass_status, const float rand_x) {
+//  // FIXME need a better way for this, but here are the survival factors for now
+//
+//  // Factors derived from prescaled HT425 trigger
+//  std::vector<float> veto_factors{-0.893308, 0.898857, 0.870336, 0.892738, 0.923750, 0.950358, 0.965808,
+//                                   0.975436, 0.981205, 0.985363, 0.989302, 0.990224, 0.991814, 0.993340,
+//                                   0.994583, 0.995452, 0.996463, 0.995928, 0.996308, 0.996597, 0.997387,
+//                                   0.996520, 0.998216, 0.996268, 0.998126, 0.998431, 0.999427, 0.997307,
+//                                   0.998534, 0.999582, 0.997612, 0.998354, -1.000000, 0.992482, 0.994563};
+//
+//
+//  float veto_factor = nprompt < (int)(veto_factors.size()) ? veto_factors[nprompt] : 1.000;
+//  bool data_eff_greater = (veto_factor > 0.0);
+//  veto_factor = fabs(veto_factor);
+//
+//  if (data_eff_greater and not current_pass_status) {
+//      if (rand_x > veto_factor) return true;
+//  }
+//  else if (not data_eff_greater and current_pass_status) {
+//      if (rand_x > veto_factor) return false;
+//  }
+//  
+//  return current_pass_status;
+//
+//}
 
 void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       
@@ -390,13 +426,17 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz), geny - mevent->bsy_at_z(genz));
         gen_sumdbv += genbs2ddist;  
     }
-    if (require_gen_sumdbv and gen_sumdbv < 0.7) return;
+    if (require_gen_sumdbv and gen_sumdbv < 0.7) { return; }
+
   
     const double w = *weight;
     int  calojet_ntagged = 0;
     int  calojet_ngood   = 0;
     int  calojet_nweird  = 0;
-    int  calojet_npass_hlt = 0;
+    int  calojet_npass_hlt    = 0;
+    int  calojet_npass_prompt = 0;
+    int n_online_btags      = 0;
+    int n_hard_online_btags = 0;
     double online_pfht    = 0.0;
     double online_caloht  = 0.0;
     double offline_pfht   = 0.0;
@@ -404,18 +444,53 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_w->Fill(w);
   
 
-    if ((require_triggers) and not (mevent->pass_hlt(trigger_bit))) return;
+    if ((require_triggers) and not (mevent->pass_hlt(trigger_bit))) { return; }
     if ((veto_bjet_events) and (mevent->pass_hlt(mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33)
-                            or  mevent->pass_hlt(mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0))) return;
+                            or  mevent->pass_hlt(mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0))) { return; }
 
-    if (!mevent->pass_filter(mfv::b_hltL4PromptDisplacedDijetFullTracksHLTCaloJetTagFilterLowPt) and trigger_bit == 18) return;
 
     // Calculate on/off caloht
     for (int i = 0, ie=mevent->calo_jet_pt.size(); i < ie; ++i) {
         if ((mevent->calo_jet_pt[i] > 30.0) and (fabs(mevent->calo_jet_eta[i]) < 2.5)) offline_caloht += mevent->calo_jet_pt[i];
     }
 
-    if (offline_caloht < 400.0 or (trigger_bit==19 and offline_caloht < 600.0) or (not mevent->pass_l1(mfv::b_L1_HTT380er))) return;
+    //if (offline_caloht < 400.0 or (trigger_bit==19 and offline_caloht < 600.0) or (not mevent->pass_l1(mfv::b_L1_HTT380er))) return;
+
+    bool has_nice_muon = false;
+    bool has_nice_ele  = false;
+    for (size_t ilep = 0; ilep < mevent->nlep(); ++ilep) {
+        if (mevent->is_electron(ilep)) {
+            float ele_eta = mevent->lep_eta[ilep]; 
+            float ele_pt  = mevent->lep_pt(ilep);
+            if (fabs(ele_eta) > 2.4 or ele_pt < 30.0) continue;
+            else if (fabs(ele_eta) < 1.479) {
+                if (mevent->lep_iso[ilep] < (0.0287+(0.506/ele_pt))) {
+                    has_nice_ele = true;
+                }
+            }
+            else {  
+                if (mevent->lep_iso[ilep] < (0.0445+(0.963/ele_pt))) {
+                    has_nice_ele = true;
+                }
+            }
+        }
+        else if (mevent->lep_iso[ilep] < 0.15 and mevent->lep_pt(ilep) > 30.0 and fabs(mevent->lep_eta[ilep]) < 2.4) {
+            has_nice_muon = true;
+        }
+    }
+    if (require_two_good_leptons and ((not has_nice_muon) or (not has_nice_ele))) return;
+
+    std::vector<int> tri_kine_filter_bits{mfv::b_hltQuadCentralJet30, mfv::b_hltCaloQuadJet30HT300, mfv::b_hltBTagCaloCSVp05Double, mfv::b_hltPFCentralJetLooseIDQuad30,
+                                 mfv::b_hlt1PFCentralJetLooseID75, mfv::b_hlt2PFCentralJetLooseID60, mfv::b_hlt3PFCentralJetLooseID45,
+                                 mfv::b_hlt4PFCentralJetLooseID40, mfv::b_hltPFCentralJetsLooseIDQuad30HT300};
+
+    //std::vector<int> di_kine_filter_bits{mfv::b_hltDoubleCaloBJets100eta2p3};
+    std::vector<int> di_kine_filter_bits{mfv::b_hltDoubleCaloBJets100eta2p3, mfv::b_hltDoublePFJets100Eta2p3, mfv::b_hltDoublePFJets100Eta2p3MaxDeta1p6};
+//
+//
+//    for (auto bit : di_kine_filter_bits) {
+//        if (not mevent->pass_filter(bit)) return;
+//    }
 
     // Get closest online/offline pfjet match and calculate on/off pfht
     for (int i = 0; i < mevent->njets(); ++i) {
@@ -493,17 +568,14 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         std::vector<float> jettk_dxys;
         std::vector<float> jettk_nsigmadxys;
         float closest_pudisc = 0.0;
+        float closest_csv = -0.2;
         float closest_jec_factor = 1.0;
         float pt_thresh = trigger_bit==19 ? 60.0 : 40.0;
         float calojet_dxy = -1.0;
 
-        //                             {0.0, 0.025, 0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50};
-        std::vector<int> dxy_content = {    0,     0,    0,     0,    0,    0,    0,    0,    0};
-
         double closest_dR = 9.9;
         double next_dR    = 10.9;
         int    closest_j  = -10;
-//        int    calojet_nhlttks = 0;
         int    calojet_njettks = 0;
         int    calojet_njettks_prompt = 0;
         int    calojet_njettks_dispd = 0;
@@ -521,6 +593,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                 closest_j  = j;
                 has_match = true;
                 closest_pudisc = mevent->jet_pt[j] < 50.0 ? mevent->jet_pudisc[j] : 1.1;
+                closest_csv    = mevent->jet_bdisc_csv[j];
                 closest_jec_factor = mevent->jet_raw_pt[j] / mevent->jet_pt[j];
             }
             else if (temp_dR < next_dR) {
@@ -532,6 +605,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         // Do some kludge-y filter stuff. First, only run on events/jets that look good enough
         bool   matches_promptpass_cjet = false;
         bool   matches_disp_cjet = false;
+        bool   matches_hlt_calo_bjet = false;
         //if (not good_jet) continue;
 
         // Get the number of decent jet tracks within dR < 0.4
@@ -546,22 +620,14 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             double this_dR = reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], mevent->jet_track_eta[itk], mevent->jet_track_phi[itk]);
             if (this_dR < (0.4 - (tk_match_shift * tk_pt_testbit))) {
 
-                float abs_dxy = fabs(mevent->jet_track_dxy[itk]);
-                for (int iedge=0, iedgee=dxy_nbins+1; iedge<iedgee; iedge++) {
-                    if ((abs_dxy > dxy_edges[iedge]) and (abs_dxy < dxy_edges[iedge+1])) {
-                        dxy_content[iedge]++;
-                    }
-                    else {
-                        continue;
-                    }
-                }
-
                 calojet_njettks++;
-                jettk_dxys.push_back(fabs(mevent->jet_track_dxy[itk]));
+                double abs_dxy = fabs(mevent->jet_track_dxy[itk]);
+                jettk_dxys.push_back(abs_dxy);
                 jettk_nsigmadxys.push_back(this_tk_nsigmadxy);
 
-                if (fabs(mevent->jet_track_dxy[itk]) < 0.10) calojet_njettks_prompt++;
-                if (fabs(mevent->jet_track_dxy[itk]) > 0.05 and this_tk_nsigmadxy > 5.0) calojet_njettks_dispd++;
+                if (study_offline_dxy_res) abs_dxy += gaussian(rng);
+                if (abs_dxy < 0.10) calojet_njettks_prompt++;
+                if (abs_dxy > 0.05 and this_tk_nsigmadxy > 5.0) calojet_njettks_dispd++;
 
                 Track_Helper tmp_track_helper;
                 tmp_track_helper.dr    = abs_dxy;
@@ -578,21 +644,12 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
 
-        // Get the number of HLT track candidates within dR < 0.4
-//        for (size_t itk = 0; itk < mevent->hlt_tk_pt.size(); ++itk) {
-//            if (mevent->hlt_tk_pt[itk] < 1.0) continue;
-
-//            double this_dR = reco::deltaR(mevent->hlt_tk_eta[itk], mevent->hlt_tk_phi[itk], mevent->calo_jet_eta[i], mevent->calo_jet_phi[i]);
-//            if (this_dR < 0.4) calojet_nhlttks++;
-//        }
-        
-
         // See if this calojet matches to one which passes the prompt track tag (Low-HT trigger)
         if (trigger_bit != 19) {
             for (int j=0, je=mevent->hlt_calo_jet_lowpt_fewprompt_pt.size(); j < je; j++) {
                 double test_jet_eta = mevent->hlt_calo_jet_lowpt_fewprompt_eta[j];
                 double test_jet_phi = mevent->hlt_calo_jet_lowpt_fewprompt_phi[j];
-                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.14) {
+                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.20) {
                     matches_promptpass_cjet = true;
                     break;
                 }
@@ -604,7 +661,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             for (int j=0, je=mevent->hlt_calo_jet_midpt_fewprompt_pt.size(); j < je; j++) {
                 double test_jet_eta = mevent->hlt_calo_jet_midpt_fewprompt_eta[j];
                 double test_jet_phi = mevent->hlt_calo_jet_midpt_fewprompt_phi[j];
-                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.14) {
+                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.20) {
                     matches_promptpass_cjet = true;
                     break;
                 }
@@ -616,16 +673,41 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             for (int j=0, je=mevent->hlt_calo_jet_lowpt_wdisptks_pt.size(); j < je; j++) {
                 double test_jet_eta = mevent->hlt_calo_jet_lowpt_wdisptks_eta[j];
                 double test_jet_phi = mevent->hlt_calo_jet_lowpt_wdisptks_phi[j];
-                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.14) {
+                if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.20) {
                   matches_disp_cjet = true;
                   break;
                 }
             }
         }
 
+        // See if this calojet matches to one which satisfies the HLT calo bjet filter
+        for (int j=0, je=mevent->hlt_calo_b_jet_pt.size(); j < je; j++) {
+            double test_jet_eta = mevent->hlt_calo_b_jet_eta[j];
+            double test_jet_phi = mevent->hlt_calo_b_jet_phi[j];
+            if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.20) {
+              matches_hlt_calo_bjet = true;
+              break;
+            }
+        }
+
+        //Require that there is at least one other jet in the event which passes a med btag
+        bool has_tag_jet_buddy = false;
+        for (int j=0; j < mevent->njets(); ++j) {
+            // Make sure this PF jet isn't the same as the CaloJet we're looking at
+            if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], mevent->nth_jet_eta(j), mevent->nth_jet_phi(j)) < 0.4) continue;
+
+            if (mevent->is_btagged(j, 1) and mevent->nth_jet_pt(j) > 30.0 and fabs(mevent->nth_jet_eta(j)) < 2.4) {  // the "1" in is_btagged stands for med.
+                has_tag_jet_buddy = true;
+                break;  
+            }
+        }
+        if (not has_tag_jet_buddy) continue;
+        
+        float rand_x = distribution(rng);
         // Refactor survival >_<
         if (do_tk_filt_refactor) {
-          matches_promptpass_cjet = refactor_survival(calojet_njettks_prompt, matches_promptpass_cjet);
+          //matches_promptpass_cjet = refactor_survival(calojet_njettks_prompt, matches_promptpass_cjet, rand_x);
+          matches_promptpass_cjet = jmt::UncertTools::refactor_prompt_tk_eff(calojet_njettks_prompt, matches_promptpass_cjet, rand_x);
         }
 
         // sort vectors by increasing (nsigma)dxy
@@ -644,11 +726,14 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         bool pass_offline_tagreqs = ((trigger_bit == 18 and pass_prompt_req and pass_alt_disp_req and pass_pt_req) or (trigger_bit == 19 and pass_prompt_req and pass_pt_req));
         bool pass_online_tagreqs  = ((trigger_bit == 18 and matches_disp_cjet and matches_promptpass_cjet) or (trigger_bit == 19 and matches_promptpass_cjet));
         bool pass_category        = true;
-        bool pass_pure_region     = mevent->calo_jet_pt[i] > (pt_thresh + 10.0);
+        bool pass_pure_region     = mevent->calo_jet_pt[i] > 80.0 ;
+
+        if (not pass_pure_region) continue;
        
         // 0: passes no offline filter bits      1: passes tk-based bits     2: passes pT-based bits     3: passes all bits
         int calojet_filtscore = 0 + (1 * (trigger_bit == 18 and pass_prompt_req and pass_alt_disp_req)) + (1 * (trigger_bit == 19 and pass_prompt_req)) + (2 * pass_pt_req);
 
+        if (matches_promptpass_cjet)                           calojet_npass_prompt++;
         if (pass_online_tagreqs)                               calojet_npass_hlt++;
         if (pass_offline_tagreqs)                              calojet_ntagged++;
         if (pass_offline_tagreqs and pass_online_tagreqs)      calojet_ngood++;
@@ -669,12 +754,12 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                 break;
         }
 
-        if ((not pass_category) or (not pass_pure_region)) continue;
-        //if (not pass_category) continue;
+        if (not pass_category) continue;
         
         fill_calo_hists.push_back(ALL);
-        fill_calo_hists.push_back(matches_promptpass_cjet                       ? PASS_CALO_PROMPT : FAIL_CALO_PROMPT);
-        fill_calo_hists.push_back(matches_disp_cjet and matches_promptpass_cjet ? PASS_CALO_DISP   : FAIL_CALO_DISP);
+        if (matches_hlt_calo_bjet)                         { fill_calo_hists.push_back(PASS_HLT_BTAG); }
+        if (matches_promptpass_cjet)                       { fill_calo_hists.push_back(PASS_CALO_PROMPT); }
+        if (matches_promptpass_cjet and matches_disp_cjet) { fill_calo_hists.push_back(PASS_CALO_DISP); }
 
         for (auto n_hist : fill_calo_hists) {
              h_calojet_pt[n_hist]->Fill(mevent->calo_jet_pt[i], w);
@@ -682,14 +767,13 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
              h_calojet_eta[n_hist]->Fill(fabs(mevent->calo_jet_eta[i]), w);
              h_calojet_phi[n_hist]->Fill(mevent->calo_jet_phi[i], w);
              h_calojet_dxy[n_hist]->Fill(calojet_dxy, w);
+             h_calojet_csv[n_hist]->Fill(closest_csv, w);
              h_calojet_pf_dR[n_hist]->Fill(closest_dR, w);
              h_calojet_pf_next_dR[n_hist]->Fill(next_dR, w);
              h_calojet_ntks[n_hist]->Fill(closest_j >= 0 ? (int)(mevent->n_jet_tracks(closest_j)) : -2, w);
              h_calojet_njettks[n_hist]->Fill(calojet_njettks, w);
              h_calojet_nprompttks[n_hist]->Fill(calojet_njettks_prompt, w);
              h_calojet_ndisptks[n_hist]->Fill(calojet_njettks_dispd, w);
-//             h_calojet_nhlttks[n_hist]->Fill(calojet_nhlttks, w);
-//             h_calojet_nhlttks_njettks[n_hist]->Fill(calojet_nhlttks, calojet_njettks, w);
 
              if (mevent->calo_jet_pt[i] < pt_thresh) h_calojet_pudisc[n_hist]->Fill(closest_pudisc, w);
 
@@ -730,11 +814,6 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
              }
         }
 
-        // Fill the track multiplicity vs. dxy plot
-        for (int iedge=0, iedgee=dxy_nbins+1; iedge<iedgee; iedge++) {
-            h_calo_jettk_dxy_mult->Fill(dxy_edges[iedge]+0.0005, dxy_content[iedge], w);           
-        }
-
         // And fill some more track-based hists
         for (auto helper : calo_trackhelpers) {
             h_calo_jettk_dxy->Fill(helper.dr, w);
@@ -756,6 +835,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
     
     h_calojet_npasshlt->Fill(calojet_npass_hlt, w);
+    h_calojet_npassprompt->Fill(calojet_npass_prompt, w);
     h_calojet_ntagged->Fill(calojet_ntagged, w);
     h_calojet_nweird_ngood->Fill(calojet_nweird, calojet_ngood, w);
     h_calojet_sum_good_weird->Fill(calojet_nweird + calojet_ngood, w);
@@ -765,21 +845,52 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   START PFJET STUFF
 
-    for (int i = 0; i < mevent->njets(); ++i) {
-        bool matches_online_bjet = false;
-        bool matches_online_calo = false;
+    bool pass_di_kine_filters  = true;
+    bool pass_tri_kine_filters = true;
 
-        if (mevent->jet_bdisc_deepcsv[i] < offline_csv || mevent->nth_jet_pt(i) < 30.0) continue;
+    for (auto bit : di_kine_filter_bits) {
+        if (not mevent->pass_filter(bit)) {
+            pass_di_kine_filters = false;
+            break;
+        };
+    }
+
+    for (auto bit : tri_kine_filter_bits) {
+        if (not mevent->pass_filter(bit)) {
+            pass_tri_kine_filters = false;
+            break;
+        };
+    }
     
-        std::vector<int> fill_hists;
-        fill_hists.push_back(ALL);     // Always fill histo #0
+    for (int i = 0; i < mevent->njets(); ++i) {
+        bool matches_online_bjet      = false;
+        bool matches_online_calo_bjet = false;
+        bool matches_online_jet       = false;
+        bool reject_hlt_bjet          = false;
+//
+//        if (mevent->jet_bdisc_deepcsv[i] < offline_csv || mevent->nth_jet_pt(i) < pt_lo_for_tag_probe ||
+//            mevent->nth_jet_pt(i) > pt_hi_for_tag_probe || fabs(mevent->nth_jet_eta(i)) > 2.4) continue;
+//
+//      //Require that there is at least one other jet in the event which passes a med btag
+//        bool has_tag_jet_buddy = false;
+//        for (int j=0; j < mevent->njets(); ++j) {
+//            if (i == j) continue;
+//
+//            if (mevent->is_btagged(j, 1) and mevent->nth_jet_pt(j) > 30.0 and fabs(mevent->nth_jet_eta(j)) < 2.4) {  // the "1" in is_btagged stands for med.
+//                has_tag_jet_buddy = true;
+//                break;  
+//            }
+//        }
+//        if (not has_tag_jet_buddy) continue;
+//        if ((study_hlt_tagged_jets or study_hlt_nontagged_jets) and (mevent->jet_bdisc_deepcsv[i] < 0.6 or mevent->jet_bdisc_deepcsv[i] > 0.9)) continue; //FIXME
     
         float sum_nsigmadxy = 0.0;
         float sum_nsigmadxyz = 0.0;
     
-        //float off_pt  = mevent->nth_jet_pt(i);
+        float off_pt  = mevent->nth_jet_pt(i);
         float off_eta = mevent->nth_jet_eta(i);
         float off_phi = mevent->nth_jet_phi(i);
+        //float hlt_match_pt = -1.0;
 
         float jet_dbv = 0.0;
     
@@ -787,31 +898,70 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         jet_vector.SetPtEtaPhi(mevent->nth_jet_pt(i), off_eta, off_phi);       
         jet_vector.SetMag(1.0);
     
-        // See if this jet matches to an online calojet (probably yes)
-        int n_online_calojets = mevent->hlt_pf_jet_pt.size();
-        for (int j=0; j < n_online_calojets; j++) {
+        // See if this jet matches to an online jet (probably yes)
+        float jet_min_hlt_dR = 9.9;
+        int n_online_jets = mevent->hlt_pf_jet_pt.size();
+        for (int j=0; j < n_online_jets; j++) {
+            if (mevent->hlt_pf_jet_pt[j] < 30.0) continue;
             float hlt_eta = mevent->hlt_pf_jet_eta[j];
             float hlt_phi = mevent->hlt_pf_jet_phi[j];
-    
-            if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_calo = true; break;}
+            float this_dR = reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi);
+            if (this_dR < jet_min_hlt_dR) {
+                jet_min_hlt_dR = this_dR;
+            }
         }
-                      
-        // If for some weird reason, there's no match btwn online/offline jets, skip this jet
-        if (not matches_online_calo) continue;
+        if (jet_min_hlt_dR < 0.40) { matches_online_jet = true; }
     
+        // If for some weird reason, there's no match btwn online/offline jets, skip the remaining portion of the loop
+        //if (not matches_online_jet) continue;
+
         // See if this jet matches to some HLT jet which passes the btag filters
-        //int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
-        int n_hlt_calobjets = mevent->hlt_idp_calo_jet_pt.size();
-        for (int j=0; j < n_hlt_calobjets; j++) {
-            float hlt_eta = mevent->hlt_idp_calo_jet_eta[j];
-            float hlt_phi = mevent->hlt_idp_calo_jet_phi[j];
-    
-            if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_bjet = true; }
+        int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
+        //int n_hlt_calobjets = mevent->hlt_idp_calo_jet_pt.size();
+
+        float jet_min_hlt_bjet_dR = 9.9;
+        for (int j=0; j < n_online_bjets; j++) {
+            float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
+            float hlt_phi = mevent->hlt_pfforbtag_jet_phi[j];
+            float this_dR = reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi);
+            if (this_dR < jet_min_hlt_bjet_dR) {
+                jet_min_hlt_bjet_dR = this_dR;
+                //hlt_match_pt = mevent->hlt_pfforbtag_jet_pt[i];
+            }
         }
-    
+        if(jet_min_hlt_bjet_dR < 0.40) { matches_online_bjet = true; }
+
+
+        //See if this calojet matches to one which satisfies the HLT calo bjet filter
+        float jet_min_hlt_calo_bjet_dR = 9.9;
+        for (int j=0, je=mevent->hlt_calo_b_jet_pt.size(); j < je; j++) {
+            float hlt_eta = mevent->hlt_calo_b_jet_eta[j];
+            float hlt_phi = mevent->hlt_calo_b_jet_phi[j];
+            float this_dR = reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi);
+            if (this_dR < jet_min_hlt_calo_bjet_dR) {
+                jet_min_hlt_calo_bjet_dR = this_dR;
+            }
+        }
+        if(jet_min_hlt_calo_bjet_dR < 0.40) { matches_online_calo_bjet = true; }
+
+        if (study_hlt_tagged_jets    and not matches_online_bjet) continue; //FIXME
+        if (study_hlt_nontagged_jets and     matches_online_bjet) continue; //FIXME
+
+        // Study the effects of online/offline btagging differences by punishing online tags in MC
+        if (matches_online_bjet and study_hlt_btagging) {
+            float rand_y = distribution(rng);
+            reject_hlt_bjet = jmt::UncertTools::reject_btag_hlt(mevent->jet_bdisc_deepcsv[i], off_pt, rand_y, 0, 2017);
+        }
+
+        if (matches_online_bjet      and (not reject_hlt_bjet)) n_online_btags++;
+        if (matches_online_calo_bjet and (not reject_hlt_bjet)) n_hard_online_btags++;
+
         // Which histograms do we need to fill?
+        std::vector<int> fill_hists;
+        fill_hists.push_back(ALL);     // Always fill histo #0
         fill_hists.push_back(matches_online_bjet ? PASS_HLT : FAIL_HLT);
         fill_hists.push_back(mevent->jet_bdisc_deepcsv[i] > offline_csv ? PASS_OFF : FAIL_OFF);
+        if (matches_online_calo_bjet) fill_hists.push_back(PASS_HLT_CALO_BJET);
         
         // Try and find the point that this jet originates from. Do this by finding the closest instance of jet_loc_helper
         // Fill the pre-determined histograms
@@ -823,8 +973,17 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
              h_jet_ntks[n_hist]->Fill((int)(mevent->n_jet_tracks(i)));
              h_jet_bdisc_deepflav[n_hist]->Fill((i < (int)(mevent->jet_bdisc_deepflav.size()) ? mevent->jet_bdisc_deepflav[i] : -9.9), w);
              h_jet_bdisc_deepcsv[n_hist]->Fill((i < (int)(mevent->jet_bdisc_deepcsv.size()) ? mevent->jet_bdisc_deepcsv[i] : -9.9), w);
+             h_jet_bdisc_csv[n_hist]->Fill((i < (int)(mevent->jet_bdisc_csv.size()) ? mevent->jet_bdisc_csv[i] : -9.9), w);
+             h_jet_min_hlt_dR[n_hist]->Fill(jet_min_hlt_dR, w);
+             h_jet_min_hlt_bjet_dR[n_hist]->Fill(jet_min_hlt_bjet_dR,w);
+             h_jet_min_hlt_calo_bjet_dR[n_hist]->Fill(jet_min_hlt_calo_bjet_dR,w);
+             h_jet_matches_hlt[n_hist]->Fill(matches_online_jet,w);
+             h_jet_matches_hlt_bjet[n_hist]->Fill(matches_online_bjet, w);
+             h_jet_matches_hlt_calo_bjet[n_hist] ->Fill(matches_online_calo_bjet, w);
+
+
         }
-    
+
         // Start the track portion of this code
         TVector3 jet_sumtk_vector;
         jet_sumtk_vector.SetPtEtaPhi(0.0, 0.0, 0.0);
@@ -870,6 +1029,8 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                    h_jet_tks_eta[n_hist]->Fill(fabs(mevent->jet_track_eta[ntk]), w);
                    h_jet_tks_eta_rel[n_hist]->Fill(eta_rel, w);
                    h_jet_tks_dR[n_hist]->Fill(tk_vector.DeltaR(jet_vector), w);
+                   h_jet_tks_dxy[n_hist]->Fill(fabs(dr), w);
+                   h_jet_tks_dxyz[n_hist]->Fill(fabs(drz), w);
                    h_jet_tks_nsigmadxy[n_hist]->Fill(fabs(dr/drerr), w);
                    h_jet_tks_nsigmadxyz[n_hist]->Fill(fabs(drz/drzerr), w);
               }
@@ -937,34 +1098,15 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             h_jet_sumtk_dR[n_hist]->Fill(jet_vector.DeltaR(jet_sumtk_vector), w);
         }
     }
+
+    bool satisfies_online_tags = false;
+    if      (pass_di_kine_filters  and n_hard_online_btags >= 2) satisfies_online_tags = true;
+    else if (pass_tri_kine_filters and      n_online_btags >= 3) satisfies_online_tags = true;
+
+    h_online_btags->Fill(n_online_btags, w);
+    h_hard_online_btags->Fill(n_hard_online_btags, w);
+    h_satisfies_online_tags->Fill((int)(satisfies_online_tags), w);
       
     //////////////////////////////////////////////////////////////////////////////
-      
-    for (int b = 0; b < 100; b++) {
-        float b_cut = (b * 0.01)+0.00001;
-        int   n_proxies = 0; // Number of jets passing whatever the proxy is
-        int   n_passes  = 0; // Number of jets matching to an HLT bjet
-        int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
-    
-        for (int i = 0; i < mevent->njets(); i++) {
-            float b_disc = (i < (int)(mevent->jet_bdisc_deepcsv.size()) ? mevent->jet_bdisc_deepcsv[i] : -9.9);
-            if (b_disc < 0.0 or mevent->nth_jet_pt(i) < 30.0) continue;
-            if (b_disc > b_cut) n_proxies++;
-      
-            float off_eta = mevent->nth_jet_eta(i);
-            float off_phi = mevent->nth_jet_phi(i);
-      
-            for (int j=0; j < n_online_bjets; j++) {
-                float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
-                float hlt_phi = mevent->hlt_pfforbtag_jet_phi[j];
-                if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) n_passes++;
-            }
-        }
-    
-        float y_bin  = n_proxies >= 3 ? 1.0 : 0.0;
-        int n_hist = n_online_bjets >= 3 ? 0 : 1;   // If this collection has at least three members, then there's enough HLT bjets to pass
-        h_proxy_grid[n_hist]->Fill(b_cut, y_bin, w);
-      
-    }
 }
 DEFINE_FWK_MODULE(MFVJetTksHistos);
