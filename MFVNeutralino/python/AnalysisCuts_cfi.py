@@ -15,9 +15,15 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
                                require_bquarks  = cms.bool(False),
                                require_trigbit  = cms.bool(True),
+                               require_gen_sumdbv  = cms.bool(False),
+                               require_bjet_psel   = cms.bool(True), # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               study_btag_sf       = cms.bool(False),
+                               dijet_agnostic      = cms.bool(False),
+                               bjet_agnostic       = cms.bool(False),
+                               bjet_veto           = cms.bool(False),
+                               btagger_choice  = cms.int32(2), # 0 = CSV, 1 = DeepCSV, 2 = DeepJet
+                               btag_wp         = cms.int32(0), # 0 = Loose, 1 = Medium, 2 = Tight
                                trigbit_tostudy = cms.int32(99999),
-                               calo_seed_threshold = cms.int32(0),
-                               calo_prompt_threshold = cms.int32(999),
                                # to make any of the next 3 trigger cuts work, or min/max_njets/ht, you have to set apply_presel = 0 above
                                l1_bit = cms.int32(-1),
                                trigger_bit = cms.int32(-1),
