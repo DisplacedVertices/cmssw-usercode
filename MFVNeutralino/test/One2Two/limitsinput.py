@@ -114,6 +114,7 @@ class sample_iterator(object):
             self.isample = isample
             self.name = name
             self.kind, self.tau, self.mass, self.massResonance = name2details(self.name)
+            #print self.name
 
     def __iter__(self):
         for ibin in xrange(1, self.h.GetNbinsX()+1):
@@ -333,7 +334,7 @@ def make_signals_2015p6(f, name_list):
         # '/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6.root',),
         #('/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',
         # '/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',),
-         ('/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',), # modified code below to only use one 2016 file (since we don't have a HIP one for this study)
+         ('/uscms/home/joeyr/dark_sector_review_paper/mfv_8035/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput.root',), # modified code below to only use one 2016 file (since we don't have a HIP one for this study)
         ]
 
     def trigmult2016(x):
@@ -648,6 +649,8 @@ def make_signals_2017p8(f, name_list):
         scale = 1e-3 * gp.int_lumis[iyear] / ngen
         data_mc_scale = sig_datamcSF_2017p8(name_year)
 
+        # FIXME around here, add the efficiency rescaling due to the bug Matthew identified
+
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 1250, 0, 2.5)
         h_dvv  = ROOT.TH1D(n('dvv'),  '', 400, 0, 4)
@@ -693,7 +696,7 @@ def make():
     f = ROOT.TFile(gp.fn, 'recreate')
 
     # FIXME!!! we should have the old 2017p8 bkgs to reuse here
-    #make_bkg(f)
+    make_bkg(f)
 
     name_list = {}
     # FIXME!!! need to do the same for 2016 before this will properly work
@@ -887,12 +890,14 @@ def points(f=None):
     if f is None:
         f = ROOT.TFile(gp.fn)
     kinds  = sorted(set(s.kind for s in sample_iterator(f)))
+    #masses = sorted(set( (s.massResonance*1000 + s.mass if s.massResonance is not None else s.mass) for s in sample_iterator(f))) # FIXME not used anywhere yet, let's not overcomplicate
     masses = sorted(set(s.mass for s in sample_iterator(f)))
     taus   = sorted(set(s.tau  for s in sample_iterator(f)))
     return kinds, masses, taus
 
 def axisize(l):
     l = sorted(set(l))
+    print l
     delta = l[-1] - l[-2]
     l.append(l[-1] + delta)
     return to_array(l)

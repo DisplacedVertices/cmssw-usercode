@@ -141,6 +141,7 @@ class limits:
         if key == 'tau':
             return [p.sample.tau for p in self.points]
         elif key == 'mass':
+            #return [(p.sample.massResonance*10000 + p.sample.mass if p.sample.massResonance is not None else p.sample.mass) for p in self.points]
             return [p.sample.mass for p in self.points]
         else:
             return [getattr(p,key) for p in self.points]
@@ -182,25 +183,13 @@ def make_1d_plot(d, name, xkey='mass'):
     elif name.startswith('dijet'):
         which_theory = 'stopstop'
 
-    if xkey == 'mass':
-        g.theory = make_theory(which_theory)
-        if which_theory2:
-            g.theory2 = make_theory(which_theory2)
-    else:
-        xsecs = parse_theory(which_theory)
-        zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
-        if zz:
-            xsec, unc = zz[0]
+    if which_theory :
+        if xkey == 'mass':
+            g.theory = make_theory(which_theory)
+            if which_theory2:
+                g.theory2 = make_theory(which_theory2)
         else:
-            xsec, unc = 1e-99, 1e-99
-        x = d[xkey]
-        y = [xsec]*len(x)
-        ey = [unc]*len(x)
-        g.theory = tge(zip(x,y,ey))
-        fmt_theory(which_theory, g.theory, xtitle)
-
-        if which_theory2:
-            xsecs = parse_theory(which_theory2)
+            xsecs = parse_theory(which_theory)
             zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
             if zz:
                 xsec, unc = zz[0]
@@ -209,8 +198,21 @@ def make_1d_plot(d, name, xkey='mass'):
             x = d[xkey]
             y = [xsec]*len(x)
             ey = [unc]*len(x)
-            g.theory2 = tge(zip(x,y,ey))
-            fmt_theory(which_theory2, g.theory2, xtitle)
+            g.theory = tge(zip(x,y,ey))
+            fmt_theory(which_theory, g.theory, xtitle)
+
+            if which_theory2:
+                xsecs = parse_theory(which_theory2)
+                zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
+                if zz:
+                    xsec, unc = zz[0]
+                else:
+                    xsec, unc = 1e-99, 1e-99
+                x = d[xkey]
+                y = [xsec]*len(x)
+                ey = [unc]*len(x)
+                g.theory2 = tge(zip(x,y,ey))
+                fmt_theory(which_theory2, g.theory2, xtitle)
 
     return g
 
@@ -230,7 +232,7 @@ def save_1d_plots():
         #('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('splitSUSY_M2400_100',   lambda s: 'splitSUSY'          in sample.name and sample.mass == 2400, lambda s: s.sample.tau,  ('tau', 2400.)),
+        #('splitSUSY_M2400_100',   lambda s: 'splitSUSY'          in sample.name and sample.mass == 2400, lambda s: s.sample.tau,  ('tau', 2400.)),
         #('splitSUSY_tau100um',    lambda s: 'splitSUSY'          in sample.name and sample.tau  ==  0.1    and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau1mm',      lambda s: 'splitSUSY'          in sample.name and sample.tau  ==  1.     and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau10mm',     lambda s: 'splitSUSY'          in sample.name and sample.tau  == 10.     and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
@@ -238,22 +240,77 @@ def save_1d_plots():
         #('splitSUSY_tau1000mm',   lambda s: 'splitSUSY'          in sample.name and sample.tau  == 1000.   and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau10000mm',  lambda s: 'splitSUSY'          in sample.name and sample.tau  == 10000.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau100000mm', lambda s: 'splitSUSY'          in sample.name and sample.tau  == 100000. and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        ('HtoLLPto4j_M1000_450',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
+        ('HtoLLPto4j_M1000_100',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('HtoLLPto4j_M400_150',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('HtoLLPto4j_M600_250',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
+        ('HtoLLPto4j_M600_60',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 60, lambda s: s.sample.tau,  ('tau', 60)),
+        ('HtoLLPto4j_M800_350',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
+        ('HtoLLPto4j_M800_80',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 80, lambda s: s.sample.tau,  ('tau', 80)),
+        ('HtoLLPto4b_M1000_450',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
+        ('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('HtoLLPto4b_M400_150',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('HtoLLPto4b_M600_250',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
+        ('HtoLLPto4b_M800_350',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
+        ('HtoLLPto4b_M800_80',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 80, lambda s: s.sample.tau,  ('tau', 80)),
+        ('ZprimetoLLPto4j_M1000_100',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('ZprimetoLLPto4j_M1000_450',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
+        ('ZprimetoLLPto4j_M1500_150',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 1500 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('ZprimetoLLPto4j_M1500_700',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 1500 and sample.mass == 700, lambda s: s.sample.tau,  ('tau', 700)),
+        ('ZprimetoLLPto4j_M2000_200',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 2000 and sample.mass == 200, lambda s: s.sample.tau,  ('tau', 200)),
+        ('ZprimetoLLPto4j_M2000_950',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 2000 and sample.mass == 950, lambda s: s.sample.tau,  ('tau', 950)),
+        ('ZprimetoLLPto4j_M2500_1200',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 2500 and sample.mass == 1200, lambda s: s.sample.tau,  ('tau', 1200)),
+        ('ZprimetoLLPto4j_M2500_250',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 2500 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
+        ('ZprimetoLLPto4j_M3000_1450',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 3000 and sample.mass == 1450, lambda s: s.sample.tau,  ('tau', 1450)),
+        ('ZprimetoLLPto4j_M3000_300',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 3000 and sample.mass == 300, lambda s: s.sample.tau,  ('tau', 300)),
+        ('ZprimetoLLPto4j_M3500_1700',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 3500 and sample.mass == 1700, lambda s: s.sample.tau,  ('tau', 1700)),
+        ('ZprimetoLLPto4j_M3500_350',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 3500 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
+        ('ZprimetoLLPto4j_M4000_1950',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 4000 and sample.mass == 1950, lambda s: s.sample.tau,  ('tau', 1950)),
+        ('ZprimetoLLPto4j_M4000_400',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 4000 and sample.mass == 400, lambda s: s.sample.tau,  ('tau', 400)),
+        ('ZprimetoLLPto4j_M4500_2200',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 4500 and sample.mass == 2200, lambda s: s.sample.tau,  ('tau', 2200)),
+        ('ZprimetoLLPto4j_M4500_450',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 4500 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
+        ('ZprimetoLLPto4b_M1000_100',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('ZprimetoLLPto4b_M1000_450',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
+        ('ZprimetoLLPto4b_M1500_150',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 1500 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('ZprimetoLLPto4b_M1500_700',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 1500 and sample.mass == 700, lambda s: s.sample.tau,  ('tau', 700)),
+        ('ZprimetoLLPto4b_M2000_200',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 2000 and sample.mass == 200, lambda s: s.sample.tau,  ('tau', 200)),
+        ('ZprimetoLLPto4b_M2000_950',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 2000 and sample.mass == 950, lambda s: s.sample.tau,  ('tau', 950)),
+        ('ZprimetoLLPto4b_M2500_1200',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 2500 and sample.mass == 1200, lambda s: s.sample.tau,  ('tau', 1200)),
+        ('ZprimetoLLPto4b_M2500_250',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 2500 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
+        ('ZprimetoLLPto4b_M3000_1450',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 3000 and sample.mass == 1450, lambda s: s.sample.tau,  ('tau', 1450)),
+        ('ZprimetoLLPto4b_M3000_300',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 3000 and sample.mass == 300, lambda s: s.sample.tau,  ('tau', 300)),
+        ('ZprimetoLLPto4b_M3500_1700',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 3500 and sample.mass == 1700, lambda s: s.sample.tau,  ('tau', 1700)),
+        ('ZprimetoLLPto4b_M3500_350',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 3500 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
+        ('ZprimetoLLPto4b_M4000_1950',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 4000 and sample.mass == 1950, lambda s: s.sample.tau,  ('tau', 1950)),
+        ('ZprimetoLLPto4b_M4000_400',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 4000 and sample.mass == 400, lambda s: s.sample.tau,  ('tau', 400)),
+        ('ZprimetoLLPto4b_M4500_2200',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 4500 and sample.mass == 2200, lambda s: s.sample.tau,  ('tau', 2200)),
+        ('ZprimetoLLPto4b_M4500_450',   lambda s: 'ZprimetoLLPto4b' in sample.name and sample.massResonance == 4500 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
-    for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+    for which, years in ('run2', [2016,2017,2018]), :
+    #for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
     #for which, years in ('2017p8', [2017,2018]), :
         out_f = ROOT.TFile('limits_1d_%s.root' % which, 'recreate')
         for name, use, sorter, xkey in xxx:
             d = limits()
-            for sample in sample_iterator(in_f, years, slices_1d=True):
+            for sample in sample_iterator(in_f, years, slices_1d=False):
+                if -sample.isample in (1,4,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,28,30,32,36,38,40,44,46,48,52,57,58,59,60,61,62,63,64,65,67,68,69,70,72,76,78,80,84,92,113,114,115,116,117,118,120,122,124,125,126,128,129,130,131,133,136,140,145,147,161,177,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241) :
+                    continue
+
                 if use(sample):
+                    #print sample.name, sample.massResonance, sample.mass, sample.tau
                     #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
                     #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
-                    d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                    #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                    d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                else :
+                    pass
+                    #print "NOT USING ", sample.name, sample.massResonance, sample.mass, sample.tau
             d.points.sort(key=sorter)
 
             out_f.mkdir(name).cd()
+            #print name
             g = make_1d_plot(d, name, xkey)
             for gg in g:
                 gg.Write(gg.GetName())
@@ -273,23 +330,28 @@ def interpolate(h):
 
 def save_2d_plots():
     in_f = ROOT.TFile('limitsinput.root')
-    for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+    for which, years in ('run2', [2016,2017,2018]), :
+    #for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
     #for which, years in ('2017p8', [2017,2018]), :
         out_f = ROOT.TFile('limits_%s.root' % which, 'recreate')
 
         #for kind in 'mfv_stopdbardbar', 'mfv_neu':
-        for kind in 'mfv_splitSUSY', :
+        #for kind in 'mfv_splitSUSY', :
+        for kind in 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b' :
             d = limits()
             for sample in sample_iterator(in_f, years):
-                if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
+                if -sample.isample in (1,4,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,28,30,32,36,38,40,44,46,48,52,57,58,59,60,61,62,63,64,65,67,68,69,70,72,76,78,80,84,92,113,114,115,116,117,118,120,122,124,125,126,128,129,130,131,133,136,140,145,147,161,177,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241) :
                     continue
                 if sample.kind != kind:
                     continue
                 #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
-                d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
 
+            print d['tau'], d['mass']
             taus, masses = axisize(d['tau']), axisize(d['mass'])
-            taus.remove(30.)
+            print masses
+            #taus.remove(30.)
 
             out_f.mkdir(kind).cd()
 
@@ -297,7 +359,7 @@ def save_2d_plots():
                 h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
                 h.SetStats(0)
                 for p in d.points:
-                    h.SetBinContent(h.FindBin(p.sample.mass, p.sample.tau), getattr(p, x))
+                    h.SetBinContent(h.FindBin(p.sample.massResonance*10000 + p.sample.mass if p.sample.massResonance is not None else p.sample.mass, p.sample.tau), getattr(p, x))
                 h.Write()
 ####
 

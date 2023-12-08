@@ -17,14 +17,15 @@ import limitsinput
 # Directly for this version:
 #
 #   export SCRAM_ARCH=slc7_amd64_gcc700
+#   source /cvmfs/cms.cern.ch/cmsset_default.sh
 #   cmsrel CMSSW_10_2_13
 #   cd CMSSW_10_2_13/src
 #   cmsenv
 #   git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 #   cd HiggsAnalysis/CombinedLimit
-#   patch -p1 < path/to/main/cmssw/src/JMTucker/MFVNeutralino/test/One2Two/patchSetHint
 #   git fetch origin
 #   git checkout v8.0.1
+#   patch -p1 < path/to/main/cmssw/src/JMTucker/MFVNeutralino/test/One2Two/patchSetHint
 #   scram b clean; scram b
 #
 # In that same combine environment, make the tarball with:
