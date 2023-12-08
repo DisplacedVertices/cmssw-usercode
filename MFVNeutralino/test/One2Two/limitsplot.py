@@ -248,7 +248,7 @@ def save_1d_plots():
         ('HtoLLPto4j_M800_350',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
         ('HtoLLPto4j_M800_80',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 80, lambda s: s.sample.tau,  ('tau', 80)),
         ('HtoLLPto4b_M1000_450',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
-        ('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        #('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
         ('HtoLLPto4b_M400_150',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
         ('HtoLLPto4b_M600_250',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
         ('HtoLLPto4b_M800_350',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
@@ -295,7 +295,7 @@ def save_1d_plots():
         for name, use, sorter, xkey in xxx:
             d = limits()
             for sample in sample_iterator(in_f, years, slices_1d=False):
-                if -sample.isample in (1,4,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,28,30,32,36,38,40,44,46,48,52,57,58,59,60,61,62,63,64,65,67,68,69,70,72,76,78,80,84,92,113,114,115,116,117,118,120,122,124,125,126,128,129,130,131,133,136,140,145,147,161,177,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241) :
+                if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
                     continue
 
                 if use(sample):
@@ -340,7 +340,7 @@ def save_2d_plots():
         for kind in 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b' :
             d = limits()
             for sample in sample_iterator(in_f, years):
-                if -sample.isample in (1,4,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,28,30,32,36,38,40,44,46,48,52,57,58,59,60,61,62,63,64,65,67,68,69,70,72,76,78,80,84,92,113,114,115,116,117,118,120,122,124,125,126,128,129,130,131,133,136,140,145,147,161,177,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241) :
+                if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
                     continue
                 if sample.kind != kind:
                     continue
