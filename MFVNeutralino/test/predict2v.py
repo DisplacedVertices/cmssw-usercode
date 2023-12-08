@@ -29,7 +29,7 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 effs = pd.read_csv('MiniTree/efficiencies/all_effs.csv',index_col='variant')
-cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals.csv',index_col='variant')
+cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals_for_predict2v.csv',index_col='variant')
 
 fracdict = {}
 cdict = {}
