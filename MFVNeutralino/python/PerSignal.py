@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 
 class PerSignal:
-    tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm'}
+    tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm', 1000000 : '1000 mm', 10000000 : '10000 mm'}
 
     @classmethod
     def clear_samples(_, samples):
@@ -35,6 +35,7 @@ class PerSignal:
         # (tau,mass) points first.
 
         samples = sorted(samples, key=lambda s: s.name)
+
         tm = [(s.tau, s.mass) for s in samples]
         if len(tm) != len(set(tm)):
             raise ValueError('duplicate (tau,mass) seen')
@@ -46,6 +47,7 @@ class PerSignal:
         c.in_legend = in_legend
         self.curves.append(c)
         for s in samples:
+
             self.taus.add(s.tau)
             self.masses.add(s.mass)
             if hasattr(s, 'y') and s.y is not None:
@@ -97,9 +99,11 @@ class PerSignal:
                 g.SetPointEYhigh(j, eyh[j])
 
             if x_missing:
-                g = curve.g_missing = ROOT.TGraph(len(x_missing), to_array(x_missing), to_array([self.y_range[0] + self.y_span*0.01]*len(x_missing)))
+                g = curve.g_missing = ROOT.TGraph(len(x_missing), to_array(x_missing), to_array([self.y_range[0]]*len(x_missing)))
+                #g = curve.g_missing = ROOT.TGraph(len(x_missing), to_array(x_missing), to_array([self.y_range[0] + self.y_span*0.5e-6]*len(x_missing)))
                 g.SetMarkerColor(curve.color)
                 g.SetMarkerStyle(29)
+                if curve.color == ROOT.kBlue : g.SetMarkerStyle(30)
                 g.SetMarkerSize(2.0)
             else:
                 curve.g_missing = None
@@ -173,9 +177,9 @@ class PerSignal:
         if do_decay_paves:
             for ic, curve in enumerate([c for c in self.curves if c.in_legend]):
                 if self.decay_paves_at_top:
-                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.97-(ic+1)*0.05), nmasses, self.y_range[0]+self.y_span*(0.97-ic*0.05)
+                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.97-(ic+1)*0.05), nmasses*2, self.y_range[0]+self.y_span*(0.97-ic*0.05)
                 else:
-                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.03+ic*0.05), nmasses, self.y_range[0]+self.y_span*(0.03+(ic+1)*0.05)
+                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.03+ic*0.05), nmasses*2, self.y_range[0]+self.y_span*(0.03+(ic+1)*0.05)
                 p = ROOT.TPaveText(*decay_pave_loc)
                 p.AddText(curve.title)
                 p.SetTextFont(42)
