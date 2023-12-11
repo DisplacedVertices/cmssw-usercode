@@ -75,7 +75,7 @@ def cmd_hadd_data():
 
         have = []
         year_eras = [
-            ('2017', 'BCDFE'), 
+            ('2017', 'BCDFE'),  
             ('2018', 'ABCD'),
             ]
 
@@ -126,7 +126,9 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
     if _leptonpresel or trigeff: #FIXME
-        if (bkg_tag == 'dyjets'):
+        if bkg_tag == 'wjetstolnu':
+            x = ['wjetstolnu_amcatnlo']
+        elif bkg_tag == 'dyjets':
             x = ['dyjetstollM10', 'dyjetstollM50'] 
         elif bkg_tag == 'qcd':
             x = []
@@ -137,7 +139,7 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
             x = [] 
             if not trigeff:
                 x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]] 
-                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]] 
+                x += ['qcdpt%03imupt5' % x for x in [120,300,470,600,800]] #170 
                 x += ['qcdpt1000mupt5']
         else:
             x = ['ttbar', 'ww', 'wz', 'zz'] 
@@ -202,8 +204,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
-        
-        for bkg_tag in ['others', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+        for bkg_tag in ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
@@ -225,7 +226,10 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                     ok = False
             if ok:
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
-
+         
+        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
+        print cmd
+        os.system(cmd)
     #only work for 2017 data now
     #if ok:
     #    cmd = 'hadd.py background%s_2017p8.root background%s_2017.root background%s_2018.root' % (_presel_s, _presel_s, _presel_s)

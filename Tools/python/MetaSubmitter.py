@@ -335,7 +335,7 @@ def pick_samples(dataset, both_years=False,
         for a2 in args:
             if a2 != a:
                 args[a2] = False
-
+    print(year)
     years = [20161, 20162, 2017, 2018] if both_years else [year]
 
     samples = []

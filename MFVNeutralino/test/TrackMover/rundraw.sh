@@ -1,12 +1,10 @@
 set -e
+sigpth="/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverMCTruthVetoPUPVetoTrkJetByMiniJetHistsUlv30lepmumv4"
+pth="/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverJetByJetHistsUlv30lepmumv4_20_tau001000um_2Djetdrjet1sumpCorrection"
 for year in 2017
 do
-  for tau in 000300 001000 030000 #000000100 000000300 000001000 000003000 000010000 000030000 000100000
+  for tau in 001000 #001000 030000 #000000100 000000300 000001000 000003000 000010000 000030000 000100000
   do
-    python draw.py TM_drawtau${tau}_Mu${year}_bkg${year} /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsUlv30lepmumv3_20_tau${tau}um/SingleMuon${year}.root /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsUlv30lepmumv3_20_tau${tau}um/background_leptonpresel_${year}.root
-    #sleep 5
-    python draw.py TM_drawtau${tau}_Ele${year}_bkg${year} /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsUlv30lepelemv3_20_tau${tau}um/SingleElectron${year}.root /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsUlv30lepelemv3_20_tau${tau}um/background_leptonpresel_${year}.root
-    #sleep 5
-
+    python draw.py TM_config20_M55_tau000${tau}um ${pth}/SingleMuon${year}.root ${pth}/background_leptonpresel_${year}.root ${sigpth}/WplusHToSSTodddd_tau1mm_M55_2017.root  
   done
 done

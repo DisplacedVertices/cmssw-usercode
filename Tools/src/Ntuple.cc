@@ -208,6 +208,7 @@ namespace jmt {
     p_cov_44_ = 0;
     p_chi2dof_ = 0;
     p_hp_ = 0;
+    p_missinhit_  = 0;
     p_minhit_ = 0;
     p_maxhit_ = 0;
     p_maxpxhit_ = 0;
@@ -238,6 +239,7 @@ namespace jmt {
     cov_44_.clear();
     chi2dof_.clear();
     hp_.clear();
+    missinhit_.clear();
     minhit_.clear();
     maxhit_.clear();
     maxpxhit_.clear();
@@ -268,6 +270,7 @@ namespace jmt {
     t->Branch(TString::Format("%s_cov_44", pfx()), &cov_44_);
     t->Branch(TString::Format("%s_chi2dof", pfx()), &chi2dof_);
     t->Branch(TString::Format("%s_hp", pfx()), &hp_);
+    t->Branch(TString::Format("%s_missinhit", pfx()), &missinhit_);
     t->Branch(TString::Format("%s_minhit", pfx()), &minhit_);
     t->Branch(TString::Format("%s_maxhit", pfx()), &maxhit_);
     t->Branch(TString::Format("%s_maxpxhit", pfx()), &maxpxhit_);
@@ -314,6 +317,7 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_cov_44", pfx()), &p_cov_44_);
     t->SetBranchAddress(TString::Format("%s_chi2dof", pfx()), &p_chi2dof_);
     t->SetBranchAddress(TString::Format("%s_hp", pfx()), &p_hp_);
+    t->SetBranchAddress(TString::Format("%s_missinhit", pfx()), &p_missinhit_);
     t->SetBranchAddress(TString::Format("%s_minhit", pfx()), &p_minhit_);
     t->SetBranchAddress(TString::Format("%s_maxhit", pfx()), &p_maxhit_);
     t->SetBranchAddress(TString::Format("%s_maxpxhit", pfx()), &p_maxpxhit_);
@@ -344,6 +348,7 @@ namespace jmt {
     cov_44_ = *p_cov_44_;
     chi2dof_ = *p_chi2dof_;
     hp_ = *p_hp_;
+    missinhit_ = *p_missinhit_;
     minhit_ = *p_minhit_;
     maxhit_ = *p_maxhit_;
     maxpxhit_ = *p_maxpxhit_;

@@ -6,14 +6,16 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-version = 'V27m'
-ps = plot_saver(plot_dir('sigeff_wrt_presel_beampipe_origin_%s_correct_release_2018' % version), size=(600,600), pdf=True, log=False)
+version = 'ULV30LepMum_SingleLep'
+ps = plot_saver(plot_dir('sigeff_wrt_presel_beampipe_origin_%s_correct_release_2017' % version), size=(600,600), pdf=True, log=False)
 
-multijet = Samples.mfv_signal_samples_2018
-dijet = Samples.mfv_stopdbardbar_samples_2018
+WplusH = Samples.WplusHToSSTodddd_samples_2017
+WminusH = Samples.WminusHToSSTodddd_samples_2017
+ZH = Samples.ZHToSSTodddd_samples_2017
 
-for sample in multijet + dijet:
-    fn = os.path.join('/uscms/home/joeyr/crabdirs/Histos_within_fiducial_fixed_beampipe_wrt_origin_correct_release%s' % version, sample.name + '.root')
+for sample in WplusH + WminusH + ZH:
+    fn = os.path.join('/uscms/home/pkotamni/nobackup/crabdirs/Histos%s' % version, sample.name + '.root')
+    print(fn)
     if not os.path.exists(fn):
         print 'no', sample.name
         continue
@@ -30,8 +32,9 @@ for sample in multijet + dijet:
     sample.y, sample.yl, sample.yh = clopper_pearson(num, den) # ignore integral != entries, just get central value right
     print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
-per = PerSignal('efficiency', y_range=(0.,1.05))
-per.add(multijet, title='#tilde{N} #rightarrow tbs')
-per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
+per = PerSignal('efficiency', y_range=(0.,1.05)) 
+per.add(WplusH, title='Wplus(#rightarrow #mu #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}', color=ROOT.kAzure+8)
+per.add(WminusH, title='Wminus(#rightarrow #mu #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}', color=ROOT.kRed-9)
+per.add(ZH, title='Z(#rightarrow #mu bar{#mu}) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}', color=ROOT.kGreen-3)
 per.draw(canvas=ps.c)
 ps.save('sigeff')

@@ -275,7 +275,7 @@ namespace jmt {
     void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
              float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
              float chi2dof,
-             int npxh, int nsth, int npxl, int nstl,
+             int npxh, int nsth, int npxl, int nstl, bool missinhit,
              int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z,
              int which_jet, int which_pv, bool ismu, bool isel, bool isgoodmu, bool isgoodel,
 	     int which_sv,
@@ -302,6 +302,7 @@ namespace jmt {
       if (npxl > 15) npxl = 15;
       if (nstl > 31) nstl = 31;
       hp_.push_back((nstl << 13) | (npxl << 9) | (nsth << 4) | npxh);
+      missinhit_.push_back(missinhit);
       assert(minhit_r >= 0 && minhit_r <= 15);
       assert(minhit_z >= 0 && minhit_z <= 15);
       minhit_.push_back((uchar(minhit_z) << 4) | uchar(minhit_r));
@@ -339,6 +340,7 @@ namespace jmt {
     virtual float cov_44 (int i) const { return p_get(i, cov_44_, p_cov_44_ ); }
     float    chi2dof  (int i) const { return p_get(i, chi2dof_,   p_chi2dof_   ); }
     unsigned hp       (int i) const { return p_get(i, hp_,        p_hp_        ); }
+    bool     missinhit(int i) const { return p_get(i, missinhit_, p_missinhit_      ); }
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
     uchar    maxhit   (int i) const { return p_get(i, maxhit_,    p_maxhit_    ); }
     uchar    maxpxhit (int i) const { return p_get(i, maxpxhit_,  p_maxpxhit_  ); }
@@ -411,7 +413,8 @@ namespace jmt {
     int maxpx_z(int i) const { return maxpxhit(i) >> 4; }
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
-    bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
+    bool pass_sel(int i) const { return pt(i) > 1 && (min_r(i) <= 1.0 || (min_r(i) == 2.0 && missinhit(i) == 0)) && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
+    //bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1.0 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
     template <typename BS> bool pass_seed(int i, const BS& bs, float ns=4) const { return pass_sel(i) && nsigmadxybs(i,bs) > ns; }
     int nsel() const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_sel(i)) ++c; return c; }
     template <typename BS> int nseed(const BS& bs) const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_seed(i, bs)) ++c; return c; }
@@ -448,6 +451,7 @@ namespace jmt {
     vfloat cov_44_;      vfloat* p_cov_44_;
     vfloat chi2dof_;     vfloat* p_chi2dof_;
     vunsigned hp_;       vunsigned* p_hp_;
+    vbool  missinhit_;   vbool* p_missinhit_;
     vuchar minhit_;      vuchar* p_minhit_;
     vuchar maxhit_;      vuchar* p_maxhit_;
     vuchar maxpxhit_;    vuchar* p_maxpxhit_;
@@ -495,7 +499,7 @@ namespace jmt {
     float bdisc     (int i) const { return p_get(i, bdisc_,     p_bdisc_);     }
     uchar genflavor (int i) const { return p_get(i, genflavor_, p_genflavor_); }
     unsigned misc   (int i) const { return p_get(i, misc_,      p_misc_);      }
-
+    
     void set_misc(int i, unsigned x) { assert(0 == p_misc_); misc_[i] = x; }
 
     vfloat::const_iterator pt_begin() const { return p_pt_ ? p_pt_->begin() : pt_.begin(); }

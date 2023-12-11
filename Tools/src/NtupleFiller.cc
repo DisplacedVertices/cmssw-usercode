@@ -135,7 +135,7 @@ namespace jmt {
      bool isTightMuon = mu.passed(reco::Muon::CutBasedIdTight);
 
      const float iso = (mu.pfIsolationR04().sumChargedHadronPt + std::max(0., mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt -0.5*mu.pfIsolationR04().sumPUPt))/mu.pt();
-     
+    
      if(!mtk.isNull()) {
 
        const reco::HitPattern& hp = mtk->hitPattern();
@@ -269,6 +269,7 @@ namespace jmt {
            hp.numberOfValidStripHits(),
            hp.pixelLayersWithMeasurement(),
            hp.stripLayersWithMeasurement(),
+           hp.numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS) > 0 ? 1 : 0,
            ex.min_r < 2e9 ? ex.min_r : 0,
            ex.min_z < 2e9 ? ex.min_z : 0,
            ex.max_r > -2e9 ? ex.max_r : 0,
