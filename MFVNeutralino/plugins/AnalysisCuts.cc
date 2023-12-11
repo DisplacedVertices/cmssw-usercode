@@ -7,8 +7,12 @@
 #include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -22,7 +26,7 @@ class MFVAnalysisCuts : public edm::EDFilter {
 
     private:
         virtual bool filter(edm::Event&, const edm::EventSetup&);
-        bool satisfiesTrigger(edm::Handle<MFVEvent>, size_t);
+        bool satisfiesTrigger(edm::Handle<MFVEvent>, size_t, const edm::EventSetup&);
 
         bool jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
             // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
@@ -194,7 +198,7 @@ namespace {
         }
 }
 
-bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
+bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<MFVEvent> mevent;
 
     if (use_mevent) {
@@ -221,7 +225,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
             bool success = false;
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
-                if(satisfiesTrigger(mevent, trig)){
+                if(satisfiesTrigger(mevent, trig, setup)){
                     success = true;
                     break;
                 }
@@ -233,12 +237,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         if (apply_presel == 4) {
 
             // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-            if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+            if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
 
             bool success = false;
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-                if(satisfiesTrigger(mevent, trig)){
+                if(satisfiesTrigger(mevent, trig, setup)){
                     success = true;
                     break;
                 }
@@ -259,8 +263,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
             }
             if (require_gen_sumdbv and gen_sumdbv < 0.7) return false;
 
-            if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33)) return false;
-            if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0)) return false;
+            if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, setup)) return false;
+            if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, setup)) return false;
 
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
@@ -275,7 +279,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
                 if (dijet_agnostic and trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
                 if (dijet_agnostic and trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
 
-                if(satisfiesTrigger(mevent, trig)){
+                if(satisfiesTrigger(mevent, trig, setup)){
                     success = true;
                     break;
                 }
@@ -468,7 +472,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     return true;
 }
 
-bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig) {
+bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig, const edm::EventSetup& setup) {
     if(require_trigbit and !mevent->pass_hlt(trig)) return false;
 
     edm::ESHandle<JetCorrectorParametersCollection> jet_corr;
@@ -521,7 +525,6 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         else if (study_jes) {
             jec_unc.setJetEta(mevent->calo_jet_eta[ic]);
             jec_unc.setJetPt(mevent->calo_jet_pt[ic]);
-            scale  = 1 + jec_unc.getUncertainty(true);
             if (    jes_jer_var_up) { cj_pt *= (1 + jec_unc.getUncertainty(true)); }
             if (not jes_jer_var_up) { cj_pt *= (1 - jec_unc.getUncertainty(false)); }
         }
@@ -546,9 +549,8 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         }
 
         else if (study_jes) {
-            jec_unc.setJetEta(mevent->jet_eta[i]);
-            jec_unc.setJetPt(mevent->jet_pt[i]);
-            scale  = 1 + jec_unc.getUncertainty(true);
+            jec_unc.setJetEta(mevent->jet_eta[j0]);
+            jec_unc.setJetPt(mevent->jet_pt[j0]);
             if (    jes_jer_var_up) { pf_pt *= (1 + jec_unc.getUncertainty(true)); }
             if (not jes_jer_var_up) { pf_pt *= (1 - jec_unc.getUncertainty(false)); }
         }
