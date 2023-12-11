@@ -41,6 +41,7 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
         eyh = [0]*l
     eyh = array('f', eyh)
     #print l, x, y, exl, exh, eyl, eyh
+    if l == 0 : return ROOT.TGraphAsymmErrors()
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
@@ -147,6 +148,7 @@ class limits:
             return [getattr(p,key) for p in self.points]
 
 def make_1d_plot(d, name, xkey='mass'):
+    #print d, name
     if xkey == 'mass':
         which_mass = None
         xtitle = 'mass (GeV)'
@@ -240,15 +242,15 @@ def save_1d_plots():
         #('splitSUSY_tau1000mm',   lambda s: 'splitSUSY'          in sample.name and sample.tau  == 1000.   and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau10000mm',  lambda s: 'splitSUSY'          in sample.name and sample.tau  == 10000.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         #('splitSUSY_tau100000mm', lambda s: 'splitSUSY'          in sample.name and sample.tau  == 100000. and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('HtoLLPto4j_M1000_450',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
-        ('HtoLLPto4j_M1000_100',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('HtoLLPto4j_M1000_450',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)), 
+        ('HtoLLPto4j_M1000_100',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)), 
         ('HtoLLPto4j_M400_150',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
         ('HtoLLPto4j_M600_250',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
         ('HtoLLPto4j_M600_60',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 60, lambda s: s.sample.tau,  ('tau', 60)),
         ('HtoLLPto4j_M800_350',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
         ('HtoLLPto4j_M800_80',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 80, lambda s: s.sample.tau,  ('tau', 80)),
         ('HtoLLPto4b_M1000_450',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
-        #('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
+        ('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
         ('HtoLLPto4b_M400_150',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
         ('HtoLLPto4b_M600_250',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
         ('HtoLLPto4b_M800_350',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),

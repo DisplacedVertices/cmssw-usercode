@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_DarkSectorReview_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_DarkSectorReview_redux_%s' % which, make=True)
 
 ts = tdr_style()
 

@@ -103,4 +103,9 @@ if __name__ == '__main__':
         if not remake and os.path.isfile(out_fn):
             continue
         print path
-        doit(path, out_fn)
+        try :
+            doit(path, out_fn)
+        except AttributeError :
+            print "failed for", path, out_fn
+
+
