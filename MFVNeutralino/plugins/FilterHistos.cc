@@ -294,7 +294,7 @@ struct CaloJet_Central_Helper {
     float pt = 0.0;
 };
 
-struct MatchedJet_Helper {
+struct Jet_Eta_Helper {
     float pt  =  0.0;
     float eta = 99.0;
 };
@@ -336,7 +336,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double min_threshjet_deta = 99.9;
     std::vector<Jet_BHelper> bsort_helpers;
     std::vector<Jet_Track_Helper> jet_track_helper;
-    std::vector<MatchedJet_Helper> matched_jet_helper;
+    std::vector<Jet_Eta_Helper> jet_eta_helper;
 
     std::vector<int> jet_nprompt_counts(70, 0);
     std::vector<int> jet_ndisp_counts(70, 0);
@@ -436,27 +436,23 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
     }
 
-    // Do matching between online/offline pfjets
-    for (int i=0, ie = mevent->hlt_pf_jet_pt.size(); i < ie; ++i) {
-        MatchedJet_Helper tmp_helper;
-        double best_dR = 0.4;
-        for (int j=0; j < nofflinepfjets; ++j) {
-            double temp_dR = reco::deltaR(mevent->jet_eta[j], mevent->jet_phi[j], mevent->hlt_pf_jet_eta[i], mevent->hlt_pf_jet_phi[i]);
-            if (temp_dR < best_dR) {
-                best_dR = temp_dR;
-                tmp_helper.pt  = mevent->jet_pt[j];
-                tmp_helper.eta = mevent->jet_eta[j];
-            }
-        }
-        matched_jet_helper.push_back(tmp_helper);
+    // Prepare some tiny helpers to select jets in relevant eta ranges
+    for (int j=0; j < nofflinepfjets; ++j) {
+        Jet_Eta_Helper tmp_helper;
+        tmp_helper.pt  = mevent->jet_pt[j];
+        tmp_helper.eta = mevent->jet_eta[j];
+        jet_eta_helper.push_back(tmp_helper);
     }
 
-    std::vector<MatchedJet_Helper> matched_jets_eta2p5;
-    std::vector<MatchedJet_Helper> matched_jets_eta2p3;
-    std::copy_if(matched_jet_helper.begin(), matched_jet_helper.end(), std::back_inserter(matched_jets_eta2p5), [](MatchedJet_Helper const &a) { return fabs(a.eta) < 2.5; });
-    std::copy_if(matched_jet_helper.begin(), matched_jet_helper.end(), std::back_inserter(matched_jets_eta2p3), [](MatchedJet_Helper const &a) { return fabs(a.eta) < 2.3; });
-    int nmatched_2p5 = matched_jets_eta2p5.size();
-    int nmatched_2p3 = matched_jets_eta2p3.size();
+    std::vector<Jet_Eta_Helper> jets_eta2p5;
+    std::vector<Jet_Eta_Helper> jets_eta2p3;
+    std::vector<Jet_Eta_Helper> jets_eta2p0;
+    std::copy_if(jet_eta_helper.begin(), jet_eta_helper.end(), std::back_inserter(jets_eta2p5), [](Jet_Eta_Helper const &a) { return fabs(a.eta) < 2.5; });
+    std::copy_if(jet_eta_helper.begin(), jet_eta_helper.end(), std::back_inserter(jets_eta2p3), [](Jet_Eta_Helper const &a) { return fabs(a.eta) < 2.3; });
+    std::copy_if(jet_eta_helper.begin(), jet_eta_helper.end(), std::back_inserter(jets_eta2p0), [](Jet_Eta_Helper const &a) { return fabs(a.eta) < 2.0; });
+    int njets_eta2p5 = jets_eta2p5.size();
+    int njets_eta2p3 = jets_eta2p3.size();
+    int njets_eta2p0 = jets_eta2p0.size();
 
     // The calo_jet_ht variable in Event.h considers ALL calojets in event; we only want those with |eta| < 2.5
     float alt_calo_ht_40 = 0.0;
@@ -584,6 +580,11 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
 
+    //FIXME delete this garbage
+    if (scnd_leading_cent_calo_pt and false) {
+        std::cout << "hello I'm garbage" << std::endl;
+    }
+
     // Fill the starting bin of h_filt_nsurvive
     h_filt_nsurvive->Fill(0.1, w);
 
@@ -624,10 +625,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             //if (di_filt_res[1]) {
             if (true) {
                 h_di_filter_01[NUM]->Fill(bsort_helpers[1].bscore, w);
-                h_di_filter_02[DEN]->Fill(nmatched_2p3 > 1 ? matched_jets_eta2p3[1].pt : -1.0, w);
+                h_di_filter_02[DEN]->Fill(njets_eta2p3 > 1 ? jets_eta2p3[1].pt : -1.0, w);
     
                 if (di_filt_res[2]) {
-                    h_di_filter_02[NUM]->Fill(nmatched_2p3 > 1 ? matched_jets_eta2p3[1].pt : -1.0, w);
+                    h_di_filter_02[NUM]->Fill(njets_eta2p3 > 1 ? jets_eta2p3[1].pt : -1.0, w);
                     h_di_filter_03[DEN]->Fill(min_threshjet_deta, w);
     
                     if (di_filt_res[3]) {
@@ -652,26 +653,26 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                 //if (tri_filt_res[2]) {
                 if (true) {
                     h_tri_filter_02[NUM]->Fill(bsort_helpers[1].bscore, w);
-                    h_tri_filter_03[DEN]->Fill(nmatched_2p5 > 3 ? matched_jets_eta2p5[3].pt : -1.0, w);
+                    h_tri_filter_03[DEN]->Fill(njets_eta2p5 > 3 ? jets_eta2p5[3].pt : -1.0, w);
     
                     if (tri_filt_res[3]) {
-                        h_tri_filter_03[NUM]->Fill(nmatched_2p5 > 3 ? matched_jets_eta2p5[3].pt : -1.0, w);
-                        h_tri_filter_04[DEN]->Fill(nmatched_2p5 > 0 ? matched_jets_eta2p5[0].pt : -1.0, w);
+                        h_tri_filter_03[NUM]->Fill(njets_eta2p5 > 3 ? jets_eta2p5[3].pt : -1.0, w);
+                        h_tri_filter_04[DEN]->Fill(njets_eta2p5 > 0 ? jets_eta2p5[0].pt : -1.0, w);
     
                         if (tri_filt_res[4]) {
-                            h_tri_filter_04[NUM]->Fill(nmatched_2p5 > 0 ? matched_jets_eta2p5[0].pt : -1.0, w);
-                            h_tri_filter_05[DEN]->Fill(nmatched_2p5 > 1 ? matched_jets_eta2p5[1].pt : -1.0, w);
+                            h_tri_filter_04[NUM]->Fill(njets_eta2p5 > 0 ? jets_eta2p5[0].pt : -1.0, w);
+                            h_tri_filter_05[DEN]->Fill(njets_eta2p5 > 1 ? jets_eta2p5[1].pt : -1.0, w);
     
                             if (tri_filt_res[5]) {
-                                h_tri_filter_05[NUM]->Fill(nmatched_2p5 > 1 ? matched_jets_eta2p5[1].pt : -1.0, w);
-                                h_tri_filter_06[DEN]->Fill(nmatched_2p5 > 2 ? matched_jets_eta2p5[2].pt : -1.0, w);
+                                h_tri_filter_05[NUM]->Fill(njets_eta2p5 > 1 ? jets_eta2p5[1].pt : -1.0, w);
+                                h_tri_filter_06[DEN]->Fill(njets_eta2p5 > 2 ? jets_eta2p5[2].pt : -1.0, w);
     
                                 if (tri_filt_res[6]) {
-                                    h_tri_filter_06[NUM]->Fill(nmatched_2p5 > 2 ? matched_jets_eta2p5[2].pt : -1.0, w);
-                                    h_tri_filter_07[DEN]->Fill(nmatched_2p5 > 3 ? matched_jets_eta2p5[3].pt : -1.0, w);
+                                    h_tri_filter_06[NUM]->Fill(njets_eta2p5 > 2 ? jets_eta2p5[2].pt : -1.0, w);
+                                    h_tri_filter_07[DEN]->Fill(njets_eta2p5 > 3 ? jets_eta2p5[3].pt : -1.0, w);
     
                                     if (tri_filt_res[7]) {
-                                        h_tri_filter_07[NUM]->Fill(nmatched_2p5 > 3 ? matched_jets_eta2p5[3].pt : -1.0, w);
+                                        h_tri_filter_07[NUM]->Fill(njets_eta2p5 > 3 ? jets_eta2p5[3].pt : -1.0, w);
                                         h_tri_filter_08[DEN]->Fill(mevent->jet_ht(30), w);
     
                                         if (tri_filt_res[8]) {
@@ -694,16 +695,16 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     // Now, the displaced dijet + displaced track filters:
-    h_dd_dtk_filter_00[DEN]->Fill(alt_calo_ht_40, w);
-    h_dd_dtk_filter_alt_d_00[DEN]->Fill(alt_calo_ht_30, w);
+    h_dd_dtk_filter_00[DEN]->Fill(mevent->jet_ht(40), w);
+    h_dd_dtk_filter_alt_d_00[DEN]->Fill(mevent->jet_ht(30), w);
     if (dd_dtk_filt_res[0] ) {
     //if (dd_dtk_filt_res[0] and mevent->pass_l1(mfv::b_L1_HTT380er)) {
-        h_dd_dtk_filter_00[NUM]->Fill(alt_calo_ht_40, w);
-        h_dd_dtk_filter_alt_d_00[NUM]->Fill(alt_calo_ht_30, w);
-        h_dd_dtk_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+        h_dd_dtk_filter_00[NUM]->Fill(mevent->jet_ht(40), w);
+        h_dd_dtk_filter_alt_d_00[NUM]->Fill(mevent->jet_ht(30), w);
+        h_dd_dtk_filter_01[DEN]->Fill(njets_eta2p0 > 1 ? jets_eta2p5[1].pt : -1.0, w);
 
         if (dd_dtk_filt_res[1]) {
-            h_dd_dtk_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+            h_dd_dtk_filter_01[NUM]->Fill(njets_eta2p0 > 1 ? jets_eta2p5[1].pt : -1.0, w);
             h_dd_dtk_filter_02[DEN]->Fill(second_least_prompt_tks, w);
 
             for (auto helper : jet_track_helper) {
@@ -746,16 +747,16 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     // Now, the inclusive displaced dijet filters:
-    h_dd_inc_filter_00[DEN]->Fill(alt_calo_ht_40, w);
-    h_dd_inc_filter_alt_d_00[DEN]->Fill(alt_calo_ht_30, w);
+    h_dd_inc_filter_00[DEN]->Fill(mevent->jet_ht(40), w);
+    h_dd_inc_filter_alt_d_00[DEN]->Fill(mevent->jet_ht(30), w);
     if (dd_inc_filt_res[0]) {
     //if (dd_inc_filt_res[0] and mevent->pass_l1(mfv::b_L1_HTT380er)) {
-        h_dd_inc_filter_00[NUM]->Fill(alt_calo_ht_40, w);
-        h_dd_inc_filter_alt_d_00[NUM]->Fill(alt_calo_ht_30, w);
-        h_dd_inc_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+        h_dd_inc_filter_00[NUM]->Fill(mevent->jet_ht(40), w);
+        h_dd_inc_filter_alt_d_00[NUM]->Fill(mevent->jet_ht(40), w);
+        h_dd_inc_filter_01[DEN]->Fill(njets_eta2p0 > 1 ? jets_eta2p0[1].pt : -1.0, w);
 
         if (dd_inc_filt_res[1]) {
-            h_dd_inc_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+            h_dd_inc_filter_01[NUM]->Fill(njets_eta2p0 > 1 ? jets_eta2p0[1].pt : -1.0, w);
             h_dd_inc_filter_02[DEN]->Fill(second_least_prompt_tks, w);
 
             if (dd_inc_filt_res[2]) {
