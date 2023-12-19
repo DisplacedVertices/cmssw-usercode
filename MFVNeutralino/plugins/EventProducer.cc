@@ -197,6 +197,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->gen_pv[0] = (*gen_vertex)[0];
     mevent->gen_pv[1] = (*gen_vertex)[1];
     mevent->gen_pv[2] = (*gen_vertex)[2];
+    //std::cout << "mevent->gen_pv[0], [1], [2]: " << mevent->gen_pv[0] << ", " << mevent->gen_pv[1] << ", " << mevent->gen_pv[2] << std::endl;
 
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
@@ -233,6 +234,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_decay[i*3+0] = p.x;
         mevent->gen_lsp_decay[i*3+1] = p.y;
         mevent->gen_lsp_decay[i*3+2] = p.z;
+
+        //std::cout << "mevent->gen_lsp_decay[" << i << "*3+0], [" << "i" << "*3+1], [" << i << "*3+2]: " << mevent->gen_lsp_decay[i*3+0] << ", " << mevent->gen_lsp_decay[i*3+1] << ", " << mevent->gen_lsp_decay[i*3+2] << std::endl;
 
         mevent->gen_decay_type[i] = mci->decay_type()[i];
 

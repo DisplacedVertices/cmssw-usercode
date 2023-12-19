@@ -77,6 +77,9 @@ namespace mfv {
     int nbtags_medium() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium)); }
     int nbtags_loose() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose)); }
 
+    float gen_pv_x0;
+    float gen_pv_y0;
+    float gen_pv_z0;
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];

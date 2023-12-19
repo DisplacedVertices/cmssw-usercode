@@ -114,6 +114,7 @@ namespace mfv {
   void MCInteraction::set(const MCInteractionHolderXX4j& h)     { set(h, mci_XX4j);     }
   void MCInteraction::set(const MCInteractionHolderMFVddbar& h) { set(h, mci_MFVddbar); }
   void MCInteraction::set(const MCInteractionHolderMFVlq& h)    { set(h, mci_MFVlq);    }
+  void MCInteraction::set(const MCInteractionHolderSinglino& h) { set(h, mci_singlino); }
 
   ////
 

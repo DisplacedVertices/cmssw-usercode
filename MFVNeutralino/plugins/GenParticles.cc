@@ -36,6 +36,7 @@ private:
   bool try_XX4j        (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVdijet    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_stopdbardbar(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
+  bool try_singlino    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVlq       (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 
   TH1F* h_valid;
@@ -484,21 +485,26 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
 
 bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
   if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
-  assert(quark == 1 || quark == 4 || quark == 5);
+  assert(quark == 0 || quark == 1 || quark == 4 || quark == 5);
 
   mfv::MCInteractionHolderPair h;
 
   //GenParticlePrinter gpp(*gen_particles);
   //gpp.PrintHeader();
 
-  // Find the LSPs (e.g. gluinos or neutralinos). Since this is
+  // Find the LLPs (e.g. gluinos, neutralinos, LL scalar). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
-  // decay to the three quarks.
+  // decay to the correct two quarks.
   int found = 0;
   for (int i = int(gen_particles->size()) - 1; i >= 0 && found < 2; --i) {
     const reco::GenParticle& gen = gen_particles->at(i);
     reco::GenParticleRef ref(gen_particles, i);
-    if (gen.pdgId() != lsp_id || gen.numberOfDaughters() != 2)
+
+    if (debug && abs(gen.pdgId()) == lsp_id && gen.numberOfDaughters() == 2) {
+      std::cout << "dau pdgIDs are: " << gen.daughter(0)->pdgId() << ", " << gen.daughter(1)->pdgId() << std::endl;
+    }
+
+    if (abs(gen.pdgId()) != lsp_id || gen.numberOfDaughters() != 2)
       continue;
     ++found;
 
@@ -517,10 +523,24 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     //gpp.Print(&*h.p[which], lspname);
 
     // Get the immediate daughters. 
-    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
-        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
-      printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
-      return false;
+    if (quark != 0) {
+      if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
+          (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
+        //printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull()); // or the wrong quark flavor! should handle msg better here
+        return false;
+      }
+    }
+    else {
+      bool hasMatch = false;
+      // use quark == 0 case to handle arbitrary LLP -> qq, e.g. for events where one LLP decays to uu and another decays to dd
+      for (int quark_tmp = 1; quark_tmp <= 6; ++quark_tmp) {
+        if (!(h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark_tmp, false), gen_particles)).isNull() &&
+            !(h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark_tmp, false), gen_particles)).isNull()) {
+          hasMatch = true;
+          break;
+        }
+      }
+      if (!hasMatch) return false;
     }
 
     h.decay_id[which] = 1;
@@ -535,10 +555,13 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mfv::MCInteractions_t type = mfv::mci_MFVddbar;
-    if      (quark == 4) type = mfv::mci_MFVccbar;
+    mfv::MCInteractions_t type = mfv::mci_MFVqqbar;
+    if      (quark == 1) type = mfv::mci_MFVddbar;
+    else if (quark == 4) type = mfv::mci_MFVccbar;
     else if (quark == 5) type = mfv::mci_MFVbbbar;
     mc.set(h, type);
+
+    if (debug) std::cout << "success! quark is " << quark << std::endl;
     return true;
   }
   else
@@ -626,6 +649,70 @@ bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle
     return false;
 }
 
+bool MFVGenParticles::try_singlino(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
+  if (debug) printf("MFVGenParticles::try_singlino\n");
+
+  mfv::MCInteractionHolderSinglino h;
+
+  //GenParticlePrinter gpp(*gen_particles);
+  //gpp.PrintHeader();
+
+  // Find the singlino LLPs decaying to singlet and gravitino, based on:
+  // https://gitlab.cern.ch/cms-exo-mci/EXO-MCsampleRequests/-/blob/4f8119283a55471cf59074ae82df547fe7866043/genFragments/Generator/Pythia/StealthSHHLL/StealthSHH_2t6j_mStop-300to1500_mSo-lowandhigh_ctau-0p01to1000_TuneCP5_13TeV-madgraphMLM-pythia8.py
+  int found = 0;
+  for (int i = int(gen_particles->size()) - 1; i >= 0 && found < 2; --i) {
+    const reco::GenParticle& gen = gen_particles->at(i);
+    reco::GenParticleRef ref(gen_particles, i);
+
+    if (debug) {
+      if (abs(gen.pdgId()) == lsp_id && gen.numberOfDaughters() == 2) 
+        std::cout << "dau pdgIDs are: " << gen.daughter(0)->pdgId() << ", " << gen.daughter(1)->pdgId() << std::endl;
+      else
+        std::cout << "gen.pdgId() is " << gen.pdgId() << ", nDau is " << gen.numberOfDaughters() << std::endl;
+    }
+
+    if (abs(gen.pdgId()) != lsp_id || gen.numberOfDaughters() != 2)
+      continue;
+    ++found;
+
+    size_t which = 0;
+    if (h.p[0].isNull())
+      h.p[0] = ref;
+    else {
+      if (reco::deltaR(*h.p[0], gen) < 0.001)
+	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+      which = 1;
+      h.p[1] = ref;
+    }
+
+    // Get the immediate daughters, look for singlet and gravitino. 
+    // The last true param of daughter_with_id means take absolute value, so that e.g. anti-singlet is also covered
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen, 5000002, true), gen_particles)).isNull() ||
+        (h.s[which][1] = gen_ref(daughter_with_id(&gen, 1000039, true), gen_particles)).isNull()) {
+      return false;
+    }
+
+    h.decay_id[which] = 1;
+    h.s[which][0] = gen_ref(final_candidate(h.s[which][0], 3), gen_particles);
+    h.s[which][1] = gen_ref(final_candidate(h.s[which][1], 3), gen_particles);
+
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
+  }
+
+  if (h.valid()) {
+    mfv::MCInteractions_t type = mfv::mci_singlino;
+    mc.set(h, type);
+
+    return true;
+  }
+  else
+    return false;
+}
+
 bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
   if (debug) printf("MFVGenParticles::try_MFVlq\n");
 
@@ -703,17 +790,35 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       // LSP id wanted. Otherwise, default to looking for gluino. This
       // isn't relevant for some signals.
       lsp_id = 1000021;
-      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
-        if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
-        else if (gen_particles->at(i).pdgId() == 1000006) { lsp_id = 1000006; break; }
+      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+        if (debug) std::cout << "gen_particles->at(i).pdgId() is " << gen_particles->at(i).pdgId() << std::endl;
+
+        if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; } // neutralino LLP
+        else if (gen_particles->at(i).pdgId() == 1000006) { // stop LLP
+          lsp_id = 1000006; 
+
+          // but if there is a singlino in the event, treat *that* as the LLP rather than stop! Stealth SYY and SHH samples generate a prompt stop decaying to long-lived singlino
+          for (int j = i+1; j < ie; ++j) {
+            if (abs(gen_particles->at(j).pdgId()) == 5000001) {
+              lsp_id = 5000001;
+              break;
+            }
+          }
+          break; 
+        }
+        else if (gen_particles->at(i).pdgId() == 9000006) { lsp_id = 9000006; break; } // LLP from exotic decay of SM Higgs(125)
+        else if (gen_particles->at(i).pdgId() == 6000111) { lsp_id = 6000111; break; } // LLP from decay of an additional Heavy Higgs
+        else if (gen_particles->at(i).pdgId() == 18) { lsp_id = 18; break; } // LLP from decay of a Zprime (odd that they code it in as a nu_tau', but okay)
+      }
     }
 
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
 
-    // the order of these tries is important, at least that MFVtbses come before Ttbar
+    // the order of these tries is important, at least that MFVtbses come before Ttbar; same for singlino which is from pair-produced stop -> S~ t events
     try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
     try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
     try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb
+    try_singlino(*mc, gen_particles) || // singlino -> singlet + gravitino
     try_Ttbar   (*mc, gen_particles) || 
     try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
     try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
@@ -729,6 +834,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
     try_MFVdijet(*mc, gen_particles, 4) || //ccbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar
+    try_MFVdijet(*mc, gen_particles, 0) || //arbitrary qqbar
     try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
