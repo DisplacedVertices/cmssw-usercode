@@ -159,7 +159,7 @@ def get(i): return _l[i]
             os.mkdir(links_dir)
 
         if submit_host.endswith('fnal.gov'):
-            schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3,4,5]
+            schedds = ['lpcschedd%i.fnal.gov' % i for i in 3,4,5,6]
             for schedd in schedds:
                 schedd_d = os.path.join(links_dir, schedd)
                 if not os.path.isdir(schedd_d):
