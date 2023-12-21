@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthVetoPUPJetByMiniJetHistsUlv30lepmumv4", "trackmovermctruthulv30lepmumv4", "all_signal = True")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthVetoPUPVetoTrkJetByMiniJetHistsUlv30lepmumv4", "trackmovermctruthulv30lepmumv4", "all_signal = True")
     ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.00), "min distance between LSP decays to use event") //FIXME 0.02
     ;
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_decay_x, k_decay_y, k_decay_z, k_decay_xy, k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_lspeta,k_lsppt, k_lspgammabeta, k_npv, k_pvz, k_dist2dpvbs, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_nmuons, k_muon_pT, k_muon_abseta, k_muon_iso, k_muon_absdxybs, k_muon_absdz, k_muon_nsigmadxybs, k_neles, k_ele_pT, k_ele_abseta, k_ele_iso, k_ele_absdxybs, k_ele_absdz, k_ele_nsigmadxybs, k_met_pT, k_w_pT, k_w_mT, k_z_pT, k_z_m, k_lnu_absphi, k_ljet_absdr, k_ljet0_absdr, k_ljet1_absdr, k_nujet0_absphi, k_nujet1_absphi, k_wjet_dphi, k_zjet_dphi, k_jet_asymm, k_vtx_unc, k_jet0_eta, k_jet1_eta, k_llp_category, k_jet_dr, k_jet_asymsump, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_jet_dr_minj0_q0, k_jet_dr_minj1_q1, k_ntk0_ntk1, k_boost0_boost1, k_whichsv_which_pv_0_j0, k_whichsv_which_pv_int_j0, k_whichsv_which_pv_255_j0, k_jet0_trk_pt, k_jet1_trk_pt, k_jet0_trk_p, k_jet1_trk_p, k_jet0_trk_dr, k_jet1_trk_dr, k_jet0_trk_dz, k_jet1_trk_dz, k_jet0_sump, k_jet1_sump, k_jet0_sump_jetdr, k_jet1_sump_jetdr, k_jet1_sump_jetdphi, k_jet1_ntks_jetdphi, k_jet0_sump_jet1_sump, k_qrktosump_j0, k_qrktosump_j1, k_qrktosump_sumpj0, k_qrktosump_sumpj1, k_2p0p1_1mgencos, k_2sump0sump1_1mcos, k_1mcosto1mgencos, k_2genlogm, k_2logm, k_asymjet_jetdr, k_jet0_trk_missdist, k_jet1_trk_missdist, k_jet0_trk_whichpv, k_jet1_trk_whichpv, k_jet0_trk_dsz, k_jet1_trk_dsz, k_jet0_trk_dxy, k_jet1_trk_dxy, k_jet0_trk_nsigmadxy, k_jet1_trk_nsigmadxy, k_jet0_trk_dxyerr, k_jet1_trk_dxyerr, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_dphi_sum_q_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_jetdravg, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_q0_mv, k_dphi_q1_mv, k_miscseedtracks, k_closeseedtks, k_jetdphimax, k_jetdetamax, k_qrkdphimax, k_jetdphi_mveta, k_jetmovea3d01, k_jeteta01, k_jetpt01, k_pt_angle0, k_pt_angle1, k_eta_angle0, k_eta_angle1};
+  enum { k_decay_x, k_decay_y, k_decay_z, k_decay_xy, k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_lspeta,k_lsppt, k_lspgammabeta, k_npv, k_pvz, k_dist2dpvbs, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_nmuons, k_muon_pT, k_muon_abseta, k_muon_iso, k_muon_absdxybs, k_muon_absdz, k_muon_nsigmadxybs, k_neles, k_ele_pT, k_ele_abseta, k_ele_iso, k_ele_absdxybs, k_ele_absdz, k_ele_nsigmadxybs, k_met_pT, k_w_pT, k_w_mT, k_z_pT, k_z_m, k_lnu_absphi, k_ljet_absdr, k_ljet0_absdr, k_ljet1_absdr, k_nujet0_absphi, k_nujet1_absphi, k_wjet_dphi, k_zjet_dphi, k_jet_asymm, k_vtx_unc, k_jet0_eta, k_jet1_eta, k_llp_category, k_jet_dr, k_jet_asymsump, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_jet_dr_minj0_q0, k_jet_dr_minj1_q1, k_ntk0_ntk1, k_boost0_boost1, k_jet0_trk_pt, k_jet1_trk_pt, k_jet0_trk_p, k_jet1_trk_p, k_jet0_trk_dr, k_jet1_trk_dr, k_jet0_trk_dz, k_jet1_trk_dz, k_jet0_trk_vtxdz, k_jet1_trk_vtxdz, k_jet0_trk_nsigmadz, k_jet1_trk_nsigmadz, k_jet0_trk_dzerr, k_jet1_trk_dzerr, k_jet0_trk_eta, k_jet1_trk_eta, k_jet0_sump, k_jet1_sump, k_jet0_sump_jetdr, k_jet1_sump_jetdr, k_jet1_sump_jetdphi, k_jet1_ntks_jetdphi, k_jet0_sump_jet1_sump, k_qrktosump_j0, k_qrktosump_j1, k_qrktosump_sumpj0, k_qrktosump_sumpj1, k_2p0p1_1mgencos, k_2sump0sump1_1mcos, k_1mcosto1mgencos, k_2genlogm, k_2logm, k_asymjet_jetdr, k_jet0_trk_genmissdist, k_jet1_trk_genmissdist, k_jet0_trk_whichpv, k_jet1_trk_whichpv, k_jet0_trk_dsz, k_jet1_trk_dsz, k_jet0_trk_dxy, k_jet1_trk_dxy, k_jet0_trk_nsigmadxy, k_jet1_trk_nsigmadxy, k_jet0_trk_dxyerr, k_jet1_trk_dxyerr, k_jet_invtx_trk_eta, k_jet_invtx_trk_nsigmadz, k_jet_outvtx_trk_eta, k_jet_outvtx_trk_nsigmadz, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_dphi_sum_q_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_jetdravg, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_q0_mv, k_dphi_q1_mv, k_nseedtracks, k_miscseedtracks, k_closeseedtks, k_movedseedtks, k_jetdphimax, k_jetdetamax, k_qrkdphimax, k_jetdphi_mveta, k_jetmovea3d01, k_jeteta01, k_jetpt01, k_pt_angle0, k_pt_angle1, k_eta_angle0, k_eta_angle1};
 
   for (numdens& nd : nds) {
     nd.book(k_decay_x,  "decay_x" , ";SV Decay X-pos [cm]; arb. units", 100, -4, 4);
@@ -103,9 +103,6 @@ int main(int argc, char** argv) {
     nd.book(k_jet_dr_minj1_q1, "jet_dr_minj1_q1", ";#DeltaR(minij1,quark1)", 70, 0, 7);
     nd.book(k_ntk0_ntk1, "ntk0_ntk1", ";Ntks in jet0; Ntks in jet1; arb. units", 25, 0.0, 25, 25, 0.0, 25);
     nd.book(k_boost0_boost1, "boost0_boost1", ";#gamma#beta of quark0; #gamma#beta of quark1; arb. units", 50, 0.0, 200, 50, 0.0, 200);
-    nd.book(k_whichsv_which_pv_0_j0, "whichsv_which_pv_0_j0", ";which_sv of tracks w/ which_pv == 0", 260, 0, 260);
-    nd.book(k_whichsv_which_pv_int_j0, "whichsv_which_pv_int_j0", ";which_sv of tracks w/ which_pv != 0 or 255", 260, 0, 260);
-    nd.book(k_whichsv_which_pv_255_j0, "whichsv_which_pv_255_j0", ";which_sv of tracks w/ which_pv == 255", 260, 0, 260);
     nd.book(k_jet0_trk_pt, "jet0_trk_pt", "; jet0-quality-track's pT; arb. units", 45, 0, 15);
     nd.book(k_jet1_trk_pt, "jet1_trk_pt", "; jet1-quality-track's pT; arb. units", 45, 0, 15);
     nd.book(k_jet0_trk_p, "jet0_trk_p", "; jet0-quality-track's p; arb. units", 45, 0, 15);
@@ -131,9 +128,17 @@ int main(int argc, char** argv) {
     nd.book(k_jet1_trk_dr, "jet1_trk_dr", "; jet1-quality-track's DeltaR-to-jet; arb. units", 45, 0, 0.5);
     nd.book(k_jet0_trk_dz, "jet0_trk_dz", "; jet0-quality-track's dz; arb. units", 50, -1.0, 1.0);
     nd.book(k_jet1_trk_dz, "jet1_trk_dz", "; jet1-quality-track's dz; arb. units", 50, -1.0, 1.0);
-    nd.book(k_jet0_trk_missdist, "jet0_trk_missdist", "; jet0-quality-track's missdist; arb. units", 50, 0.0, 0.05);
-    nd.book(k_jet1_trk_missdist, "jet1_trk_missdist", "; jet1-quality-track's missdist; arb. units", 50, 0.0, 0.05);
-    nd.book(k_jet0_trk_whichpv, "jet0_trk_whichpv", "; jet0-quality-track's which_pv; arb. units", 260, 0.0, 260);
+    nd.book(k_jet0_trk_vtxdz, "jet0_trk_vtxdz", "; jet0-quality-track's dz to vtx; arb. units", 50, -1.0, 1.0);
+    nd.book(k_jet1_trk_vtxdz, "jet1_trk_vtxdz", "; jet1-quality-track's dz to vtx; arb. units", 50, -1.0, 1.0);
+    nd.book(k_jet0_trk_nsigmadz, "jet0_trk_nsigmadz", "; jet0-quality-track's nsigmavtxdz; arb. units", 80, -8, 8);
+    nd.book(k_jet1_trk_nsigmadz, "jet1_trk_nsigmadz", "; jet1-quality-track's nsigmavtxdz; arb. units", 80, -8, 8);
+    nd.book(k_jet0_trk_dzerr, "jet0_trk_dzerr", "; jet0-quality-track's dz err; arb. units", 100, 0.0, 0.05);
+    nd.book(k_jet1_trk_dzerr, "jet1_trk_dzerr", "; jet1-quality-track's dz err; arb. units", 100, 0.0, 0.05);
+    nd.book(k_jet0_trk_eta, "jet0_trk_eta", "; jet0-quality-track's eta; arb. units", 70, -3.5, 3.5);
+    nd.book(k_jet1_trk_eta, "jet1_trk_eta", "; jet1-quality-track's eta; arb. units", 70, -3.5, 3.5);
+    nd.book(k_jet0_trk_genmissdist, "jet0_trk_genmissdist", "; jet0-quality-track's missdist to LLP; arb. units", 50, 0.0, 0.05);
+    nd.book(k_jet1_trk_genmissdist, "jet1_trk_genmissdist", "; jet1-quality-track's missdist to LLP; arb. units", 50, 0.0, 0.05);
+    nd.book(k_jet0_trk_whichpv, "jet1_trk_whichpv", "; jet1-quality-track's which_pv; arb. units", 260, 0.0, 260);
     nd.book(k_jet1_trk_whichpv, "jet1_trk_whichpv", "; jet1-quality-track's which_pv; arb. units", 260, 0.0, 260);
     nd.book(k_jet0_trk_dsz, "jet0_trk_dsz", "; jet0-quality-track's dsz; arb. units", 50, -1.0, 1.0);
     nd.book(k_jet1_trk_dsz, "jet1_trk_dsz", "; jet1-quality-track's dsz; arb. units", 50, -1.0, 1.0);
@@ -143,6 +148,10 @@ int main(int argc, char** argv) {
     nd.book(k_jet1_trk_nsigmadxy, "jet1_trk_nsigmadxy", "; jet1-quality-track's nsigmadxybs; arb. units", 50, -5, 5);
     nd.book(k_jet0_trk_dxyerr, "jet0_trk_dxyerr", "; jet0-quality-track's dxyerr; arb. units", 100, 0.0, 0.01);
     nd.book(k_jet1_trk_dxyerr, "jet1_trk_dxyerr", "; jet1-quality-track's dxyerr; arb. units", 100, 0.0, 0.01);
+    nd.book(k_jet_invtx_trk_eta, "jet_invtx_trk_eta", "; jets-invtx-track's eta; arb. units", 70, -3.5, 3.5);
+    nd.book(k_jet_invtx_trk_nsigmadz, "jet_invtx_trk_nsigmadz", "; jets-in-vtx-track's nsigmavtxdz; arb. units", 200, -20, 20);
+    nd.book(k_jet_outvtx_trk_eta, "jet_outvtx_trk_eta", "; jets-outvtx-track's eta; arb. units", 70, -3.5, 3.5);
+    nd.book(k_jet_outvtx_trk_nsigmadz, "jet_outvtx_trk_nsigmadz", "; jets-out-vtx-track's nsigmavtxdz; arb. units", 200, -20, 20);
     nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
     nd.book(k_dphi_sum_j_mv, "dphi_sum_j_mv", ";abs #Delta #phi between jet0+jet1 and move vec;events/bin", 63, 0, M_PI);
     nd.book(k_deta_sum_j_mv, "deta_sum_j_mv", ";abs #Delta #eta between jet0+jet1 and move vec;events/bin", 25, 0, 4);
@@ -162,8 +171,10 @@ int main(int argc, char** argv) {
     nd.book(k_deta_j1_mv, "deta_j1_mv", ";abs #Delta #eta between jet1 and move vec;events/bin", 25, 0, 4);
     nd.book(k_dphi_q0_mv, "dphi_q0_mv", ";abs #Delta #phi between qrk0 and move vec;events/bin", 63, 0, M_PI);
     nd.book(k_dphi_q1_mv, "dphi_q1_mv", ";abs #Delta #phi between qrk1 and move vec;events/bin", 63, 0, M_PI);
+    nd.book(k_nseedtracks, "nseedtracks", ";# seed tracks;events", 80, 0, 80);
     nd.book(k_miscseedtracks, "miscseedtracks", ";#Sigma seed tks not from moved jets;count", 80, 0, 80);
     nd.book(k_closeseedtks,  "closeseedtks", ";# tracks close to artificial vtx.;count", 80, 0, 80);
+    nd.book(k_movedseedtks,  "movedseedtks", ";# moved seed tracks;count", 30, 0, 30);
     nd.book(k_jetdphimax, "jetdphimax", ";max jet #Delta #phi; events", 32, -M_PI, M_PI);
     nd.book(k_jetdetamax, "jetdetamax", ";max jet #Delta #eta; events", 200, -5, 5);
     nd.book(k_qrkdphimax, "qrkdphimax", ";abs. max qrk #Delta #phi; events", 75, -3.5, 3.5);
@@ -216,7 +227,8 @@ int main(int argc, char** argv) {
     std::vector<int> tks_in_lspjets;
 
     int n_miscseedtracks = 0;
-
+    int n_movedseedtks = 0;
+    
     // Instantiate some jet, leptons & quark variables to be filled later
     int nselmuons = 0, nseleles = 0;
     TLorentzVector muon_p4;
@@ -258,6 +270,7 @@ int main(int argc, char** argv) {
     int     jet_ntks_0 = -10, jet_ntks_1 = -10;
     double  boost0 = -10, boost1 = -10;
     int n_closeseedtks = 0;
+    const int nseedtracks = tks.nseed(bs);
     double sump_0 = 0;
     double sump_1 = 0;
     double qrkp_0 = -9.9;
@@ -267,9 +280,8 @@ int main(int argc, char** argv) {
     int llp_category = -99;
     std::vector<int> jet0trk_idx;
     std::vector<int> jet1trk_idx;
-    std::vector<int> jet0trk_pv0_idx = {};
-    std::vector<int> jet0trk_pvint_idx = {};
-    std::vector<int> jet0trk_pv255_idx = {};
+    std::vector<int> jettrk_invtx_idx;
+    std::vector<int> jettrk_outvtx_idx;
     double  wjet_dphi = 99, zjet_dphi = 99;
 
     TLorentzVector minijet_p4_0;
@@ -406,12 +418,13 @@ int main(int argc, char** argv) {
           quark_assoc[i] = iq;
         }
 
+        n_closeseedtks = 0;
+        n_miscseedtracks = 0;
         // Start calculating significances of closest approach and count # of close seed tracks
         for (int it=0, ite = tks.n(); it < ite; it++) {
           if (tks.pass_seed(it, bs)) {
 
-            if (ilsp == 1)
-              n_miscseedtracks++; // Count up all seed tracks. Will subtract out the matching tracks later.
+            n_miscseedtracks++; // Count up all seed tracks. Will subtract out the matching tracks later.
 
             std::vector<double> sigs_quad;
 
@@ -427,7 +440,7 @@ int main(int argc, char** argv) {
             if ( sigs_quad[ilsp] < close_criteria)
               n_closeseedtks++;
 
-            if ( (ilsp == 1) and ((sigs_quad[0] < close_criteria) or  (sigs_quad[1] < close_criteria)) )
+            if (((sigs_quad[0] < close_criteria) or  (sigs_quad[1] < close_criteria)) )
               n_miscseedtracks--;
 
           }
@@ -467,9 +480,7 @@ int main(int argc, char** argv) {
         minijet_p4_1.SetPxPyPzE(0, 0, 0, 0);
         jet0trk_idx = {};
         jet1trk_idx = {};
-        jet0trk_pv0_idx = {};
-        jet0trk_pvint_idx = {};
-        jet0trk_pv255_idx = {};
+        n_movedseedtks = 0;
         for (int j = 0; j < tks.n(); ++j) {
           const TLorentzVector jp4 = tks.p4(j);
           if ( tks.pass_sel(j) && (tks.which_pv(j) == 0 || tks.which_pv(j) == 255) && jp4.DeltaR(quark_p4_0) < 0.4 ){ //FIXME apply which_pv            
@@ -480,27 +491,19 @@ int main(int argc, char** argv) {
             minijet_ntk_0 += 1;
             jet0trk_idx.push_back(j);
             sump_0 += tks.p(j);
-
-            if (tks.which_pv(j) == 0){
-               jet0trk_pv0_idx.push_back(j);
-            }
-            else if (tks.which_pv(j) == 255){
-               jet0trk_pv255_idx.push_back(j);
-            }
-            else{
-               jet0trk_pvint_idx.push_back(j);
-            }
+            if (tks.pass_seed(j, bs)) n_movedseedtks++;
           }
           if ( tks.pass_sel(j) && (tks.which_pv(j) == 0 || tks.which_pv(j) == 255) && jp4.DeltaR(quark_p4_1) < 0.4 ){ //FIXME apply which_pv
           //if ( jp4.DeltaR(quark_p4_1) < 0.4 ){ //FIXME apply which_pv
           //auto it1 = std::find(jet1_tracks.begin(), jet1_tracks.end(), j);
           //if ( tks.pass_sel(j) && it1 != jet1_tracks.end()){
-            //auto it1 = std::find(jet0trk_idx.begin(), jet0trk_idx.end(), j);
-            //if (it1 != jet0trk_idx.end()) continue;
+            auto it1 = std::find(jet0trk_idx.begin(), jet0trk_idx.end(), j);
+            if (it1 != jet0trk_idx.end()) continue;
             minijet_p4_1 += tks.p4(j);
             minijet_ntk_1 += 1;
             jet1trk_idx.push_back(j);
-            sump_1 += tks.p(j); 
+            sump_1 += tks.p(j);
+            if (tks.pass_seed(j, bs)) n_movedseedtks++;
           }
 
         }
@@ -521,12 +524,12 @@ int main(int argc, char** argv) {
           
         const TVector3 lspdecay0 = gen.decay(0, bs);  // JMTBAD BS BS
         const TVector3 lspdecay1 = gen.decay(1, bs);  // JMTBAD BS BS
-            int j = ilsp;   
-            int slsp = 2+j*2, swapemm = gen.pt(slsp) < gen.pt(slsp+1); // toward making the jet assoc'd to the higher (lower) pT quark be "jet0" ("jet1")
-            int iqlsp0 = slsp + (swapemm ? !0 : 0);
-            int iqlsp1 = slsp + (swapemm ? !1 : 1);
-            boost0 =  gen.p4(iqlsp0).Beta()*gen.p4(iqlsp0).Gamma(); 
-            boost1 = gen.p4(iqlsp1).Beta()*gen.p4(iqlsp1).Gamma(); 
+        int j = ilsp;   
+        int slsp = 2+j*2, swapemm = gen.pt(slsp) < gen.pt(slsp+1); // toward making the jet assoc'd to the higher (lower) pT quark be "jet0" ("jet1")
+        int iqlsp0 = slsp + (swapemm ? !0 : 0);
+        int iqlsp1 = slsp + (swapemm ? !1 : 1);
+        boost0 =  gen.p4(iqlsp0).Beta()*gen.p4(iqlsp0).Gamma(); 
+        boost1 = gen.p4(iqlsp1).Beta()*gen.p4(iqlsp1).Gamma(); 
         
         const TLorentzVector jet_tot_p4 = jet_p4_0 + jet_p4_1;
 
@@ -590,12 +593,13 @@ int main(int argc, char** argv) {
       int n_pass_ntracks = 0;
       int n_pass_all = 0;
       double  dist2move = -9.9;
-
+      jmt::MinValue dist2min(100);
       std::vector<int> first_vtx_to_pass(num_numdens, -1);
       auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
 
       for (size_t i = 0; i < nvtx; ++i) {
         dist2move = (lspdecay - vs.pos(i)).Mag();
+        dist2min(i, dist2move);
         if (dist2move > 0.0200) //FIXME
           continue;
 
@@ -607,6 +611,32 @@ int main(int argc, char** argv) {
         if (pass_ntracks && pass_bs2derr) { set_it_if_first(first_vtx_to_pass[2], i); ++n_pass_all; }
       }
 
+      dist2move = dist2min.v();
+      double mindist2move_iv = dist2min.i();
+      
+      if (mindist2move_iv != -1){
+        for (size_t j = 0; j < jet0trk_idx.size(); ++j){
+           const std::vector<int> ivits = tks.tks_for_sv(mindist2move_iv);
+             auto it0 = std::find(ivits.begin(), ivits.end(), jet0trk_idx[j]);
+             if (it0 !=  ivits.end()){ 
+               jettrk_invtx_idx.push_back(jet0trk_idx[j]);
+             }
+             else{
+               jettrk_outvtx_idx.push_back(jet0trk_idx[j]);
+             }
+        }
+        for (size_t j = 0; j < jet1trk_idx.size(); ++j){
+           const std::vector<int> ivits = tks.tks_for_sv(mindist2move_iv);
+             auto it1 = std::find(ivits.begin(), ivits.end(), jet1trk_idx[j]);
+             if (it1 !=  ivits.end()){ 
+               jettrk_invtx_idx.push_back(jet1trk_idx[j]);
+             }
+             else{
+               jettrk_outvtx_idx.push_back(jet1trk_idx[j]);
+             }
+        }
+      }
+      
       den += w;
 
       for (numdens& nd : nds) {
@@ -673,22 +703,19 @@ int main(int argc, char** argv) {
         nd.den(k_jet_dr_minj1_q1, jet_dr_minjq1);
         nd.den(k_ntk0_ntk1, jet_ntks_0, jet_ntks_1);
         nd.den(k_boost0_boost1, boost0, boost1);
-        for (size_t j = 0; j < jet0trk_pv0_idx.size(); ++j){
-          nd.den(k_whichsv_which_pv_0_j0, tks.which_sv(jet0trk_pv0_idx[j]));
-        }
-        for (size_t j = 0; j < jet0trk_pvint_idx.size(); ++j){
-          nd.den(k_whichsv_which_pv_int_j0, tks.which_sv(jet0trk_pvint_idx[j]));
-        }
-        for (size_t j = 0; j < jet0trk_pv255_idx.size(); ++j){
-          nd.den(k_whichsv_which_pv_255_j0, tks.which_sv(jet0trk_pv255_idx[j]));
-        }
         for (size_t j = 0; j < jet0trk_idx.size(); ++j){
           const TLorentzVector jp4 = tks.p4(jet0trk_idx[j]);
           nd.den(k_jet0_trk_dr, jp4.DeltaR(minijet_p4_0));
           nd.den(k_jet0_trk_pt, tks.pt(jet0trk_idx[j]));
           nd.den(k_jet0_trk_p, tks.p(jet0trk_idx[j]));
+          nd.den(k_jet0_trk_eta, tks.eta(jet0trk_idx[j]));
           nd.den(k_jet0_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
-          nd.den(k_jet0_trk_missdist, tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
+          if (mindist2move_iv != -1) {
+            nd.den(k_jet0_trk_vtxdz, tks.dz(jet0trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv)));
+            nd.den(k_jet0_trk_nsigmadz, tks.dz(jet0trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jet0trk_idx[j]));
+          }
+          nd.den(k_jet0_trk_dzerr, tks.err_dz(jet0trk_idx[j]));
+          nd.den(k_jet0_trk_genmissdist, tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
           nd.den(k_jet0_trk_whichpv, tks.which_pv(jet0trk_idx[j]));
           nd.den(k_jet0_trk_dsz, tks.dsz(jet0trk_idx[j], pvs.x(0) + bs.x(0), pvs.y(0) + bs.y(0), pvs.z(0)));
           nd.den(k_jet0_trk_dxy, tks.dxybs(jet0trk_idx[j], bs));
@@ -702,13 +729,28 @@ int main(int argc, char** argv) {
           nd.den(k_jet1_trk_dr, jp4.DeltaR(minijet_p4_1));
           nd.den(k_jet1_trk_pt, tks.pt(jet1trk_idx[j]));
           nd.den(k_jet1_trk_p, tks.p(jet1trk_idx[j]));
+          nd.den(k_jet1_trk_eta, tks.eta(jet1trk_idx[j]));
           nd.den(k_jet1_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
-          nd.den(k_jet1_trk_missdist, tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
+          if (mindist2move_iv != -1) {
+            nd.den(k_jet1_trk_vtxdz, tks.dz(jet1trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv)));
+            nd.den(k_jet1_trk_nsigmadz, tks.dz(jet1trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jet1trk_idx[j]));
+          }
+          nd.den(k_jet1_trk_dzerr, tks.err_dz(jet1trk_idx[j]));
+          nd.den(k_jet1_trk_genmissdist, tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
           nd.den(k_jet1_trk_whichpv, tks.which_pv(jet1trk_idx[j]));
           nd.den(k_jet1_trk_dsz, tks.dsz(jet1trk_idx[j], pvs.x(0) + bs.x(0), pvs.y(0) + bs.y(0), pvs.z(0)));
           nd.den(k_jet1_trk_dxy, tks.dxybs(jet1trk_idx[j], bs));
           nd.den(k_jet1_trk_nsigmadxy, tks.dxybs(jet1trk_idx[j], bs)/tks.err_dxy(jet1trk_idx[j]));
           nd.den(k_jet1_trk_dxyerr, tks.err_dxy(jet1trk_idx[j]));
+        }
+        
+        for (size_t j = 0; j < jettrk_invtx_idx.size(); ++j){
+          nd.den(k_jet_invtx_trk_eta, tks.eta(jettrk_invtx_idx[j]));
+          nd.den(k_jet_invtx_trk_nsigmadz, tks.dz(jettrk_invtx_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jettrk_invtx_idx[j]));
+        }
+        for (size_t j = 0; j < jettrk_outvtx_idx.size(); ++j){
+          nd.den(k_jet_outvtx_trk_eta, tks.eta(jettrk_outvtx_idx[j]));
+          nd.den(k_jet_outvtx_trk_nsigmadz, tks.dz(jettrk_outvtx_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jettrk_outvtx_idx[j]));
         }
         nd.den(k_jet1_sump, sump_1);
         nd.den(k_jet1_sump_jetdr, sump_1, jet_dr);
@@ -744,7 +786,8 @@ int main(int argc, char** argv) {
         nd.den(k_deta_j1_mv, jet_mv_deta_1);
         nd.den(k_dphi_q0_mv, fabs(qrk_mv_dphi_0));
         nd.den(k_dphi_q1_mv, fabs(qrk_mv_dphi_1));
-        if (ilsp == 1) nd.den(k_miscseedtracks, n_miscseedtracks); 
+        nd.den(k_nseedtracks, nseedtracks);
+        nd.den(k_miscseedtracks, n_miscseedtracks); 
         nd.den(k_closeseedtks, n_closeseedtks);
         nd.den(k_jetdphimax, jet_dphi_max);
         nd.den(k_jetdetamax, jet_deta_max);
@@ -760,8 +803,9 @@ int main(int argc, char** argv) {
       }
 
       for (int in = 0; in < num_numdens; ++in) {
-        const int iv = first_vtx_to_pass[in];
+        int iv = first_vtx_to_pass[in];
         if (iv != -1) {
+          iv = mindist2move_iv; 
           h_vtxntracks   [in]->Fill(vs.ntracks(iv));
           h_vtxbs2derr   [in]->Fill(vs.bs2derr(iv));
           //h_vtxtkonlymass[in]->Fill(vs.tkonlymass(iv));
@@ -847,22 +891,19 @@ int main(int argc, char** argv) {
         nd.num(k_jet_dr_minj1_q1, jet_dr_minjq1);
         nd.num(k_ntk0_ntk1, jet_ntks_0, jet_ntks_1);
         nd.num(k_boost0_boost1, boost0, boost1);
-        for (size_t j = 0; j < jet0trk_pv0_idx.size(); ++j){
-          nd.num(k_whichsv_which_pv_0_j0, tks.which_sv(jet0trk_pv0_idx[j]));
-        }
-        for (size_t j = 0; j < jet0trk_pvint_idx.size(); ++j){
-          nd.num(k_whichsv_which_pv_int_j0, tks.which_sv(jet0trk_pvint_idx[j]));
-        }
-        for (size_t j = 0; j < jet0trk_pv255_idx.size(); ++j){
-          nd.num(k_whichsv_which_pv_255_j0, tks.which_sv(jet0trk_pv255_idx[j]));
-        }
         for (size_t j = 0; j < jet0trk_idx.size(); ++j){
           const TLorentzVector jp4 = tks.p4(jet0trk_idx[j]);
           nd.num(k_jet0_trk_dr, jp4.DeltaR(minijet_p4_0));
           nd.num(k_jet0_trk_pt, tks.pt(jet0trk_idx[j]));
+          nd.num(k_jet0_trk_eta, tks.eta(jet0trk_idx[j]));
           nd.num(k_jet0_trk_p, tks.p(jet0trk_idx[j]));
           nd.num(k_jet0_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
-          nd.num(k_jet0_trk_missdist, tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
+          if (mindist2move_iv != -1) {
+            nd.num(k_jet0_trk_vtxdz, tks.dz(jet0trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv)));
+            nd.num(k_jet0_trk_nsigmadz, tks.dz(jet0trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jet0trk_idx[j]));
+          }
+          nd.num(k_jet0_trk_dzerr, tks.err_dz(jet0trk_idx[j]));
+          nd.num(k_jet0_trk_genmissdist, tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
           nd.num(k_jet0_trk_whichpv, tks.which_pv(jet0trk_idx[j]));
           nd.num(k_jet0_trk_dsz, tks.dsz(jet0trk_idx[j], pvs.x(0) + bs.x(0), pvs.y(0) + bs.y(0), pvs.z(0)));
           nd.num(k_jet0_trk_dxy, tks.dxybs(jet0trk_idx[j], bs));
@@ -875,14 +916,28 @@ int main(int argc, char** argv) {
           const TLorentzVector jp4 = tks.p4(jet1trk_idx[j]);
           nd.num(k_jet1_trk_dr, jp4.DeltaR(minijet_p4_1));
           nd.num(k_jet1_trk_pt, tks.pt(jet1trk_idx[j]));
+          nd.num(k_jet1_trk_eta, tks.eta(jet1trk_idx[j]));
           nd.num(k_jet1_trk_p, tks.p(jet1trk_idx[j]));
           nd.num(k_jet1_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
-          nd.num(k_jet1_trk_missdist, tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
+          if (mindist2move_iv != -1) {
+            nd.num(k_jet1_trk_vtxdz, tks.dz(jet1trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv)));
+            nd.num(k_jet1_trk_nsigmadz, tks.dz(jet1trk_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jet1trk_idx[j]));
+          }
+          nd.num(k_jet1_trk_dzerr, tks.err_dz(jet1trk_idx[j]));
+          nd.num(k_jet1_trk_genmissdist, tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));
           nd.num(k_jet1_trk_whichpv, tks.which_pv(jet1trk_idx[j]));
           nd.num(k_jet1_trk_dsz, tks.dsz(jet1trk_idx[j], pvs.x(0) + bs.x(0), pvs.y(0) + bs.y(0), pvs.z(0)));
           nd.num(k_jet1_trk_dxy, tks.dxybs(jet1trk_idx[j], bs));
           nd.num(k_jet1_trk_nsigmadxy, tks.dxybs(jet1trk_idx[j], bs)/tks.err_dxy(jet1trk_idx[j]));
           nd.num(k_jet1_trk_dxyerr, tks.err_dxy(jet1trk_idx[j]));
+        }
+        for (size_t j = 0; j < jettrk_invtx_idx.size(); ++j){
+          nd.num(k_jet_invtx_trk_eta, tks.eta(jettrk_invtx_idx[j]));
+          nd.num(k_jet_invtx_trk_nsigmadz, tks.dz(jettrk_invtx_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jettrk_invtx_idx[j]));
+        }
+        for (size_t j = 0; j < jettrk_outvtx_idx.size(); ++j){
+          nd.num(k_jet_outvtx_trk_eta, tks.eta(jettrk_outvtx_idx[j]));
+          nd.num(k_jet_outvtx_trk_nsigmadz, tks.dz(jettrk_outvtx_idx[j], vs.x(mindist2move_iv) + bs.x(0),vs.y(mindist2move_iv) + bs.y(0),vs.z(mindist2move_iv))/tks.err_dz(jettrk_outvtx_idx[j]));
         }
         nd.num(k_jet1_sump, sump_1);
         nd.num(k_jet1_sump_jetdr, sump_1, jet_dr);
@@ -918,7 +973,8 @@ int main(int argc, char** argv) {
         nd.num(k_deta_j1_mv, jet_mv_deta_1);
         nd.num(k_dphi_q0_mv, fabs(qrk_mv_dphi_0));
         nd.num(k_dphi_q1_mv, fabs(qrk_mv_dphi_1));
-        if (ilsp == 1) nd.num(k_miscseedtracks, n_miscseedtracks); 
+        nd.num(k_nseedtracks, nseedtracks);
+        nd.num(k_miscseedtracks, n_miscseedtracks); 
         nd.num(k_closeseedtks, n_closeseedtks);
         nd.num(k_jetdphimax, jet_dphi_max);
         nd.num(k_jetdetamax, jet_deta_max);

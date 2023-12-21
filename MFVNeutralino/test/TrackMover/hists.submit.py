@@ -7,8 +7,8 @@ dataset = 'trackmover' + version
 apply_correction = True
 year = 2017
 #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
-#samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True)
-samples = [getattr(Samples, 'wjetstolnu_1j_2017')]
+samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True)
+#samples = [getattr(Samples, 'wjetstolnu_1j_2017')]
 #samples = [getattr(Samples, 'qcdpt120mupt5_2017')]
 for nl in 2,: # 3:
     for nb in 0,: # 1, 2:
@@ -26,7 +26,7 @@ for nl in 2,: # 3:
             args = '-t mfvMovedTree%i%i --tau %i %s' % (nl, nb, tau, correction_args) #FIXME
             NtupleReader_submit(batch, dataset, samples, exe_args=args, input_fns_extra=w_fns)
       else:
-        for tau in 10000, : # 100, 300, 1000, 10000, 30000, 100000,
+        for tau in 1000, : # 100, 300, 1000, 10000, 30000, 100000,
           batch_tag = "noCorrection"
           correction_args = "--jet-decayweights false "
           batch = 'TrackMoverJetByJetHists' + version.capitalize() + '_%i%i_tau%06ium_%s' % (nl, nb, tau, batch_tag)

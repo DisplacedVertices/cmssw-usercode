@@ -198,7 +198,11 @@ class MFVVertexer : public edm::EDProducer {
 	TH2F* h_miss_seed_track_eta_phi;
 	TH2F* h_miss_seed_track_npxlayers_minr;
 
+    TH1F* h_failedseed_vertex_chi2;
+    TH1F* h_failedseed_vertex_isvalid;
+    
     TH1F* h_n_seed_vertices;
+    TH1F* h_n_at_least_3trk_seed_vertices;
     TH1F* h_seed_vertex_track_weights;
     TH1F* h_seed_vertex_chi2;
     TH1F* h_seed_vertex_ndof;
@@ -214,6 +218,7 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_n_onetracks;
 
     TH1F* h_n_noshare_vertices;
+    TH1F* h_n_at_least_3trk_noshare_vertices;
     TH1F* h_noshare_vertex_ntracks;
     TH1F* h_noshare_vertex_mass;
     TH1F* h_noshare_vertex_track_weights;
@@ -247,11 +252,13 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_trackrefine_trimmax_vertex_distr_shift;
 
     TH1F* h_n_output_vertices;
+    TH1F* h_n_at_least_3trk_output_vertices;
     TH1F* h_n_at_least_5trk_output_vertices;
 
     TH1F* hs_output_vertex_tkvtxdist[stepEnum::N_STEPS];
     TH1F* hs_output_vertex_tkvtxdisterr[stepEnum::N_STEPS];
     TH1F* hs_output_vertex_tkvtxdistsig[stepEnum::N_STEPS];
+    TH1F* hs_n_at_least_3trk_output_vertices[stepEnum::N_STEPS];
     TH1F* hs_n_at_least_5trk_output_vertices[stepEnum::N_STEPS];
     TH1F* hs_output_vertex_nm1_bsbs2ddist[stepEnum::N_STEPS];
     TH1F* hs_output_vertex_nm1_bs2derr[stepEnum::N_STEPS];
@@ -356,7 +363,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 	h_miss_seed_track_eta_phi = fs->make<TH2F>("h_miss_seed_track_eta_phi", ";missed seed track's eta;missed seed track's phi", 100, -2.6, 2.6, 100, -3.15, 3.15);
 	h_miss_seed_track_npxlayers_minr = fs->make<TH2F>("h_miss_seed_track_npxlayers_minr", ";missed seed track's npxlayers;missed seed track's min_{r}", 10, 0, 10, 10, 0, 10);
 
-    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  50,   0,    200);
+    h_failedseed_vertex_chi2            = fs->make<TH1F>("h_failedseed_vertex_chi2",      ";normalized chi2",  40,   0, 40);
+    h_failedseed_vertex_isvalid         = fs->make<TH1F>("h_failedseed_vertex_isvalid",   ";isvalid?",  2,   0, 2);
+
+    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  200,   0,    200);
+    h_n_at_least_3trk_seed_vertices  = fs->make<TH1F>("h_n_at_least_3trk_seed_vertices",  ";# of seed vertices w/ >=3trk/vtx",  200,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
     h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  40,   0, 10);
     h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               ";ndof",  10,   0,     20);
@@ -372,8 +383,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 50,   0,   500);
     h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
 
-    h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             ";# of noshare vertices", 20,   0,    50);
-
+    h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             ";# of noshare vertices", 50,   0,    50);
+    h_n_at_least_3trk_noshare_vertices = fs->make<TH1F>("h_n_at_least_3trk_noshare_vertices",";# of noshare vertices w/ >=3trk/vtx ", 50,   0,    50);
+    
     if (histos_noshare) {
       h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
@@ -409,6 +421,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     }
 
     h_n_output_vertices = fs->make<TH1F>("h_n_output_vertices", ";# of output vertices", 50, 0, 50);
+    h_n_at_least_3trk_output_vertices = fs->make<TH1F>("h_n_at_least_3trk_output_vertices", ";# of output vertices w/ >=3trk/vtx", 20, 0, 20);
     h_n_at_least_5trk_output_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_vertices", ";# of output vertices w/ >=5trk/vtx", 20, 0, 20);
 
     for(size_t step = 0; step < stepEnum::N_STEPS; ++step) {
@@ -418,7 +431,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       if (step == stepEnum::aftermerge      && !histos_output_aftermerge)      continue;
       if (step == stepEnum::aftersharedjets && !histos_output_aftersharedjets) continue;
 	  if (step == stepEnum::aftertrackattach && !histos_output_aftertrackattach) continue;
-
+      hs_n_at_least_3trk_output_vertices[step] = fs->make<TH1F>("h_n_at_least_3trk_output_"+stepStrs[step]+"_vertices", ";# of >=3trk-vertices", 20, 0, 20);
       hs_n_at_least_5trk_output_vertices[step] = fs->make<TH1F>("h_n_at_least_5trk_output_"+stepStrs[step]+"_vertices", ";# of >=5trk-vertices", 20, 0, 20);
       hs_output_vertex_nm1_bsbs2ddist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
       hs_output_vertex_nm1_bs2derr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
@@ -563,6 +576,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   }
 
   if (verbose) printf("vertices:\n");
+  int count_3trk_vertices = 0;
   int count_5trk_vertices = 0;
   for (const reco::Vertex& v : *vertices) {
     if (verbose) printf("x: %f y %f z %f\n", v.x(), v.y(), v.z());
@@ -571,6 +585,8 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
       if (verbose) printf("id: %i key: %u <%f,%f,%f,%f,%f>\n", tk.id().id(), tk.key(), tk->charge()*tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
       tracks_inVertices->push_back(*tk);
     }
+    if (v.nTracks() >= 3)
+      ++count_3trk_vertices;
     if (v.nTracks() >= 5)
       ++count_5trk_vertices;
   }
@@ -580,6 +596,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   if (histos) {
     h_n_miss_seed_tracks->Fill(tracks_missseed->size());
     h_n_output_vertices->Fill(vertices->size());
+    h_n_at_least_3trk_output_vertices->Fill(count_3trk_vertices);
     h_n_at_least_5trk_output_vertices->Fill(count_5trk_vertices);
   }
 
@@ -701,6 +718,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
       }
     }
+    else{
+          h_failedseed_vertex_chi2->Fill(seed_vertex.normalisedChiSquared());
+          h_failedseed_vertex_isvalid->Fill(seed_vertex.isValid());
+    }
   };
 
   // ha
@@ -724,11 +745,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  int count_3trk_vertices = 0;
+
   if (histos) {
     for (std::vector<reco::Vertex>::const_iterator v0 = vertices->begin(); v0 != vertices->end(); ++v0) {
       const double v0x = v0->position().x() - bsx;
       const double v0y = v0->position().y() - bsy;
       const double phi0 = atan2(v0y, v0x);
+      const int ntracks = v0->nTracks();
+      if (ntracks >= 3)
+        count_3trk_vertices++;
       for (std::vector<reco::Vertex>::const_iterator v1 = v0 + 1; v1 != vertices->end(); ++v1) {
         const double v1x = v1->position().x() - bsx;
         const double v1y = v1->position().y() - bsy;
@@ -741,9 +767,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   if (verbose)
     printf("n_seed_vertices: %lu\n", vertices->size());
-  if (histos)
+  if (histos){
+    h_n_at_least_3trk_seed_vertices->Fill(count_3trk_vertices);
     h_n_seed_vertices->Fill(vertices->size());
-
+  }
   //////////////////////////////////////////////////////////////////////
   // Take care of track sharing. If a track is in two vertices, and
   // the vertices are "close", refit the tracks from the two together
@@ -1037,6 +1064,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_n_resets->Fill(n_resets);
     h_n_onetracks->Fill(n_onetracks);
     h_n_noshare_vertices->Fill(vertices->size());
+    int count_3trk_vertices = 0;
+    for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
+      reco::Vertex& v = vertices->at(i);
+      const int ntracks = v.nTracks();
+      if (ntracks >= 3)
+        count_3trk_vertices++;
+    }
+    h_n_at_least_3trk_noshare_vertices->Fill(count_3trk_vertices);
   }
 
 
@@ -1938,6 +1973,7 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
 void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>& vertices, const reco::Vertex& fake_bs_vtx, edm::ESHandle<TransientTrackBuilder>& tt_builder, size_t step) {
 
   std::map<reco::TrackRef, int> track_use;
+  int count_3trk_vertices = 0;
   int count_5trk_vertices = 0;
 
   const double bsx = fake_bs_vtx.position().x();
@@ -1964,6 +2000,8 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
     }
 
     hs_output_vertex_ntracks[step]->Fill(ntracks);
+    if (ntracks >= 3) 
+      count_3trk_vertices++;
     if (ntracks >= 5) {
       count_5trk_vertices++;
       Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
@@ -2011,6 +2049,7 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
     }
   }
 
+  hs_n_at_least_3trk_output_vertices[step]->Fill(count_3trk_vertices);
   hs_n_at_least_5trk_output_vertices[step]->Fill(count_5trk_vertices);
 }
 

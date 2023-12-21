@@ -127,7 +127,9 @@ def cmd_rm_mc_parts():
 def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
     if _leptonpresel or trigeff: #FIXME
         if bkg_tag == 'wjetstolnu':
-            x = ['wjetstolnu_amcatnlo']
+            x = ['wjetstolnu_0j']
+            x += ['wjetstolnu_1j']
+            x += ['wjetstolnu_2j']
         elif bkg_tag == 'dyjets':
             x = ['dyjetstollM10', 'dyjetstollM50'] 
         elif bkg_tag == 'qcd':
