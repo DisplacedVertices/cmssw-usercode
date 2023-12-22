@@ -243,7 +243,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.bs2derr1 = v1.bs2derr;
     nt.rescale_bs2derr1 = v1.rescale_bs2derr;
   }
-  else
+  else // NOTE if you need a custom MiniTree with absolutely all cuts turned off, this has to also be removed, or we do not save the 0-vtx events to the MiniTree!
     return;
 
   tree->Fill();
