@@ -5,7 +5,7 @@ from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 from JMTucker.MFVNeutralino.WeightProducer_cfi import *
 
 mfvAnalysisCutsGE1Vtx = mfvAnalysisCuts.clone(min_nvertex = 1)
-#mfvAnalysisCutsPreSelEvtFilt = mfvAnalysisCuts.clone(min_nvertex = 0) # Note! Enabling this for the purpose of storing all events to the MiniTree also requires a change in MiniTreer.cc to actually keep 0-vtx events in the MiniTree
+mfvAnalysisCutsPreSelEvtFilt = mfvAnalysisCuts.clone(min_nvertex = 0, apply_presel = cms.int32(0)) # Note! Enabling this for the purpose of storing all events to the MiniTree also requires a change in MiniTreer.cc to actually keep 0-vtx events in the MiniTree
 
 mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                              event_src = cms.InputTag('mfvEvent'),
@@ -24,7 +24,7 @@ mfvAnalysisCutsGE1VtxNtk4or5 = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSele
 mfvAnalysisCutsGE1VtxNtk3or4exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', ntracks01_0=4, ntracks01_1=3)
 mfvAnalysisCutsGE1VtxNtk3or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or5', ntracks01_0=5, ntracks01_1=3)
 mfvAnalysisCutsGE1VtxNtk4or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5', ntracks01_0=5, ntracks01_1=4)
-#mfvAnalysisCutsPreSelEvtFilt    = mfvAnalysisCutsPreSelEvtFilt.clone(vertex_src = 'mfvSelectedVerticesTight') 
+mfvAnalysisCutsPreSelEvtFilt    = mfvAnalysisCutsPreSelEvtFilt.clone(vertex_src = 'mfvSelectedVerticesTight') 
 
 mfvMiniTreeNtk3    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
 mfvMiniTreeNtk4    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')
@@ -34,7 +34,7 @@ mfvMiniTreeNtk4or5 = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk
 mfvMiniTreeNtk3or4exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
 mfvMiniTreeNtk3or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or5')
 mfvMiniTreeNtk4or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5')
-#mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight')
+mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight')
 
 pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
 pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)
@@ -44,4 +44,4 @@ pMiniTreeNtk4or5 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAna
 pMiniTreeNtk3or4exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4exact * mfvMiniTreeNtk3or4exact)
 pMiniTreeNtk3or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or5 * mfvAnalysisCutsGE1VtxNtk3or5exact * mfvMiniTreeNtk3or5exact)
 pMiniTreeNtk4or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAnalysisCutsGE1VtxNtk4or5exact * mfvMiniTreeNtk4or5exact)
-#pMiniTreePreSelEvtFilt    = cms.Path(mfvWeight * mfvSelectedVerticesTight    * mfvAnalysisCutsPreSelEvtFilt    * mfvMiniTreePreSelEvtFilt) 
+pMiniTreePreSelEvtFilt    = cms.Path(mfvWeight * mfvSelectedVerticesTight    * mfvAnalysisCutsPreSelEvtFilt    * mfvMiniTreePreSelEvtFilt) 
