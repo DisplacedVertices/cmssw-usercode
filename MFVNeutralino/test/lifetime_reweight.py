@@ -33,14 +33,19 @@ def main() :
                         out_ctau = 2*gen_ctau_low
 
                         while out_ctau < gen_ctau_high :
-                            # do the reweighting! both from e.g. 1mm up to 2mm and from 10mm down to 2mm
-                            makeReweightedTree(fpath, name_template, gen_ctau_low, out_ctau)
-                            makeReweightedTree(fpath, name_template, gen_ctau_high, out_ctau)
 
                             # formatting for float value of 0.1mm -> file name string of 0p1mm
                             out_ctau_str = str(out_ctau).replace(".","p")
                             
-                            # makeReweightedTree formats the outputs as e.g. "mfv_HtoLLPto4j_tau5from1mm_M1000_450_2017.root", i.e. keeping the string "from" between the output and input ctau, so that we can hadd them here
+                            # one edge case, due to float vs. int comparisons
+                            if out_ctau_str == "1p0" and gen_ctau_high == 1 : continue
+                            
+                            # do the reweighting! both from e.g. 1mm up to 2mm and from 10mm down to 2mm
+                            makeReweightedTree(fpath, name_template, gen_ctau_low, out_ctau)
+                            makeReweightedTree(fpath, name_template, gen_ctau_high, out_ctau)
+
+                            # makeReweightedTree formats the outputs as e.g. "mfv_HtoLLPto4j_tau5from1mm_M1000_450_2017.root", 
+                            # i.e. keeping the string "from" between the output and input ctau, so that we can hadd them here
                             hadded_name = name_template.replace("CTAU", out_ctau_str)
                             hadd_inputs = name_template.replace("CTAU", out_ctau_str+"from*")
 
