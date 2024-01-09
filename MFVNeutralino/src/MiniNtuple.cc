@@ -67,6 +67,9 @@ namespace mfv {
     tree->Branch("hlt_ht", &nt.hlt_ht);
     tree->Branch("hlt_ht4mc", &nt.hlt_ht4mc);
 
+    tree->Branch("bsx", &nt.bsx);
+    tree->Branch("bsy", &nt.bsy);
+    tree->Branch("bsz", &nt.bsz);
     tree->Branch("npv", &nt.npv);
     tree->Branch("pvx", &nt.pvx);
     tree->Branch("pvy", &nt.pvy);
@@ -155,6 +158,9 @@ namespace mfv {
     tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
     tree->SetBranchAddress("hlt_ht4mc", &nt.hlt_ht4mc);
+    tree->SetBranchAddress("bsx", &nt.bsx);
+    tree->SetBranchAddress("bsy", &nt.bsy);
+    tree->SetBranchAddress("bsz", &nt.bsz);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);

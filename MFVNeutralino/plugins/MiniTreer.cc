@@ -209,8 +209,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.bs2derr1 = v1.bs2derr;
     nt.geo2ddist1 = v1.geo2ddist();
   }
-  else
-    return;
+  //else // NOTE if you need a custom MiniTree with absolutely all cuts turned off, this line and the return in the line below has to be commented out, or we do not save the 0-vtx events to the MiniTree! If the `else return` is left in, we only save events with >= 1 vertex to the MiniTree.
+  //  return;
 
   tree->Fill();
 }

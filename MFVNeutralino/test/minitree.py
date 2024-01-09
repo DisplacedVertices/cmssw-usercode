@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev27darksectorreviewm'
+dataset = 'ntuplev27darksectorreview_withgeninfom'
 sample_files(process, 'mfv_HtoLLPto4j_tau0p1mm_M1000_100_2016', dataset, 1)
 process.TFileService.fileName = 'minitree.root'
 file_event_from_argv(process)
@@ -25,7 +25,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'minitree', data_json='jsons/ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MiniTreeV27darksectorreviewm',
+    cs = CondorSubmitter('MiniTreeV27darksectorreview_withGenInfom',
                          ex = year,
                          dataset = dataset,
                          )

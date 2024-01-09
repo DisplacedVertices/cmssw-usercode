@@ -790,7 +790,11 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       // If there is a neutralino or stop in the first event, assume that's the
       // LSP id wanted. Otherwise, default to looking for gluino. This
       // isn't relevant for some signals.
-      lsp_id = 1000021;
+      
+      // JPR removed:
+      // lsp_id = 1000021;
+      // NOTE that defaulting to _anything_ can be an issue if the sample does not have 100% BR to a given LLP (e.g. if, by mistake, prompt decays were also enabled).
+      lsp_id = 18; // FIXME!!
       for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
         if (debug) std::cout << "gen_particles->at(i).pdgId() is " << gen_particles->at(i).pdgId() << std::endl;
 
