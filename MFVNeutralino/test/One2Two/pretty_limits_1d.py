@@ -5,7 +5,11 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_DarkSectorReview_redux_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_DarkSectorReview_lifetime_reweight_final_%s' % which, make=True)
+
+# whether to save everything to a single output file
+oneFile = True
+if oneFile : single_output_file = ROOT.TFile(path+"/all_limits.root", "RECREATE")
 
 ts = tdr_style()
 
@@ -38,14 +42,17 @@ kinds = [
     'HtoLLPto4j_M1000_450',
     'HtoLLPto4j_M1000_100',
     'HtoLLPto4j_M400_150', 
+    #'HtoLLPto4j_M400_40', #empty
     'HtoLLPto4j_M600_250', 
-    'HtoLLPto4j_M600_60',  
+    #'HtoLLPto4j_M600_60', #not actually empty, but seems to be so low in stats that the lifetime reweighted curves are not smooth at all!
     'HtoLLPto4j_M800_350', 
     'HtoLLPto4j_M800_80',  
     'HtoLLPto4b_M1000_450',
-    'HtoLLPto4b_M1000_100',
+    #'HtoLLPto4b_M1000_100', #empty
     'HtoLLPto4b_M400_150', 
+    #'HtoLLPto4b_M400_40', #empty
     'HtoLLPto4b_M600_250', 
+    #'HtoLLPto4b_M600_60', #empty
     'HtoLLPto4b_M800_350', 
     'HtoLLPto4b_M800_80',  
     'ZprimetoLLPto4j_M1000_100',
@@ -336,4 +343,12 @@ for kind in kinds:
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
 
+    if oneFile : 
+        observed.SetName(kind)
+        single_output_file.cd()
+        observed.Write()
+
     del c
+
+if oneFile :
+    single_output_file.Write()
