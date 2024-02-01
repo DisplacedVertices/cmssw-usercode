@@ -183,10 +183,15 @@ notification  = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = %(input_files)s,cs_jobmap
-+REQUIRED_OS = "rhel7"
-+DesiredOS = REQUIRED_OS
 Queue %(njobs)s
 '''
+
+# Jan 2024: had to drop these lines for things to run successfully:
+#+REQUIRED_OS = "rhel7"
+#+DesiredOS = REQUIRED_OS
+# but probably could have successfully used:
+#+DesiredOS = "SL7"
+# based on discussions in the LPC computing mattermost
 
 batch_root = crab_dirs_root('combine_output_%i' % time.time())
 if os.path.isdir(batch_root):
