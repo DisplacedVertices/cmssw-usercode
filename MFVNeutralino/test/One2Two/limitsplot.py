@@ -245,6 +245,7 @@ def save_1d_plots():
         ('HtoLLPto4j_M1000_450',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)), 
         ('HtoLLPto4j_M1000_100',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)), 
         ('HtoLLPto4j_M400_150',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('HtoLLPto4j_M400_40',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 400 and sample.mass == 40, lambda s: s.sample.tau,  ('tau', 40)),
         ('HtoLLPto4j_M600_250',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
         ('HtoLLPto4j_M600_60',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 600 and sample.mass == 60, lambda s: s.sample.tau,  ('tau', 60)),
         ('HtoLLPto4j_M800_350',   lambda s: 'HtoLLPto4j' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
@@ -252,7 +253,9 @@ def save_1d_plots():
         ('HtoLLPto4b_M1000_450',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 450, lambda s: s.sample.tau,  ('tau', 450)),
         ('HtoLLPto4b_M1000_100',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
         ('HtoLLPto4b_M400_150',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 400 and sample.mass == 150, lambda s: s.sample.tau,  ('tau', 150)),
+        ('HtoLLPto4b_M400_40',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 400 and sample.mass == 40, lambda s: s.sample.tau,  ('tau', 40)),
         ('HtoLLPto4b_M600_250',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 600 and sample.mass == 250, lambda s: s.sample.tau,  ('tau', 250)),
+        ('HtoLLPto4b_M600_60',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 600 and sample.mass == 60, lambda s: s.sample.tau,  ('tau', 60)),
         ('HtoLLPto4b_M800_350',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 350, lambda s: s.sample.tau,  ('tau', 350)),
         ('HtoLLPto4b_M800_80',   lambda s: 'HtoLLPto4b' in sample.name and sample.massResonance == 800 and sample.mass == 80, lambda s: s.sample.tau,  ('tau', 80)),
         ('ZprimetoLLPto4j_M1000_100',   lambda s: 'ZprimetoLLPto4j' in sample.name and sample.massResonance == 1000 and sample.mass == 100, lambda s: s.sample.tau,  ('tau', 100)),
@@ -297,15 +300,58 @@ def save_1d_plots():
         for name, use, sorter, xkey in xxx:
             d = limits()
             for sample in sample_iterator(in_f, years, slices_1d=False):
-                if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
-                    continue
+
+                # only plot the 1eX and 3eX samples, rather than all of the intermediate reweighted ones too
+                #if not(str(sample.tau).startswith("1") or str(sample.tau).startswith("3") or str(sample.tau).startswith("0.1") or str(sample.tau).startswith("0.3")) : continue
+                #if not(str(sample.tau).startswith("1") or str(sample.tau).startswith("2") or str(sample.tau).startswith("3") or str(sample.tau).startswith("6") or str(sample.tau).startswith("0.1") or str(sample.tau).startswith("0.3") or str(sample.tau).startswith("0.2") or str(sample.tau).startswith("0.6")) : continue
+
+                # skip these with large signal contamination and any reweighted samples that make use of them
+                #
+                #HtoLLPto4b_tau0p1mm_M600_250
+                #HtoLLPto4b_tau1mm_M1000_100
+                #HtoLLPto4b_tau10mm_M1000_100
+                #HtoLLPto4b_tau100mm_M1000_100
+                #
+                #HtoLLPto4j_tau0p1mm_M1000_100
+                #HtoLLPto4j_tau0p1mm_M600_60
+                #HtoLLPto4j_tau1000mm_M800_350
+                #
+                #ZprimetoLLPto4b_tau0p1mm_M1500_150
+                #ZprimetoLLPto4b_tau10000mm_M3000_1450
+                #ZprimetoLLPto4b_tau10000mm_M4500_2200
+                #ZprimetoLLPto4b_tau100mm_M3000_300
+                #ZprimetoLLPto4b_tau1000mm_M3000_300
+                #ZprimetoLLPto4b_tau100mm_M3500_350
+
+                #ZprimetoLLPto4j_tau0p1mm_M1000_100
+                #ZprimetoLLPto4j_tau100mm_M2000_200
+
+                if "HtoLLPto4b" in sample.name :
+                    if sample.massResonance == 600 and sample.mass == 250 and sample.tau < 1 : continue # to skip HtoLLPto4b_tau0p1mm_M600_250
+                    if sample.massResonance == 800 and sample.mass == 350 and sample.tau > 1000 : continue # to avoid non-physical behaviors in the limits at large ctau here
+                    if sample.massResonance == 1000 and sample.mass == 100 and sample.tau > 0.1 : continue # to skip HtoLLPto4b_tau1mm_M1000_100, HtoLLPto4b_tau10mm_M1000_100, HtoLLPto4b_tau100mm_M1000_100
+                elif "HtoLLPto4j" in sample.name :
+                    if sample.massResonance == 1000 and sample.mass == 100 and sample.tau < 1 : continue # to skip HtoLLPto4j_tau0p1mm_M1000_100
+                    if sample.massResonance == 600 and sample.mass == 60 and sample.tau < 1 : continue # to skip HtoLLPto4j_tau0p1mm_M600_60
+                    if sample.massResonance == 800 and sample.mass == 350 and sample.tau > 100 : continue # to skip HtoLLPto4j_tau1000mm_M800_350
+                elif "ZprimetoLLPto4b" in sample.name :
+                    if sample.massResonance == 1500 and sample.mass == 150 and sample.tau < 1 : continue # to skip ZprimetoLLPto4b_tau0p1mm_M1500_150
+                    if sample.massResonance == 3000 and sample.mass == 1450 and sample.tau > 1000 : continue # to skip ZprimetoLLPto4b_tau10000mm_M3000_1450
+                    if sample.massResonance == 4500 and sample.mass == 2200 and sample.tau > 1000 : continue # to skip ZprimetoLLPto4b_tau10000mm_M4500_2200
+                    if sample.massResonance == 3000 and sample.mass == 300 and sample.tau > 10 : continue # to skip ZprimetoLLPto4b_tau100mm_M3000_300 and ZprimetoLLPto4b_tau1000mm_M3000_300
+                    if sample.massResonance == 3500 and sample.mass == 350 and sample.tau > 10 : continue # to skip ZprimetoLLPto4b_tau100mm_M3500_350
+                elif "ZprimetoLLPto4j" in sample.name :
+                    if sample.massResonance == 1000 and sample.mass == 100 and sample.tau < 1 : continue # to skip ZprimetoLLPto4j_tau0p1mm_M1000_100
+                    if sample.massResonance == 2000 and sample.mass == 200 and sample.tau > 10 : continue # to skip ZprimetoLLPto4j_tau100mm_M2000_200
+
 
                 if use(sample):
                     #print sample.name, sample.massResonance, sample.mass, sample.tau
                     #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
                     #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
                     #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
-                    d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                    #d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                    d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
                 else :
                     pass
                     #print "NOT USING ", sample.name, sample.massResonance, sample.mass, sample.tau
@@ -342,13 +388,14 @@ def save_2d_plots():
         for kind in 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b' :
             d = limits()
             for sample in sample_iterator(in_f, years):
-                if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
-                    continue
+                #if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
+                #    continue
                 if sample.kind != kind:
                     continue
                 #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
                 #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
-                d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                #d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
 
             print d['tau'], d['mass']
             taus, masses = axisize(d['tau']), axisize(d['mass'])
