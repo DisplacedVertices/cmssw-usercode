@@ -373,13 +373,9 @@ def make_signals_2015p6(f, name_list):
             name_list[new_name] = ss = signalset(new_name, '2016', new_isample)
             ss.ipair = ipair
 
-            # Adjust for the dark sector review's Zprime sample efficiency (where some LLPs were accidentally prompt particles, and therefore contributed 0 to our efficiency and could be removed from our efficiency denominator)
-            zprime_eff_bugfix = get_zprime_eff_bugfix(new_name, 2016)
-
             norms = _hs(old_bn + 'norm')
-            ngens = [(1e-3/h.GetBinContent(2))*zprime_eff_bugfix for h in norms]
+            ngens = [(1e-3/h.GetBinContent(2)) for h in norms]
             ngentot = sum(ngens[1:]) # hip/nonhip are the only independent samples, 2015 is just 2016 that we rescale
-            print new_name, "2016", zprime_eff_bugfix, ngentot
 
             for n in 'dbv', 'dphi', 'dvv', 'dvv_rebin':
                 hs = _hs(old_bn + n)
@@ -603,7 +599,7 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = None
-    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreviewm/mfv*.root'
+    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom/reweighted/mfv*.root'
     title = []
     sigs = {}
 
@@ -633,12 +629,9 @@ def make_signals_2017p8(f, name_list):
         for fn in fns:
             sig_f = ROOT.TFile.Open(fn)
 
-            # Adjust for the dark sector review's Zprime sample efficiency (where some LLPs were accidentally prompt particles, and therefore contributed 0 to our efficiency and could be removed from our efficiency denominator)
-            zprime_eff_bugfix = get_zprime_eff_bugfix(name, int(year))
-            ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1) * zprime_eff_bugfix
+            ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
             sig_f.Close()
             t.Add(fn)
-        print name, year, zprime_eff_bugfix, ngen
 
         if year == '2017' and gp.l1eeprefiring_2017:
             t.SetAlias('jet_l1ee', 'abs(jet_eta) > 2.25 && jet_pt > 100')
@@ -1041,296 +1034,6 @@ def event_scale_factors():
         out_f.Write()
         out_f.Close()
 
-def get_zprime_eff_bugfix(name, year) :
-    if name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_100" and year == 2016 : return 0.9892
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_100" and year == 2017 : return 0.9907
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_100" and year == 2016 : return 0.9892
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_100" and year == 2017 : return 0.9907
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_100" and year == 2016 : return 0.9892
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_100" and year == 2017 : return 0.9907
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_100" and year == 2016 : return 0.9891989198919892
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_100" and year == 2017 : return 0.9906
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_100" and year == 2016 : return 0.9891919191919192
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_100" and year == 2017 : return 0.9907
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_100" and year == 2016 : return 0.989172932330827
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_100" and year == 2017 : return 0.9907
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_100" and year == 2018 : return 0.9888
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1000_450" and year == 2018 : return 0.8738
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1000_450" and year == 2018 : return 0.8722222222222222
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1000_450" and year == 2018 : return 0.8738
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1000_450" and year == 2018 : return 0.8738
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1000_450" and year == 2018 : return 0.8738
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_450" and year == 2016 : return 0.877
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_450" and year == 2017 : return 0.8809
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1000_450" and year == 2018 : return 0.8738116681677174
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_150" and year == 2016 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_150" and year == 2017 : return 0.9819
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_150" and year == 2018 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_150" and year == 2016 : return 0.981919191919192
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_150" and year == 2017 : return 0.9819
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_150" and year == 2018 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_150" and year == 2016 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_150" and year == 2017 : return 0.9822222222222222
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_150" and year == 2018 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_150" and year == 2016 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_150" and year == 2017 : return 0.9819
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_150" and year == 2018 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_150" and year == 2016 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_150" and year == 2017 : return 0.9819
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_150" and year == 2018 : return 0.9816504562318259
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_150" and year == 2016 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_150" and year == 2017 : return 0.9819
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_150" and year == 2018 : return 0.9817
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_700" and year == 2016 : return 0.8163
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_700" and year == 2016 : return 0.8163
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_700" and year == 2016 : return 0.8157291666666666
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_700" and year == 2016 : return 0.8163
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_700" and year == 2016 : return 0.8163
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_700" and year == 2016 : return 0.8163
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_700" and year == 2017 : return 0.8139
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M1500_700" and year == 2018 : return 0.8149
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_200" and year == 2017 : return 0.9695505617977528
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_200" and year == 2018 : return 0.9682
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_200" and year == 2017 : return 0.9695555555555555
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_200" and year == 2018 : return 0.9683
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_200" and year == 2017 : return 0.9701
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_200" and year == 2018 : return 0.9683
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_200" and year == 2017 : return 0.9701428571428572
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_200" and year == 2018 : return 0.9683
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_200" and year == 2017 : return 0.9701
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_200" and year == 2018 : return 0.9683
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_200" and year == 2016 : return 0.9748
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_200" and year == 2017 : return 0.9701
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_200" and year == 2018 : return 0.9683
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_950" and year == 2017 : return 0.7385
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2000_950" and year == 2018 : return 0.7368
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_950" and year == 2017 : return 0.7385
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2000_950" and year == 2018 : return 0.7368
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_950" and year == 2017 : return 0.7385
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2000_950" and year == 2018 : return 0.7368
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_950" and year == 2017 : return 0.7385
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2000_950" and year == 2018 : return 0.7368
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_950" and year == 2017 : return 0.7392222222222222
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2000_950" and year == 2018 : return 0.7370027469732424
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_950" and year == 2016 : return 0.7473
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_950" and year == 2017 : return 0.7385
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2000_950" and year == 2018 : return 0.7368
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_1200" and year == 2017 : return 0.6557777777777778
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_1200" and year == 2018 : return 0.6568
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_1200" and year == 2017 : return 0.6546
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_1200" and year == 2018 : return 0.6567597318122685
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_1200" and year == 2017 : return 0.6546590909090909
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_1200" and year == 2018 : return 0.6568
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_1200" and year == 2017 : return 0.6541428571428571
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_1200" and year == 2018 : return 0.6568
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_1200" and year == 2017 : return 0.656375
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_1200" and year == 2018 : return 0.6568
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_1200" and year == 2016 : return 0.6619
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_1200" and year == 2017 : return 0.6546
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_1200" and year == 2018 : return 0.6568
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_250" and year == 2017 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_250" and year == 2017 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_250" and year == 2017 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_250" and year == 2017 : return 0.9533333333333334
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_250" and year == 2017 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_250" and year == 2016 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_250" and year == 2017 : return 0.9531
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M2500_250" and year == 2018 : return 0.9487
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_1450" and year == 2017 : return 0.5502222222222222
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_1450" and year == 2017 : return 0.552
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_1450" and year == 2017 : return 0.549375
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_1450" and year == 2017 : return 0.5508
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_1450" and year == 2017 : return 0.5508
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_1450" and year == 2016 : return 0.5826
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_1450" and year == 2017 : return 0.5508
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_1450" and year == 2018 : return 0.5497
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_300" and year == 2016 : return 0.9269
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_300" and year == 2017 : return 0.911375
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3000_300" and year == 2018 : return 0.9102
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_300" and year == 2016 : return 0.9269
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_300" and year == 2017 : return 0.9135
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3000_300" and year == 2018 : return 0.9102
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_300" and year == 2016 : return 0.927
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_300" and year == 2017 : return 0.9135
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3000_300" and year == 2018 : return 0.9102
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_300" and year == 2016 : return 0.9269
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_300" and year == 2017 : return 0.9151111111111111
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3000_300" and year == 2018 : return 0.9102
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_300" and year == 2016 : return 0.9269
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_300" and year == 2017 : return 0.9135
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3000_300" and year == 2018 : return 0.9097
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_300" and year == 2016 : return 0.9269
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_300" and year == 2017 : return 0.9135
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3000_300" and year == 2018 : return 0.9097
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_1700" and year == 2017 : return 0.43455555555555553
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_1700" and year == 2018 : return 0.4331191002209279
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_1700" and year == 2017 : return 0.4343
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_1700" and year == 2018 : return 0.4334
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_1700" and year == 2017 : return 0.4343
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_1700" and year == 2018 : return 0.4334
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_1700" and year == 2017 : return 0.43475
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_1700" and year == 2018 : return 0.4334
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_1700" and year == 2017 : return 0.4343
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_1700" and year == 2018 : return 0.4334
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_1700" and year == 2016 : return 0.4887
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_1700" and year == 2017 : return 0.43434343434343436
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_1700" and year == 2018 : return 0.4334
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_350" and year == 2017 : return 0.8565
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M3500_350" and year == 2018 : return 0.8577
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_350" and year == 2017 : return 0.8557777777777777
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M3500_350" and year == 2018 : return 0.8577
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_350" and year == 2017 : return 0.854
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M3500_350" and year == 2018 : return 0.8576
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_350" and year == 2017 : return 0.8557471264367816
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M3500_350" and year == 2018 : return 0.8577
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_350" and year == 2017 : return 0.85425
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M3500_350" and year == 2018 : return 0.8577
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_350" and year == 2016 : return 0.8795
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_350" and year == 2017 : return 0.8565
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M3500_350" and year == 2018 : return 0.8577
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_1950" and year == 2016 : return 0.383
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_1950" and year == 2017 : return 0.3146
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_1950" and year == 2018 : return 0.3166
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_400" and year == 2016 : return 0.8192929292929293
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4000_400" and year == 2018 : return 0.7765
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_400" and year == 2016 : return 0.8197
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4000_400" and year == 2018 : return 0.7765
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_400" and year == 2016 : return 0.8202020202020202
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4000_400" and year == 2018 : return 0.7765
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_400" and year == 2016 : return 0.8197
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4000_400" and year == 2018 : return 0.7765
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_400" and year == 2016 : return 0.8197
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4000_400" and year == 2018 : return 0.7765
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_400" and year == 2016 : return 0.8197
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_400" and year == 2017 : return 0.7724
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4000_400" and year == 2018 : return 0.7745714285714286
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_2200" and year == 2016 : return 0.2797
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_2200" and year == 2016 : return 0.2797
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_2200" and year == 2016 : return 0.2797
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_2200" and year == 2016 : return 0.2797
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_2200" and year == 2016 : return 0.2797979797979798
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_2200" and year == 2016 : return 0.2797
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_2200" and year == 2017 : return 0.2096
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_2200" and year == 2018 : return 0.2084
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau0p1mm_M4500_450" and year == 2018 : return 0.6806
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau10000mm_M4500_450" and year == 2018 : return 0.6806
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau1000mm_M4500_450" and year == 2018 : return 0.6813
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau100mm_M4500_450" and year == 2018 : return 0.6806
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau10mm_M4500_450" and year == 2018 : return 0.6806
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_450" and year == 2016 : return 0.7341
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_450" and year == 2017 : return 0.6786
-    elif name == "mfv_ZprimetoLLPto4b_tau1mm_M4500_450" and year == 2018 : return 0.6806
-    else : return 1
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
