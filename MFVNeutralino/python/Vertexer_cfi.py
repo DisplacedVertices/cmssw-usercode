@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+#from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 kvr_params = cms.PSet(
     maxDistance = cms.double(0.01),
@@ -78,6 +79,7 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                )
 
 mfvVertices = cms.EDProducer('MFVVertexer',
+                             #jmtNtupleFiller_pset(True, True, False),
                              kvr_params = kvr_params,
                              do_track_refinement = cms.bool(False), # remove tracks + trim out tracks with IP significance larger than trackrefine_sigmacut and trackrefine_trimmax, respectively   
                              resolve_split_vertices_loose = cms.bool(False), # an alternative merging routine with `loose` criteria, to merge any nearby vertices within a given dist or significance
@@ -106,19 +108,19 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              min_track_vertex_sig_to_remove = cms.double(1.5), # default track arbitration
                              remove_one_track_at_a_time = cms.bool(True),
                              max_nm1_refit_dist3 = cms.double(-1),
-                             max_nm1_refit_distz = cms.double(0.005), #0.03#0.005 might be too tight so try to relex it
+                             max_nm1_refit_distz = cms.double(-1), #(0.005), #0.03#0.005 might be too tight so try to relex it
                              ignore_lep_in_refit_distz = cms.bool(True), #do not consider dropping tracks at dz refit step if they are leptons w/ pt > 20 GeV. 
                              max_nm1_refit_distz_error = cms.double(-1), #0.02#0.015 might be too tight so try to relex it
-                             max_nm1_refit_distz_sig = cms.double(-1), #0.005 might be too tight so try to relex it
+                             max_nm1_refit_distz_sig = cms.double(-1), #-1), #0.005 #might be too tight so try to relex it
                              max_nm1_refit_count = cms.int32(-1),
                              trackrefine_sigmacut = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              trackrefine_trimmax = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              histos = cms.untracked.bool(True),
-                             histos_noshare = cms.untracked.bool(True),   # make plots of no shared-track vertices 
-                             histos_output_beforedzfit = cms.untracked.bool(True),
-                             histos_output_afterdzfit = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing 
+                             histos_noshare = cms.untracked.bool(False),   # make plots of no shared-track vertices 
+                             histos_output_beforedzfit = cms.untracked.bool(False),
+                             histos_output_afterdzfit = cms.untracked.bool(False),   # make plots of output vertices after the default vertexing 
                              histos_output_aftermerge = cms.untracked.bool(False),   # make plots of output vertices after the default vertexing  + tight merging routine turned on
-                             histos_output_aftersharedjets = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + tight merging routine turned on  + shared-jet mitigation turned on 
-                             histos_output_aftertrackattach = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + tight merging routine turned on  + shared-jet mitigation turned on + track attachment turned on
+                             histos_output_aftersharedjets = cms.untracked.bool(False),   # make plots of output vertices after the default vertexing  + tight merging routine turned on  + shared-jet mitigation turned on 
+                             histos_output_aftertrackattach = cms.untracked.bool(False),   # make plots of output vertices after the default vertexing  + tight merging routine turned on  + shared-jet mitigation turned on + track attachment turned on
                              verbose = cms.untracked.bool(False),
                              )

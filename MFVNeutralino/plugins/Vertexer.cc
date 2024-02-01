@@ -1,6 +1,12 @@
 #include "TH2.h"
 #include "TMath.h"
 #include <math.h>  
+#include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalTrajectoryExtrapolatorToLine.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -27,6 +33,7 @@
 #include "JMTucker/MFVNeutralino/interface/VertexerParams.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 class MFVVertexer : public edm::EDProducer {
   public:
@@ -34,9 +41,10 @@ class MFVVertexer : public edm::EDProducer {
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
   private:
+    //mfv::VertexerNtuple nt;
+    //jmt::TrackingAndJetsNtupleFiller nt_filler;
     typedef std::set<reco::TrackRef> track_set;
     typedef std::vector<reco::TrackRef> track_vec;
-
     std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const size_t vtx0idx, const size_t vtx1idx, const std::vector < std::vector<size_t>>& sv_match_jetidx, const std::vector < std::vector<size_t>>& sv_match_trkidx);
     bool hasCommonElement(std::vector<size_t> vec0, std::vector<size_t> vec1);
     std::vector<size_t>::iterator getFirstCommonElement(std::vector<size_t>& vec0, std::vector<size_t>& vec1);
@@ -115,6 +123,10 @@ class MFVVertexer : public edm::EDProducer {
         return IPTools::absoluteImpactParameter3D(t, v);
     }
 
+    std::pair<bool, Measurement1D> track_dist2d(const reco::TransientTrack & t, const reco::Vertex & v) const {
+      return IPTools::absoluteTransverseImpactParameter(t, v);
+    }
+
     VertexDistanceXY vertex_dist_2d;
     VertexDistance3D vertex_dist_3d;
     std::unique_ptr<KalmanVertexFitter> kv_reco;
@@ -134,6 +146,22 @@ class MFVVertexer : public edm::EDProducer {
       std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
       return v;
     }
+    /*
+    const edm::InputTag weight_src;
+    const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
+    const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+    const edm::EDGetTokenT<double> rho_token;
+    const bool input_is_miniaod;
+    const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
+    const edm::EDGetTokenT<pat::JetCollection> jets_token;
+    const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+    const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
+    const edm::EDGetTokenT<pat::METCollection> mets_token;
+    const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+    const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+    EffectiveAreas electron_effective_areas;
+    jmt::TrackRefGetter track_ref_getter;
+    */
     const bool do_track_refinement;
     const bool resolve_split_vertices_loose;
     const bool resolve_split_vertices_tight;
@@ -161,7 +189,7 @@ class MFVVertexer : public edm::EDProducer {
     const double min_track_vertex_sig_to_remove;
     const bool remove_one_track_at_a_time;
     const double max_nm1_refit_dist3;
-    const double max_nm1_refit_distz;
+    const double max_nm1_refit_distz; //FIXME
     const int max_nm1_refit_count;
     const double trackrefine_sigmacut;
     const double trackrefine_trimmax;
@@ -198,9 +226,22 @@ class MFVVertexer : public edm::EDProducer {
 	TH2F* h_miss_seed_track_eta_phi;
 	TH2F* h_miss_seed_track_npxlayers_minr;
 
+    //FIXME 
     TH1F* h_failedseed_vertex_chi2;
     TH1F* h_failedseed_vertex_isvalid;
-    
+    TH1F* h_dz_vertex_chi2;
+    TH1F* h_dz_vertex_tkvtxdistz;
+    TH1F* h_dz_vertex_tkvtxdisterrz;
+    TH1F* h_dz_vertex_tkvtxdistsigz;
+    TH1F* h_dz_vertex_tkvtxdistxy;
+    TH1F* h_dz_vertex_tkvtxdisterrxy;
+    TH1F* h_dz_vertex_tkvtxdistsigxy;
+    TH1F* h_dz_vertex_vtxdistz;
+    TH1F* h_dz_vertex_cov_vtxdisterrz;
+    TH1F* h_dz_vertex_vtxnm1_covzz;
+    TH1F* h_dz_vertex_vtx_covzz;
+    TH1F* h_dz_vertex_vtxnm1_z;
+    TH1F* h_dz_vertex_cov_vtxdistsigz;
     TH1F* h_n_seed_vertices;
     TH1F* h_n_at_least_3trk_seed_vertices;
     TH1F* h_seed_vertex_track_weights;
@@ -289,7 +330,11 @@ class MFVVertexer : public edm::EDProducer {
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
-  : 
+  :
+    //nt_filler(nt, cfg, NF_CC_TrackingAndJets_v, //FIXME
+    //          jmt::TrackingAndJetsNtupleFillerParams()
+    //            .pvs_subtract_bs(true) // JMTBAD get rid of beamspot subtraction everywhere
+    //            .fill_tracks(true)),
     kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     do_track_refinement(cfg.getParameter<bool>("do_track_refinement")),
     resolve_split_vertices_loose(cfg.getParameter<bool>("resolve_split_vertices_loose")),
@@ -318,7 +363,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     max_nm1_refit_dist3(cfg.getParameter<double>("max_nm1_refit_dist3")),
-    max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")),
+    max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")), //FIXME
     max_nm1_refit_count(cfg.getParameter<int>("max_nm1_refit_count")),
     trackrefine_sigmacut(cfg.getParameter<double>("trackrefine_sigmacut")),
     trackrefine_trimmax(cfg.getParameter<double>("trackrefine_trimmax")),
@@ -365,7 +410,19 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     h_failedseed_vertex_chi2            = fs->make<TH1F>("h_failedseed_vertex_chi2",      ";normalized chi2",  40,   0, 40);
     h_failedseed_vertex_isvalid         = fs->make<TH1F>("h_failedseed_vertex_isvalid",   ";isvalid?",  2,   0, 2);
-
+    h_dz_vertex_chi2                    = fs->make<TH1F>("h_dz_vertex_chi2",              ";normalized chi2",  40,   0, 40);
+    h_dz_vertex_tkvtxdistz              = fs->make<TH1F>("h_dz_vertex_tkvtxdistz", ";tkvtxdistz (cm.)", 80, -0.1, 0.1);
+    h_dz_vertex_tkvtxdisterrz           = fs->make<TH1F>("h_dz_vertex_tkvtxdisterrz", ";err tkvtxdistz (cm.)", 80, 0, 0.1);
+    h_dz_vertex_tkvtxdistsigz           = fs->make<TH1F>("h_dz_vertex_tkvtxdistsigz", ";n#sigma tkvtxdistz (cm.)", 40, -10, 10);
+    h_dz_vertex_tkvtxdistxy              = fs->make<TH1F>("h_dz_vertex_tkvtxdistxy", ";tkvtxdistxy (cm.)", 80, -0.1, 0.1);
+    h_dz_vertex_tkvtxdisterrxy          = fs->make<TH1F>("h_dz_vertex_tkvtxdisterrxy", ";err tkvtxdistxy (cm.)", 80, 0, 0.1);
+    h_dz_vertex_tkvtxdistsigxy           = fs->make<TH1F>("h_dz_vertex_tkvtxdistsigxy", ";n#sigma tkvtxdistxy (cm.)", 40, -10, 10);
+    h_dz_vertex_vtxdistz              = fs->make<TH1F>("h_dz_vertex_vtxdistz", ";shift vtxdistz (cm.)", 100, -0.025, 0.025);
+    h_dz_vertex_cov_vtxdisterrz       = fs->make<TH1F>("h_dz_vertex_cov_vtxdisterrz", ";sqrt(cov_zz_nm1vtx - cov_zz_vtx) (cm.)", 40, 0, 0.2);
+    h_dz_vertex_vtxnm1_covzz        = fs->make<TH1F>("h_dz_vertex_vtxnm1_covzz", ";sqrt(cov_zz_nm1vtx)(cm.)", 40, 0, 0.1);
+    h_dz_vertex_vtx_covzz           = fs->make<TH1F>("h_dz_vertex_vtx_covzz", ";sqrt(cov_zz_vtx)(cm.)", 40, 0, 0.1);
+    h_dz_vertex_vtxnm1_z               = fs->make<TH1F>("h_dz_vertex_vtxnm1_z", ";vtxnm1's z (cm.)", 200, -10.0, 10.0);
+    h_dz_vertex_cov_vtxdistsigz  = fs->make<TH1F>("h_dz_vertex_cov_vtxdistsigz", "; #frac{shift vtxdistz}{sqrt(cov_zz_nm1vtx - cov_zz_vtx)}", 40, -10, 10);
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  200,   0,    200);
     h_n_at_least_3trk_seed_vertices  = fs->make<TH1F>("h_n_at_least_3trk_seed_vertices",  ";# of seed vertices w/ >=3trk/vtx",  200,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
@@ -576,6 +633,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   }
 
   if (verbose) printf("vertices:\n");
+
   int count_3trk_vertices = 0;
   int count_5trk_vertices = 0;
   for (const reco::Vertex& v : *vertices) {
@@ -612,6 +670,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose)
     std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
+  //nt_filler.fill(event); //FIXME
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
   const double bsx = beamspot->position().x();
@@ -632,8 +691,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  all_tracks.push_back(tt_builder->build(tk));
 	  all_track_ref_map[tk] = all_tracks.size() - 1;
   }
-  
-  
+ 
   edm::Handle<std::vector<reco::TrackRef>> muon_seed_track_refs;
   event.getByToken(museed_tracks_token, muon_seed_track_refs);
 
@@ -678,7 +736,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   std::vector<size_t> itks(n_tracks_per_seed_vertex, 0);
-
   auto try_seed_vertex = [&]() {
     std::vector<reco::TransientTrack> ttks(n_tracks_per_seed_vertex);
     for (int i = 0; i < n_tracks_per_seed_vertex; ++i)
@@ -1376,9 +1433,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////
-  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
+  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) { //FIXME
+    /*
+    auto& tks = nt.tracks();
+    for (int it=0, ite = tks.n(); it < ite; it++){
+        std::cout << " which_pv " << (int) tks.which_pv(it) << std::endl; 
+    }
+    */
     std::vector<int> refit_count(vertices->size(), 0);
-
     int iv = 0;
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
       if (max_nm1_refit_count > 0 && refit_count[iv] >= max_nm1_refit_count)
@@ -1388,7 +1450,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       const size_t ntks = tks.size();
       if (ntks < 3)
         continue;
-
       if (verbose) {
         printf("doing n-%i refit on vertex at %7.4f %7.4f %7.4f with %lu tracks\n", refit_count[iv] + 1, v[0]->x(), v[0]->y(), v[0]->z(), ntks);
         for (size_t i = 0; i < ntks; ++i)
@@ -1402,12 +1463,41 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             ttks[j - (j >= i)] = tt_builder->build(tks[j]);
         reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
         const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
-        const double distz = mag(vnm1.z() - v[0]->z());
+        const double distz = vnm1.z() - v[0]->z();
+        //AnalyticalImpactPointExtrapolator extrapolator(tt_builder->build(tks[i]).field());
+        //TrajectoryStateOnSurface closestOnTransversePlaneState =
+        //          extrapolator.extrapolate(tt_builder->build(tks[i]).impactPointState(), RecoVertex::convertPos(v[0]->position()));
+        //GlobalPoint impactPoint = closestOnTransversePlaneState.globalPosition();
+        //const double tkv_distz_alt = impactPoint.z() - v[0]->z();
+	const double tkv_distz = (tks[i]->vz() - v[0]->z()) - ((tks[i]->vx() -  v[0]->x()) * tks[i]->px() + (tks[i]->vy() -  v[0]->y()) * tks[i]->py()) / tks[i]->pt() * tks[i]->pz() / tks[i]->pt();
+        const double err_tkv_distz = sqrt(tks[i]->covariance(4,4) * (tks[i]->p()*tks[i]->p())) / tks[i]->pt(); //same as dzErr() 
+        std::pair<bool, Measurement1D> tkbs_dist_2d = track_dist2d(tt_builder->build(tks[i]), *v[0]);
+        const double vchi2 = v[0]->normalizedChi2();
+        Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+        double dBV = dBV_Meas1D.value();
+        double bs2derr = dBV_Meas1D.error();
+        reco::TrackRef tk = tks[i];
+        if (ntks >= 5 && vchi2 < 5 && dBV < 2.0 && dBV > 0.01 && bs2derr < 0.005){ 
+              h_dz_vertex_tkvtxdistz->Fill(tkv_distz);
+              h_dz_vertex_tkvtxdisterrz->Fill(err_tkv_distz);
+              h_dz_vertex_tkvtxdistsigz->Fill(tkv_distz/err_tkv_distz);
+              h_dz_vertex_tkvtxdistxy->Fill(tkbs_dist_2d.second.value());
+              h_dz_vertex_tkvtxdisterrxy->Fill(tkbs_dist_2d.second.error());
+              h_dz_vertex_tkvtxdistsigxy->Fill(tkbs_dist_2d.second.significance());
+              h_dz_vertex_vtxdistz->Fill(distz);
+              h_dz_vertex_cov_vtxdisterrz->Fill(sqrt(mag(vnm1.covariance(2,2) - v[0]->covariance(2,2))));
+              h_dz_vertex_cov_vtxdistsigz->Fill(distz/sqrt(mag(vnm1.covariance(2,2) - v[0]->covariance(2,2))));
+              h_dz_vertex_vtxnm1_z->Fill(vnm1.z()); 
+              h_dz_vertex_vtxnm1_covzz->Fill(sqrt(vnm1.covariance(2,2)));
+              h_dz_vertex_vtx_covzz->Fill(sqrt(v[0]->covariance(2,2)));
+        }
+        const double distz_sig = distz/sqrt(mag(vnm1.covariance(2,2) - v[0]->covariance(2,2)));  
         if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
 
+        
         if (vnm1.chi2() < 0 ||
             (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
-            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
+            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) { //FIXME
           if (verbose) {
             printf("    replacing");
             if (refit_count[iv] < max_nm1_refit_count - 1)
@@ -1424,11 +1514,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
     iv = 0; //some vertices after dz refiting have normalized chi2 > 5
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
-       if ((*v[0]).normalizedChi2() > 5) {
+      h_dz_vertex_chi2->Fill((*v[0]).normalizedChi2());
+      if ((*v[0]).normalizedChi2() > 5) {
          v[0] = vertices->erase(v[0]) - 1;
          continue;
        }
     }
+  
   }
   if (histos_output_afterdzfit){
     fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::afterdzfit);
@@ -1838,7 +1930,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  }
   }
 
-
+  //nt_filler.finalize(); #FIXME
   //////////////////////////////////////////////////////////////////////
   // Put the output.
   //////////////////////////////////////////////////////////////////////

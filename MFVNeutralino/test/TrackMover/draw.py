@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-variables = ['_movedist', '_npv_', '_ht_','_njets_', '_w_mT_', 'sump', '_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_', '_nmovedtracks_' ] 
+variables = ['_movedist', '_ht_', '_sump_', 'tks', '_vtx', '_trk_', '_npv_', '_costheta_', '_njets_', 'movedseedtks', 'closeseedtks', 'jet0_eta', 'jet1_eta', 'closedseed', '_w_mT_', '_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_', '_nmovedtracks_' ] 
 
 def get_em(fn, scale=1., alpha=1-0.6827):
     #f = ROOT.TFile(fn)
@@ -63,7 +63,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
            if var in name:
              Isnametoplot = True
              break
-        if not Isnametoplot:
+        if not Isnametoplot or name.startswith('h_'):
            continue
         
         if name.startswith('h_'):

@@ -16,7 +16,8 @@ def cmd_hadd_vertexer_histos():
     print(ntuple)
     samples = Samples.registry.from_argv(
             #Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017 + 
-            Samples.WplusHToSSTodddd_samples_2017 + Samples.met_samples_2017 + Samples.qcd_lep_samples_2017 + Samples.leptonic_samples_2017 + Samples.diboson_samples_2017 
+            Samples.met_samples_2017
+            #Samples.WplusHToSSTodddd_samples_2017 + Samples.met_samples_2017 + Samples.qcd_lep_samples_2017 + Samples.leptonic_samples_2017 + Samples.diboson_samples_2017 
             #Samples.data_samples_2015 + \
             #Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             #Samples.data_samples + \
@@ -135,16 +136,16 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
         elif bkg_tag == 'qcd':
             x = []
             if not trigeff:
-                x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
-                x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+                x += ['qcdempt%03i' % x for x in [15,20,80,120]] #30 50 170 300
+                x += ['qcdbctoept%03i' % x for x in [30,80,250]] #20 170 
         elif bkg_tag == 'qcdmupt5':
             x = [] 
             if not trigeff:
-                x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]] 
-                x += ['qcdpt%03imupt5' % x for x in [120,300,470,600,800]] #170 
-                x += ['qcdpt1000mupt5']
+                x += ['qcdpt%02imupt5' % x for x in [15,20,30,80]]  #50
+                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600]]  #800 
+                #x += ['qcdpt1000mupt5']
         else:
-            x = ['ttbar', 'ww', 'wz', 'zz'] 
+            x = ['ww', 'wz', 'zz'] #ttbar  
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']

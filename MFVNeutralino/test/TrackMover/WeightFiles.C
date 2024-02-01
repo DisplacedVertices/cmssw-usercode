@@ -23,7 +23,7 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, int year, bool doangle, doub
   TFile* fout = new TFile(fnout, "recreate");
 
   /*
-  std::vector<TString> hns_1d = {"nocuts_jet_dr_den"};
+  std::vector<TString> hns_1d = {"nocuts_movedist3_den", "nocuts_closeseedtks_den","nocuts_jet_costheta_den"};
   for (const auto& hn : hns_1d){
       std::cout << hn << std::endl;
       TH1D* hb = (TH1D*)fb->Get(hn);
@@ -38,8 +38,8 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, int year, bool doangle, doub
   fb->Close();
   fout->Close();
   */
-
-  std::vector<TString> hns_2d = {"nocuts_jet1_sump_jetdr_den"};
+   
+  std::vector<TString> hns_2d = {"nocuts_jet1_sump_jetdr_den", "nocuts_jet_costheta_tightcloseseedtks_den", "nocuts_jet_dr_tightcloseseedtks_den", "nocuts_movedist3_tightcloseseedtks_den", "nocuts_jet_costheta_closeseedtks_den", "nocuts_jet_dr_closeseedtks_den", "nocuts_movedist3_closeseedtks_den"};
   for (const auto& hn : hns_2d){
       std::cout << hn << std::endl;
       TH2D* hb = (TH2D*)fb->Get(hn);
