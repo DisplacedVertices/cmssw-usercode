@@ -2,9 +2,6 @@ import ROOT
 import array
 import sys, os, math
 
-#"/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom/mfv_HtoLLPto4j_tau10mm_M1000_450_2017.root"
-#in_fname = "/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom/mfv_ZprimetoLLPto4b_tau1mm_M4500_2200_2017.root"
-
 def main() :
     fpath = "/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom"
     os.system("mkdir -p "+fpath+"/reweighted/")
@@ -23,37 +20,30 @@ def main() :
                 for year in ["2016", "2017", "2018"] :
                     name_template = "mfv_%sto%s_tauCTAUmm_M%s_%s.root" % (model, decay, masses, year)
 
-                    # since I am using this also to apply the gen filter for the Zprime samples, I need to run the generated samples also through the script
-                    for gen_ctau in generated_ctaus :
-                        makeReweightedTree(fpath, name_template, gen_ctau, gen_ctau)
-
-                        gen_ctau_str = str(gen_ctau).replace(".","p")
-                        from_name = fpath+"/reweighted/"+name_template.replace("CTAU", gen_ctau_str+"from"+gen_ctau_str)
-                        to_name =   fpath+"/reweighted/"+name_template.replace("CTAU", gen_ctau_str)
-                        os.system("mv %s %s" % (from_name, to_name) )
-
-                    ## get our pairings of low and high ctaus that we'll reweight from
-                    for idx in xrange(0, len(generated_ctaus)-1) :
+                    # get our pairings of low and high ctaus that we'll reweight from
+                    for idx in xrange(0, len(generated_ctaus)) :
                         gen_ctau_low = generated_ctaus[idx]
-                        gen_ctau_high = generated_ctaus[idx+1]
+                        if idx == len(generated_ctaus) - 1 :
+                            gen_ctau_high = generated_ctaus[idx]+1 # bit of a hack, just to get it to go through the loop one more time
+                        else :
+                            gen_ctau_high = generated_ctaus[idx+1]
 
-                        # e.g., for 1mm, the initial ctau to weight to is 2mm
-                        out_ctau = 2*gen_ctau_low
+                        # start with the "low" value
+                        out_ctau = gen_ctau_low
+                        #print out_ctau, gen_ctau_high
 
                         while out_ctau < gen_ctau_high :
 
                             # formatting for float value of 0.1mm -> file name string of 0p1mm
                             out_ctau_str = str(out_ctau).replace(".","p")
-                            
-                            # one edge case, due to float vs. int comparisons
-                            if out_ctau_str == "1p0" and gen_ctau_high == 1 : 
-                                # e.g. for the 1-10mm range, increment by 1mm
-                                out_ctau += gen_ctau_low
-                                continue
-                            
-                            # do the reweighting! both from e.g. 1mm up to 2mm and from 10mm down to 2mm
-                            makeReweightedTree(fpath, name_template, gen_ctau_low, out_ctau)
-                            makeReweightedTree(fpath, name_template, gen_ctau_high, out_ctau)
+
+                            # weird edge case that I cannot otherwise avoid, possibly due to float vs. int comparisons
+                            if out_ctau_str == "1p0" :
+                                out_ctau_str = "1"
+
+                            for in_ctau in generated_ctaus :
+                                #print "makeReweightedTree", fpath, name_template, in_ctau, out_ctau
+                                makeReweightedTree(fpath, name_template, in_ctau, out_ctau)
 
                             # makeReweightedTree formats the outputs as e.g. "mfv_HtoLLPto4j_tau5from1mm_M1000_450_2017.root", 
                             # i.e. keeping the string "from" between the output and input ctau, so that we can hadd them here
@@ -63,6 +53,7 @@ def main() :
                             hadded_name = fpath+"/reweighted/"+hadded_name
                             hadd_inputs = fpath+"/reweighted/"+hadd_inputs
 
+                            #print "hadd %s %s" % (hadded_name, hadd_inputs)
                             os.system("hadd %s %s" % (hadded_name, hadd_inputs) )
 
                             # e.g. for the 1-10mm range, increment by 1mm
@@ -72,11 +63,17 @@ def main() :
 
 def makeReweightedTree(fpath, name_template, in_ctau_mm, out_ctau_mm) :
 
-    debug = True
-    apply_gen_filter = True # could do this only if Zprime is in the filename # FIXME do this cleanup, or at least check that it only affects the Zprime samples
+    debug = False
+    apply_gen_filter = True # in principle, we only want this for the buggy Zprime samples that accidentally had some prompt decays (but I checked it to have no impact for the heavy Higgs samples)
 
     in_ctau_str = str(in_ctau_mm).replace(".","p")
     out_ctau_str = str(out_ctau_mm).replace(".","p")
+
+    # weird edge case that I cannot otherwise avoid, possibly due to float vs. int comparisons
+    if in_ctau_str == "1p0" :
+        in_ctau_str = "1"
+    if out_ctau_str == "1p0" :
+        out_ctau_str = "1"
     
     in_fname = fpath+"/"+name_template.replace("CTAU", in_ctau_str)
     in_file = ROOT.TFile(in_fname, "OPEN")
@@ -150,21 +147,19 @@ def makeReweightedTree(fpath, name_template, in_ctau_mm, out_ctau_mm) :
             new_weight = entry.weight * weight1 * weight2
 
             if add_to_sumw :
-                # this sumw includes things like pileup weights, which may not be correct (and at minimum, is not what we did in EXO-19-013. instead, we used Nevents in our denominator, so we'll try the same below)
-                #sumw += new_weight
-                #sumw2 += new_weight**2
-
-                sumw += 1
-                sumw2 += 1
+                # Note that we track the sumw based only on these lifetime weights, under the assumption that the other gen weights are all 1. 
+                # If we used new_weight itself here, we would be including reco weights in our denominator, which would be incorrect
+                sumw += (weight1 * weight2)
+                sumw2 += (weight1 * weight2)**2
 
                 # fill plots of original and output ctau, for testing.
                 # only do it here for the nopresel tree, to get the full ctau distribution without any bias from cuts applied
                 if debug :
                     #print weight1, weight2, new_weight
-                    h_input_ctau.Fill(rest_disp1, entry.weight)
-                    h_input_ctau.Fill(rest_disp2, entry.weight)
-                    h_output_ctau.Fill(rest_disp1, new_weight)
-                    h_output_ctau.Fill(rest_disp2, new_weight)
+                    h_input_ctau.Fill(rest_disp1, 1)
+                    h_input_ctau.Fill(rest_disp2, 1)
+                    h_output_ctau.Fill(rest_disp1, weight1 * weight2)
+                    h_output_ctau.Fill(rest_disp2, weight1 * weight2)
 
             if fill_output_tree :
                 weight_branch[0] = new_weight
