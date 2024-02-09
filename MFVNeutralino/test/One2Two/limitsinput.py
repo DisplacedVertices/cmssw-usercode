@@ -48,31 +48,57 @@ def details2name(kind, tau, mass, massResonance=None):
         else :
             taustr = int(tau)
         return '%s_tau%smm_M%i_%i' % (kind, taustr, massResonance, mass)
+    elif "Stealth" in kind :
+        if tau < 0.1 :
+            taustr = "0p0%i" % int(tau*100)
+        elif tau >= 0.1 and tau < 1 :
+            taustr = "0p%i" % int(tau*10)
+        else :
+            taustr = int(tau)
+        #print "details2name: " + '%s_mStop_%i_mS_%i_ctau_%s' % (kind, massResonance, mass, taustr)
+        return '%s_mStop_%i_mS_%i_ctau_%s' % (kind, massResonance, mass, taustr)
     else :
         return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 
 def _nameok(name):
-    assert name.count('_tau') == 1 and (name.count('um_') == 1 or name.count('mm_') == 1) and name.count('_M') == 1
+    assert (name.count('_tau') == 1 and (name.count('um_') == 1 or name.count('mm_') == 1) and name.count('_M') == 1) or (name.count('_ctau_') == 1 and name.count('_mStop_') == 1 and name.count('_mS_') == 1)
 
 def name2kind(name):
     _nameok(name)
-    return name.split('_tau')[0]
+    if '_tau' in name :
+        return name.split('_tau')[0]
+    elif '_mStop_' in name :
+        # for Stealth SUSY samples
+        return name.split('_mStop_')[0]
+    else :
+        print "unsupported name, surprised _nameok didn't already fail: %s" % name
+        return None
 
 def name2tau(name):
     _nameok(name)
-    if 'mm_' in name :
+    if 'um_' in name :
+        return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    elif 'mm_' in name :
         return float((name.split('_tau')[1].split('mm_')[0]).replace('p','.'))
-    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    else :
+        return float((name.split('_ctau_')[1]).replace('p','.'))
 
 def name2mass(name):
     _nameok(name)
-    listOfMasses = name.split('_M')[1].split('_')
-    if len(listOfMasses) == 1 :
-        mass = int(listOfMasses[0])
-        massResonance = None
-    else :
+
+    # for Stealth SUSY samples
+    if '_mStop_' in name :
+        listOfMasses = name.split('_mStop_')[1].split('_ctau_')[0].split('_mS_')
         mass = int(listOfMasses[1])
         massResonance = int(listOfMasses[0])
+    else :
+        listOfMasses = name.split('_M')[1].split('_')
+        if len(listOfMasses) == 1 :
+            mass = int(listOfMasses[0])
+            massResonance = None
+        else :
+            mass = int(listOfMasses[1])
+            massResonance = int(listOfMasses[0])
     return mass, massResonance
 
 def name2details(name):
@@ -297,6 +323,18 @@ def sig_uncert_alphas(name_year):
             ('mfv_ZprimetoLLPto4j', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
             ('mfv_ZprimetoLLPto4j', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
             ('mfv_ZprimetoLLPto4j', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_StealthSHH', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_StealthSHH', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_StealthSHH', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_StealthSHH', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_StealthSHH', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_StealthSHH', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+            ('mfv_StealthSYY', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_StealthSYY', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_StealthSYY', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_StealthSYY', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_StealthSYY', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_StealthSYY', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
           }
 
     ab = None
@@ -505,6 +543,30 @@ def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
                                         (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
                                         (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
                                         (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_StealthSHH': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_StealthSYY': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
         'mfv_neu':          { '2017': ( (0.276, 0.193, 0.11, 0.058, 0.059),
                                         (0.243, 0.166, 0.093, 0.043, 0.044),
                                         (0.22, 0.153, 0.088, 0.036, 0.037),
@@ -599,7 +661,8 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = None
-    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom/reweighted/mfv*.root'
+    #trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27darksectorreview_withGenInfom/reweighted/mfv*.root'
+    trees = '/eos/user/j/jreicher/dark_sector_review/StealthSUSY/reweighted/mfv*.root'
     title = []
     sigs = {}
 
