@@ -60,6 +60,15 @@ def details2name(kind, tau, mass, massResonance=None):
         else :
             taustr = int(tau)
         return '%s_tau%smm_M%i_%i' % (kind, taustr, massResonance, mass)
+    elif "Stealth" in kind :
+        if tau < 0.1 :
+            taustr = "0p0%i" % int(tau*100)
+        elif tau >= 0.1 and tau < 1 :
+            taustr = "0p%i" % int(tau*10)
+        else :
+            taustr = int(tau)
+        #print "details2name: " + '%s_mStop_%i_mS_%i_ctau_%s' % (kind, massResonance, mass, taustr)
+        return '%s_mStop_%i_mS_%i_ctau_%s' % (kind, massResonance, mass, taustr)
     else :
         return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 
@@ -69,23 +78,41 @@ def details2name(kind, tau, mass, massResonance=None):
 #    return '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
 
 def name2kind(name):
-    return name.split('_tau')[0]
+    _nameok(name)
+    if '_tau' in name :
+        return name.split('_tau')[0]
+    elif '_mStop_' in name :
+        # for Stealth SUSY samples
+        return name.split('_mStop_')[0]
+    else :
+        print "unsupported name, surprised _nameok didn't already fail: %s" % name
+        return None
 
 def name2tau(name):
     _nameok(name)
-    if 'mm_' in name :
+    if 'um_' in name :
+        return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    elif 'mm_' in name :
         return float((name.split('_tau')[1].split('mm_')[0]).replace('p','.'))
-    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    else :
+        return float((name.split('_ctau_')[1]).replace('p','.'))
 
 def name2mass(name):
     _nameok(name)
-    listOfMasses = name.split('_M')[1].split('_')
-    if len(listOfMasses) == 1 :
-        mass = int(listOfMasses[0])
-        massResonance = None
-    else :
+
+    # for Stealth SUSY samples
+    if '_mStop_' in name :
+        listOfMasses = name.split('_mStop_')[1].split('_ctau_')[0].split('_mS_')
         mass = int(listOfMasses[1])
         massResonance = int(listOfMasses[0])
+    else :
+        listOfMasses = name.split('_M')[1].split('_')
+        if len(listOfMasses) == 1 :
+            mass = int(listOfMasses[0])
+            massResonance = None
+        else :
+            mass = int(listOfMasses[1])
+            massResonance = int(listOfMasses[0])
     return mass, massResonance
 
 def name2details(name):
