@@ -81,7 +81,7 @@ def name2tau(name):
     elif 'mm_' in name :
         return float((name.split('_tau')[1].split('mm_')[0]).replace('p','.'))
     else :
-        return float((name.split('_ctau_')[1]).replace('p','.'))
+        return float((name.split('_ctau_')[1]).replace('p','.').split('_')[0])
 
 def name2mass(name):
     _nameok(name)
