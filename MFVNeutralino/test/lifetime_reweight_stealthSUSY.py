@@ -16,8 +16,7 @@ def main() :
         if True :
 
             for masses in all_masses :
-                for year in ["2017", "2018"] :
-                #for year in ["2016", "2017", "2018"] :
+                for year in ["2016", "2017", "2018"] :
                     name_template = "mfv_Stealth%s_%s_ctau_CTAU_%s.root" % (model, masses, year)
 
                     # get our pairings of low and high ctaus that we'll reweight from
@@ -33,6 +32,12 @@ def main() :
                         #print out_ctau, gen_ctau_high
 
                         while out_ctau < gen_ctau_high :
+
+                            # avoid processing some samples twice due to float vs. int comparisons
+                            diff = abs(out_ctau-gen_ctau_high)
+                            if(diff < 1.0e-6) :
+                                out_ctau += gen_ctau_low
+                                continue
 
                             out_ctau_str = str(out_ctau)
 
