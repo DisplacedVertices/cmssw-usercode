@@ -189,7 +189,7 @@ class MFVVertexer : public edm::EDProducer {
     const double min_track_vertex_sig_to_remove;
     const bool remove_one_track_at_a_time;
     const double max_nm1_refit_dist3;
-    const double max_nm1_refit_distz; //FIXME
+    const double max_nm1_refit_distz_sig;
     const int max_nm1_refit_count;
     const double trackrefine_sigmacut;
     const double trackrefine_trimmax;
@@ -225,8 +225,7 @@ class MFVVertexer : public edm::EDProducer {
 
 	TH2F* h_miss_seed_track_eta_phi;
 	TH2F* h_miss_seed_track_npxlayers_minr;
-
-    //FIXME 
+ 
     TH1F* h_failedseed_vertex_chi2;
     TH1F* h_failedseed_vertex_isvalid;
     TH1F* h_dz_vertex_chi2;
@@ -363,7 +362,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     max_nm1_refit_dist3(cfg.getParameter<double>("max_nm1_refit_dist3")),
-    max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")), //FIXME
+    max_nm1_refit_distz_sig(cfg.getParameter<double>("max_nm1_refit_distz_sig")), 
     max_nm1_refit_count(cfg.getParameter<int>("max_nm1_refit_count")),
     trackrefine_sigmacut(cfg.getParameter<double>("trackrefine_sigmacut")),
     trackrefine_trimmax(cfg.getParameter<double>("trackrefine_trimmax")),
@@ -1433,7 +1432,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////
-  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) { //FIXME
+  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz_sig > 0) { 
     /*
     auto& tks = nt.tracks();
     for (int it=0, ite = tks.n(); it < ite; it++){
@@ -1494,10 +1493,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const double distz_sig = distz/sqrt(mag(vnm1.covariance(2,2) - v[0]->covariance(2,2)));  
         if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
 
-        
+         
         if (vnm1.chi2() < 0 ||
             (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
-            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) { //FIXME
+            (max_nm1_refit_distz_sig > 0 && fabs(distz_sig) > max_nm1_refit_distz_sig)) { 
           if (verbose) {
             printf("    replacing");
             if (refit_count[iv] < max_nm1_refit_count - 1)

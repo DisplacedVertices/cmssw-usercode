@@ -6,7 +6,7 @@ do_track = False # this can onlky be used for ntuple with keep_tk=True
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 #currently : keep histos slim -> do only Loose Vertices & NoCuts, Minntk = 3, 4, 5 
 #update : Selected Loose Vertices are changed to Tight Vertices
-input_files(process, './ntuple.root')
+#input_files(process, '/eos/uscms/store/group/lpclonglived/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOffdzULV30LepMum_2017/240131_215245/0000/ntuple_0.root')
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -72,7 +72,7 @@ nm1s = []
 #    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
 #    ]
 
-ntks = [5,]#3,4,7,8,9]
+ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
 
 # new setup for lepton : min3, min4, min5 with 'Loose' Vertices 
@@ -182,8 +182,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier)
     elif use_Muon_triggers :
-        samples = pick_samples(dataset, qcd=True, all_signal=True, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False )
-        #samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')] 
+        #samples = pick_samples(dataset, qcd=True, all_signal=True, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False )
+        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=True, met=True, diboson=True, Lepton_data=False)
+        samples = pick_samples(dataset, all_signal=True)
+        #samples = [getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2017')] 
         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
     elif use_Electron_triggers :
         samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False)

@@ -9,7 +9,7 @@ settings.is_miniaod = True
 #settings.event_filter = 'electrons only novtx'
 settings.event_filter = 'muons only novtx'
 
-version = settings.version + 'v4'
+version = settings.version + 'v5'
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -37,10 +37,10 @@ cfgs = named_product(njets = [2], #FIXME
 process = ntuple_process(settings)
 #tfileservice(process, '/uscms/home/pkotamni/nobackup/crabdirs/movedtree.root')
 tfileservice(process, 'movedtree.root')
-max_events(process, 200)
+#max_events(process, 200)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
-input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/01DA55E6-2A8C-AE48-B2C4-A3DC37E2052D.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/10063082-9BA1-D14B-A04D-EDA3288D079A.root')
 cmssw_from_argv(process)
@@ -112,7 +112,7 @@ for icfg, cfg in enumerate(cfgs):
                             min_jet_ntracks = cms.uint32(2), 
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
-                            tau = cms.double(1.),
+                            tau = cms.double(0.3), #FIXME default 1.
                             sig_theta = cms.double(cfg.angle),
                             sig_phi = cms.double(cfg.angle),
                             )
@@ -147,13 +147,14 @@ random_service(process, random_dict)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=False, met=False, diboson=False, Lepton_data=False)
-    #samples = [getattr(Samples, 'ww_2017')]
-    #samples = [getattr(Samples, 'SingleMuon2017C')]
-    samples = [getattr(Samples, 'wjetstolnu_0j_2017')]
+    #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=True, met=True, diboson=True, Lepton_data=True)
+    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True)
+    #samples = [getattr(Samples, 'ttbar_2017')]
+    #samples = [getattr(Samples, 'SingleMuon2017D')]
+    #samples = [getattr(Samples, 'wjetstolnu_0j_2017')]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
-    ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
+    ms = MetaSubmitter('TrackMover0p3' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

@@ -16,30 +16,13 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, int year, bool doangle, doub
   TFile* fb = TFile::Open(fnb, "read");
   // This is for 10mm->1mm ntuple after sump weighting
   TString fnout;
-  fnout.Form("reweight_tau%imm_M%02i_%i.root", ctau, mg, year);
+  fnout.Form("reweight_tau%imm_M%02i_%i_2D.root", ctau, mg, year);
   std::cout << "Getting weights from: " << std::endl;
   std::cout << fns << std::endl;
   std::cout << fnb << std::endl;
   TFile* fout = new TFile(fnout, "recreate");
-
-  /*
-  std::vector<TString> hns_1d = {"nocuts_movedist3_den", "nocuts_closeseedtks_den","nocuts_jet_costheta_den"};
-  for (const auto& hn : hns_1d){
-      std::cout << hn << std::endl;
-      TH1D* hb = (TH1D*)fb->Get(hn);
-      TH1D* hs = (TH1D*)fs->Get(hn);
-      //hb->Rebin(2);
-      hb->Scale(1./hb->Integral());
-      hs->Scale(1./hs->Integral());
-      hs->Divide(hb);
-      fout->WriteObject(hs,hn);
-  }
-  fs->Close();
-  fb->Close();
-  fout->Close();
-  */
-   
-  std::vector<TString> hns_2d = {"nocuts_jet1_sump_jetdr_den", "nocuts_jet_costheta_tightcloseseedtks_den", "nocuts_jet_dr_tightcloseseedtks_den", "nocuts_movedist3_tightcloseseedtks_den", "nocuts_jet_costheta_closeseedtks_den", "nocuts_jet_dr_closeseedtks_den", "nocuts_movedist3_closeseedtks_den"};
+     
+  std::vector<TString> hns_2d = {"nocuts_jet1_sump_jetdr_den", "nocuts_jet1_sump_jet_costheta_den", "nocuts_jet_costheta_tightcloseseedtks_den", "nocuts_jet_dr_tightcloseseedtks_den", "nocuts_movedist3_tightcloseseedtks_den", "nocuts_jet_costheta_closeseedtks_den", "nocuts_jet_dr_closeseedtks_den", "nocuts_movedist3_closeseedtks_den", "nocuts_movedist3_jetdr_den"};
   for (const auto& hn : hns_2d){
       std::cout << hn << std::endl;
       TH2D* hb = (TH2D*)fb->Get(hn);
@@ -47,14 +30,6 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, int year, bool doangle, doub
       hb->Scale(1./hb->Integral());
       hs->Scale(1./hs->Integral());
       hs->Divide(hb);
-      if ((weight_limit>0) && (hn!="nocuts_detadphi_js_mv_den")){
-        for(int i=0; i<hs->GetNcells(); ++i){
-          if (hs->GetBinContent(i)>weight_limit)
-            hs->SetBinContent(i,weight_limit);
-          else if (hs->GetBinContent(i)<(-1)*weight_limit)
-            hs->SetBinContent(i,(-1)*weight_limit);
-        }
-      }
       fout->WriteObject(hs,hn);
   }
   fs->Close();
@@ -63,7 +38,7 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, int year, bool doangle, doub
 }
 
 
-void WeightFiles()
+void WeightFiles2D()
 {
   std::vector<int> taus = {1};
   std::vector<int> mgs = {55};

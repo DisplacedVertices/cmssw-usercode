@@ -111,7 +111,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              max_nm1_refit_distz = cms.double(-1), #(0.005), #0.03#0.005 might be too tight so try to relex it
                              ignore_lep_in_refit_distz = cms.bool(True), #do not consider dropping tracks at dz refit step if they are leptons w/ pt > 20 GeV. 
                              max_nm1_refit_distz_error = cms.double(-1), #0.02#0.015 might be too tight so try to relex it
-                             max_nm1_refit_distz_sig = cms.double(-1), #-1), #0.005 #might be too tight so try to relex it
+                             max_nm1_refit_distz_sig = cms.double(3.0), #-1 we now use a significant value rather than an absolute one 
                              max_nm1_refit_count = cms.int32(-1),
                              trackrefine_sigmacut = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              trackrefine_trimmax = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)

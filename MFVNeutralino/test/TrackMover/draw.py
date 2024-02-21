@@ -63,7 +63,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
            if var in name:
              Isnametoplot = True
              break
-        if not Isnametoplot or name.startswith('h_'):
+        if not Isnametoplot or name.startswith('h_') or 'which' in name or 'invtx' in name or 'outvtx' in name:
            continue
         
         if name.startswith('h_'):
@@ -85,6 +85,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
               num = num.Rebin(10)
               den = den.Rebin(10)
             g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
+            print(name)
             g.SetTitle('')
             g.GetXaxis().SetTitle(num.GetXaxis().GetTitle())
             g.GetYaxis().SetTitle('efficiency')
@@ -134,8 +135,8 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root'):
     f_2, l_2, d_2, c_2, integ_2 = get_em(fn2, scale=mc_scale_factor)
     print 'fn3:', fn3
     f_3, l_3, d_3, c_3, integ_3 = get_em(fn3)
-    assert l_1 == l_2
-    assert len(d_1) == len(d_2)
+    #assert l_1 == l_2
+    #assert len(d_1) == len(d_2)
     l = l_1
 
     scale = integ_1 / integ_2
@@ -153,21 +154,20 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root'):
         both = (data, mc)
 
         if name.endswith('_rat') or (not name.endswith('_num') and not name.endswith('_den')):
-            data.SetName("SingleMuon 2017")
-            data.SetLineWidth(2)
-            data.SetMarkerStyle(20)
+            
+            data.SetName("SingleMuon")
             data.SetMarkerSize(0.8)
+            data.SetMarkerColor(ROOT.kBlack)
             data.SetLineColor(ROOT.kBlack)
+            data.SetFillColor(ROOT.kBlack)
 
-            mc.SetName("MC combined bkg 2017")
-            mc.SetFillStyle(3001)
-            mc.SetMarkerStyle(24)
+            mc.SetName("MC bkg")
             mc.SetMarkerSize(0.8)
-            mc.SetMarkerColor(2)
-            mc.SetLineColor(2)
-            mc.SetFillColor(2)
-
-            signal.SetName("MC WHSS4d 1mm 55GeV")
+            mc.SetMarkerColor(ROOT.kMagenta)
+            mc.SetLineColor(ROOT.kMagenta)
+            mc.SetFillColor(ROOT.kMagenta)
+            
+            signal.SetName("MC signal")
             signal.SetMarkerSize(0.8)
             signal.SetMarkerColor(ROOT.kBlue)
             signal.SetLineColor(ROOT.kBlue)
@@ -175,12 +175,12 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root'):
             
             x_range = None
             y_range = None
-            objs = [mc, data, signal]
+            objs = [data, mc]
             statbox_size = (0.2,0.2)
             if name.endswith('_rat'):
                 for g in both:
                     g.GetYaxis().SetTitle('efficiency')
-                objs = [(mc, 'PE2'), (data, 'P'), (signal, 'P')]
+                objs = [(signal, 'P'), (data, 'P'), (mc, 'PE2')]
                 y_range = (0, 1.05)
                 statbox_size = None
             if 'bs2derr' in name:
@@ -193,7 +193,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root'):
                         y_range=y_range,
                         #res_y_range=0.10,
                         res_y_range=(0.4,1.6),
-                        res_y_title='data/MC',
+                        res_y_title='TM/signal MC',
                         res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False, 'allow_subset': True}, #name in ('all_jetsumntracks_rat', )},
                         res_lines=1.,

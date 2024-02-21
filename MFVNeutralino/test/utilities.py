@@ -136,16 +136,18 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
         elif bkg_tag == 'qcd':
             x = []
             if not trigeff:
-                x += ['qcdempt%03i' % x for x in [15,20,80,120]] #30 50 170 300
-                x += ['qcdbctoept%03i' % x for x in [30,80,250]] #20 170 
+                x = []
+                #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] #15 30 50 170 300
+                #x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] #20 170 
         elif bkg_tag == 'qcdmupt5':
             x = [] 
             if not trigeff:
-                x += ['qcdpt%02imupt5' % x for x in [15,20,30,80]]  #50
-                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600]]  #800 
+                x = []
+                #x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  #50
+                #x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]  #800 
                 #x += ['qcdpt1000mupt5']
         else:
-            x = ['ww', 'wz', 'zz'] #ttbar  
+            x = ['ww', 'wz', 'zz', 'ttbar'] 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
