@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-import sys, os, glob, argparse, subprocess
+import sys, os, glob, argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd_files, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd_files, cs_hadd
 from JMTucker.Tools.general import touch as _touch
 from JMTucker.Tools.hadd import HaddlogParser
 from JMTucker.Tools import eos, colors
-from JMTucker.Tools.CMSSWTools import cmssw_base, make_tarball
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
                                  usage = '%(prog)s [options] condor_or_crab_dirs')
@@ -33,8 +32,6 @@ parser.add_argument('-r', '--remove-originals', action='store_true', default=Fal
                     help='Remove the original files.')
 parser.add_argument('-v', '--verbose', action='store_true', default=False,
                     help='Print more info.')
-parser.add_argument('-s', '--submit', action='store_true', default=False,
-                    help='submits hadd jobs to condor')
 
 options = parser.parse_args()
 
@@ -54,9 +51,6 @@ if options.only_notdones:
     options.ignore_done = True
     options.overwrite = True
 
-if options.submit:
-    make_tarball('%s/input.tgz'  % (os.getcwd()), include_python=True, include_interface=True)
-
 ########################################################################
 
 wds = options.positional
@@ -68,7 +62,6 @@ def hadd_(is_crab, *args, **kwargs):
 
     done = True
     working_dir = args[0]
-    
     if not os.path.isfile(os.path.join(working_dir, 'mmon_done')):
         if options.ignore_done:
             done = False
@@ -79,11 +72,7 @@ def hadd_(is_crab, *args, **kwargs):
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
     kwargs['range_filter'] = options.range
-    kwargs['submit'] = options.submit
 
-    if options.submit:
-        kwargs['cmssw_tar_path'] = '%s/input.tgz' % (os.getcwd())
-    
     if is_crab:
         kwargs['lpc_shortcut'] = options.lpc_shortcut
         hadd_args, hadd_files, hadd = crab_hadd_args, crab_hadd_files, crab_hadd
@@ -101,8 +90,6 @@ def hadd_(is_crab, *args, **kwargs):
 
     working_dir, new_name, new_dir = hadd_args(working_dir, kwargs.get('new_name', None), new_dir)
 
-    #print working_dir
-    
     on_eos = new_dir and '/store/' in new_dir
     if on_eos:
         exists, mkdir, rm, touch = eos.exists, eos.mkdir, eos.rm, eos.touch
@@ -121,22 +108,16 @@ def hadd_(is_crab, *args, **kwargs):
         touch(notdone_fn)
 
     if exists(new_name):
-       # if submit : 
         if options.overwrite:
             print colors.yellow('overwriting existing file %s' % new_name)
             rm(new_name)
-        
         else:
             log_fn = new_name + '.haddlog'
-            log_fn_submit = new_name.replace('.root', '') + '.log'
-                        
             if on_eos:
                 log_fn = eos.fusemount(log_fn)
             njobs = hadd_files(working_dir, **kwargs)[0]
-            
             if not exists(log_fn):
                 log_njobs = 1 # assume 1 file copied
-                
             else:
                 p = HaddlogParser(log_fn)
                 log_njobs = p.num_sources
@@ -146,7 +127,7 @@ def hadd_(is_crab, *args, **kwargs):
                 if options.verbose:
                     print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
-        
+
     result = hadd(*args, **kwargs)
 
     if options.remove_originals and result.success:
@@ -156,12 +137,8 @@ def hadd_(is_crab, *args, **kwargs):
             else:
                 print 'dunno how to rm', fn
 
-########################################################################################################################################################
-
-
 
 for x in wds:
-    x = os.path.abspath(x)
     is_crab = is_crab_working_dir(x)
     if is_crab or is_cs_dir(x):
         hadd_(is_crab, x)

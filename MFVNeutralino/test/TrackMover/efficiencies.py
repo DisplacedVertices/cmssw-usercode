@@ -1,24 +1,24 @@
 import os
+from uncertainties import ufloat
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import named_product
 
 class Efficiencies:
     class EfficiencyFor:
-        pathbase = '/uscms_data/d2/tucker/crab_dirs/TrackMoverHistsV21mV2'
+        pathbase = '/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverJetByJetHistsUlv30lepmumv4_20_tau001000um_2Djetdrjet1sumpCorrection'
         def __init__(self, cfg):
             self.cfg = cfg
-            self.fn = os.path.join(self.pathbase,
-                                   ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p'),
-                                   'tau%06ium' % cfg.tau,
-                                   '%i%i' % (cfg.njets, cfg.nbjets),
-                                   'background_2017.root' if cfg.mc else 'JetHT2017.root'
-                                   )
-            f = ROOT.TFile(self.fn)
-            self.num = get_integral(f.Get('%s_npv_num' % cfg.cutset))[0]
-            self.den = get_integral(f.Get('%s_npv_den' % cfg.cutset))[0]
-            r,l,h = wilson_score(self.num, self.den)
-            self.eff = r,(h-l)/2
+            self.fn = os.path.join(self.pathbase,'background_leptonpresel_2017.root' if cfg.mc else 'SingleMuon2017.root')
+            f = ROOT.TFile.Open(self.fn)
+            self.num,self.num_unc = get_integral(f.Get('%s_npv_num' % cfg.cutset))
+            self.den,self.den_unc = get_integral(f.Get('%s_npv_den' % cfg.cutset))
+            self.num_w_unc = ufloat(self.num,self.num_unc)
+            self.den_w_unc = ufloat(self.den,self.den_unc)
+            e = self.num_w_unc/self.den_w_unc
+            self.eff = e.n, e.s
 
+            #r,l,h = wilson_score(self.num, self.den)
+            #self.eff = r,(h-l)/2
         def __repr__(self):
             return repr(self.cfg) + ': %.4f +- %.4f' % self.eff
 
@@ -27,8 +27,9 @@ class Efficiencies:
                                   cutset = ['nocuts', 'ntracks', 'all'],
                                   nsigmadxy = [4.0],
                                   tau = [100,300,1000,10000,30000],
-                                  njets = [2,3],
-                                  nbjets = [0,1,2],
+                                  njets = [2],
+                                  nbjets = [0],
+                                  year = [2017], #FIXME 
                                   mc = [False,True])
         self.effs = [self.EfficiencyFor(cfg) for cfg in self.cfgs]
 

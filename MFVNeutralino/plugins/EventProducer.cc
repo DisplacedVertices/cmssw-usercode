@@ -247,7 +247,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     edm::Handle<mfv::MCInteraction> mci;
     event.getByToken(mci_token, mci);
 
-    // mevent->secondaries = mci->secondaries;
+    //mevent->secondaries = mci->secondaries;
     // mevent->primaries = mci->primaries;
 
     std::vector<reco::GenParticleRef> mci_lep;
@@ -256,7 +256,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     // event.getByToken(secondaries_token, secondaries);
     // edm::Handle<std::vector<double>> primaries;
     // event.getByToken(secondaries_token, primaries);
-
     if (mci->valid()) {
       mevent->gen_valid = true;
 
@@ -274,21 +273,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 	mevent->gen_lsp_decay[i*3+2] = p.z;
 
 	mevent->gen_decay_type[i] = mci->decay_type()[i];
-  if (mci->secondaries(i).size() == 0) std::cout << "warning : found no gen daughters..." << std::endl;
+      if (mci->secondaries(i).size() == 0) std::cout << "warning : found no gen daughters..." << std::endl;
         for (const reco::GenParticleRef& s : mci->secondaries(i)) {
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
         }
       }
       
-      // for (const reco::GenParticleRef& p : *primaries) {
-      // 	mevent->gen_lsp.push_back(MFVEvent::p4(p->pt(), p->eta(), p->phi(), p->mass()));
-      // }
-
-      // for (const reco::GenParticeRef& s : *secondaries) {
-      // 	mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
-      // 	mevent->gen_daughter_id.push_back(s->pdgId());
-      // }
       mci_lep = mci->light_leptons();
     }
 

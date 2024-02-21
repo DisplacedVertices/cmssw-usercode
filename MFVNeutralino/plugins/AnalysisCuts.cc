@@ -44,6 +44,8 @@ private:
   const bool apply_displacedlepton_triggers;
   const bool require_displaced_lepton;
   const bool apply_cleaning_filters;
+  const bool apply_muons_only;
+  const bool apply_electrons_only;
   const int min_npv;
   const int max_npv;
   const double min_npu;
@@ -100,6 +102,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_displacedlepton_triggers(cfg.getParameter<bool>("apply_displacedlepton_triggers")),
     require_displaced_lepton(cfg.getParameter<bool>("require_displaced_lepton")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
+    apply_muons_only(cfg.getParameter<bool>("apply_muons_only")),
+    apply_electrons_only(cfg.getParameter<bool>("apply_electrons_only")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_npu(cfg.getParameter<double>("min_npu")),
@@ -142,6 +146,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
 {
   if (apply_cleaning_filters)
     throw cms::Exception("NotImplemented", "cleaning filters not yet implemented");
+  if (apply_muons_only && apply_electrons_only)
+    throw cms::Exception("ConflictLeptons ", "pick either use_Muon_triggers or use_Electron_triggers for orthogonality");
 }
 
 namespace {
@@ -169,11 +175,35 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     // if use_DisplacedLepton_triggers is True, also consider Displaced Lepton && offline preselection
     if (apply_presel == 2) {
       bool success = false;
-      for(size_t trig : mfv::LeptonTriggers){
-      	if(satisfiesLepTrigger(mevent, trig)) { 
-	         success = true;
-	         break;
+      bool pass_muon_events = false;
+      for(size_t trig : mfv::MuonTriggers){
+	if(satisfiesLepTrigger(mevent, trig)) { 
+	  success = true;
+          pass_muon_events = true;
+	  break;
+	}
+      }
+      
+      if (apply_electrons_only && !pass_muon_events){ // to avoid event-events that already pass muon triggers being double-counted
+        if (success){  
+          success = false;
         }
+        else{
+          for(size_t trig : mfv::ElectronTriggers){
+            if(satisfiesLepTrigger(mevent, trig)) { 
+	      success = true;
+              break;
+	    }
+          }
+        }
+      }
+      if (apply_displacedlepton_triggers) {
+	for(size_t trig : mfv::DisplacedLeptonTriggers){
+	  if(satisfiesDispLepTrigger(mevent, trig)) { 
+	    success = true;
+	    break;
+	  }
+	}
       }
       // if we want to consider displaced lepton triggers, to make it a logical OR, we need the single lepton triggers to fail. 
       if (apply_displacedlepton_triggers && success == false) {
@@ -280,11 +310,28 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (apply_trigger == 2) {
       bool at_least_one_trigger_passed = false;
-      for(size_t trig : mfv::LeptonTriggers){
-	      if(mevent->pass_hlt(trig)){
-	        at_least_one_trigger_passed = true;
-	         break;
-	      }
+      bool pass_muon_events = false;
+      for(size_t trig : mfv::MuonTriggers){
+	if(mevent->pass_hlt(trig)) { 
+          at_least_one_trigger_passed = true;
+	  pass_muon_events = true;
+          break;
+	}
+      }
+      
+      
+      if (apply_electrons_only && !pass_muon_events){ // to avoid event-events that already pass muon triggers being double-counted  
+        if(at_least_one_trigger_passed){ 
+          at_least_one_trigger_passed = false;
+        }
+        else {
+          for(size_t trig : mfv::ElectronTriggers){
+	    if(mevent->pass_hlt(trig)) { 
+              at_least_one_trigger_passed = true;
+              break;
+	    }
+          }
+        }
       }
       if(apply_displacedlepton_triggers){
 	      for(size_t trig : mfv::DisplacedLeptonTriggers){
@@ -475,12 +522,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
   bool passed_kinematics = false;
 
   switch(trig){
-  //case mfv::b_HLT_Ele35_WPTight_Gsf :
-  case mfv::b_HLT_Ele32_WPTight_Gsf :
+  case mfv::b_HLT_Ele35_WPTight_Gsf : //For 2017
+  //case mfv::b_HLT_Ele32_WPTight_Gsf : //For 2018
     {
       for(int ie =0; ie < nelectrons; ++ie){
-        if (mevent->electron_pt[ie] < 35) continue;
-	      //if (mevent->electron_pt[ie] < 38) continue;
+        //if (mevent->electron_pt[ie] < 35) continue; //For 2018
+	if (mevent->electron_pt[ie] < 38) continue; //For 2017
 	      if (mevent->electron_ID[ie][3] == 1) {
 	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
 	          if (mevent->electron_iso[ie] < 0.10) {
@@ -491,12 +538,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
       }
       return passed_kinematics;
     }
-  //case mfv::b_HLT_IsoMu27 :
-  case mfv::b_HLT_IsoMu24 :
+  case mfv::b_HLT_IsoMu27 : //For 2017
+  //case mfv::b_HLT_IsoMu24 : //For 2018
     {
       for(int im =0; im < nmuons; ++im) {
-		    if (mevent->muon_pt[im] < 27) continue;
-        //if (mevent->muon_pt[im] < 30) continue;
+	//if (mevent->muon_pt[im] < 27) continue; //For 2018
+          if (mevent->muon_pt[im] < 30) continue; //For 2017
 	      if (mevent->muon_ID[im][1] == 1) {
 	        if (abs(mevent->muon_eta[im]) < 2.4) {
 	          if (mevent->muon_iso[im] < 0.15) {

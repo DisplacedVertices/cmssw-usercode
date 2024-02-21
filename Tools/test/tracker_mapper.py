@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
-from JMTucker.MFVNeutralino.NtupleCommon import use_Lepton_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_Muon_triggers, use_Electron_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -57,14 +57,23 @@ if use_btag_triggers :
                               event_filter_jes_mult = 0,
                               event_filter_require_vertex = False,
                               input_is_miniaod = True)
-
+elif use_Muon_triggers :
+    event_filter = setup_event_filter(process,
+                              path_name = '',
+                              #trigger_filter = 'jets only',
+                              trigger_filter = 'muons only',
+                              #event_filter = 'jets only',
+                              event_filter = 'muons only',
+                              event_filter_jes_mult = 0,
+                              event_filter_require_vertex = False,
+                              input_is_miniaod = True)
 else :
     event_filter = setup_event_filter(process,
                               path_name = '',
                               #trigger_filter = 'jets only',
-                              trigger_filter = 'leptons only',
+                              trigger_filter = 'electrons only',
                               #event_filter = 'jets only',
-                              event_filter = 'leptons only',
+                              event_filter = 'electrons only',
                               event_filter_jes_mult = 0,
                               event_filter_require_vertex = False,
                               input_is_miniaod = True)

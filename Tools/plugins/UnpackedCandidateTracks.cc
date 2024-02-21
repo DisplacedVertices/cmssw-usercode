@@ -170,8 +170,8 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
   std::vector<int> eidx_toremove;
   std::vector<int> midx_toremove;
-  // std::vector<int> eidx_lost_toremove;
-  // std::vector<int> midx_lost_toremove;
+  std::vector<int> eidx_lost_toremove;
+  std::vector<int> midx_lost_toremove;
   std::vector<int> tight_eidx_toremove;
   std::vector<int> med_midx_toremove;
 

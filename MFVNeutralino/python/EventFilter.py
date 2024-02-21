@@ -38,15 +38,24 @@ def setup_event_filter(process,
         trigger_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'trigger bjets OR displaced dijet veto HT':
         trigger_filter = 'bjets OR displaced dijet veto HT'
-    elif mode == 'trigger leptons only':
-        trigger_filter = 'leptons only'
-        
+    elif mode == 'trigger muons only':
+        trigger_filter = 'muons only'
+    elif mode == 'trigger electrons only':
+        trigger_filter = 'electrons only'
     elif mode == 'jets only':
         trigger_filter = event_filter = 'jets only'
-    elif mode == 'leptons only':
-        trigger_filter = event_filter = 'leptons only'
-    elif mode == 'lep OR displaced lep':
-        trigger_filter = event_filter = 'lep OR displaced lep'
+    elif mode == 'muons only':
+        trigger_filter = 'muons only'
+        event_filter = 'muons only'
+    elif mode == 'electrons only':
+        trigger_filter = 'electrons only'
+        event_filter = 'electrons only veto muons'
+    elif mode == 'displeptons only':
+        trigger_filter = 'displeptons only',
+        event_filter = 'leptons only'
+    elif mode == 'displeptons OR leptons':
+        trigger_filter = 'displeptons OR leptons'
+        event_filter = 'leptons only'
     elif mode == 'met only':
         trigger_filter = event_filter = 'met only'
     elif mode == 'HT OR bjets OR displaced dijet':
@@ -56,8 +65,13 @@ def setup_event_filter(process,
     elif mode == 'jets only novtx':
         trigger_filter = event_filter = 'jets only'
         event_filter_require_vertex = False
-    elif mode == 'leptons only novtx':
-        trigger_filter = event_filter = 'leptons only'
+    elif mode == 'muons only novtx':
+        trigger_filter = 'muons only'
+        event_filter = 'muons only'
+        event_filter_require_vertex = False
+    elif mode == 'electrons only novtx':
+        trigger_filter = 'electrons only'
+        event_filter = 'electrons only veto muons'
         event_filter_require_vertex = False
     elif mode == 'bjets OR displaced dijet veto HT novtx':
         trigger_filter = event_filter = 'bjets OR displaced dijet veto HT'
@@ -86,8 +100,10 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterHTORBjetsORDisplacedDijet as triggerFilter
     elif trigger_filter == 'bjets OR displaced dijet veto HT':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijetVetoHT as triggerFilter
-    elif trigger_filter == 'leptons only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+    elif trigger_filter == 'muons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMuonsOnly as triggerFilter
+    elif trigger_filter == 'electrons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterElectronsOnly as triggerFilter
     elif trigger_filter == 'displeptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedLeptons as triggerFilter
     elif trigger_filter == 'lep OR displaced lep':
@@ -95,7 +111,7 @@ def setup_event_filter(process,
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "leptons only", "displeptons only", "lep OR displaced lep", True, False)' % trigger_filter)
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "muons only", "electrons only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -108,10 +124,10 @@ def setup_event_filter(process,
         print event_filter
         if event_filter == 'jets only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
-        elif event_filter == 'leptons only':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
-        elif event_filter == 'lep OR displaced lep':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
+        elif event_filter == 'muons only':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterMuonsOnly as eventFilter
+        elif event_filter == 'electrons only veto muons':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterElectronsOnlyVetoMuons as eventFilter
         elif event_filter == 'HT OR bjets OR displaced dijet':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
         elif event_filter == 'bjets OR displaced dijet veto HT':
@@ -121,7 +137,7 @@ def setup_event_filter(process,
         elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
         elif event_filter is not False:
-            raise ValueError('event_filter must be one of ("jets only", "leptons only", "lep OR displaced lep", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)')
+            raise ValueError('event_filter must be one of ("jets only", "muons only", "electrons only veto muons", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)')
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:
@@ -144,7 +160,6 @@ def setup_event_filter(process,
             overall *= jetShifter
 
         overall *= eventFilter
-
         if event_filter_require_vertex:
             if not hasattr(process, 'mfvVertices'):
                 # assume if mfvVertices is set up, then the rest of this is too
@@ -158,10 +173,12 @@ def setup_event_filter(process,
             vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
             setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
             if input_is_miniaod:
-                overall *= process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
+                #overall *= process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
+                overall *= process.goodOfflinePrimaryVertices * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
             else:
-                overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
-
+                #overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
+                overall *= process.goodOfflinePrimaryVertices * process.updatedJetsSeqMiniAOD * process.selectedPatJets                                      * process.mfvVertexSequenceBare * vertexFilter
+        
     setattr(process, sequence_name, overall)
 
     if not path_name:

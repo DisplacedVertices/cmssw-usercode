@@ -5,8 +5,13 @@ debug = 'debug' in sys.argv
 
 #sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
 sample_files(process, 'mfv_stopld_tau001000um_M1000_2018', 'miniaod', 5)
-#tfileservice(process, 'gen_histos.root')
-tfileservice(process, 'stopld_genhisto_M1000_1mm.root')
+tfileservice(process, 'gen_histos.root')
+#tfileservice(process, 'stopld_genhisto_M1000_1mm.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/40000/0BD790C6-883F-0147-A66E-8EC9DC53750F.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/70000/1966857B-FA0C-454B-A180-F83F96A0C9D6.root')
+#input_files(process, './13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+max_events(process, 100)
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')

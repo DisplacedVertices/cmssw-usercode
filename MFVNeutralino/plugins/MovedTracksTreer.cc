@@ -61,7 +61,6 @@ namespace {
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt_filler.fill(event);
   gentruth_filler(event);
-
   auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
 
   if (for_mctruth) {
@@ -256,13 +255,14 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                       v.rescale_chi2, v.rescale_x - nt_filler.bs().x(v.rescale_z), v.rescale_y - nt_filler.bs().y(v.rescale_z), v.rescale_z, v.rescale_cxx, v.rescale_cxy, v.rescale_cxz, v.rescale_cyy, v.rescale_cyz, v.rescale_czz, // JMTBAD get rid of beamspot subtraction everywhere (then just use NtupleAdd here)
                       v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, false,
                       v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
-
+    
     for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
       jmt::MinValue m(0.1);
-      for (size_t j = 0, je = nt.tracks().n(); j < je; ++j)
+      for (size_t j = 0, je = nt.tracks().n(); j < je; ++j){
         m(j, mag2(v.track_qpt(i) - nt.tracks().qpt(j),
                   v.track_eta[i] - nt.tracks().eta(j),
                   v.track_phi[i] - nt.tracks().phi(j)));
+        }
 
       assert(m.i() != -1);
       if (nt.tracks().which_sv(m.i()) != 255) {
@@ -285,11 +285,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   }
 
   if (apply_presel) {
-    if ((!for_mctruth && (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req)) ||
-        nt.jets().ht() < 1000)
-    return;
+    if ((!for_mctruth && (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req))) // || nt.jets().ht() < 1000)
+      return;
   }
-
   nt_filler.finalize();
 }
 

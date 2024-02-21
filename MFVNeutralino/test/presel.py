@@ -23,7 +23,8 @@ process.mfvEvent.vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 1)
-process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsMuon = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsElectron = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
 process.mfvAnalysisCutsBJetDispJetVetoHT = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 4)
 
 process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
@@ -44,12 +45,15 @@ def doit(name):
     obj = getattr(process, name)
     setattr(process, '%sJetTriggered'    % name, obj.clone())
     setattr(process, '%sJetPreSel'       % name, obj.clone())
-    setattr(process, '%sLeptonTriggered' % name, obj.clone())
-    setattr(process, '%sLeptonPreSel'    % name, obj.clone())
+    setattr(process, '%sMuonTriggered' % name, obj.clone())
+    setattr(process, '%sMuonPreSel'    % name, obj.clone())
+    setattr(process, '%sElectronTriggered' % name, obj.clone())
+    setattr(process, '%sElectronPreSel'    % name, obj.clone())
     setattr(process, '%sBJetDispJetVetoHTTriggered'    % name, obj.clone())
     setattr(process, '%sBJetDispJetVetoHTPreSel'       % name, obj.clone())
     setattr(process, 'p%sJet' % name, cms.Path(process.mfvTriggerFilterJetsOnly    * process.preSeq * getattr(process, '%sJetTriggered'    % name) * process.mfvAnalysisCutsJet    * getattr(process, '%sJetPreSel'    % name)))
-    setattr(process, 'p%sLep' % name, cms.Path(process.mfvTriggerFilterLeptonsOnly * process.preSeq * getattr(process, '%sLeptonTriggered' % name) * process.mfvAnalysisCutsLepton * getattr(process, '%sLeptonPreSel' % name)))
+    setattr(process, 'p%sMu' % name, cms.Path(process.mfvTriggerFilterMuonsOnly * process.preSeq * getattr(process, '%sMuonTriggered' % name) * process.mfvAnalysisCutsMuon * getattr(process, '%sMuonPreSel' % name)))
+    setattr(process, 'p%sEle' % name, cms.Path(process.mfvTriggerFilterElectronsOnly * process.preSeq * getattr(process, '%sElectronTriggered' % name) * process.mfvAnalysisCutsElectron * getattr(process, '%sElectronPreSel' % name)))
     setattr(process, 'p%sBJetDispJetVetoHT' % name, cms.Path(process.mfvTriggerFilterBjetsORDisplacedDijetVetoHT * process.preSeq * getattr(process, '%sBJetDispJetVetoHTTriggered'    % name) * process.mfvAnalysisCutsBJetDispJetVetoHT * getattr(process, '%sBJetDispJetVetoHTPreSel'    % name)))
 
 doit('mfvEventHistos')

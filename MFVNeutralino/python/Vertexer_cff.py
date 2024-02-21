@@ -17,10 +17,28 @@ mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
 
 mfvVertexSequenceBare = cms.Sequence(
+    mfvGenParticles * 
     jmtRescaledTracks *
     mfvVertexTracks *
     mfvVertices
     )
+
+mfvVertexSequence = cms.Sequence(
+    mfvVertexSequenceBare *
+    mfvVerticesAuxTmp *
+    mfvSelectedVerticesTmp *
+    mfvVerticesToJets *
+    mfvVerticesToLeptons *
+    mfvVerticesAuxPresel *
+    mfvVerticesAux
+    )
+"""
+mfvVertexSequenceBare = cms.Sequence(
+    jmtRescaledTracks *
+    mfvVertexTracks *
+    mfvVertices
+    )
+
 
 #mfvVertexSequenceBare = cms.Sequence(
 #    jmtRescaledTracks *
@@ -39,7 +57,7 @@ mfvVertexSequence = cms.Sequence(
     mfvVerticesAuxPresel *
     mfvVerticesAux
     )
-
+"""
 def modifiedVertexSequence(process, name, **kwargs):
     kwargs_tracks, kwargs_vertices = {}, {}
     for k,v in kwargs.iteritems():

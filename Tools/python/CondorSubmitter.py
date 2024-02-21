@@ -22,7 +22,6 @@ echo realjob $realjob job $job start at $(date)
 
 export SCRAM_ARCH=__SCRAM_ARCH__
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-export XRD_NETWORKSTACK=IPv4
 
 scram project CMSSW __CMSSW_VERSION__ 2>&1 > /dev/null
 scramexit=$?
@@ -100,10 +99,6 @@ arguments = $(Process)
 Output = stdout.$(Process)
 Error = stderr.$(Process)
 Log = log.$(Process)
-request_memory = 3 GB
-request_disk = 3 GB
-requirements = TARGET.HAS_OSG_WN_CLIENT =?= TRUE
-requirements = TARGET.OpSysMajorVer == 7
 stream_output = false
 stream_error = false
 notification = never
@@ -164,7 +159,7 @@ def get(i): return _l[i]
             os.mkdir(links_dir)
 
         if submit_host.endswith('fnal.gov'):
-            schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
+            schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3,4,5,6]
             for schedd in schedds:
                 schedd_d = os.path.join(links_dir, schedd)
                 if not os.path.isdir(schedd_d):
@@ -252,8 +247,7 @@ def get(i): return _l[i]
             crab_renew_proxy_if_needed()
             self.get_proxy = False
 
-        # username = os.environ['USER']
-        username = 'awarden'
+        username = os.environ['USER']
         self.timestamp = datetime.now()
         #os.system('mkdir -p /tmp/%s' % username)
 
@@ -325,8 +319,7 @@ def get(i): return _l[i]
                 stageout_user = username # JMTBAD use getUsernameFromSiteDB?
                 if stageout_path:
                     stageout_path = '/' + stageout_path
-               # stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
-                stageout_path = 'root://cmsxrootd.hep.wisc.edu//store/user/' + stageout_user + stageout_path
+                stageout_path = 'root://cmseos.fnal.gov//store/group/lpclonglived/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
@@ -357,8 +350,7 @@ def get(i): return _l[i]
 
     def normalize_fns(self, fns):
         # JMTBAD fall back to global redirector
-        #return ['root://cmseos.fnal.gov/' + x for x in fns if x.startswith('/store')]
-        return ['root://cmsxrootd.hep.wisc.edu/' + x for x in fns if x.startswith('/store')]
+        return ['root://cmseos.fnal.gov/' + x for x in fns if x.startswith('/store')]
 
     def filelist(self, sample, working_dir):
         # JMTBAD are there performance problems by not matching the json to the files per job?
@@ -541,7 +533,7 @@ def get(i): return _l[i]
         for sample in samples:
             self.submit(sample)
 
-def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1, split={}):
+def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1, split={}, input_fns_extra=[]):
     meat = '''
 job=$(<cs_job)
 njobs=$(<cs_njobs)
@@ -569,5 +561,6 @@ fi
         sample.files_per = -1
         sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split.get(sample.name, split_default))
 
-    cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
+    cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn]+input_fns_extra, output_files=[output_fn], stageout_files='all')
+    #cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn]+input_fns_extra, output_files=[output_fn])
     cs.submit_all(samples)

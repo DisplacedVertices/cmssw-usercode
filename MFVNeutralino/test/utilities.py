@@ -15,7 +15,9 @@ def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
     print(ntuple)
     samples = Samples.registry.from_argv(
-            Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017
+            #Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017 + 
+            Samples.met_samples_2017
+            #Samples.WplusHToSSTodddd_samples_2017 + Samples.met_samples_2017 + Samples.qcd_lep_samples_2017 + Samples.leptonic_samples_2017 + Samples.diboson_samples_2017 
             #Samples.data_samples_2015 + \
             #Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             #Samples.data_samples + \
@@ -74,7 +76,7 @@ def cmd_hadd_data():
 
         have = []
         year_eras = [
-            ('2017', 'BCDEF'),
+            ('2017', 'BCDFE'),  
             ('2018', 'ABCD'),
             ]
 
@@ -123,12 +125,29 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2018):
-    if _leptonpresel:
-        x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
-        #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
-        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170]]
-        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
+    if _leptonpresel or trigeff: #FIXME
+        if bkg_tag == 'wjetstolnu':
+            x = ['wjetstolnu_0j']
+            x += ['wjetstolnu_1j']
+            x += ['wjetstolnu_2j']
+        elif bkg_tag == 'dyjets':
+            x = ['dyjetstollM10', 'dyjetstollM50'] 
+        elif bkg_tag == 'qcd':
+            x = []
+            if not trigeff:
+                x = []
+                #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] #15 30 50 170 300
+                #x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] #20 170 
+        elif bkg_tag == 'qcdmupt5':
+            x = [] 
+            if not trigeff:
+                x = []
+                #x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  #50
+                #x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]  #800 
+                #x += ['qcdpt1000mupt5']
+        else:
+            x = ['ww', 'wz', 'zz', 'ttbar'] 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -145,7 +164,7 @@ def _background_samples(trigeff=False, year=2018):
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2018):
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:
@@ -190,28 +209,32 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
-  
-        files = _background_samples(year=year)
-        files = ['%s%s.root' % (x, year_s) for x in files]
-        files2 = []
-        for fn in files:
-            if not os.path.isfile(fn):
-                msg = '%s not found' % fn
-                if permissive:
-                    print msg
+        for bkg_tag in ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+            files = _background_samples(year=year, bkg_tag=bkg_tag)
+            files = ['%s%s.root' % (x, year_s) for x in files]
+            files2 = []
+            for fn in files:
+                if not os.path.isfile(fn):
+                    msg = '%s not found' % fn
+                    if permissive:
+                        print msg
+                    else:
+                        raise RuntimeError(msg)
                 else:
-                    raise RuntimeError(msg)
-            else:
-                files2.append(fn)
-        if files2:
-            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
-            cmd += ' '.join(files2)
-            print cmd
-            if os.system(cmd) != 0:
-                ok = False
-        if ok:
-            print ("{0} background merged!".format(year))
-
+                    files2.append(fn)
+            if files2:
+                cmd = 'samples merge %f %s%s%s.root ' % (scale,bkg_tag,_presel_s, year_s) 
+                cmd += ' '.join(files2)
+                print("scale is "+str(scale))
+                print cmd
+                if os.system(cmd) != 0:
+                    ok = False
+            if ok:
+                print ("{0} {1} merged!".format(year, bkg_tag)) 
+         
+        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
+        print cmd
+        os.system(cmd)
     #only work for 2017 data now
     #if ok:
     #    cmd = 'hadd.py background%s_2017p8.root background%s_2017.root background%s_2018.root' % (_presel_s, _presel_s, _presel_s)
@@ -269,10 +292,10 @@ def cmd_effsprint(year_to_use=2017):
 
 
 def cmd_histos():
-    cmd_report_data()
+    #cmd_report_data()
     cmd_hadd_data()
     cmd_merge_background()
-    cmd_effsprint()
+    #cmd_effsprint()
 
 def cmd_presel():
     cmd_report_data()

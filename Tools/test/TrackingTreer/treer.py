@@ -1,5 +1,5 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Lepton_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 settings = CMSSWSettings()
 settings.is_mc = True
 
@@ -41,8 +41,10 @@ if use_btag_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
 elif use_MET_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='met only', event_filter_jes_mult=0, event_filter_require_vertex = False)
-elif use_Lepton_triggers :
-    setup_event_filter(process, input_is_miniaod=True, mode='leptons only', event_filter_jes_mult=0, event_filter_require_vertex = False)
+elif use_Muon_triggers :
+    setup_event_filter(process, input_is_miniaod=True, mode='muons only', event_filter_jes_mult=0, event_filter_require_vertex = False)
+elif use_Electron_triggers :
+    setup_event_filter(process, input_is_miniaod=True, mode='electrons only', event_filter_jes_mult=0, event_filter_require_vertex = False)
 else :
     setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
    # setup_event_filter(process, input_is_miniaod=True, mode='leptons only', event_filter_jes_mult=0)
@@ -59,8 +61,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif use_MET_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
-    elif use_Lepton_triggers :
-        samples = pick_samples(dataset, all_signal=False, qcd_lep=False, leptonic=False, met=True, diboson=False, data=False, Lepton_data=False)
+    elif use_Muon_triggers :
+        samples = pick_samples(dataset, all_signal=False, qcd_lep=False, leptonic=True, met=False, diboson=False, data=False, Lepton_data=True)
+        pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
+    elif use_Electron_triggers :
+        samples = pick_samples(dataset, all_signal=False, qcd_lep=False, leptonic=True, met=False, diboson=False, data=False, Lepton_data=True)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset, all_signal=False)

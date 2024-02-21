@@ -123,6 +123,22 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_rz;
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
+  TH1F* h_sum_bsbs2ddist;
+  TH1F* h_sum_bsbs2ddist_atleast_4x4;
+  TH1F* h_sum_bsbs2ddist_atleast_4x5;
+  TH1F* h_sum_bsbs2ddist_atleast_5x5;
+  TH1F* h_rescaled_bsbs2ddist_atleast_4x4;
+  TH1F* h_rescaled_bsbs2ddist_atleast_4x5;
+  TH1F* h_rescaled_bsbs2ddist_atleast_5x5;
+  TH1F* h_sum_bsbs2ddist_lt_400um;
+  TH1F* h_lt_400um_llp_res80um;
+  TH1F* h_sum_bsbs2ddist_gt_400um_lt_700um;
+  TH1F* h_gt_400um_lt_700um_llp_res80um;
+  TH1F* h_sum_bsbs2ddist_gt_700um;
+  TH1F* h_gt_700um_llp_res80um;
+  TH1F* h_sum_all_bsbs2ddist;
+  TH1F* h_sum_bs3ddist;
+  TH1F* h_sqsum_bsbs2ddist;
   TH2F* h_sv0pvdz_v_sv1pvdz;
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
   TH1F* h_absdeltaphi01;
@@ -134,6 +150,22 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_svdist2d_no_shared_jets;
   TH1F* h_absdeltaphi01_shared_jets;
   TH1F* h_absdeltaphi01_no_shared_jets;
+  TH1F* h_sv0_first_large_nsigmadxy_bsp;
+  TH1F* h_sv0_second_large_nsigmadxy_bsp;
+  TH1F* h_sv0_third_large_nsigmadxy_bsp;
+  TH1F* h_sv0_first_large_dxy_bsp;
+  TH1F* h_sv0_second_large_dxy_bsp;
+  TH1F* h_sv0_third_large_dxy_bsp;
+  TH1F* h_sv0_med_nsigmadxy_bsp;
+  TH1F* h_sv0_med_dxy_bsp;
+  TH1F* h_sv1_first_large_nsigmadxy_bsp;
+  TH1F* h_sv1_second_large_nsigmadxy_bsp;
+  TH1F* h_sv1_third_large_nsigmadxy_bsp;
+  TH1F* h_sv1_first_large_dxy_bsp;
+  TH1F* h_sv1_second_large_dxy_bsp;
+  TH1F* h_sv1_third_large_dxy_bsp;
+  TH1F* h_sv1_med_nsigmadxy_bsp;
+  TH1F* h_sv1_med_dxy_bsp;
 
   TH1F* h_sv_track_weight[sv_num_indices];
   TH1F* h_sv_track_q[sv_num_indices];
@@ -289,8 +321,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("rescale_d2_big", "rescaled-fit - nominal SV (2D) (cm)", 100, 0, 4);
   hs.add("rescale_d3", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 1e-3);
   hs.add("rescale_d3_big", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 4);
-  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 1000, 0, 2.5);
-  hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
+  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 200, 0, 0.1);
+  hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 200, 0, 0.010);
 
   hs.add("max_nm1_refit_dist3_wbad", "maximum n-1 refit distance (3D) (cm)", 1001, -0.001, 1);
   hs.add("max_nm1_refit_dist3", "maximum n-1 refit distance (3D) (cm)", 1000, 0, 1);
@@ -578,6 +610,35 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_rz = fs->make<TH2F>("h_sv_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
+  h_sum_bsbs2ddist = fs->make<TH1F>("h_sum_bsbs2ddist", ";sum(dBV(sv #0), dBV(sv #1));arb. units", 50, 0, 2);
+  h_sum_bsbs2ddist_atleast_4x4 = fs->make<TH1F>("h_sum_bsbs2ddist_atleast_4x4", ";sum(dBV(>=4trk sv #0), dBV(>=4trk sv #1));arb. units", 50, 0, 2);
+  h_sum_bsbs2ddist_atleast_4x5 = fs->make<TH1F>("h_sum_bsbs2ddist_atleast_4x5", ";sum(dBV(>=5trk sv #0), dBV(>=4trk sv #1));arb. units", 50, 0, 2);
+  h_sum_bsbs2ddist_atleast_5x5 = fs->make<TH1F>("h_sum_bsbs2ddist_atleast_5x5", ";sum(dBV(>=5trk sv #0), dBV(>=5trk sv #1));arb. units", 50, 0, 2);
+  h_rescaled_bsbs2ddist_atleast_4x4 = fs->make<TH1F>("h_rescaled_bsbs2ddist_atleast_4x4", ";rescaled-fit >=4trk-sv's d_{BV} (cm);arb. units", 50, 0, 1);
+  h_rescaled_bsbs2ddist_atleast_4x5 = fs->make<TH1F>("h_rescaled_bsbs2ddist_atleast_4x5", ";rescaled-fit >=5trk(4trk)-sv's d_{BV} (cm);arb. units", 50, 0, 1);
+  h_rescaled_bsbs2ddist_atleast_5x5 = fs->make<TH1F>("h_rescaled_bsbs2ddist_atleast_5x5", ";rescaled-fit >=5trk-sv's d_{BV} (cm);arb. units", 50, 0, 1);
+  
+  h_sum_bsbs2ddist_lt_400um = fs->make<TH1F>("h_sum_bsbs2ddist_lt_400um", "sum dBV < 400um;;events", 4, 0, 4);
+  h_lt_400um_llp_res80um = fs->make<TH1F>("h_lt_400um_llp_res80um", "sum dBV < 400um;;vertices", 4, 0, 4);
+  h_sum_bsbs2ddist_gt_400um_lt_700um = fs->make<TH1F>("h_sum_bsbs2ddist_gt_400um_lt_700um", "700um > sum dBV > 400um;;events", 4, 0, 4);
+  h_gt_400um_lt_700um_llp_res80um = fs->make<TH1F>("h_gt_400um_lt_700um_llp_res80um", "700um > sum dBV > 400um;;vertices", 4, 0, 4);
+  h_sum_bsbs2ddist_gt_700um = fs->make<TH1F>("h_sum_bsbs2ddist_gt_700um", "sum dBV > 700um;;events", 4, 0, 4);
+  h_gt_700um_llp_res80um = fs->make<TH1F>("h_gt_700um_llp_res80um", "sum dBV > 700um;;vertices", 4, 0, 4);
+  
+  const char* category_names[4] = { ">=3trk->=3trk 2vtx" , ">=4trk->=4trk 2vtx", ">=5trk->=4trk 2vtx", ">=5trk->=5trk 2vtx"};
+  for (int i = 0; i < 4; ++i) {
+	  h_sum_bsbs2ddist_lt_400um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+	  h_lt_400um_llp_res80um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+      h_sum_bsbs2ddist_gt_400um_lt_700um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+	  h_gt_400um_lt_700um_llp_res80um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+	  h_sum_bsbs2ddist_gt_700um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+	  h_gt_700um_llp_res80um->GetXaxis()->SetBinLabel(i + 1, TString::Format("%s", category_names[i]));
+
+  }
+  
+  h_sum_all_bsbs2ddist = fs->make<TH1F>("h_sum_all_bsbs2ddist", ";#Sigma all SV d_{BV} (cm);arb. units", 500, 0, 1);
+  h_sum_bs3ddist = fs->make<TH1F>("h_sum_bs3ddist", ";(3D) d_{BV}^{0} + d_{BV}^{1} ;arb. units", 500, 0, 20);
+  h_sqsum_bsbs2ddist = fs->make<TH1F>("h_sqsum_bsbs2ddist", ";sq sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
   h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
   h_absdeltaphi01 = fs->make<TH1F>("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 315, 0, 3.15);
@@ -589,6 +650,23 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist2d_no_shared_jets = fs->make<TH1F>("h_svdist2d_no_shared_jets", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_absdeltaphi01_shared_jets = fs->make<TH1F>("h_absdeltaphi01_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
   h_absdeltaphi01_no_shared_jets = fs->make<TH1F>("h_absdeltaphi01_no_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
+  h_sv0_first_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_first_large_nsigmadxy_bsp", ";sv0 seed track's 1st-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_second_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_second_large_nsigmadxy_bsp", ";sv0 seed track's 2nd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_third_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_third_large_nsigmadxy_bsp", ";sv0 seed track's 3rd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_first_large_dxy_bsp = fs->make<TH1F>("h_sv0_first_large_dxy_bsp", ";sv0 seed track's 1st-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_second_large_dxy_bsp = fs->make<TH1F>("h_sv0_second_large_dxy_bsp", ";sv0 seed track's 2nd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_third_large_dxy_bsp = fs->make<TH1F>("h_sv0_third_large_dxy_bsp", ";sv0 seed track's 3rd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_med_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_med_nsigmadxy_bsp", ";sv0 seed track's median n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_med_dxy_bsp = fs->make<TH1F>("h_sv0_med_dxy_bsp", ";sv0 seed track's median missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_first_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_first_large_nsigmadxy_bsp", ";sv1 seed track's 1st-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_second_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_second_large_nsigmadxy_bsp", ";sv1 seed track's 2nd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_third_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_third_large_nsigmadxy_bsp", ";sv1 seed track's 3rd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_first_large_dxy_bsp = fs->make<TH1F>("h_sv1_first_large_dxy_bsp", ";sv1 seed track's 1st-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_second_large_dxy_bsp = fs->make<TH1F>("h_sv1_second_large_dxy_bsp", ";sv1 seed track's 2nd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_third_large_dxy_bsp = fs->make<TH1F>("h_sv1_third_large_dxy_bsp", ";sv1 seed track's 3rd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_med_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_med_nsigmadxy_bsp", ";sv1 seed track's median n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_med_dxy_bsp = fs->make<TH1F>("h_sv1_med_dxy_bsp", ";sv1 seed track's median missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+
 }
 
 Measurement1D MFVVertexHistos::miss_dist(const math::XYZPoint& pv, const math::XYZPoint& sv, const math::XYZPoint& lep, const double pv_arr [9], const double sv_arr [9]) {
@@ -1775,8 +1853,147 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_sv_ntk0_ntk1->Fill(sv0.ntracks(), sv1.ntracks(), w);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
+    double bs3ddist0 = mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z), (float)(sv0.z-bsz));
+    double bs3ddist1 = mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z), (float)(sv1.z-bsz));
     h_svdist2d->Fill(svdist2d, w);
     h_svdist3d->Fill(svdist3d, w);
+    h_sum_bsbs2ddist->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+	
+	double sum_bsbs2ddist = mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z));
+
+	if (sum_bsbs2ddist < 0.04) {
+		h_sum_bsbs2ddist_lt_400um->Fill(0.0, w);
+		if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_lt_400um->Fill(1.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_lt_400um->Fill(2.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+			h_sum_bsbs2ddist_lt_400um->Fill(3.0, w);
+		}
+		if (sv0.gen3ddist < 0.008) {
+			h_lt_400um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_lt_400um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_lt_400um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_lt_400um_llp_res80um->Fill(3.0, w);
+			}
+		}
+		if (sv1.gen3ddist < 0.008) {
+			h_lt_400um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_lt_400um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_lt_400um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_lt_400um_llp_res80um->Fill(3.0, w);
+			}
+		}
+
+	}
+	else if (sum_bsbs2ddist > 0.04 && sum_bsbs2ddist < 0.07) {
+		h_sum_bsbs2ddist_gt_400um_lt_700um->Fill(0.0, w);
+		if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_gt_400um_lt_700um->Fill(1.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_gt_400um_lt_700um->Fill(2.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+			h_sum_bsbs2ddist_gt_400um_lt_700um->Fill(3.0, w);
+		}
+		if (sv0.gen3ddist < 0.008) {
+			h_gt_400um_lt_700um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(3.0, w);
+			}
+		}
+		if (sv1.gen3ddist < 0.008) {
+			h_gt_400um_lt_700um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_gt_400um_lt_700um_llp_res80um->Fill(3.0, w);
+			}
+		}
+	}
+	else {
+		h_sum_bsbs2ddist_gt_700um->Fill(0.0, w);
+		if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_gt_700um->Fill(1.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+			h_sum_bsbs2ddist_gt_700um->Fill(2.0, w);
+		}
+		if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+			h_sum_bsbs2ddist_gt_700um->Fill(3.0, w);
+		}
+
+		if (sv0.gen3ddist < 0.008) {
+			h_gt_700um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_gt_700um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_gt_700um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_gt_700um_llp_res80um->Fill(3.0, w);
+			}
+		}
+		if (sv1.gen3ddist < 0.008) {
+			h_gt_700um_llp_res80um->Fill(0.0, w);
+			if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4) {
+				h_gt_700um_llp_res80um->Fill(1.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+				h_gt_700um_llp_res80um->Fill(2.0, w);
+			}
+			if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+				h_gt_700um_llp_res80um->Fill(3.0, w);
+			}
+		}
+
+	}
+
+	if (sv0.ntracks() >= 4 && sv1.ntracks() >= 4){
+		h_sum_bsbs2ddist_atleast_4x4->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+		h_rescaled_bsbs2ddist_atleast_4x4->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)));
+		h_rescaled_bsbs2ddist_atleast_4x4->Fill(mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+	}
+
+	if (sv0.ntracks() >= 5 && sv1.ntracks() >= 4) {
+		h_sum_bsbs2ddist_atleast_4x5->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+		h_rescaled_bsbs2ddist_atleast_4x5->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)));
+		h_rescaled_bsbs2ddist_atleast_4x5->Fill(mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+	}
+
+	if (sv0.ntracks() >= 5 && sv1.ntracks() >= 5) {
+		h_sum_bsbs2ddist_atleast_5x5->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+		h_rescaled_bsbs2ddist_atleast_5x5->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)));
+		h_rescaled_bsbs2ddist_atleast_5x5->Fill(mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+	}
+
+	
+	h_sum_bs3ddist->Fill(bs3ddist0 + bs3ddist1);
+    h_sqsum_bsbs2ddist->Fill(hypot(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)), mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z))));
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);
     h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), w);
     double phi0 = atan2(sv0.y - bsy, sv0.x - bsx);
@@ -1823,6 +2040,58 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_svdist2d_no_shared_jets->Fill(svdist2d, w);
       h_absdeltaphi01_no_shared_jets->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
     }
+
+	std::vector<double> vec_sv0_nsigmadxy = {};
+	std::vector<double> vec_sv0_dxy = {};
+	for (int i = 0; i < sv0.ntracks(); ++i) {
+		vec_sv0_nsigmadxy.push_back(fabs(sv0.track_dxy[i] / sv0.track_dxy_err(i)));
+		vec_sv0_dxy.push_back(sv0.track_dxy[i]);
+    }
+	sort(vec_sv0_nsigmadxy.begin(), vec_sv0_nsigmadxy.end());
+	sort(vec_sv0_dxy.begin(), vec_sv0_dxy.end());
+        if (sv0.ntracks() >= 3){
+	    h_sv0_first_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-1], w);
+	    h_sv0_second_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-2], w);
+	    h_sv0_third_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-3], w);
+	    h_sv0_first_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-1], w);
+	    h_sv0_second_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-2], w);
+	    h_sv0_third_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-3], w);
+	    if (sv0.ntracks() % 2 == 0) {
+		h_sv0_med_nsigmadxy_bsp->Fill((vec_sv0_nsigmadxy[sv0.ntracks()/2] + vec_sv0_nsigmadxy[(sv0.ntracks()/2)-1])/2, w);
+		h_sv0_med_dxy_bsp->Fill((vec_sv0_dxy[sv0.ntracks()/2] + vec_sv0_dxy[(sv0.ntracks()/2) - 1])/2, w);
+	    }  
+	    else {
+		h_sv0_med_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[(sv0.ntracks()-1)/2], w);
+		h_sv0_med_dxy_bsp->Fill(vec_sv0_dxy[(sv0.ntracks()-1)/2], w);
+	    }
+        }
+
+	std::vector<double> vec_sv1_nsigmadxy = {};
+	std::vector<double> vec_sv1_dxy = {};
+	for (int i = 0; i < sv1.ntracks(); ++i) {
+		vec_sv1_nsigmadxy.push_back(fabs(sv1.track_dxy[i] / sv1.track_dxy_err(i)));
+		vec_sv1_dxy.push_back(sv1.track_dxy[i]);
+	}
+	sort(vec_sv1_nsigmadxy.begin(), vec_sv1_nsigmadxy.end());
+	sort(vec_sv1_dxy.begin(), vec_sv1_dxy.end());
+
+	if (sv1.ntracks() >= 3){
+            h_sv1_first_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 1], w);
+	    h_sv1_second_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 2], w);
+	    h_sv1_third_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 3], w);
+	    h_sv1_first_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 1], w);
+	    h_sv1_second_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 2], w);
+	    h_sv1_third_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 3], w);
+	    if (sv1.ntracks() % 2 == 0) {
+		h_sv1_med_nsigmadxy_bsp->Fill((vec_sv1_nsigmadxy[sv1.ntracks() / 2] + vec_sv1_nsigmadxy[(sv1.ntracks() / 2) - 1]) / 2, w);
+		h_sv1_med_dxy_bsp->Fill((vec_sv1_dxy[sv1.ntracks() / 2] + vec_sv1_dxy[(sv1.ntracks() / 2) - 1]) / 2, w);
+	    }  
+	    else {
+		h_sv1_med_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[(sv1.ntracks() - 1) / 2], w);
+		h_sv1_med_dxy_bsp->Fill(vec_sv1_dxy[(sv1.ntracks() - 1) / 2], w);
+	    }  
+        }
+
   }
 
   // number of jets associated with SVs

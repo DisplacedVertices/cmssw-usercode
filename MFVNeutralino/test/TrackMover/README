@@ -1,0 +1,14 @@
+This part of code deal with systematic uncertainty of vertex reconstruction
+The general logic is:
+
+- First get a TrackMover ntuple:
+  python ntuple.py submit
+  python mltruth.py submit
+
+- Base on the ntuple, get histograms:
+  python hists.submit.py 
+  ./mctruth.exe -s
+
+- Get vertex reconstruction efficiency plot:
+  python draw.py TM_config20_tau000030000um /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsULV30Lepmv2_20_tau000030000um/SingleLepton2017.root /uscms/home/pkotamni/nobackup/crabdirs/TrackMoverHistsULV30Lepmv2_20_tau000030000um/background_leptonpresel_2017.root
+  python ploteff.py

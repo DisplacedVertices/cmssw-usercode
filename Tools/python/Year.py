@@ -3,7 +3,7 @@
 import os, re
 
 year = None
-yre = re.compile(r'^#define MFVNEUTRALINO_(\d{4})$')
+yre = re.compile(r'^#define MFVNEUTRALINO_(\d{4,5})$')
 
 for line in open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/interface/Year.h')):
     mo = yre.match(line.strip())

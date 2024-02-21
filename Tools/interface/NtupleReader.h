@@ -79,6 +79,8 @@ namespace jmt {
         ("which-chunk,w",  po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
         ("weights",        po::bool_switch       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
         ("pu-weights",     po::value<std::string>(&pu_weights_)    ->default_value(""),           "extra pileup weights beyond whatever's already in the tree")
+        ("half_mc_by_lumi",     po::bool_switch       (&half_mc_by_lumi_)     ->default_value(false),        "only process half of the MC by lumiblocks")
+        ("quarter_mc_by_lumi",  po::bool_switch       (&quarter_mc_by_lumi_)  ->default_value(false),        "only process a quarter of the MC by lumiblocks")
 
         ("submit,s",       po::bool_switch       (&submit_)        ->default_value(false),         "submit batch via CondorSubmitter")
         ("submit-batch",   po::value<std::string>(&submit_batch_)  ->default_value(batch_name),    "batch name")
@@ -151,6 +153,8 @@ namespace jmt {
                     << " which_chunk: " << which_chunk_
                     << " weights: " << use_weights_
                     << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
+                    << " half mc by lumi: " << half_mc_by_lumi_
+                    << " quarter mc by lumi: " << quarter_mc_by_lumi_
                     << "\n";
       }
 
@@ -162,7 +166,7 @@ namespace jmt {
         std::ostringstream o;
         o << "from JMTucker.Tools.MetaSubmitter import *\n"
           << "dataset = '" << submit_dataset_ << "'\n"
-          << "samples = pick_samples(dataset, both_years=False, " << submit_samples_ << ")\n"
+          << "samples = pick_samples(dataset, both_years=True, " << submit_samples_ << ")\n"
           << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";
 
         std::cout << o.str();
@@ -297,6 +301,14 @@ namespace jmt {
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
           continue;
+        if (is_mc() && half_mc_by_lumi_){
+          if (nt_->base().lumi() % 4 >= 2)
+            continue;
+        }
+        if (is_mc() && quarter_mc_by_lumi_){
+          int quarter_lumi_mod_n = (nt_->base().lumi() % 16) / 4;
+          if (quarter_lumi_mod_n!=0) continue;
+        }
 
         jmt::AnalysisEras::set_current(nt_->base().run(), nt_->base().lumi(), nt_->base().event());
 
@@ -336,6 +348,8 @@ namespace jmt {
     int which_chunk_;
     bool use_weights_;
     std::string pu_weights_;
+    bool half_mc_by_lumi_;
+    bool quarter_mc_by_lumi_;
 
     bool submit_;
     std::string submit_exe_;

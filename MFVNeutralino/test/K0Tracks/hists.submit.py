@@ -1,7 +1,11 @@
 from JMTucker.Tools.MetaSubmitter import *
+from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 
-dataset = 'nr_k0ntuplev25mv1'
-samples = pick_samples(dataset, both_years=True, ttbar=False, all_signal=False)
+dataset = 'k0ntuplev25mv1'
+#input_files(process, './k0tree.root')
+#samples = pick_samples(dataset, ttbar=True, all_signal=False)
+samples = [getattr(Samples, 'ttbar_2017')]
 NtupleReader_submit('K0HistsV25mv1_nsigdxy0p0_rhomin0p268_ctaumin0p0268_costh2min0p99975', dataset, samples,
                     split = {'qcdht1000_2017': 2,
                              'qcdht1000_2018': 2,

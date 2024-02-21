@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import sys, os, subprocess, tempfile, re
-import ROOT
-import socket
+import os, subprocess, tempfile, re
 from datetime import datetime
 from JMTucker.Tools import colors, eos
 
 class HaddBatchResult(object):
-    def __init__(self, kind, working_dir, new_name, new_dir, expected, files, submit):
+    def __init__(self, kind, working_dir, new_name, new_dir, expected, files):
         self.success = True
         self.kind = kind
         self.working_dir = working_dir
@@ -15,8 +13,7 @@ class HaddBatchResult(object):
         self.new_dir = new_dir
         self.expected = expected
         self.files = files
-        self.submit = submit
-        
+
 class HaddlogParser(object):
     target_re = re.compile(r'hadd Target file: (.*)')
     source_re = re.compile(r'hadd Source file (\d+): (.*)')
@@ -40,7 +37,6 @@ class HaddlogParser(object):
                 self.sources[num] = fn
         self.num_sources = len(self.sources)
         self.files = self.sources.values()
-
 
 def hadd(output_fn, input_fns):
     """This is a simple wrapper around hadd that suppresses the stdout
@@ -73,6 +69,19 @@ def hadd(output_fn, input_fns):
     else:
         open(log_fn, 'wt').write(stdout)
 
+    log_fn = output_fn + '.haddlog'
+    is_eos = '/store/' in output_fn # ugh
+    while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
+        log_fn += '.2'
+
+    if is_eos:
+        fd, tmp_fn = tempfile.mkstemp()
+        os.fdopen(fd, 'wt').write(stdout)
+        eos.cp(tmp_fn, log_fn) # if the haddlog already exists the new one will silently go into the ether...
+        os.remove(tmp_fn)
+    else:
+        open(log_fn, 'wt').write(stdout)
+
     if p.returncode != 0:
         print colors.error('PROBLEM hadding %s' % output_fn)
         #print p.stdout.read()
@@ -83,8 +92,6 @@ def hadd(output_fn, input_fns):
     if max_file_num != l:
         print colors.error('PROBLEM hadding %s' % output_fn)
         return False
-
-    return True    
 
 
 __all__ = [

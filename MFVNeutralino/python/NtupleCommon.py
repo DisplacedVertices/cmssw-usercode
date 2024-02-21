@@ -1,18 +1,21 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV5'
-lsp_id = 1000006 # should do that in a smarter way; currently for stop
+ntuple_version_ = 'OnnormdzULV30'
+lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_MET_triggers = False
-use_Lepton_triggers = True
-
+use_Muon_triggers = True
+use_Electron_triggers = False
+use_DisplacedLepton_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
     ntuple_version_ += "MET"
-elif use_Lepton_triggers :
-    ntuple_version_ += "Lep"
+elif use_Muon_triggers :
+    ntuple_version_ += "LepMu"
+elif use_Electron_triggers :
+    ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -74,7 +77,7 @@ def minitree_only(process, mode, settings, output_commands):
             process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
             from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
             process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
-                                                  jmtNtupleFiller_pset(settings.is_miniaod, True),
+                                                  jmtNtupleFiller_pset(settings.is_miniaod, True, False), 
                                                   kvr_params = kvr_params,
                                                   vertices_src = cms.InputTag('mfvVertices'),
                                                   auxes_src = cms.InputTag('mfvVerticesAuxPresel'),
@@ -257,13 +260,13 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('JMTucker.Tools.L1PrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-   # process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
+    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -279,7 +282,7 @@ def miniaod_ntuple_process(settings):
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
     # change made to use corrected MET
-    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
     if not settings.is_mc:
         process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
@@ -303,10 +306,9 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    process.mfvEvent.met_src = 'slimmedMETs'
+    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
     
-    # MET correction and filters
+    # MET correction and filtersi 
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
@@ -316,7 +318,7 @@ def miniaod_ntuple_process(settings):
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
-                         #process.BadPFMuonFilterUpdateDz *
+                         process.BadPFMuonFilterUpdateDz *
                          process.fullPatMetSequence *
                          process.selectedPatJets *
                          process.selectedPatMuons *
@@ -366,14 +368,20 @@ def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclu
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
+        print("is signal")
         if use_btag_triggers :
             magic = "event_filter = 'bjets OR displaced dijet veto HT'"
-        elif use_Lepton_triggers :
-            magic ="event_filter = 'leptons only'"
+        elif use_Muon_triggers :
+            magic ="event_filter = 'muons only'"
+            print("signal : turn on muon trig")
+        elif use_Electron_triggers :
+            magic ="event_filter = 'electrons only veto muons'"
+            print("signal : turn on ele trig")
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
     else:
+        print("not signal")
         to_replace = []
     return [], to_replace
 

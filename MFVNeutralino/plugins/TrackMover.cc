@@ -28,6 +28,8 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   jmt::TrackRefGetter track_ref_getter;
 
   const double min_jet_pt;
@@ -44,6 +46,8 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     track_ref_getter(cfg.getParameter<std::string>("@module_label"),
                          cfg.getParameter<edm::ParameterSet>("track_ref_getter"),
                          consumesCollector()),
@@ -106,6 +110,11 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
   if (pv) {
     edm::Handle<pat::JetCollection> jets;
     event.getByToken(jets_token, jets);
+    
+    edm::Handle<pat::MuonCollection> muons;
+    edm::Handle<pat::ElectronCollection> electrons;
+    event.getByToken(muons_token, muons);
+    event.getByToken(electrons_token, electrons);
 
     CLHEP::RandExponential rexp(rng_engine);
     CLHEP::RandGauss rgau(rng_engine);
@@ -121,7 +130,20 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     for (const pat::Jet& jet : *jets) {
       if (jet.pt() < min_jet_pt || track_ref_getter.tracks(event, jet).size() < min_jet_ntracks)
         continue;
-
+      int muonjets = 0;
+      for (const pat::Muon& muon : *muons) {
+        bool isLooseMuon = muon.passed(reco::Muon::CutBasedIdLoose);
+        double ljet_absdR = reco::deltaR(muon.eta(), muon.phi(), jet.eta(), jet.phi()); 
+        if (isLooseMuon && abs(ljet_absdR) < 0.4) muonjets++;
+      }
+      int elejets = 0;
+      for (const pat::Electron& electron : *electrons) {
+        bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");
+        double ljet_absdR = reco::deltaR(electron.eta(), electron.phi(), jet.eta(), jet.phi()); 
+        if (isTightEl && abs(ljet_absdR) < 0.4) elejets++;
+      }
+      if (muonjets > 0 || elejets > 0)
+        continue;
       const double b_disc = jmt::BTagging::discriminator(jet);
       if (b_disc < jmt::BTagging::discriminator_min(jmt::BTagging::loose))
         presel_jets.push_back(&jet);
@@ -187,6 +209,21 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
       done_check_to_move:
     
       if (to_move) {
+        
+        //move only quality tracks 
+        const double pt = tk->pt();
+        const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
+        const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
+        const auto trackLostInnerHits = tk->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
+        int min_r = 2000000000;
+        for (int i = 1; i <= 4; ++i){
+           if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+             min_r = i;
+             break;
+           }
+        }
+        if (!(pt > 1.0 && npxlayers >= 2 && nstlayers >= 6 && (min_r <= 1.0 || (min_r == 2.0 && trackLostInnerHits == 0) ))) continue;
+        
         reco::TrackBase::Point new_point(tk->vx() + move.x(),
                                          tk->vy() + move.y(),
                                          tk->vz() + move.z());
