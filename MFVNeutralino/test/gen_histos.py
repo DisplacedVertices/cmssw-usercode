@@ -7,6 +7,8 @@ debug = 'debug' in sys.argv
 #sample_files(process, 'ttbar_2017', 'miniaod', 1 )
 #sample_files(process, 'ggHToSSTobbbb_tau1mm_M40_2017', 'miniaod', 10)
 #sample_files(process, 'mfv_neu_tau001000um_M0400_2017', 'miniaod', 10)
+input_files(process, '/store/mc/RunIIFall17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/130000/04FF4CB3-BFFF-EA11-96B4-3417EBE7002A.root')
+max_events(process, 100)
 tfileservice(process, 'gen_histos.root')
 file_event_from_argv(process)
 

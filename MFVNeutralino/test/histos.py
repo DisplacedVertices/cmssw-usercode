@@ -128,7 +128,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=True, span_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        samples = [getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2017')]  
+        samples = [getattr(Samples, 'qcdht2000_2017')]#'ggHToSSTodddd_tau1mm_M55_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset)
@@ -136,7 +136,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Test1AttrkTightdBVStudies' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

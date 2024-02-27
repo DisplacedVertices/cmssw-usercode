@@ -38,9 +38,21 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
   TH2F* h_sv_bs2derr_bsbs2ddist[sv_num_indices];
   TH2F* h_pvrho_bsbs2ddist[sv_num_indices];
-
+  
+  TH1F* h_new_2vtx_events;
   TH1F* h_w;
   TH1F* h_nsv;
+  TH1F* h_sv_gen2ddist_signed;
+  TH2F* h_sv_ntk_genbs2ddist;
+  TH2F* h_sv_ntk_bs2ddist;
+  TH2F* h_sv_ntk_gen2ddist;
+  TH2F* h_sv_ntk_njet;
+  TH2F* h_sv_ntk0_ntk1;
+  TH2F* h_sv_nsv_nmatchjet;
+  TH2F* h_sv_nsv_nmatchlep;
+  TH2F* h_sv_nsv_nmatchele;
+  TH2F* h_sv_nsv_nmatchmu;
+  TH2F* h_sv_nsv_ngentaus;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -62,6 +74,22 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_svdist2d_no_shared_jets;
   TH1F* h_absdeltaphi01_shared_jets;
   TH1F* h_absdeltaphi01_no_shared_jets;
+  TH1F* h_sv0_first_large_nsigmadxy_bsp;
+  TH1F* h_sv0_second_large_nsigmadxy_bsp;
+  TH1F* h_sv0_third_large_nsigmadxy_bsp;
+  TH1F* h_sv0_first_large_dxy_bsp;
+  TH1F* h_sv0_second_large_dxy_bsp;
+  TH1F* h_sv0_third_large_dxy_bsp;
+  TH1F* h_sv0_med_nsigmadxy_bsp;
+  TH1F* h_sv0_med_dxy_bsp;
+  TH1F* h_sv1_first_large_nsigmadxy_bsp;
+  TH1F* h_sv1_second_large_nsigmadxy_bsp;
+  TH1F* h_sv1_third_large_nsigmadxy_bsp;
+  TH1F* h_sv1_first_large_dxy_bsp;
+  TH1F* h_sv1_second_large_dxy_bsp;
+  TH1F* h_sv1_third_large_dxy_bsp;
+  TH1F* h_sv1_med_nsigmadxy_bsp;
+  TH1F* h_sv1_med_dxy_bsp;
 
   TH1F* h_sv_track_weight[sv_num_indices];
   TH1F* h_sv_track_q[sv_num_indices];
@@ -84,6 +112,24 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_nhits[sv_num_indices];
   TH1F* h_sv_track_injet[sv_num_indices];
   TH1F* h_sv_track_inpv[sv_num_indices];
+
+  TH1F* h_sv_eletrack_pt[sv_num_indices];
+  TH1F* h_sv_eletrack_eta[sv_num_indices];
+  TH1F* h_sv_eletrack_phi[sv_num_indices];
+  TH1F* h_sv_eletrack_dxy[sv_num_indices];
+  TH1F* h_sv_eletrack_iso[sv_num_indices];
+  TH1F* h_sv_eletrack_ID[sv_num_indices];
+  TH1F* h_sv_eletrack_tip[sv_num_indices];
+  TH1F* h_sv_eletrack_tipsig[sv_num_indices];
+
+  TH1F* h_sv_mutrack_pt[sv_num_indices];
+  TH1F* h_sv_mutrack_eta[sv_num_indices];
+  TH1F* h_sv_mutrack_phi[sv_num_indices];
+  TH1F* h_sv_mutrack_dxy[sv_num_indices];
+  TH1F* h_sv_mutrack_iso[sv_num_indices];
+  TH1F* h_sv_mutrack_ID[sv_num_indices];
+  TH1F* h_sv_mutrack_tip[sv_num_indices];
+  TH1F* h_sv_mutrack_tipsig[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
@@ -134,15 +180,15 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("rescale_d2_big", "rescaled-fit - nominal SV (2D) (cm)", 100, 0, 4);
   hs.add("rescale_d3", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 1e-3);
   hs.add("rescale_d3_big", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 4);
-  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 100, 0, 0.5);
-  hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
+  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 200, 0, 0.1);
+  hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 200, 0, 0.010);
 
   hs.add("max_nm1_refit_dist3_wbad", "maximum n-1 refit distance (3D) (cm)", 1001, -0.001, 1);
   hs.add("max_nm1_refit_dist3", "maximum n-1 refit distance (3D) (cm)", 1000, 0, 1);
   hs.add("max_nm1_refit_dist2", "maximum n-1 refit distance (2D) (cm)", 1000, 0, 1);
   hs.add("max_nm1_refit_distz", "maximum n-1 refit z distance (cm)", 1000, 0, 1);
 
-  hs.add("nlep", "# leptons", 10, 0, 10);
+  // hs.add("nlep", "# leptons", 10, 0, 10);
 
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -151,6 +197,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackminnhits",                 "min number of hits on track per SV",                                           40,    0,      40);
   hs.add("trackmaxnhits",                 "max number of hits on track per SV",                                           40,    0,      40);
   hs.add("njetsntks",                     "# of jets assoc. by tracks to SV",                                             10,    0,      10);
+  hs.add("nelensv",                       " # of ele assoc. to SV",                                                        5,    0,       5);
+  hs.add("nmunsv",                        " # of mu assoc. to SV",                                                        10,    0,      10);
+  hs.add("nlepnsv",                       " # of leptons assoc. to SV",                                                   10,    0,      10);
   hs.add("chi2dof",                       "SV #chi^2/dof",                                                                50,    0,       7);
   hs.add("chi2dofprob",                   "SV p(#chi^2, dof)",                                                            50,    0,       1.2);
 
@@ -224,6 +273,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
   hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
 
+  hs.add("trackdxynsigmamin", "SV min{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmamax", "SV max{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmaavg", "SV avg{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmarms", "SV rms{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+
   hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.004);
   hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
   hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
@@ -267,8 +321,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("gen3ddist",                     "dist3d(SV, closest gen vtx) (cm)",                                            200,    0,       0.2);
   hs.add("gen3derr",                      "#sigma(dist3d(SV, closest gen vtx)) (cm)",                                    200,    0,       0.2);
   hs.add("gen3dsig",                      "N#sigma(dist3d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
-  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
-  hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
+  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                  1000,    0,      2.5);
+  hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                  1000,    0,      2.5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           1000,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
@@ -280,6 +334,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("pvdz",                          "dz(SV, PV) (cm)",                                                             100,    0,       0.5);
   hs.add("pvdzerr",                       "#sigma(dz(SV, PV)) (cm)",                                                     100,    0,       0.1);
   hs.add("pvdzsig",                       "N#sigma(dz(SV, PV))",                                                         100,    0,     100);
+
 
   const char* lmt_ex[4] = {"", "loose b-", "medium b-", "tight b-"};
   for (int i = 0; i < 4; ++i) {
@@ -310,8 +365,28 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("track%i_injet",         i), TString::Format("track%i in-jet?",                     i),   2,  0,      2);
     hs.add(TString::Format("track%i_inpv",          i), TString::Format("track%i in-PV?",                      i),  10, -1,      9);
     hs.add(TString::Format("track%i_jet_deltaphi0", i), TString::Format("track%i |#Delta#phi| to closest jet", i),  25,  0,      3.15);
-  }
 
+    hs.add(TString::Format("eletrack%i_pt",         i), TString::Format("p_{T} of ele track%i assoc to SV (GeV)", i),   200,      0,     1000);
+    hs.add(TString::Format("eletrack%i_eta",        i), TString::Format("eta of ele track%i assoc to SV",         i),    50,     -4,       4);
+    hs.add(TString::Format("eletrack%i_phi",        i), TString::Format("phi of ele track%i assoc to SV",         i),    50,  -3.15,    3.15);
+    hs.add(TString::Format("eletrack%i_dxy",        i), TString::Format("dxy (cm) of ele track%i assoc to SV",    i),   200,   -2.0,     2.0);
+    hs.add(TString::Format("eletrack%i_iso",        i), TString::Format("iso of ele track%i assoc to SV",         i),   100,      0,     2.0);
+    hs.add(TString::Format("eletrack%i_ID",         i), TString::Format("ID of ele track%i assoc to SV",          i),     5,      0,       5);
+    hs.add(TString::Format("eletrack%i_tip",        i), TString::Format("transverse IP of ele track%i assoc to SV", i), 200,    0,       2.0);
+    hs.add(TString::Format("eletrack%i_tipsig",        i), TString::Format("transverse IP sig. of ele track%i assoc to SV", i),  200,   0,   20);
+
+
+    hs.add(TString::Format("mutrack%i_pt",          i), TString::Format("p_{T} of mu track%i assoc to SV (GeV)",  i),  200,      0,    1000);
+    hs.add(TString::Format("mutrack%i_eta",         i), TString::Format("eta of mu track%i assoc to SV",          i),   50,     -4,       4);
+    hs.add(TString::Format("mutrack%i_phi",         i), TString::Format("phi of mu track%i assoc to SV",          i),   50,  -3.15,    3.15);
+    hs.add(TString::Format("mutrack%i_dxy",         i), TString::Format("dxy (cm) of mu track%i assoc to SV",     i),  200,   -2.0,     2.0);
+    hs.add(TString::Format("mutrack%i_iso",         i), TString::Format("iso of mu track%i assoc to SV",          i),  100,      0,     2.0);
+    hs.add(TString::Format("mutrack%i_ID",          i), TString::Format("ID of mu track%i assoc to SV",           i),    4,      0,      4);
+    hs.add(TString::Format("mutrack%i_tip",        i), TString::Format("transverse IP of mu track%i assoc to SV", i),  200,      0,     2.0);
+    hs.add(TString::Format("mutrack%i_tipsig",        i), TString::Format("transverse IP sig. of mu track%i assoc to SV", i),  200,   0,     20);
+
+  }
+  h_new_2vtx_events = fs->make<TH1F>("h_new_2vtx_events",": ;arb. units", 3.0, 0.0, 3.0);
   for (int j = 0; j < sv_num_indices; ++j) {
     const char* exc = sv_index_names[j];
 
@@ -344,16 +419,45 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_nhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nhits", exc), TString::Format(";%s SV tracks number of hits", exc), 40, 0, 40);
     h_sv_track_injet[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet", exc), TString::Format(";%s SV tracks in-jet?", exc), 2, 0, 2);
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
+  
+    h_sv_eletrack_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_pt", exc), TString::Format(";%s SV assoc. electron p_{T} (GeV);arb. units", exc), 200, 0, 1000);
+    h_sv_eletrack_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_eta", exc), TString::Format(";%s SV assoc. electron #eta;arb. units", exc), 50, -4, 4);
+    h_sv_eletrack_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_phi", exc), TString::Format(";%s SV assoc. electron #phi;arb. units", exc), 50, -3.15, 3.15);
+    h_sv_eletrack_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_dxy", exc), TString::Format(";%s SV assoc. electron dxy (cm);arb. units", exc), 200, -2.0, 2.0);
+    h_sv_eletrack_iso[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_iso", exc), TString::Format(";%s SV assoc. electron iso;arb. units", exc), 100, 0, 2.0);
+    h_sv_eletrack_ID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_ID", exc), TString::Format(";%s SV assoc. electron ID;arb. units", exc), 5, 0, 5);
+    h_sv_eletrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_tip", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter; arb. units", exc), 200, 0, 2.0);
+    h_sv_eletrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_tipsig", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter sig.; arb. units", exc), 200, 0, 20);
+
+    h_sv_mutrack_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_pt", exc), TString::Format(";%s SV assoc. muon p_{T} (GeV);arb. units", exc), 200, 0, 1000);
+    h_sv_mutrack_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_eta", exc), TString::Format(";%s SV assoc. muon #eta;arb. units", exc), 50, -4, 4);
+    h_sv_mutrack_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_phi", exc), TString::Format(";%s SV assoc. muon #phi;arb. units", exc), 50, -3.15, 3.15);
+    h_sv_mutrack_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_dxy", exc), TString::Format(";%s SV assoc. muon dxy (cm);arb. units", exc), 200, -2.0, 2.0);
+    h_sv_mutrack_iso[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_iso", exc), TString::Format(";%s SV assoc. muon iso;arb. units", exc), 1000, 0, 2.0);
+    h_sv_mutrack_ID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_ID", exc), TString::Format(";%s SV assoc. muon ID;arb. units", exc), 4, 0, 4);
+    h_sv_mutrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_tip", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter; arb. units", exc), 200, 0, 2.0);
+    h_sv_mutrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_tipsig", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter sig.; arb. units", exc), 200, 0, 20);
   }
 
+  h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
+  h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
+  h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
+  h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
+  h_sv_nsv_nmatchjet = fs->make<TH2F>("h_sv_nsv_nmatchjet", ";# jets matched with gen quarks;# SV", 10, 0, 10, 10, 0, 10);
+  h_sv_nsv_nmatchele = fs->make<TH2F>("h_sv_nsv_nmatchele", ";# electrons matched with gen electrons;# SV", 10, 0, 10, 10, 0, 10);  
+  h_sv_nsv_nmatchmu = fs->make<TH2F>("h_sv_nsv_nmatchmu", ";# muons matched with gen muons;# SV", 10, 0, 10, 10, 0, 10);  
+  h_sv_nsv_nmatchlep = fs->make<TH2F>("h_sv_nsv_nmatchlep", ";# leptons matched with gen leptons;# SV", 10, 0, 10, 10, 0, 10);  
+  h_sv_nsv_ngentaus = fs->make<TH2F>("h_sv_nsv_ngentaus", ";# gen taus; #SV", 10, 0, 10, 10, 0, 10);
+  h_sv_ntk_njet = fs->make<TH2F>("h_sv_ntk_njet", "; # tracks of SV; # associated jets of SV", 40,0,40,10,0,10);
+  h_sv_ntk0_ntk1 = fs->make<TH2F>("h_sv_ntk0_ntk1", "; # tracks of SV0; # tracks of SV1", 40,0,40,40,0,40);
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
   h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_rz = fs->make<TH2F>("h_sv_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 2);
-  h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 2);
-  h_sum_bsbs2ddist = fs->make<TH1F>("h_sum_bsbs2ddist", ";sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
-  h_sum_all_bsbs2ddist = fs->make<TH1F>("h_sum_all_bsbs2ddist", ";#Sigma all SV d_{BV} (cm);arb. units", 500, 0, 2);
+  h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
+  h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
+  h_sum_bsbs2ddist = fs->make<TH1F>("h_sum_bsbs2ddist", ";sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 1);
+  h_sum_all_bsbs2ddist = fs->make<TH1F>("h_sum_all_bsbs2ddist", ";#Sigma all SV d_{BV} (cm);arb. units", 500, 0, 1);
   h_sum_bs3ddist = fs->make<TH1F>("h_sum_bs3ddist", ";(3D) d_{BV}^{0} + d_{BV}^{1} ;arb. units", 500, 0, 20);
   h_sqsum_bsbs2ddist = fs->make<TH1F>("h_sqsum_bsbs2ddist", ";sq sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
@@ -367,6 +471,23 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist2d_no_shared_jets = fs->make<TH1F>("h_svdist2d_no_shared_jets", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_absdeltaphi01_shared_jets = fs->make<TH1F>("h_absdeltaphi01_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
   h_absdeltaphi01_no_shared_jets = fs->make<TH1F>("h_absdeltaphi01_no_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
+  h_sv0_first_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_first_large_nsigmadxy_bsp", ";sv0 seed track's 1st-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_second_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_second_large_nsigmadxy_bsp", ";sv0 seed track's 2nd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_third_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_third_large_nsigmadxy_bsp", ";sv0 seed track's 3rd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_first_large_dxy_bsp = fs->make<TH1F>("h_sv0_first_large_dxy_bsp", ";sv0 seed track's 1st-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_second_large_dxy_bsp = fs->make<TH1F>("h_sv0_second_large_dxy_bsp", ";sv0 seed track's 2nd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_third_large_dxy_bsp = fs->make<TH1F>("h_sv0_third_large_dxy_bsp", ";sv0 seed track's 3rd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv0_med_nsigmadxy_bsp = fs->make<TH1F>("h_sv0_med_nsigmadxy_bsp", ";sv0 seed track's median n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv0_med_dxy_bsp = fs->make<TH1F>("h_sv0_med_dxy_bsp", ";sv0 seed track's median missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_first_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_first_large_nsigmadxy_bsp", ";sv1 seed track's 1st-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_second_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_second_large_nsigmadxy_bsp", ";sv1 seed track's 2nd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_third_large_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_third_large_nsigmadxy_bsp", ";sv1 seed track's 3rd-largest n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_first_large_dxy_bsp = fs->make<TH1F>("h_sv1_first_large_dxy_bsp", ";sv1 seed track's 1st-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_second_large_dxy_bsp = fs->make<TH1F>("h_sv1_second_large_dxy_bsp", ";sv1 seed track's 2nd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_third_large_dxy_bsp = fs->make<TH1F>("h_sv1_third_large_dxy_bsp", ";sv1 seed track's 3rd-largest missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+  h_sv1_med_nsigmadxy_bsp = fs->make<TH1F>("h_sv1_med_nsigmadxy_bsp", ";sv1 seed track's median n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_sv1_med_dxy_bsp = fs->make<TH1F>("h_sv1_med_dxy_bsp", ";sv1 seed track's median missdist_{bsp} (cm); arb. units", 50, 0, 0.2);
+
 }
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -384,17 +505,109 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const math::XYZPoint bs(bsx, bsy, bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
 
-  double all_sumdbv = 0.0;
-
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
-
   const int nsv = int(auxes->size());
-  h_nsv->Fill(nsv, w);
+  h_nsv->Fill(nsv, w); 
+  /*
+  // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
+  // do the same but with gen leptons from LLPs;
+  // nmatched 0 refers to the first llp; nmatched 1 refers to the second llp -> each has 2 daughters 
+  double nmatched_0 = 0;
+  double nmatched_1 = 0;
+  double nelematched_0 = 0;
+  double nelematched_1 = 0;
+  double nmumatched_0 = 0;
+  double nmumatched_1 = 0;
+  double ngen_taus = 0;
+  for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
+    // skip stops and only look at leptons and quarks
+    // FIXME: this only works for stoplq samples
+    //if (abs(mevent->gen_daughter_id[i])==1000022){
+    if (abs(mevent->gen_daughter_id[i])==1000006) {
+      continue;
+    }
+    else{
+      double gd_eta = mevent->gen_daughters[i].Eta();
+      double gd_phi = mevent->gen_daughters[i].Phi();
+      int n_matched = 0;
+      int n_ematched = 0;
+      int n_mmatched = 0;
+
+      if ( abs(mevent->gen_daughter_id[i]) >= 1 && abs(mevent->gen_daughter_id[i]) <= 5 ) {
+        for (int ij = 0; ij<mevent->njets(); ++ij){
+          double dR2 = reco::deltaR2(mevent->nth_jet_eta(ij), mevent->nth_jet_phi(ij), gd_eta, gd_phi);
+          if (dR2<0.16){
+            n_matched += 1;
+          }
+        }
+      }
+      else if ( abs(mevent->gen_daughter_id[i]) == 11 ) { 
+        for (int ie=0; ie<mevent->nelectrons(); ++ie){
+          double dR2 = reco::deltaR2(mevent->nth_ele_eta(ie), mevent->nth_ele_phi(ie), gd_eta, gd_phi);
+          if (dR2<0.1){
+           n_ematched +=1;
+          }
+        }
+      }
+      else if ( abs(mevent->gen_daughter_id[i]) == 13 ) {
+        for (int im=0; im<mevent->nmuons(); ++im){
+          double dR2 = reco::deltaR2(mevent->nth_mu_eta(im), mevent->nth_mu_phi(im), gd_eta, gd_phi);
+          if (dR2<0.1){
+           n_mmatched +=1;
+          }
+        }
+      }
+      else if (abs(mevent->gen_daughter_id[i]) == 15 ) {
+        ngen_taus +=1;
+      }
+
+      if (i<3){
+        nmatched_0 += n_matched;
+        nelematched_0 += n_ematched;
+        nmumatched_0 += n_mmatched;
+      }
+      else{
+        nmatched_1 += n_matched;
+        nelematched_1 += n_ematched;
+        nmumatched_1 += n_mmatched;
+      }
+    }
+  }
+  
+  h_sv_nsv_nmatchjet->Fill(nmatched_0+nmatched_1, nsv, w);
+  h_sv_nsv_nmatchele->Fill(nelematched_0+nelematched_1, nsv, w);
+  h_sv_nsv_nmatchmu->Fill(nmumatched_0+nmumatched_1, nsv, w);
+  h_sv_nsv_nmatchlep->Fill(nelematched_0+nelematched_1+nmumatched_0+nmumatched_1, nsv, w);
+  h_sv_nsv_ngentaus->Fill(ngen_taus, nsv, w);
+  */
+
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
+	const int nmuons = 0.0; //aux.nmuons;
+	const int nelectrons = 0.0;//aux.nelectrons;
 
+    jmt::MinValue d;
+    double sv_gen2ddist_sign = 1;
+    for (int igenv = 0; igenv < 2; ++igenv) {
+      double genx = mevent->gen_lsp_decay[igenv*3+0];
+      double geny = mevent->gen_lsp_decay[igenv*3+1];
+      d(igenv, mag(aux.x-genx,
+                   aux.y-geny));
+    }
+    const int genvtx_2d = d.i();
+    double genbs2ddist = mevent->mag(mevent->gen_lsp_decay[genvtx_2d*3+0] - mevent->bsx_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]),
+                                     mevent->gen_lsp_decay[genvtx_2d*3+1] - mevent->bsy_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]) 
+          );
+    h_sv_ntk_genbs2ddist->Fill(ntracks, genbs2ddist, w);
+    if (genbs2ddist<mevent->bs2ddist(aux))
+      sv_gen2ddist_sign = -1;
+
+    h_sv_gen2ddist_signed->Fill(sv_gen2ddist_sign*aux.gen2ddist, w);
+
+    h_sv_ntk_bs2ddist->Fill(ntracks, mevent->bs2ddist(aux), w);
+    h_sv_ntk_gen2ddist->Fill(ntracks, aux.gen2ddist, w);
     h_sv_xy->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
     h_sv_xz->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
     h_sv_yz->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
@@ -460,7 +673,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"max_nm1_refit_dist2", max_nm1_refit_dist2},
         {"max_nm1_refit_distz", max_nm1_refit_distz},
 
-        {"nlep",                    aux.which_lep.size()},
+	// {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 ntracks},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
         {"ntracksptgt10",           aux.ntracksptgt(10)},
@@ -468,6 +681,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackminnhits",           aux.trackminnhits()},
         {"trackmaxnhits",           aux.trackmaxnhits()},
         {"njetsntks",               aux.njets[mfv::JByNtracks]},
+        {"nelensv",                 nelectrons},
+        {"nmunsv",                  nmuons},
+		{"nlepnsv",                 0.0},//aux.nleptons},	 #FIXME
         {"chi2dof",                 aux.chi2dof()},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof())},
 
@@ -545,6 +761,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackdxyerrmax", aux.trackdxyerrmax()},
         {"trackdxyerravg", aux.trackdxyerravg()},
         {"trackdxyerrrms", aux.trackdxyerrrms()},
+
+        {"trackdxynsigmamin", 0.0},
+        {"trackdxynsigmamax", 0.0},
+        {"trackdxynsigmaavg", 0.0},
+        {"trackdxynsigmarms", 0.0},
 
         {"trackdzerrmin", aux.trackdzerrmin()},
         {"trackdzerrmax", aux.trackdzerrmax()},
@@ -643,7 +864,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     fill(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
     fill(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
-
     for (int i = 0; i < ntracks; ++i) {
       fill(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill(h_sv_track_q, isv, aux.track_q(i), w);
@@ -667,7 +887,46 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill(h_sv_track_injet, isv, aux.track_injet[i], w);
       fill(h_sv_track_inpv, isv, aux.track_inpv[i], w);
     }
+    for (int i=0; i < nelectrons; ++i) {
+      fill(h_sv_eletrack_pt,  isv, 0.0,  w);
+      fill(h_sv_eletrack_eta, isv, 0.0, w);
+      fill(h_sv_eletrack_phi, isv, 0.0, w);
+      fill(h_sv_eletrack_dxy, isv, 0.0, w);
+      fill(h_sv_eletrack_iso, isv, 0.0, w);
+	  /*
+	  auto temp = aux.electron_ID[i];
+      int id = 0;
+      if ( temp[0] == 0 ) id = 0; 
+      if ( temp[0] == 1 ) id = 1;
+      if ( temp[1] == 1 ) id = 2; 
+      if ( temp[2] == 1 ) id = 3;
+      if ( temp[3] == 1 ) id = 4;
+	  */
+      fill(h_sv_eletrack_ID,  isv, 0.0,  w);
+      fill(h_sv_eletrack_tip, isv, 0.0, w);
+      fill(h_sv_eletrack_tipsig, isv, 0.0, w);
+    }
 
+    for (int i=0; i < nmuons; ++i) {
+      fill(h_sv_mutrack_pt,  isv, 0.0,  w);
+      fill(h_sv_mutrack_eta, isv, 0.0, w);
+      fill(h_sv_mutrack_phi, isv, 0.0, w);
+      fill(h_sv_mutrack_dxy, isv, 0.0, w);
+      fill(h_sv_mutrack_iso, isv, 0.0, w);
+	  /*
+	  auto temp = 0.0;aux.muon_ID[i];
+      int id = 0;
+      if ( temp[0] == 0 ) id = 0; 
+      if ( temp[0] == 1 ) id = 1;
+      if ( temp[1] == 1 ) id = 2; 
+      if ( temp[2] == 1 ) id = 3;
+	  */
+      fill(h_sv_mutrack_ID,  isv, 0.0,  w);
+      fill(h_sv_mutrack_tip, isv, 0.0, w);
+      fill(h_sv_mutrack_tipsig, isv, 0.0, w);
+    }
+
+   
     if (max_ntrackplots > 0) {
       std::vector<std::pair<int,float>> itk_pt;
       for (int i = 0; i < ntracks; ++i)
@@ -742,6 +1001,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   if (nsv >= 2) {
     const MFVVertexAux& sv0 = auxes->at(0);
     const MFVVertexAux& sv1 = auxes->at(1);
+    h_sv_ntk0_ntk1->Fill(sv0.ntracks(), sv1.ntracks(), w);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
     double bs3ddist0 = mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z), (float)(sv0.z-bsz));
@@ -767,30 +1027,27 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (int isv = 0; isv < nsv; ++isv) {
       const MFVVertexAux& aux = auxes->at(isv);
       const int ntracks = aux.ntracks();
-      all_sumdbv += mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z));
-
+  
       std::vector<int> track_which_jet;
       for (int i = 0; i < ntracks; ++i) {
-	double match_threshold = 1.3;
-	int jet_index = 255;
-	for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-	  double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
-	  double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
-	  double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
-	  if (a * b * c < match_threshold) {
-	    match_threshold = a * b * c;
-	    jet_index = mevent->jet_track_which_jet[j];
-	  }
-	}
-	if (jet_index != 255) {
-	  track_which_jet.push_back((int) jet_index);
-	}
+        double match_threshold = 1.3;
+        int jet_index = 255;
+        for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+          double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+          double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+          double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
+          if (a * b * c < match_threshold) {
+            match_threshold = a * b * c;
+            jet_index = mevent->jet_track_which_jet[j];
+          }
+        }
+        if (jet_index != 255) {
+          track_which_jet.push_back((int) jet_index);
+        }
       }
       sv_track_which_jet.push_back(track_which_jet);
     }
-
-   h_sum_all_bsbs2ddist->Fill(all_sumdbv, w);
-
+  
     bool shared_jet = std::find_first_of (sv_track_which_jet[0].begin(), sv_track_which_jet[0].end(), sv_track_which_jet[1].begin(), sv_track_which_jet[1].end()) != sv_track_which_jet[0].end();
     h_sv_shared_jets->Fill(shared_jet, w);
     if (shared_jet) {
@@ -800,6 +1057,83 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_svdist2d_no_shared_jets->Fill(svdist2d, w);
       h_absdeltaphi01_no_shared_jets->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
     }
+
+	std::vector<double> vec_sv0_nsigmadxy = {};
+	std::vector<double> vec_sv0_dxy = {};
+	for (int i = 0; i < sv0.ntracks(); ++i) {
+		vec_sv0_nsigmadxy.push_back(fabs(sv0.track_dxy[i] / sv0.track_dxy_err(i)));
+		vec_sv0_dxy.push_back(sv0.track_dxy[i]);
+    }
+	sort(vec_sv0_nsigmadxy.begin(), vec_sv0_nsigmadxy.end());
+	sort(vec_sv0_dxy.begin(), vec_sv0_dxy.end());
+
+        if (sv0.ntracks() >= 3){	
+	    h_sv0_first_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-1], w);
+	    h_sv0_second_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-2], w);
+	    h_sv0_third_large_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[vec_sv0_nsigmadxy.size()-3], w);
+	    h_sv0_first_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-1], w);
+	    h_sv0_second_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-2], w);
+	    h_sv0_third_large_dxy_bsp->Fill(vec_sv0_dxy[vec_sv0_dxy.size()-3], w);
+	    if (sv0.ntracks() % 2 == 0) {
+		h_sv0_med_nsigmadxy_bsp->Fill((vec_sv0_nsigmadxy[sv0.ntracks()/2] + vec_sv0_nsigmadxy[(sv0.ntracks()/2)-1])/2, w);
+		h_sv0_med_dxy_bsp->Fill((vec_sv0_dxy[sv0.ntracks()/2] + vec_sv0_dxy[(sv0.ntracks()/2) - 1])/2, w);
+	    }
+	    else {
+		h_sv0_med_nsigmadxy_bsp->Fill(vec_sv0_nsigmadxy[(sv0.ntracks()-1)/2], w);
+		h_sv0_med_dxy_bsp->Fill(vec_sv0_dxy[(sv0.ntracks()-1)/2], w);
+	    }
+        }
+
+	std::vector<double> vec_sv1_nsigmadxy = {};
+	std::vector<double> vec_sv1_dxy = {};
+	for (int i = 0; i < sv1.ntracks(); ++i) {
+		vec_sv1_nsigmadxy.push_back(fabs(sv1.track_dxy[i] / sv1.track_dxy_err(i)));
+		vec_sv1_dxy.push_back(sv1.track_dxy[i]);
+	}
+	sort(vec_sv1_nsigmadxy.begin(), vec_sv1_nsigmadxy.end());
+	sort(vec_sv1_dxy.begin(), vec_sv1_dxy.end());
+        
+        if (sv1.ntracks() >= 3){
+	    h_sv1_first_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 1], w);
+	    h_sv1_second_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 2], w);
+	    h_sv1_third_large_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[vec_sv1_nsigmadxy.size() - 3], w);
+	    h_sv1_first_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 1], w);
+	    h_sv1_second_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 2], w);
+	    h_sv1_third_large_dxy_bsp->Fill(vec_sv1_dxy[vec_sv1_dxy.size() - 3], w);
+	    if (sv1.ntracks() % 2 == 0) {
+		h_sv1_med_nsigmadxy_bsp->Fill((vec_sv1_nsigmadxy[sv1.ntracks() / 2] + vec_sv1_nsigmadxy[(sv1.ntracks() / 2) - 1]) / 2, w);
+		h_sv1_med_dxy_bsp->Fill((vec_sv1_dxy[sv1.ntracks() / 2] + vec_sv1_dxy[(sv1.ntracks() / 2) - 1]) / 2, w);
+	    }
+	    else {
+		h_sv1_med_nsigmadxy_bsp->Fill(vec_sv1_nsigmadxy[(sv1.ntracks() - 1) / 2], w);
+		h_sv1_med_dxy_bsp->Fill(vec_sv1_dxy[(sv1.ntracks() - 1) / 2], w);
+	    }
+        }
+
+  }
+
+  // number of jets associated with SVs
+  for (int isv = 0; isv < nsv; ++isv) {
+    const MFVVertexAux& aux = auxes->at(isv);
+    const int ntracks = aux.ntracks();
+    std::set<int> sv_jetasso;
+    for (int i = 0; i < ntracks; ++i) {
+	    double match_threshold = 1.3;
+	    int jet_index = 255;
+	    for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+	      double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+	      double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+	      double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
+	      if (a * b * c < match_threshold) {
+	        match_threshold = a * b * c;
+	        jet_index = mevent->jet_track_which_jet[j];
+	      }
+	    }
+	    if (jet_index != 255) {
+        sv_jetasso.insert((int) jet_index);
+	    }
+    }
+    h_sv_ntk_njet->Fill(ntracks, sv_jetasso.size(), w);
   }
 }
 

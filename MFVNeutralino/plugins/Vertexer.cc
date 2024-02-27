@@ -130,7 +130,7 @@ class MFVVertexer : public edm::EDProducer {
       if (ttks.size() < 2)
         return std::vector<TransientVertex>();
       std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-      if (v[0].normalisedChiSquared() > 5)
+      if (v[0].normalisedChiSquared() > 5) 
         return std::vector<TransientVertex>();
       return v;
     }
@@ -1704,7 +1704,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
     iv = 0; //some vertices after dz refiting have normalized chi2 > 5
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
-      if ((*v[0]).normalizedChi2() > 5) {
+      if ((*v[0]).normalizedChi2() > 5) { 
         v[0] = vertices->erase(v[0]) - 1;
         continue;
       }
@@ -2301,7 +2301,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   */
   
 
-  std::cout << " vertex->size() " << vertices->size() << std::endl;
   finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 

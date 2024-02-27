@@ -45,6 +45,7 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<std::vector<double> > gen_vertices_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   jmt::TrackRefGetter track_ref_getter;
@@ -67,6 +68,7 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     gen_vertices_token(consumes<std::vector<double> >(cfg.getParameter<edm::InputTag>("gen_vertices_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))), 
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
     track_ref_getter(cfg.getParameter<std::string>("@module_label"),
@@ -208,6 +210,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         }
       }
   }
+  edm::Handle<reco::TrackCollection> vertex_seed_tracks;                                                                                                                              event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks); 
+  std::vector<size_t> vec_outsedtki;
   for (int irawsv = 0; irawsv < nsv; ++irawsv) {
     int isv = sort_irawsv[nsv-irawsv-1];
     const reco::Vertex& sv = secondary_vertices->at(isv);
@@ -231,12 +235,30 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
 
-    std::vector<reco::TransientTrack> ttks, rs_ttks;
-    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it)
-      if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
-        ttks.push_back(tt_builder->build(**it));
-        rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
-      }
+	std::vector<reco::TransientTrack> ttks, rs_ttks;
+	for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
+		reco::TrackRef tk = it->castTo<reco::TrackRef>();
+		if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
+			ttks.push_back(tt_builder->build(**it));
+			rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+		}
+
+		//get seed tracks outside all vertices
+		size_t sedtki = 0;
+		for (const reco::Track& sedtk : *vertex_seed_tracks) {
+			assert(abs(sedtk.charge()) == 1);
+			if ((fabs(sedtk.pt() - fabs(tk->charge() * tk->pt())) < 0.0001 &&
+				fabs(sedtk.eta() - tk->eta()) < 0.0001 &&
+				fabs(sedtk.phi() - tk->phi()) < 0.0001) || std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
+				continue;
+			}
+			vec_outsedtki.push_back(sedtki);
+			sedtki++;
+		}
+		
+	}
+
+
     if (rs_ttks.size() > 1) {
       reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
       if (rs_sv.isValid()) {
@@ -497,6 +519,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
 
+    
+
     jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
     aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min.back());
     aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max.back());
@@ -551,6 +575,34 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.bs2derr);
   }
 
+  //investigate outside seed tracks from vertices 
+  for (int irawsv = 0; irawsv < nsv; ++irawsv) {
+	  int isv = sort_irawsv[nsv - irawsv - 1];
+	  const reco::Vertex& sv = secondary_vertices->at(isv);
+	  const reco::VertexRef svref(secondary_vertices, isv);
+	  MFVVertexAux & aux = auxes->at(irawsv);
+
+	  size_t sedtki = 0;
+	  for (const reco::Track& sedtk : *vertex_seed_tracks) {
+		  assert(abs(sedtk.charge()) == 1);
+		  if (std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
+			  const reco::TransientTrack outsedtri = tt_builder->build(sedtk);
+			  std::pair<bool, Measurement1D> tkdist = track_dist(outsedtri, sv);
+			  aux.outsed_track_tkdist_val.push_back(tkdist.second.value());
+			  aux.outsed_track_tkdist_sig.push_back(tkdist.second.significance());
+			  if (irawsv == 0) {
+				  const double dxybs = sedtk.dxy(*beamspot);
+				  const auto rs = track_rescaler.scale(sedtk);
+				  const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+				  const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+				  aux.outsed_track_dxy.push_back(fabs(sedtk.dxy(beamspot->position())));
+				  aux.outsed_track_nsigmadxy.push_back(rescaled_sigmadxybs);
+
+			  }
+		  }
+	  }
+	  
+  }
   sorter.sort(*auxes);
   event.put(std::move(auxes));
 }

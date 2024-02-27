@@ -257,8 +257,16 @@ struct MFVVertexAux {
   std::vector<float> track_phi;
   std::vector<float> track_tkdist_val;
   std::vector<float> track_tkdist_sig;
-  std::vector<float> track_tkdisttosv1_val;
-  std::vector<float> track_tkdisttosv1_sig;
+  std::vector<float> track_tkdisttosv1_val; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> track_tkdisttosv1_sig; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> outsed_track_tkdist_val;
+  std::vector<float> outsed_track_tkdist_sig;
+  std::vector<float> outsed_track_dxy; //only if nsv > 0 and nonempty only to sv0
+  std::vector<float> outsed_track_nsigmadxy; //only if nsv > 0 and nonempty only to sv0 
+  //std::vector<float> outsed_track_gen0dist_val; //only if nsv > 0 and nonempty only to sv0
+  //std::vector<float> outsed_track_gen0dist_sig; //only if nsv > 0 and nonempty only to sv0 
+  //std::vector<float> outsed_track_gen1dist_val; //only if nsv > 0 and nonempty only to sv0 
+  //std::vector<float> outsed_track_gen1dist_sig; //only if nsv > 0 and nonempty only to sv0
 
   void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
   float track_weight(int i) const { return float(track_w_[i])/255.f; }

@@ -32,37 +32,88 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_w;
   TH1F* h_nsv;
+  TH1F* h_ntrack_sv;
+  TH1F* h_sum_ntrack_sv;
+  TH1F* h_sum_noutseedtrack; 
+  
+
   TH2F* h_2D_ntrk0_ntrk1; 
   // for a cross-check 
   TH1F* h_signal_evt_min_dau_dxy;
   TH1F* h_signal_evt_gendist3d_vtx0;
-  TH1F* h_signal_evt_gendist3d_vtx1;
+  TH2F* h_2D_signal_evt_llp0_daudxy;
+  TH1F* h_signal_evt_llp0_min_dau_dxy;
+  TH1F* h_signal_evt_vtx0_outseedtrk_trkdist;
+  TH1F* h_signal_evt_vtx0_outseedtrk_trkdistsig;
+  TH2F* h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH2F* h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist;
+  TH1F* h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs;
+  TH1F* h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
   TH1F* h_signal_evt_llp01_gendist3d;
   TH1F* h_signal_evt_vtx01_dist3d;
   TH1F* h_signal_evt_vtx01_dist3dsig;
+  TH1F* h_signal_evt_vtx0_outseedtrk_nsigmadxybs;
+  TH1F* h_signal_evt_vtx0_outseedtrk_dxybs;
   TH1F* h_signal_evt_vtx0_seedtrk_dxybs;
-  TH1F* h_signal_evt_vtx0_seedtrk_missdist;
-  TH1F* h_signal_evt_vtx0_seedtrk_missdistsig;
+  TH1F* h_signal_evt_vtx0_seedtrk_nsigmadxybs;
+  TH1F* h_signal_evt_vtx0_seedtrk_trkdist;
+  TH1F* h_signal_evt_vtx0_seedtrk_trkdistsig;
   TH1F* h_signal_evt_vtx0_mass;
   TH1F* h_signal_evt_vtx0_pT;
   TH1F* h_signal_evt_vtx0_bs2derr;
   TH1F* h_signal_evt_vtx0_dbv;
+  TH1F* h_signal_evt_n2trksv;
+  TH1F* h_signal_evt_gendist3dresllp0_2trksv;
+  TH2F* h_2D_signal_evt_gendist3dresllp0_n2trksv;
+  TH1F* h_signal_evt_gendist3dresllp0_400um_2trksv_dbv;
+  TH1F* h_signal_evt_gendist3dresllp0_400um_2trksv_absdphivtx0;
+  TH1F* h_signal_evt_gendist3dresllp0_400um_2trksv_absdphillp0;
+  TH1F* h_signal_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0;
 
   // for improvement of signal eff. 
   TH1F* h_potential_evt_min_dau_dxy;
   TH1F* h_potential_evt_gendist3d_vtx0;
+  TH2F* h_2D_potential_evt_llp0_daudxy;
+  TH1F* h_potential_evt_llp0_min_dau_dxy;
   TH1F* h_potential_evt_gendist3d_vtx1;
+  TH1F* h_potential_evt_gendist3d_3trk_vtx1;
+  TH2F* h_2D_potential_evt_llp1_daudxy;
+  TH1F* h_potential_evt_llp1_min_dau_dxy;
+  TH1F* h_potential_evt_vtx0_outseedtrk_trkdist;
+  TH1F* h_potential_evt_vtx0_outseedtrk_trkdistsig;
+  TH2F* h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH2F* h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist;
+  TH1F* h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs;
+  TH1F* h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH1F* h_potential_evt_vtx1_outseedtrk_trkdist;
+  TH1F* h_potential_evt_vtx1_outseedtrk_trkdistsig;
+  TH2F* h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH2F* h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist;
+  TH2F* h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH2F* h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist;
+  TH1F* h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs;
+  TH1F* h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
+  TH1F* h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs;
+  TH1F* h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig;
   TH1F* h_potential_evt_llp01_gendist3d;
   TH1F* h_potential_evt_vtx01_dist3d;
   TH1F* h_potential_evt_vtx01_dist3dsig;
   TH1F* h_potential_evt_vtx0_seedtrk_dxybs;
-  TH1F* h_potential_evt_vtx0_seedtrk_missdist;
-  TH1F* h_potential_evt_vtx0_seedtrk_missdistsig;
+  TH1F* h_potential_evt_vtx0_seedtrk_nsigmadxybs;
+  TH1F* h_potential_evt_vtx0_seedtrk_trkdist;
+  TH1F* h_potential_evt_vtx0_seedtrk_trkdistsig;
+  TH1F* h_potential_evt_vtx0_outseedtrk_nsigmadxybs;
+  TH1F* h_potential_evt_vtx0_outseedtrk_dxybs;
   TH1F* h_potential_evt_vtx1_seedtrk_dxybs;
-  TH1F* h_potential_evt_vtx1_seedtrk_missdist;
-  TH1F* h_potential_evt_vtx1_seedtrk_missdistsig;
-  TH2F* h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist;
-  TH2F* h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig;
+  TH1F* h_potential_evt_vtx1_seedtrk_nsigmadxybs;
+  TH1F* h_potential_evt_vtx1_seedtrk_trkdist;
+  TH1F* h_potential_evt_vtx1_seedtrk_trkdistsig;
+  TH1F* h_potential_evt_3trk_vtx1_seedtrk_dxybs;
+  TH1F* h_potential_evt_3trk_vtx1_seedtrk_nsigmadxybs;
+  TH1F* h_potential_evt_3trk_vtx1_seedtrk_trkdist;
+  TH1F* h_potential_evt_3trk_vtx1_seedtrk_trkdistsig;
+  TH2F* h_2D_potential_evt_vtx0_seedtrk_trkdist_other_trkdist;
+  TH2F* h_2D_potential_evt_vtx0_seedtrk_trkdistsig_other_trkdistsig;
   TH1F* h_potential_evt_vtx0_mass;
   TH1F* h_potential_evt_vtx0_pT;
   TH1F* h_potential_evt_vtx0_bs2derr;
@@ -71,6 +122,28 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_potential_evt_vtx1_pT;
   TH1F* h_potential_evt_vtx1_bs2derr;
   TH1F* h_potential_evt_vtx1_dbv;
+  TH1F* h_potential_evt_3trk_vtx1_mass;
+  TH1F* h_potential_evt_3trk_vtx1_pT;
+  TH1F* h_potential_evt_3trk_vtx1_bs2derr;
+  TH1F* h_potential_evt_3trk_vtx1_dbv;
+  TH1F* h_potential_evt_n2trksv;
+  TH1F* h_potential_evt_gendist3dresllp0_2trksv;
+  TH1F* h_potential_evt_gendist3dresllp1_2trksv;
+  TH2F* h_2D_potential_evt_gendist3dresllp0_n2trksv;
+  TH2F* h_2D_potential_evt_gendist3dresllp1_n2trksv;
+  TH2F* h_2D_potential_evt_gendist3dres3trkllp1_n2trksv;
+  TH1F* h_potential_evt_gendist3dresllp0_400um_2trksv_dbv;
+  TH1F* h_potential_evt_gendist3dresllp0_400um_2trksv_absdphivtx0;
+  TH1F* h_potential_evt_gendist3dresllp0_400um_2trksv_absdphillp0;
+  TH1F* h_potential_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0;
+  TH1F* h_potential_evt_gendist3dresllp1_400um_2trksv_dbv;
+  TH1F* h_potential_evt_gendist3dresllp1_400um_2trksv_absdphivtx1;
+  TH1F* h_potential_evt_gendist3dresllp1_400um_2trksv_absdphillp1;
+  TH1F* h_potential_evt_gendist3dresllp1_400um_2trksv_3ddistvtx1;
+  TH1F* h_potential_evt_gendist3dres3trkllp1_400um_2trksv_dbv;
+  TH1F* h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphivtx1;
+  TH1F* h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphillp1;
+  TH1F* h_potential_evt_gendist3dres3trkllp1_400um_2trksv_3ddistvtx1;
 
   TH2F* h_gen_decay;
   TH1F* h_gen_flavor_code;
@@ -83,105 +156,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bquark_pairdphi;
   TH1F* h_bquark_pairdeta;
 
-  //FIXME: ghost-track vertex study
-  TH1F* h_n_gen_bvtx;
   TH1F* h_llp_r3d;
   TH1F* h_llp_ctau;
   TH1F* h_llp_gammabeta;
-  TH1F* h_gvtx_nsv;
-  TH1F* h_gvtx_sv_ntrack;
-  TH1F* h_gvtx_nbsv;
-  TH1F* h_gvtx_bsv_ntrack;
-  TH1F* h_gvtx_bsv_rescale_bsbs2ddist; 
-  TH1F* h_gvtx_bsv_rescale_bs2derr;
-  TH1F* h_gvtx_bsv_genb3ddist; 
-  TH1F* h_gvtx_njet;
-  TH1F* h_gvtx_nbquarkjet;
-  TH1F* h_gvtx_nloosebtaggedjet;
-  TH1F* h_gvtx_nloosebtaggedOR3seedtrkjet;
-  TH1F* h_gvtx_shared_GEN_bjet_or_not;
-
-  //track investigation 
   
-  TH1F* h_gvtx_all_tracks_per_jet;
-  TH1F* h_gvtx_seed_tracks_per_jet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_jet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_jet;
-  TH1F* h_gvtx_all_tracks_per_GEN_bjet;
-  TH1F* h_gvtx_seed_tracks_per_GEN_bjet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet;
-  TH1F* h_gvtx_all_tracks_per_NONGEN_bjet;
-  TH1F* h_gvtx_seed_tracks_per_NONGEN_bjet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet;
-  TH1F* h_gvtx_all_track_pt_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_sigmadxybs_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_npxhits_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_nsthits_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_npxlayers_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_nstlayers_from_GEN_bjets;
-  TH1F* h_gvtx_all_track_rmin_from_GEN_bjets;
-  TH1F* h_gvtx_jet_seed_nm1_pt_from_GEN_bjets;
-  TH1F* h_gvtx_jet_seed_nm1_npxlayers_from_GEN_bjets;
-  TH1F* h_gvtx_jet_seed_nm1_nstlayers_from_GEN_bjets;
-  TH1F* h_gvtx_jet_seed_nm1_rmin_from_GEN_bjets;
-  TH1F* h_gvtx_jet_seed_nm1_sigmadxybs_from_GEN_bjets;
 
-
-  TH1F* h_gvtx_is_tight_btag_per_GEN_bjet_or_not;
-  TH1F* h_gvtx_is_medium_btag_per_GEN_bjet_or_not;
-  TH1F* h_gvtx_is_loose_btag_per_GEN_bjet_or_not;
-
-  TH1F* h_gvtx_count_bquarks_match_to_loosebtaggedjet;
-  TH1F* h_gvtx_all_tracks_per_loosebtaggedjet;
-  TH1F* h_gvtx_seed_tracks_per_loosebtaggedjet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_loosebtaggedjet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_loosebtaggedjet;
-  TH1F* h_gvtx_sv_all_genb3ddist;
-  TH1F* h_gvtx_sv_all_genllp3ddist;
   
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not;
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not;
-  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_nbsv;
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv;
-  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv;
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv;
-  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv;
-  TH2F* h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv;
-  TH2F* h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv;
-  TH2F* h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv;  //expects two b-vertices 
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv;  //expects one b-vertex 
-  TH2F* h_2D_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv;  //expects two b-vertices 
-  TH2F* h_2D_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv;  //expects one b-vertex 
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv;
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_jet_pT;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_dist3d_bpair;
-  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair;
-  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT;
-  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT;
-
-  TH1F* h_gvtx_three_categories_loosebtaggedjet;
-  TH1F* h_gvtx_three_categories_3tightseedjet;
-
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet;
-  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet;
-
-  TH1F* h_gvtx_seed_tracks_per_no_shared_jet;
-  TH1F* h_gvtx_seed_tracks_per_no_matched_jet;
-  TH1F* h_gvtx_seed_tracks_per_shared_jet;
-
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet;
-  TH1F* h_gvtx_nm1_pT_seed_tracks_per_shared_jet;
-
- 
-
 
   //////////////////////////////////////// 
 
@@ -305,47 +285,119 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
-  h_nsv = fs->make<TH1F>("h_nsv", ";# of (loose) secondary vertices;arb. units", 40, 0, 40);
+  h_nsv = fs->make<TH1F>("h_nsv", ";# of raw secondary vertices;arb. units", 20, 0, 20);
+  h_ntrack_sv = fs->make<TH1F>("h_ntrack_sv", ";ntrack/ raw secondary vertices;arb. units", 20, 0, 20);
+  h_sum_ntrack_sv = fs->make<TH1F>("h_sum_ntrack_sv", ";sum of all in-vertex seed tracks;arb. units", 50, 0, 50);
+  h_sum_noutseedtrack = fs->make<TH1F>("h_sum_noutseedtrack", ";sum of all out-vertex seed tracks;arb. units", 50, 0, 50);
   h_2D_ntrk0_ntrk1 = fs->make<TH2F>("h_2D_ntrk0_ntrk1", ";# of tracks per vtx0; # of tracks per vtx1;arb. units", 20, 0, 20, 20, 0, 20);
 
   // for a cross-check 
   h_signal_evt_min_dau_dxy = fs->make<TH1F>("h_signal_evt_min_dau_dxy", "signal-like events;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
   h_signal_evt_gendist3d_vtx0 = fs->make<TH1F>("h_signal_evt_gendist3d_vtx0", "signal-like events; gendist3d(closest llp-vtx, vtx0) (cm.)", 50, 0, 0.2);
-  h_signal_evt_gendist3d_vtx1 = fs->make<TH1F>("h_signal_evt_gendist3d_vtx1", "signal-like events; gendist3d(closest llp-vtx, vtx1) (cm.)", 50, 0, 0.2);
+  h_2D_signal_evt_llp0_daudxy = fs->make<TH2F>("h_2D_signal_evt_llp0_daudxy", "signal-like events;llp0's |dau0's dxy| (cm.); llp0's |dau1's dxy| (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
+  h_signal_evt_llp0_min_dau_dxy = fs->make<TH1F>("h_signal_evt_llp0_min_dau_dxy", "signal-like events;llp0's min(|dau's dxy|) (cm.);arb. units", 50, 0, 0.05);
+  h_signal_evt_vtx0_outseedtrk_trkdist = fs->make<TH1F>("h_signal_evt_vtx0_outseedtrk_trkdist", "signal-like events; outside seed track's missdist_{vtx0} (cm.)", 50, 0, 0.2);
+  h_signal_evt_vtx0_outseedtrk_trkdistsig = fs->make<TH1F>("h_signal_evt_vtx0_outseedtrk_trkdistsig", "signal-like events; outside seed track's n#sigma missdist_{vtx0}", 80, 0, 10.0);
+  h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH2F>("h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "signal-like events; max(outside seed track's dxybs(< min(vtx0 |daudxy|)) cm. ; its vtx0's n#sigma missdist_{vtx0}", 20, 0.0, 0.2, 50, 0, 10.0);
+  h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist = fs->make<TH2F>("h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist", "signal-like events; max(outside seed track's dxybs(< min(vtx0 |daudxy|)) cm. ; its vtx0's missdist_{vtx0} (cm.)", 20, 0.0, 0.2, 50, 0, 0.2);
+  h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs = fs->make<TH1F>("h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs", "signal-like events;mindxydau-vtx0 outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH1F>("h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "signal-like events;mindxydau-vtx0 outside seed track's n#sigma missdist_{vtx0} ; arb. units", 20, 0.0, 10.0);
   h_signal_evt_llp01_gendist3d = fs->make<TH1F>("h_signal_evt_llp01_gendist3d", "signal-like events; gendist3d(llp0, llp1) (cm.)", 50, 0, 0.2);
   h_signal_evt_vtx01_dist3d = fs->make<TH1F>("h_signal_evt_vtx01_dist3d", "signal-like events; dist3d(vtx0, vtx1) (cm.)", 50, 0, 0.2);
   h_signal_evt_vtx01_dist3dsig = fs->make<TH1F>("h_signal_evt_vtx01_dist3dsig", "signal-like events; n#sigma dist3d(vtx0, vtx1) ", 80, 0, 10.0);
-  h_signal_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_dxybs", "signal-like events;vtx0 seed track's dxybs (cm.)", 100, -0.2, 0.2);
-  h_signal_evt_vtx0_seedtrk_missdist = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_missdist", "signal-like events;vtx0 seed track's missdist (cm.)", 50, 0, 0.2);
-  h_signal_evt_vtx0_seedtrk_missdistsig = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_missdistsig", "signal-like events;vtx0 seed track's n#sigma missdist", 80, 0, 10.0);
+  h_signal_evt_vtx0_outseedtrk_nsigmadxybs = fs->make<TH1F>("h_signal_evt_vtx0_outseedtrk_nsigmadxybs", "signal-like events;outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_signal_evt_vtx0_outseedtrk_dxybs = fs->make<TH1F>("h_signal_evt_vtx0_outseedtrk_dxybs", "signal-like events;outside seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_signal_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_dxybs", "signal-like events;vtx0 seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_signal_evt_vtx0_seedtrk_nsigmadxybs = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_nsigmadxybs", "signal-like events;vtx0 seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_signal_evt_vtx0_seedtrk_trkdist = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_trkdist", "signal-like events;vtx0 seed track's missdist_{vtx0} (cm.)", 50, 0, 0.2);
+  h_signal_evt_vtx0_seedtrk_trkdistsig = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_trkdistsig", "signal-like events;vtx0 seed track's n#sigma missdist_{vtx0}", 80, 0, 10.0);
   h_signal_evt_vtx0_mass = fs->make<TH1F>("h_signal_evt_vtx0_mass", "signal-like events;vtx0 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
   h_signal_evt_vtx0_pT = fs->make<TH1F>("h_signal_evt_vtx0_pT", "signal-like events;vtx0 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
-  h_signal_evt_vtx0_dbv = fs->make<TH1F>("h_signal_evt_vtx0_dbv", "signal-like events;dBV/vtx0 (cm.); ", 120, 0, 3.0);
+  h_signal_evt_vtx0_dbv = fs->make<TH1F>("h_signal_evt_vtx0_dbv", "signal-like events;dBV/vtx0 (cm.); ", 30, 0, 0.3);
   h_signal_evt_vtx0_bs2derr = fs->make<TH1F>("h_signal_evt_vtx0_bs2derr", "signal-like events;bs2derr/vtx0(cm.); ", 50, 0, 0.05);
+  h_signal_evt_n2trksv = fs->make<TH1F>("h_signal_evt_n2trksv", "signal-like events;# of 2-trk vertices (exclude top two);arb. units", 20, 0, 20);
+  h_signal_evt_gendist3dresllp0_2trksv = fs->make<TH1F>("h_signal_evt_gendist3dresllp0_2trksv", "signal-like events;gendist3dllp0 to 2-trk vertices (exclude top two) cm.", 100, 0.0, 0.1);
+  h_2D_signal_evt_gendist3dresllp0_n2trksv = fs->make<TH2F>("h_2D_signal_evt_gendist3dresllp0_n2trksv", "signal-like events;resolution cutoff of gendist3dllp0 cm.; # of 2-trk vertices within a cutoff", 10, 0.0, 0.04, 20, 0, 20);
+  h_signal_evt_gendist3dresllp0_400um_2trksv_dbv = fs->make<TH1F>("h_signal_evt_gendist3dresllp0_400um_2trksv_dbv", "signal-like events;dBV/2trk-vtx2+ w/ 400um-genllp0 (cm.); ", 50, 0, 0.1);
+  h_signal_evt_gendist3dresllp0_400um_2trksv_absdphivtx0 = fs->make<TH1F>("h_signal_evt_gendist3dresllp0_400um_2trksv_absdphivtx0", "signal-like events;|#Delta(phi_{2trk-vtx2+}, phi_{vtx0})| w/ 400um-genllp0 ; ", 315, 0, 3.15);
+  h_signal_evt_gendist3dresllp0_400um_2trksv_absdphillp0 = fs->make<TH1F>("h_signal_evt_gendist3dresllp0_400um_2trksv_absdphillp0", "signal-like events;|#Delta(phi_{2trk-vtx2+}, phi_{llp0})| w/ 400um-genllp0 ; ", 315, 0, 3.15);
+  h_signal_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0 = fs->make<TH1F>("h_signal_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0", "signal-like events;dist3d(vtx0, 2trk-vtx2+ w/ 400um-genllp0) (cm.); ", 50, 0, 0.2);
+
 
   // for improvement of signal eff. 
   h_potential_evt_min_dau_dxy = fs->make<TH1F>("h_potential_evt_min_dau_dxy", "potentially-recover events;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
   h_potential_evt_gendist3d_vtx0 = fs->make<TH1F>("h_potential_evt_gendist3d_vtx0", "potentially-recover events; gendist3d(closest llp-vtx, vtx0) (cm.)", 50, 0, 0.2);
+  h_2D_potential_evt_llp0_daudxy = fs->make<TH2F>("h_2D_potential_evt_llp0_daudxy", "potentially-recover events;llp0's |dau0's dxy| (cm.); llp0's |dau1's dxy| (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
+  h_potential_evt_llp0_min_dau_dxy = fs->make<TH1F>("h_potential_evt_llp0_min_dau_dxy", "potentially-recover events;llp0's min(|dau's dxy|) (cm.);arb. units", 50, 0, 0.05);
+  h_2D_potential_evt_llp1_daudxy = fs->make<TH2F>("h_2D_potential_evt_llp1_daudxy", "potentially-recover events;llp1's |dau2's dxy| (cm.); llp1's |dau3's dxy| (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
+  h_potential_evt_llp1_min_dau_dxy = fs->make<TH1F>("h_potential_evt_llp1_min_dau_dxy", "potentially-recover events;llp1's min(|dau's dxy|) (cm.);arb. units", 50, 0, 0.05);
   h_potential_evt_gendist3d_vtx1 = fs->make<TH1F>("h_potential_evt_gendist3d_vtx1", "potentially-recover events; gendist3d(closest llp-vtx, vtx1) (cm.)", 50, 0, 0.2);
+  h_potential_evt_gendist3d_3trk_vtx1 = fs->make<TH1F>("h_potential_evt_gendist3d_3trk_vtx1", "potentially-recover events; gendist3d(closest llp-vtx, >=3trk vtx1) (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx0_outseedtrk_trkdist = fs->make<TH1F>("h_potential_evt_vtx0_outseedtrk_trkdist", "potentially-recover events; outside seed track's missdist_{vtx0} (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx0_outseedtrk_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx0_outseedtrk_trkdistsig", "potentially-recover events; outside seed track's n#sigma missdist_{vtx0}", 80, 0, 10.0);
+  h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH2F>("h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events; max(outside seed track's dxybs(< min(vtx0 |daudxy|)) cm. ; its n#sigma missdist_{vtx0}", 20, 0.0, 0.2, 50, 0, 10.0);
+  h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist = fs->make<TH2F>("h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist", "potentially-recover events; max(outside seed track's dxybs(< min(vtx0 |daudxy|)) cm. ; its missdist_{vtx0} (cm.)", 20, 0.0, 0.2, 50, 0, 0.2);
+  h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs = fs->make<TH1F>("h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs", "potentially-recover events;mindxydau-vtx0 outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events;mindxydau-vtx0 outside seed track's n#sigma missdist_{vtx0} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx1_outseedtrk_trkdist = fs->make<TH1F>("h_potential_evt_vtx1_outseedtrk_trkdist", "potentially-recover events; vtx1 outside seed track's missdist_{vtx1} (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx1_outseedtrk_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx1_outseedtrk_trkdistsig", "potentially-recover events; vtx1 outside seed track's n#sigma missdist_{vtx1}", 80, 0, 10.0);
+  h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH2F>("h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events; max(outside seed track's dxybs(< min(vtx1 |daudxy|)) cm. ; its n#sigma missdist_{vtx1}", 20, 0.0, 0.2, 50, 0, 10.0);
+  h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH2F>("h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events; max(outside seed track's dxybs(< min(vtx1 |daudxy|)) cm. ; its n#sigma missdist_{>=3trk-vtx1}", 20, 0.0, 0.2, 50, 0, 10.0);
+  h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist = fs->make<TH2F>("h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist", "potentially-recover events; max(outside seed track's dxybs(< min(vtx1 |daudxy|)) cm. ; its missdist_{vtx1} (cm.)", 20, 0.0, 0.2, 50, 0, 0.2);
+  h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist = fs->make<TH2F>("h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist", "potentially-recover events; max(outside seed track's dxybs(< min(vtx1 |daudxy|)) cm. ; its missdist_{>=3trk-vtx1} (cm.)", 20, 0.0, 0.2, 50, 0, 0.2);
+  h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs = fs->make<TH1F>("h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs", "potentially-recover events;mindxydau-vtx1 outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events;mindxydau-vtx1 outside seed track's n#sigma missdist_{vtx1} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs = fs->make<TH1F>("h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs", "potentially-recover events;mindxydau->=3trk-vtx1 outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig = fs->make<TH1F>("h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig", "potentially-recover events;mindxydau->=3trk-vtx1 outside seed track's n#sigma missdist_{>=3trk-vtx1} ; arb. units", 20, 0.0, 10.0);
   h_potential_evt_llp01_gendist3d = fs->make<TH1F>("h_potential_evt_llp01_gendist3d", "potentially-recover events; gendist3d(llp0, llp1) (cm.)", 50, 0, 0.2);
   h_potential_evt_vtx01_dist3d = fs->make<TH1F>("h_potential_evt_vtx01_dist3d", "potentially-recover events; dist3d(vtx0, vtx1) (cm.)", 50, 0, 0.2);
   h_potential_evt_vtx01_dist3dsig = fs->make<TH1F>("h_potential_evt_vtx01_dist3dsig", "potentially-recover events; n#sigma dist3d(vtx0, vtx1) ", 80, 0, 10.0);
-  h_potential_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_dxybs", "potentially-recover events;vtx0 seed track's dxybs (cm.)", 100, -0.2, 0.2);
-  h_potential_evt_vtx0_seedtrk_missdist = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_missdist", "potentially-recover events;vtx0 seed track's missdist (cm.)", 50, 0, 0.2);
-  h_potential_evt_vtx0_seedtrk_missdistsig = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_missdistsig", "potentially-recover events;vtx0 seed track's n#sigma missdist", 80, 0, 10.0);
-  h_potential_evt_vtx1_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_dxybs", "potentially-recover events;vtx1 seed track's dxybs (cm.)", 100, -0.2, 0.2);
-  h_potential_evt_vtx1_seedtrk_missdist = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_missdist", "potentially-recover events;vtx1 seed track's missdist (cm.)", 50, 0, 0.2);
-  h_potential_evt_vtx1_seedtrk_missdistsig = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_missdistsig", "potentially-recover events;vtx1 seed track's n#sigma missdist", 80, 0, 10.0);
-  h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist", ";vtx0 seed track's missdist to vtx0 (cm.); vtx0 seed track's missdist to vtx1 (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
-  h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig", ";vtx0 seed track's n#sigma missdist to vtx0; vtx0 seed track's n#sigma missdist to vtx1;arb. units", 30, 0, 10.0, 30, 0, 10.0);
+  h_potential_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_dxybs", "potentially-recover events;vtx0 seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_potential_evt_vtx0_seedtrk_nsigmadxybs = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_nsigmadxybs", "potentially-recover events;vtx0 seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx0_seedtrk_trkdist = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_trkdist", "potentially-recover events;vtx0 seed track's missdist_{vtx0} (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx0_seedtrk_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_trkdistsig", "potentially-recover events;vtx0 seed track's n#sigma missdist_{vtx0}", 80, 0, 10.0);
+  h_potential_evt_vtx0_outseedtrk_nsigmadxybs = fs->make<TH1F>("h_potential_evt_vtx0_outseedtrk_nsigmadxybs", "potentially-recover events;outside seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx0_outseedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx0_outseedtrk_dxybs", "potentially-recover events;outside seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_potential_evt_vtx1_seedtrk_nsigmadxybs = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_nsigmadxybs", "potentially-recover events;vtx1 seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_vtx1_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_dxybs", "potentially-recover events;vtx1 seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_potential_evt_vtx1_seedtrk_trkdist = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_trkdist", "potentially-recover events;vtx1 seed track's missdist_{vtx1} (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx1_seedtrk_trkdistsig = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_trkdistsig", "potentially-recover events;vtx1 seed track's n#sigma missdist_{vtx1}", 80, 0, 10.0);
+  h_potential_evt_3trk_vtx1_seedtrk_nsigmadxybs = fs->make<TH1F>("h_potential_evt_3trk_vtx1_seedtrk_nsigmadxybs", "potentially-recover events;>=3trk-vtx1 seed track's n#sigma missdist_{bsp} ; arb. units", 20, 0.0, 10.0);
+  h_potential_evt_3trk_vtx1_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_3trk_vtx1_seedtrk_dxybs", "potentially-recover events;>=3trk-vtx1 seed track's dxybs (cm.)", 100, 0.0, 0.2);
+  h_potential_evt_3trk_vtx1_seedtrk_trkdist = fs->make<TH1F>("h_potential_evt_3trk_vtx1_seedtrk_trkdist", "potentially-recover events;>=3trk-vtx1 seed track's missdist_{vtx1} (cm.)", 50, 0, 0.2);
+  h_potential_evt_3trk_vtx1_seedtrk_trkdistsig = fs->make<TH1F>("h_potential_evt_3trk_vtx1_seedtrk_trkdistsig", "potentially-recover events;>=3trk-vtx1 seed track's n#sigma missdist_{vtx1}", 80, 0, 10.0);
+  h_2D_potential_evt_vtx0_seedtrk_trkdist_other_trkdist = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_trkdist_other_trkdist", ";vtx0 seed track's missdist_{vtx0} (cm.); vtx0 seed track's missdist_{vtx1} (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
+  h_2D_potential_evt_vtx0_seedtrk_trkdistsig_other_trkdistsig = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_trkdistsig_other_trkdistsig", ";vtx0 seed track's n#sigma missdist_{vtx0}; vtx0 seed track's n#sigma missdist_{vtx1};arb. units", 30, 0, 10.0, 30, 0, 10.0);
   h_potential_evt_vtx0_mass = fs->make<TH1F>("h_potential_evt_vtx0_mass", "potentially-recover events;vtx0 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
   h_potential_evt_vtx0_pT = fs->make<TH1F>("h_potential_evt_vtx0_pT", "potentially-recover events;vtx0 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
-  h_potential_evt_vtx0_dbv = fs->make<TH1F>("h_potential_evt_vtx0_dbv", "potentially-recover events;dBV/vtx0 (cm.); ", 120, 0, 3.0);
+  h_potential_evt_vtx0_dbv = fs->make<TH1F>("h_potential_evt_vtx0_dbv", "potentially-recover events;dBV/vtx0 (cm.); ", 30, 0, 0.3);
   h_potential_evt_vtx0_bs2derr = fs->make<TH1F>("h_potential_evt_vtx0_bs2derr", "potentially-recover events;bs2derr/vtx0 (cm.); ", 50, 0, 0.05);
   h_potential_evt_vtx1_mass = fs->make<TH1F>("h_potential_evt_vtx1_mass", "potentially-recover events;vtx1 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
   h_potential_evt_vtx1_pT = fs->make<TH1F>("h_potential_evt_vtx1_pT", "potentially-recover events;vtx1 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
-  h_potential_evt_vtx1_dbv = fs->make<TH1F>("h_potential_evt_vtx1_dbv", "potentially-recover events;dBV/vtx1 (cm.); ", 120, 0, 3.0);
+  h_potential_evt_vtx1_dbv = fs->make<TH1F>("h_potential_evt_vtx1_dbv", "potentially-recover events;dBV/vtx1 (cm.); ", 30, 0, 0.3);
   h_potential_evt_vtx1_bs2derr = fs->make<TH1F>("h_potential_evt_vtx1_bs2derr", "potentially-recover events;bs2derr/vtx1 (cm.); ", 50, 0, 0.05);
+  h_potential_evt_3trk_vtx1_mass = fs->make<TH1F>("h_potential_evt_3trk_vtx1_mass", "potentially-recover events;>=3trk vtx1 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
+  h_potential_evt_3trk_vtx1_pT = fs->make<TH1F>("h_potential_evt_3trk_vtx1_pT", "potentially-recover events;>=3trk vtx1 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
+  h_potential_evt_3trk_vtx1_dbv = fs->make<TH1F>("h_potential_evt_3trk_vtx1_dbv", "potentially-recover events;dBV/>=3trk vtx1 (cm.); ", 30, 0, 0.3);
+  h_potential_evt_3trk_vtx1_bs2derr = fs->make<TH1F>("h_potential_evt_3trk_vtx1_bs2derr", "potentially-recover events;bs2derr/>=3trk vtx1 (cm.); ", 50, 0, 0.05);
+  h_potential_evt_n2trksv = fs->make<TH1F>("h_potential_evt_n2trksv", "potentially-recover events;# of 2-trk vertices (exclude top two);arb. units", 20, 0, 20);
+  h_potential_evt_gendist3dresllp0_2trksv = fs->make<TH1F>("h_potential_evt_gendist3dresllp0_2trksv", "potentially-recover events;gendist3dllp0 to 2-trk vertices (exclude top two) cm.", 100, 0.0, 0.1);
+  h_potential_evt_gendist3dresllp1_2trksv = fs->make<TH1F>("h_potential_evt_gendist3dresllp1_2trksv", "potentially-recover events;gendist3dllp1 to 2-trk vertices (exclude top two) cm.", 100, 0.0, 0.1);
+  h_2D_potential_evt_gendist3dresllp0_n2trksv = fs->make<TH2F>("h_2D_potential_evt_gendist3dresllp0_n2trksv", "potentially-recover events;resolution cutoff of gendist3dllp0 cm.; # of 2-trk vertices within a cutoff", 10, 0.0, 0.04, 20, 0, 20);
+  h_2D_potential_evt_gendist3dresllp1_n2trksv = fs->make<TH2F>("h_2D_potential_evt_gendist3dresllp1_n2trksv", "potentially-recover events;resolution cutoff of gendist3dllp1 cm.; # of 2-trk vertices within a cutoff", 10, 0.0, 0.04, 20, 0, 20);
+  h_2D_potential_evt_gendist3dres3trkllp1_n2trksv = fs->make<TH2F>("h_2D_potential_evt_gendist3dres3trkllp1_n2trksv", "potentially-recover events;resolution cutoff of gendist3dllp1 w/ >=3-trk vtx1 cm.; # of 2-trk vertices within a cutoff", 10, 0.0, 0.04, 20, 0, 20);
+  h_potential_evt_gendist3dresllp0_400um_2trksv_dbv = fs->make<TH1F>("h_potential_evt_gendist3dresllp0_400um_2trksv_dbv", "potentially-recover events;dBV/2trk-vtx2+ w/ 400um-genllp0 (cm.); ", 50, 0, 0.1);
+  h_potential_evt_gendist3dresllp0_400um_2trksv_absdphivtx0 = fs->make<TH1F>("h_potential_evt_gendist3dresllp0_400um_2trksv_absdphivtx0", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{vtx0})| w/ 400um-genllp0 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dresllp0_400um_2trksv_absdphillp0 = fs->make<TH1F>("h_potential_evt_gendist3dresllp0_400um_2trksv_absdphivtx0", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{llp0})| w/ 400um-genllp0 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0 = fs->make<TH1F>("h_potential_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0", "potentially-recover events;dist3d(vtx0, 2trk-vtx2+ w/ 400um-genllp0) (cm.); ", 50, 0, 0.2);
+  h_potential_evt_gendist3dresllp1_400um_2trksv_dbv = fs->make<TH1F>("h_potential_evt_gendist3dresllp1_400um_2trksv_dbv", "potentially-recover events;dBV/2trk-vtx2+ w/ 400um-genllp1 (cm.); ", 50, 0, 0.1);
+  h_potential_evt_gendist3dresllp1_400um_2trksv_absdphivtx1 = fs->make<TH1F>("h_potential_evt_gendist3dresllp1_400um_2trksv_absdphivtx1", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{vtx1})| w/ 400um-genllp1 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dresllp1_400um_2trksv_absdphillp1 = fs->make<TH1F>("h_potential_evt_gendist3dresllp1_400um_2trksv_absdphillp1", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{llp1})| w/ 400um-genllp1 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dresllp1_400um_2trksv_3ddistvtx1 = fs->make<TH1F>("h_potential_evt_gendist3dresllp1_400um_2trksv_3ddistvtx1", "potentially-recover events;dist3d(vtx1, 2trk-vtx2+ w/ 400um-genllp1) (cm.); ", 50, 0, 0.2);
+  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_dbv = fs->make<TH1F>("h_potential_evt_gendist3dres3trkllp1_400um_2trksv_dbv", "potentially-recover events;dBV/2trk-vtx2+ w/ 400um-genllp1-match>=3trkvtx1 (cm.); ", 50, 0, 0.1);
+  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphivtx1 = fs->make<TH1F>("h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphivtx1", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{vtx1})| w/ 400um-genllp1-match>=3trkvtx1 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphillp1 = fs->make<TH1F>("h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphillp1", "potentially-recover events;|#Delta(phi_{2trk-vtx2+}, phi_{llp1})| w/ 400um-genllp1-match>=3trkvtx1 ; ", 315, 0, 3.15);
+  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_3ddistvtx1 = fs->make<TH1F>("h_potential_evt_gendist3dres3trkllp1_400um_2trksv_3ddistvtx1", "potentially-recover events;dist3d(vtx1, 2trk-vtx2+ w/ 400um-genllp1-match>=3trkvtx1) (cm.); ", 50, 0, 0.2);
 
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
@@ -360,110 +412,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_pairdeta = fs->make<TH1F>("h_bquark_pairdeta", ";bquark pair #Delta#eta (rad);bquark pairs/.1", 100, -5.0, 5.0);
 
   // overview
-  h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", ";# of secondary vertices; events/1", 40, 0, 40);
-  h_gvtx_sv_ntrack = fs->make<TH1F>("h_gvtx_sv_ntrack", ";# of tracks / SV; svs/1", 10, 0, 10);
-  h_gvtx_nbsv = fs->make<TH1F>("h_gvtx_nbsv", ";# of bSV; events/1", 40, 0, 40);
-  h_gvtx_bsv_ntrack = fs->make<TH1F>("h_gvtx_bsv_ntrack", ";# of tracks / bSV; bSVs/1", 10, 0, 10);
-  h_gvtx_bsv_rescale_bsbs2ddist = fs->make<TH1F>("h_gvtx_bsv_rescale_bsbs2ddist", "rescaled-fit d_{BV} of bSV (cm)", 1000, 0, 2.5);
-  h_gvtx_bsv_rescale_bs2derr = fs->make<TH1F>("h_gvtx_bsv_rescale_bsbs2ddist", "rescaled-fit #sigma(dist2d(bSV, beamspot)) (cm)", 1000, 0, 0.05);
-  h_gvtx_bsv_genb3ddist = fs->make<TH1F>("h_gvtx_bsv_genb3ddist", ";dist3d(bSV, closest gen b-decay vtx) (cm); arb. units", 200, 0, 0.2);
-  h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
   h_llp_r3d = fs->make<TH1F>("h_llp_r3d", ";dist3d(PV, GEN-llp decay point) (cm);events/0.1 mm", 200, 0, 2);
   h_llp_ctau = fs->make<TH1F>("h_llp_ctau", ";llp's ctau (cm);events/0.1 mm", 200, 0, 2);
   h_llp_gammabeta = fs->make<TH1F>("h_llp_gammabeta", ";llp's gammabeta;events/0.1 mm", 100, 0, 20);
-  h_gvtx_njet = fs->make<TH1F>("h_gvtx_njet", ";# of jets;events/1", 10, 0, 10);
-  h_gvtx_nbquarkjet = fs->make<TH1F>("h_gvtx_nbquarkjet", ";# of b-quark jets;events/1", 10, 0, 10);
-  h_gvtx_nloosebtaggedjet = fs->make<TH1F>("h_gvtx_nloosebtaggedjet", ";# of loose-btagged jets;events/1", 10, 0, 10);
-  h_gvtx_nloosebtaggedOR3seedtrkjet = fs->make<TH1F>("h_gvtx_nloosebtaggedOR3seedtrkjet", ";# of loose-btagged or >=3 seed-track jets ;events/1", 10, 0, 10);
-
   
-  h_gvtx_shared_GEN_bjet_or_not = fs->make<TH1F>("h_gvtx_shared_GEN_bjet_or_not", "; any b-quarks jets matching to multiple b-quarks ?; arb. units", 3, 0, 3);
-  h_gvtx_count_bquarks_match_to_loosebtaggedjet = fs->make<TH1F>("h_gvtx_count_bquarks_match_to_loosebtaggedjet", "; # of b-quarks matched to a loose-btagged jet; arb. units", 6, 0, 6);
-
-  h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is matched by at least two b-quarks; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is matched by only one b-quark; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
-  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is not matched by any b-quarks; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
-  h_gvtx_shared_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is matched by at least two b-quarks; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 10, 0, 10);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is matched by only one b-quark; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 10, 0, 10);
-  h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is not matched by any b-quarks; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 10, 0, 10);
-  h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is matched by at least two b-quarks; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 10, 0, 10);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is matched by only one b-quark; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 10, 0, 10);
-  h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is not matched by any b-quarks; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 10, 0, 10);
-  h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is matched by at least two b-quarks; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
-  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is matched by only one b-quark; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
-  h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is not matched by any b-quarks; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
-  h_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv", "a loose-btagged jet is matched by at least two b-quarks; closest dist3d to a GEN b-vtx and a loose-bSV (cm.); arb. units", 120, 0, 3);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv", "a loose-btagged jet is matched by only one b-quark; closest dist3d to a GEN b-vtx and a loose-bSV (cm.); arb. units", 120, 0, 3);
-  h_2D_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv", "a loose-btagged jet is matched by at least two b-quarks; closest dist3d to a GEN b-vtx and a loose-bSV (cm.); # of a loose-bSV's seed tracks; arb. units", 120, 0, 3, 50, 0, 50);
-  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv", "a loose-btagged jet is matched by only one b-quark; closest dist3d to a GEN b-vtx and a loose-bSV (cm.); # of a loose-bSV's seed tracks; arb. units", 120, 0, 3, 50, 0, 50);
-  h_gvtx_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv", "a loose-btagged jet is matched by at least two b-quarks; #frac{a b-jet pT}{sum of >=2 b-quarks pT}; arb. units", 120, 0, 2);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_pT_ratio", "a loose-btagged jet is matched by only one b-quark; #frac{a b-jet pT}{sum of a b-quark pT}; arb. units", 120, 0, 2);
-  h_gvtx_shared_loosebtaggedjet_nm1_jet_pT = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_jet_pT", "a loose-btagged jet is matched by at least two b-quarks; a b-jet pT; arb. units", 75, 0, 150);
-  h_gvtx_shared_loosebtaggedjet_nm1_dist3d_bpair = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_dist3d_bpair", "a loose-btagged jet is matched by at least two b-quarks; a dist3d between b-quarks from the same llp; arb. units", 120, 0, 3.0);
-  h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair", "a loose-btagged jet is matched by at least two b-quarks; a dist3d between b-quarks from the same llp; arb. units", 100, 0, 0.5);
-  h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT", "a loose-btagged jet is matched by only one b-quark; a b-jet pT; arb. units", 75, 0, 150);
-  h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT", "a loose-btagged jet is not matched by any b-quark; a b-jet pT; arb. units", 75, 0, 150);
-
-  h_gvtx_three_categories_loosebtaggedjet = fs->make<TH1F>("h_gvtx_three_categories_loosebtaggedjet", "; ; # of loose btagged jets", 4, 0, 4);
-  h_gvtx_three_categories_3tightseedjet = fs->make<TH1F>("h_gvtx_three_categories_3tightseedjet", "; ; # of >=3 seed-track jets", 4, 0, 4);
-
-  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(1, TString::Format(" only loose-btagged"));
-  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(2, TString::Format(" loose-btagged & >=3 seed-track"));
-  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(3, TString::Format(" only >=3 seed-track"));
-  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(1, TString::Format(" only loose-btagged"));
-  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(2, TString::Format(" loose-btagged & >=3 seed-track"));
-  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(3, TString::Format(" only >=3 seed-track"));
-
-  h_gvtx_all_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_all_tracks_per_loosebtaggedjet", ";# of tracks per a loose b-tagged jet;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_loosebtaggedjet", ";# of seed tracks per a loose b-tagged jet;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_loosebtaggedjet", ";# of n-pT seed tracks per a loose b-tagged jet;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_loosebtaggedjet", ";# of n-nsigmadxy seed tracks per a loose b-tagged jet;", 50, 0, 50);
-
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged w/ no matched b-quark;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged jet matched w/ >=2 b-quarks;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_no_shared_jet", ";# of seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_no_matched_jet", ";# of seed tracks per a loose-btagged jet w/ no matched b-quark;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_shared_jet", ";# of seed tracks per a loose-btagged jet matched w/ >= 2 b-quarks;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ no matched b-quark;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_shared_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ >=2 b-quarks;", 50, 0, 50);
-  
-  h_gvtx_sv_all_genb3ddist = fs->make<TH1F>("h_gvtx_sv_all_genb3ddist", ";dist3d(>=3trk SV, closest gen b-decay vtx) (cm); arb. units", 200, 0, 0.2);
-  h_gvtx_sv_all_genllp3ddist = fs->make<TH1F>("h_gvtx_sv_all_genllp3ddist", ";dist3d(>=3trk SV, closest gen llp-decay vtx) (cm); arb. units", 200, 0, 0.2);
-
-  h_gvtx_is_tight_btag_per_GEN_bjet_or_not = fs->make<TH1F>("h_gvtx_is_tight_GEN_btag_per_bjet_or_not", "; is this b-quark jet also tight b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_medium_btag_per_GEN_bjet_or_not = fs->make<TH1F>("h_gvtx_is_medium_GEN_btag_per_bjet_or_not", "; is this b-quark jet also medium b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_loose_btag_per_GEN_bjet_or_not = fs->make<TH1F>("h_gvtx_is_loose_GEN_btag_per_bjet_or_not", "; is this b-quark jet also loose b-tagged ?; arb. units", 3, 0, 3);
-  
-  //track investigation 
-  h_gvtx_all_tracks_per_jet = fs->make<TH1F>("h_gvtx_all_tracks_per_jet", ";# of tracks per a jet;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_jet", ";# of seed tracks per a jet;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_jet", ";# of n-pT seed tracks per a jet;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_jet", ";# of n-nsigmadxy seed tracks per a jet;", 50, 0, 50);
-  h_gvtx_all_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_all_tracks_per_GEN_bjet", ";# of tracks per a b-quark jet;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_GEN_bjet", ";# of seed tracks per a b-quark jet;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet", ";# of n-pT seed tracks per a b-quark jet;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet", ";# of n-nsigmadxy seed tracks per a b-quark jet;", 50, 0, 50);
-  h_gvtx_all_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_all_tracks_per_NONGEN_bjet", ";# of tracks per a non b-quark jet;", 50, 0, 50);
-  h_gvtx_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_NONGEN_bjet", ";# of seed tracks per a non b-quark jet;", 50, 0, 50);
-  h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet", ";# of n-pT seed tracks per a nonb-quark jet;", 50, 0, 50);
-  h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet", ";# of n-nsigmadxy seed tracks per a non b-quark jet;", 50, 0, 50);
-  h_gvtx_all_track_pt_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_pt_from_GEN_bjets", "; track p_{T} (GeV) in b-quark jets", 20, 0, 10);
-  h_gvtx_all_track_sigmadxybs_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_sigmadxybs_from_GEN_bjets", "; #sigma_{dxy} in b-quark jets", 40, -10, 10);
-  h_gvtx_all_track_npxhits_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_npxhits_from_GEN_bjets", "; npxhits in b-quark jets", 12, 0, 12);
-  h_gvtx_all_track_nsthits_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_nsthits_from_GEN_bjets", "; nsthits in b-quark jets", 28, 0, 28);
-  h_gvtx_all_track_npxlayers_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_npxlayers_from_GEN_bjets", "; npxlayers in b-quark jets", 12, 0, 12);
-  h_gvtx_all_track_nstlayers_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_nstlayers_from_GEN_bjets", "; nstlayers in b-quark jets", 28, 0, 28);
-  h_gvtx_all_track_rmin_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_rmin_from_GEN_bjets", ";r_{min} in b-quark jets;", 5, 0, 5);
-
-  h_gvtx_jet_seed_nm1_pt_from_GEN_bjets = fs->make<TH1F>("h_gvtx_jet_seed_nm1_pt_from_GEN_bjets", "; track p_{T} (GeV) w/ n-1 cuts applied in b-quark jets", 20, 0, 10);
-  h_gvtx_jet_seed_nm1_npxlayers_from_GEN_bjets = fs->make<TH1F>("h_gvtx_jet_seed_nm1_npxlayers_from_GEN_bjets", "; npxlayers w/ n-1 cuts applied in b-quark jets", 12, 0, 12);
-  h_gvtx_jet_seed_nm1_nstlayers_from_GEN_bjets = fs->make<TH1F>("h_gvtx_jet_seed_nm1_nstlayers_from_GEN_bjets", "; nstlayers w/ n-1 cuts applied in b-quark jets", 28, 0, 28);
-  h_gvtx_jet_seed_nm1_rmin_from_GEN_bjets = fs->make<TH1F>("h_gvtx_jet_seed_nm1_rmin_from_GEN_bjets", "; rmin w/ n-1 cuts applied in b-quark jets", 5, 0, 5);
-  h_gvtx_jet_seed_nm1_sigmadxybs_from_GEN_bjets = fs->make<TH1F>("h_gvtx_jet_seed_nm1_sigmadxybs_from_GEN_bjets", "; #sigma_{dxy} w/ n-1 cuts applied in b-quark jets", 40, -10, 10);
-
-
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
@@ -636,16 +588,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   // overview before studies 
-  h_n_gen_bvtx->Fill(int((mevent->gen_b_llp0_decay.size()+ mevent->gen_b_llp1_decay.size())/3), w);
-  
-  const double r3d0 = mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
-  const double lspbeta0 = mevent->gen_lsps[0].P() / mevent->gen_lsps[0].Energy();
-  const double lspbetagamma0 = lspbeta0 / sqrt(1 - lspbeta0 * lspbeta0);
+  /*
+  const double r3d0 = 0.0;//mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
+  const double lspbeta0 = 0.0;//mevent->gen_lsps[0].P() / mevent->gen_lsps[0].Energy();
+  const double lspbetagamma0 = 0.0;//lspbeta0 / sqrt(1 - lspbeta0 * lspbeta0);
   //const double ctau0 = r3d0 / lspbetagamma0;
 
-  const double r3d1 = mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[5] - mevent->gen_pv[2]);
-  const double lspbeta1 = mevent->gen_lsps[1].P() / mevent->gen_lsps[1].Energy();
-  const double lspbetagamma1 = lspbeta1 / sqrt(1 - lspbeta1 * lspbeta1);
+  const double r3d1 = 0.0;//mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[5] - mevent->gen_pv[2]);
+  const double lspbeta1 = 0.0;//mevent->gen_lsps[1].P() / mevent->gen_lsps[1].Energy();
+  const double lspbetagamma1 = 0.0;//lspbeta1 / sqrt(1 - lspbeta1 * lspbeta1);
   //const double ctau1 = r3d1 / lspbetagamma1;
 
   //std::cout << "*** START GEN-level information ***" << std::endl; 
@@ -657,11 +608,25 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //int gensv1_ntrack = 0;
   double gendist3dvtx0 = 5.0;
   double gendist3dvtx1 = 5.0;
+  double dau0_dxy = 99.0;
+  double dau1_dxy = 99.0;
+  double dau2_dxy = 99.0;
+  double dau3_dxy = 99.0;
+  int sum_ntrack = 0.0;
+  std::vector<double> vec_exact_outsed_track_nsigmadxy = {};
+  std::vector<int> vec_i2trksv = {};
+  std::vector<double> vec_2trksv_gendist3dllpvtx0 = {};
+  std::vector<double> vec_2trksv_gendist3dllpvtx1 = {};
+  std::vector<double> vec_2trksv_absdphiauxllp0 = {};
+  std::vector<double> vec_2trksv_absdphiauxllp1 = {};
+  bool Isllp0vtx0 = true; 
 
   for (int isv = 0; isv < nsv; ++isv) {
 	  const MFVVertexAux& aux = auxes->at(isv);
-	  double genlsp0_dist3d = mag(mevent->gen_lsp_decay[0] - aux.x, mevent->gen_lsp_decay[1] - aux.y, mevent->gen_lsp_decay[2] - aux.z);
-	  double genlsp1_dist3d = mag(mevent->gen_lsp_decay[3] - aux.x, mevent->gen_lsp_decay[4] - aux.y, mevent->gen_lsp_decay[5] - aux.z);
+	  h_ntrack_sv->Fill(aux.ntracks(), w);
+	  sum_ntrack += aux.ntracks(); 
+	  double genlsp0_dist3d = 0.0; //mag(mevent->gen_lsp_decay[0] - aux.x, mevent->gen_lsp_decay[1] - aux.y, mevent->gen_lsp_decay[2] - aux.z);
+	  double genlsp1_dist3d = 0.0; // mag(mevent->gen_lsp_decay[3] - aux.x, mevent->gen_lsp_decay[4] - aux.y, mevent->gen_lsp_decay[5] - aux.z);
 	  if (genlsp0_dist3d < min_dist3d_genlsp0sv) {
 		  isv_llp0 = isv; 
 		  min_dist3d_genlsp0sv = genlsp0_dist3d;
@@ -673,23 +638,68 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           //gensv1_ntrack = aux.ntracks();
 	  }
 
+	  
 	  if (isv == 0 && nsv >= 2) {
 		  const MFVVertexAux& aux1 = auxes->at(1);
 
 		  if (genlsp0_dist3d < genlsp1_dist3d) {
 			  gendist3dvtx0 = genlsp0_dist3d;
-			  gendist3dvtx1 = mag(mevent->gen_lsp_decay[3] - aux1.x, mevent->gen_lsp_decay[4] - aux1.y, mevent->gen_lsp_decay[5] - aux1.z);
+			  gendist3dvtx1 = 0.0;// mag(mevent->gen_lsp_decay[3] - aux1.x, mevent->gen_lsp_decay[4] - aux1.y, mevent->gen_lsp_decay[5] - aux1.z);
+			  dau0_dxy = 0.0;// fabs(mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[0].Phi() - atan2(mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[0] - mevent->gen_pv[0])));
+			  dau1_dxy = 0.0;// fabs(mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[1].Phi() - atan2(mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[0] - mevent->gen_pv[0])));
+			  dau2_dxy = 0.0;// fabs(mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[2].Phi() - atan2(mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[3] - mevent->gen_pv[0])));
+			  dau3_dxy = 0.0;// fabs(mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[3].Phi() - atan2(mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[3] - mevent->gen_pv[0])));
+			  
+			  
 		  }
 		  else {
+			  Isllp0vtx0 = false; 
 			  gendist3dvtx0 = genlsp1_dist3d;
-			  gendist3dvtx1 = mag(mevent->gen_lsp_decay[0] - aux1.x, mevent->gen_lsp_decay[1] - aux1.y, mevent->gen_lsp_decay[2] - aux1.z);
-
+			  gendist3dvtx1 = 0.0;//mag(mevent->gen_lsp_decay[0] - aux1.x, mevent->gen_lsp_decay[1] - aux1.y, mevent->gen_lsp_decay[2] - aux1.z);
+			  dau2_dxy = 0.0;//fabs(mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[0].Phi() - atan2(mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[0] - mevent->gen_pv[0])));
+			  dau3_dxy = 0.0;//fabs(mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[1].Phi() - atan2(mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[0] - mevent->gen_pv[0])));
+			  dau0_dxy = 0.0;//fabs(mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[2].Phi() - atan2(mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[3] - mevent->gen_pv[0])));
+			  dau1_dxy = 0.0;//fabs(mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[3].Phi() - atan2(mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[3] - mevent->gen_pv[0])));
+			  
 		  }
+	  }
+
+	  if (aux.ntracks() == 2) {
+		  if (isv >= 2) {
+			  vec_i2trksv.push_back(isv);
+			  if (Isllp0vtx0) {
+				  //vec_2trksv_gendist3dllpvtx0.push_back(mag(mevent->gen_lsp_decay[0] - aux.x, mevent->gen_lsp_decay[1] - aux.y, mevent->gen_lsp_decay[2] - aux.z));
+				  //vec_2trksv_gendist3dllpvtx1.push_back(mag(mevent->gen_lsp_decay[3] - aux.x, mevent->gen_lsp_decay[4] - aux.y, mevent->gen_lsp_decay[5] - aux.z));
+				  TVector3 aux_flight = TVector3(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), aux.z - mevent->bsz);
+				  double absdphiauxllp0 = 0.0;//fabs(mevent->gen_lsp_p4(0).Vect().DeltaPhi(aux_flight));
+				  vec_2trksv_absdphiauxllp0.push_back(absdphiauxllp0);
+				  double absdphiauxllp1 = 0.0;//fabs(mevent->gen_lsp_p4(1).Vect().DeltaPhi(aux_flight));
+				  vec_2trksv_absdphiauxllp1.push_back(absdphiauxllp1);
+			  }
+			  else {
+				  //vec_2trksv_gendist3dllpvtx0.push_back(mag(mevent->gen_lsp_decay[3] - aux.x, mevent->gen_lsp_decay[4] - aux.y, mevent->gen_lsp_decay[5] - aux.z));
+				  //vec_2trksv_gendist3dllpvtx1.push_back(mag(mevent->gen_lsp_decay[0] - aux.x, mevent->gen_lsp_decay[1] - aux.y, mevent->gen_lsp_decay[2] - aux.z));
+				  TVector3 aux_flight = TVector3(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), aux.z - mevent->bsz);
+				  double absdphiauxllp0 = 0.0;//fabs(mevent->gen_lsp_p4(1).Vect().DeltaPhi(aux_flight));
+				  vec_2trksv_absdphiauxllp0.push_back(absdphiauxllp0);
+				  double absdphiauxllp1 = 0.0;//fabs(mevent->gen_lsp_p4(0).Vect().DeltaPhi(aux_flight));
+				  vec_2trksv_absdphiauxllp1.push_back(absdphiauxllp1);
+			  }
+		  }
+	  }
+
+	  for (size_t i = 0; i < aux.outsed_track_nsigmadxy.size(); ++i) {
+		  if (std::count(aux.track_tkdist_val.begin(), aux.track_tkdist_val.end(), aux.outsed_track_tkdist_val[i]) > 0
+			  || std::count(vec_exact_outsed_track_nsigmadxy.begin(), vec_exact_outsed_track_nsigmadxy.end(), aux.outsed_track_tkdist_val[i]) > 0)
+			  continue;
+		  vec_exact_outsed_track_nsigmadxy.push_back(aux.outsed_track_tkdist_val[i]);
+		  
 	  }
   }
 
-  
-
+  h_sum_ntrack_sv->Fill(sum_ntrack, w);
+  h_sum_noutseedtrack->Fill(vec_exact_outsed_track_nsigmadxy.size(), w);
+ 
   if (nsv > 1) {
 	  const MFVVertexAux& aux0 = auxes->at(0);
 	  const MFVVertexAux& aux1 = auxes->at(1);
@@ -698,22 +708,24 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	  double min_dau_dxy = 99.0;
 	  for (int i = 0; i < 2; ++i) {  //an index of GEN llps 
 		  for (int j = i*2; j < i*2 + 2; ++j) {
-			  double d_dxy = mag(mevent->gen_lsp_decay[i*3 + 0] - mevent->gen_pv[0], mevent->gen_lsp_decay[i*3 + 1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[j].Phi() - atan2(mevent->gen_lsp_decay[i * 3 + 1] - mevent->gen_pv[1], mevent->gen_lsp_decay[i * 3 + 0] - mevent->gen_pv[0]));
+			  double d_dxy = 0.0;//mag(mevent->gen_lsp_decay[i*3 + 0] - mevent->gen_pv[0], mevent->gen_lsp_decay[i*3 + 1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[j].Phi() - atan2(mevent->gen_lsp_decay[i * 3 + 1] - mevent->gen_pv[1], mevent->gen_lsp_decay[i * 3 + 0] - mevent->gen_pv[0]));
 			  //std::cout << " d-quark #" <<  j << " dxy(cm): " << d_dxy << " pT (GeV): " << mevent->gen_daughters[j].Pt() << std::endl;
 			  if (fabs(d_dxy) < min_dau_dxy)
 				  min_dau_dxy = fabs(d_dxy);
 		  }
 		  
 	  }
-	  double genllpdist3d = mag(mevent->gen_lsp_decay[0] - mevent->gen_lsp_decay[3], mevent->gen_lsp_decay[1] - mevent->gen_lsp_decay[4], mevent->gen_lsp_decay[2] - mevent->gen_lsp_decay[5]);
+	  double genllpdist3d = 0.0;//mag(mevent->gen_lsp_decay[0] - mevent->gen_lsp_decay[3], mevent->gen_lsp_decay[1] - mevent->gen_lsp_decay[4], mevent->gen_lsp_decay[2] - mevent->gen_lsp_decay[5]);
 	  //std::cout << " dist3d llp01 (cm) " << genllpdist3d << std::endl;
 
-	  
-	  
 	  if (aux0.ntracks() >= 5 && aux1.ntracks() >= 5) {
 			  h_signal_evt_min_dau_dxy->Fill(min_dau_dxy, w);
 			  h_signal_evt_gendist3d_vtx0->Fill(gendist3dvtx0, w);
-			  h_signal_evt_gendist3d_vtx1->Fill(gendist3dvtx1, w);
+			  h_2D_signal_evt_llp0_daudxy->Fill(dau0_dxy, dau1_dxy, w);
+			  if (dau0_dxy < dau1_dxy)
+				  h_signal_evt_llp0_min_dau_dxy->Fill(dau0_dxy, w);
+			  else
+				  h_signal_evt_llp0_min_dau_dxy->Fill(dau1_dxy, w);
 			  h_signal_evt_llp01_gendist3d->Fill(genllpdist3d, w);
 			  h_signal_evt_vtx01_dist3d->Fill(aux1.missdistsv0[mfv::PTracksPlusJetsByNtracks], w);
 			  h_signal_evt_vtx01_dist3dsig->Fill(aux1.missdistsv0sig(mfv::PTracksPlusJetsByNtracks), w);
@@ -723,14 +735,87 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 			  h_signal_evt_vtx0_bs2derr->Fill(aux0.rescale_bs2derr, w);
 			  for (int i = 0; i < aux0.ntracks(); ++i) {
 				  h_signal_evt_vtx0_seedtrk_dxybs->Fill(aux0.track_dxy[i], w);
-				  h_signal_evt_vtx0_seedtrk_missdist->Fill(aux0.track_tkdist_val[i], w);
-				  h_signal_evt_vtx0_seedtrk_missdistsig->Fill(aux0.track_tkdist_sig[i], w);
+				  h_signal_evt_vtx0_seedtrk_nsigmadxybs->Fill(fabs(aux0.track_dxy[i] / aux0.track_dxy_err(i)), w);
+				  h_signal_evt_vtx0_seedtrk_trkdist->Fill(aux0.track_tkdist_val[i], w);
+				  h_signal_evt_vtx0_seedtrk_trkdistsig->Fill(aux0.track_tkdist_sig[i], w);
 			  }
+			  size_t imax_vtx0_outsed_mindaudxy = 9999;
+			  double max_vtx0_outsed_mindaudxy = 0.0;
+			  for (size_t i = 0; i < aux0.outsed_track_nsigmadxy.size(); ++i) {
+				  if (std::count(aux0.track_tkdist_val.begin(), aux0.track_tkdist_val.end(), aux0.outsed_track_tkdist_val[i]) > 0)
+					  continue;
+				  
+				  h_signal_evt_vtx0_outseedtrk_dxybs->Fill(aux0.outsed_track_dxy[i], w);
+				  h_signal_evt_vtx0_outseedtrk_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[i]), w);
+				  h_signal_evt_vtx0_outseedtrk_trkdist->Fill(aux0.outsed_track_tkdist_val[i], w);
+				  h_signal_evt_vtx0_outseedtrk_trkdistsig->Fill(aux0.outsed_track_tkdist_sig[i], w);
+				  if ((dau0_dxy * (dau0_dxy < dau1_dxy) + dau1_dxy * (dau0_dxy > dau1_dxy)) < aux0.outsed_track_dxy[i])
+					  continue;
+				  
+				  if (max_vtx0_outsed_mindaudxy < aux0.outsed_track_dxy[i]) {
+					  max_vtx0_outsed_mindaudxy = aux0.outsed_track_dxy[i];
+					  imax_vtx0_outsed_mindaudxy = i;
+					  
+				  }
+				  
+			  }
+			  if (imax_vtx0_outsed_mindaudxy != 9999) {
+				  h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_dxy[imax_vtx0_outsed_mindaudxy], aux0.outsed_track_tkdist_sig[imax_vtx0_outsed_mindaudxy], w);
+				  h_2D_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist->Fill(aux0.outsed_track_dxy[imax_vtx0_outsed_mindaudxy], aux0.outsed_track_tkdist_val[imax_vtx0_outsed_mindaudxy], w);
+				  h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[imax_vtx0_outsed_mindaudxy]),w);
+				  h_signal_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_tkdist_sig[imax_vtx0_outsed_mindaudxy], w);
+
+			  }
+
+			  h_signal_evt_n2trksv->Fill(vec_i2trksv.size(), w);
+
+			  for (size_t ibin = 0; ibin < 10; ++ibin) {
+				  double gendist3dllp0_cutoff = ibin * (0.04 / 10);
+				  int count_n2trksv_cutoff = 0;
+				  for (size_t i = 0; i < vec_2trksv_gendist3dllpvtx0.size(); ++i) {
+					  if (vec_2trksv_gendist3dllpvtx0[i] < gendist3dllp0_cutoff) {
+						  count_n2trksv_cutoff++;
+						  if (ibin == 9) {
+							  const MFVVertexAux& aux2trk = auxes->at(vec_i2trksv[i]);
+							  double phi2trk = atan2(aux2trk.y - mevent->bsy_at_z(aux2trk.z), aux2trk.x - mevent->bsx_at_z(aux2trk.z));
+							  double phi0 = atan2(aux0.y - mevent->bsy_at_z(aux2trk.z), aux0.x - mevent->bsx_at_z(aux2trk.z));
+							  h_signal_evt_gendist3dresllp0_400um_2trksv_dbv->Fill(mag(aux2trk.x - mevent->bsx_at_z(aux2trk.z), aux2trk.y - mevent->bsy_at_z(aux2trk.z)), w);
+							  h_signal_evt_gendist3dresllp0_400um_2trksv_absdphivtx0->Fill(fabs(reco::deltaPhi(phi0, phi2trk)), w);
+							  h_signal_evt_gendist3dresllp0_400um_2trksv_absdphillp0->Fill(vec_2trksv_absdphiauxllp0[i], w);
+							  h_signal_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0->Fill(mag(aux0.x - aux2trk.x, aux0.y - aux2trk.y, aux0.z - aux2trk.z), w);
+							  
+						  }
+					  }
+					  if (ibin == 0)
+						  h_signal_evt_gendist3dresllp0_2trksv->Fill(vec_2trksv_gendist3dllpvtx0[i], w);
+					  
+				  }
+				  h_2D_signal_evt_gendist3dresllp0_n2trksv->Fill(gendist3dllp0_cutoff, count_n2trksv_cutoff, w);
+
+			  }
+			  
 	  }
 	  else if (aux0.ntracks() >= 5 && aux1.ntracks() < 5) {
 			  h_potential_evt_min_dau_dxy->Fill(min_dau_dxy, w);
 			  h_potential_evt_gendist3d_vtx0->Fill(gendist3dvtx0, w);
+			  h_2D_potential_evt_llp0_daudxy->Fill(dau0_dxy, dau1_dxy, w);
+			  if (dau0_dxy < dau1_dxy)
+				  h_potential_evt_llp0_min_dau_dxy->Fill(dau0_dxy, w);
+			  else
+				  h_potential_evt_llp0_min_dau_dxy->Fill(dau1_dxy, w);
 			  h_potential_evt_gendist3d_vtx1->Fill(gendist3dvtx1, w);
+			  if (aux1.ntracks() >= 3) {
+				  h_potential_evt_gendist3d_3trk_vtx1->Fill(gendist3dvtx1, w);
+				  h_potential_evt_3trk_vtx1_mass->Fill(aux1.mass[mfv::PTracksPlusJetsByNtracks], w);
+				  h_potential_evt_3trk_vtx1_pT->Fill(aux1.pt[mfv::PTracksPlusJetsByNtracks], w);
+				  h_potential_evt_3trk_vtx1_dbv->Fill(mag(aux1.x - mevent->bsx_at_z(aux1.z), aux1.y - mevent->bsy_at_z(aux1.z)), w);
+				  h_potential_evt_3trk_vtx1_bs2derr->Fill(aux1.rescale_bs2derr, w);
+			  }
+			  h_2D_potential_evt_llp1_daudxy->Fill(dau2_dxy, dau3_dxy, w);
+			  if (dau2_dxy < dau3_dxy)
+				  h_potential_evt_llp1_min_dau_dxy->Fill(dau2_dxy, w);
+			  else
+				  h_potential_evt_llp1_min_dau_dxy->Fill(dau3_dxy, w);
 			  h_potential_evt_llp01_gendist3d->Fill(genllpdist3d, w);
 			  h_potential_evt_vtx01_dist3d->Fill(aux1.missdistsv0[mfv::PTracksPlusJetsByNtracks], w);
 			  h_potential_evt_vtx01_dist3dsig->Fill(aux1.missdistsv0sig(mfv::PTracksPlusJetsByNtracks), w);
@@ -742,26 +827,147 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 			  h_potential_evt_vtx1_pT->Fill(aux1.pt[mfv::PTracksPlusJetsByNtracks], w);
 			  h_potential_evt_vtx1_dbv->Fill(mag(aux1.x - mevent->bsx_at_z(aux1.z), aux1.y - mevent->bsy_at_z(aux1.z)), w);
 			  h_potential_evt_vtx1_bs2derr->Fill(aux1.rescale_bs2derr, w);
-			  
 			  for (int i = 0; i < aux0.ntracks(); ++i) {
 				  h_potential_evt_vtx0_seedtrk_dxybs->Fill(aux0.track_dxy[i], w);
-				  h_potential_evt_vtx0_seedtrk_missdist->Fill(aux0.track_tkdist_val[i], w);
-				  h_potential_evt_vtx0_seedtrk_missdistsig->Fill(aux0.track_tkdist_sig[i], w);
-				  h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist->Fill(aux0.track_tkdist_val[i], aux0.track_tkdisttosv1_val[i], w);
-				  h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig->Fill(aux0.track_tkdist_sig[i], aux0.track_tkdisttosv1_sig[i], w);
+				  h_potential_evt_vtx0_seedtrk_nsigmadxybs->Fill(fabs(aux0.track_dxy[i] / aux0.track_dxy_err(i)), w);
+				  h_potential_evt_vtx0_seedtrk_trkdist->Fill(aux0.track_tkdist_val[i], w);
+				  h_potential_evt_vtx0_seedtrk_trkdistsig->Fill(aux0.track_tkdist_sig[i], w);
+				  h_2D_potential_evt_vtx0_seedtrk_trkdist_other_trkdist->Fill(aux0.track_tkdist_val[i], aux0.track_tkdisttosv1_val[i], w);
+				  h_2D_potential_evt_vtx0_seedtrk_trkdistsig_other_trkdistsig->Fill(aux0.track_tkdist_sig[i], aux0.track_tkdisttosv1_sig[i], w);
 
 			  }
 			  for (int i = 0; i < aux1.ntracks(); ++i) {
 				  h_potential_evt_vtx1_seedtrk_dxybs->Fill(aux1.track_dxy[i], w);
-				  h_potential_evt_vtx1_seedtrk_missdist->Fill(aux1.track_tkdist_val[i], w);
-				  h_potential_evt_vtx1_seedtrk_missdistsig->Fill(aux1.track_tkdist_sig[i], w);
+				  h_potential_evt_vtx1_seedtrk_nsigmadxybs->Fill(fabs(aux1.track_dxy[i] / aux1.track_dxy_err(i)), w);
+				  h_potential_evt_vtx1_seedtrk_trkdist->Fill(aux1.track_tkdist_val[i], w);
+				  h_potential_evt_vtx1_seedtrk_trkdistsig->Fill(aux1.track_tkdist_sig[i], w);
+                  
+				  if (aux1.ntracks() >= 3) {
+					  h_potential_evt_3trk_vtx1_seedtrk_dxybs->Fill(aux1.track_dxy[i], w);
+					  h_potential_evt_3trk_vtx1_seedtrk_nsigmadxybs->Fill(fabs(aux1.track_dxy[i] / aux1.track_dxy_err(i)), w);
+					  h_potential_evt_3trk_vtx1_seedtrk_trkdist->Fill(aux1.track_tkdist_val[i], w);
+					  h_potential_evt_3trk_vtx1_seedtrk_trkdistsig->Fill(aux1.track_tkdist_sig[i], w);
+				  }
 
 			  }
+			  size_t imax_vtx0_outsed_mindaudxy = 9999;
+			  double max_vtx0_outsed_mindaudxy = 0.0;
+			  for (size_t i = 0; i < aux0.outsed_track_nsigmadxy.size(); ++i) {
+				  if (std::count(aux0.track_tkdist_val.begin(), aux0.track_tkdist_val.end(), aux0.outsed_track_tkdist_val[i]) > 0)
+					  continue;
+				  h_potential_evt_vtx0_outseedtrk_dxybs->Fill(aux0.outsed_track_dxy[i], w);
+				  h_potential_evt_vtx0_outseedtrk_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[i]), w);
+				  h_potential_evt_vtx0_outseedtrk_trkdist->Fill(aux0.outsed_track_tkdist_val[i], w);
+				  h_potential_evt_vtx0_outseedtrk_trkdistsig->Fill(aux0.outsed_track_tkdist_sig[i], w);
+
+				  
+				  if ((dau0_dxy * (dau0_dxy < dau1_dxy) + dau1_dxy * (dau0_dxy > dau1_dxy)) < aux0.outsed_track_dxy[i])
+					  continue;
+				  if (max_vtx0_outsed_mindaudxy < aux0.outsed_track_dxy[i]) {
+					  max_vtx0_outsed_mindaudxy = aux0.outsed_track_dxy[i];
+					  imax_vtx0_outsed_mindaudxy = i;
+				  }
+
+			  }
+
+			  if (imax_vtx0_outsed_mindaudxy != 9999) {
+				  h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_dxy[imax_vtx0_outsed_mindaudxy], aux0.outsed_track_tkdist_sig[imax_vtx0_outsed_mindaudxy], w);
+				  h_2D_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdist->Fill(aux0.outsed_track_dxy[imax_vtx0_outsed_mindaudxy], aux0.outsed_track_tkdist_val[imax_vtx0_outsed_mindaudxy], w);
+				  h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[imax_vtx0_outsed_mindaudxy]), w);
+				  h_potential_evt_vtx0_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_tkdist_sig[imax_vtx0_outsed_mindaudxy], w);
+
+			  }
+			  size_t imax_vtx1_outsed_mindaudxy = 9999;
+			  double max_vtx1_outsed_mindaudxy = 0.0;
+			  for (size_t i = 0; i < aux1.outsed_track_tkdist_val.size(); ++i) {
+				  if (std::count(aux1.track_tkdist_val.begin(), aux1.track_tkdist_val.end(), aux1.outsed_track_tkdist_val[i]) > 0)
+					  continue;
+				  h_potential_evt_vtx1_outseedtrk_trkdist->Fill(aux1.outsed_track_tkdist_val[i], w);
+				  h_potential_evt_vtx1_outseedtrk_trkdistsig->Fill(aux1.outsed_track_tkdist_sig[i], w);
+
+				  if ((dau2_dxy * (dau2_dxy < dau3_dxy) + dau3_dxy * (dau2_dxy > dau3_dxy)) < aux0.outsed_track_dxy[i])
+					  continue;
+				  if (max_vtx1_outsed_mindaudxy < aux0.outsed_track_dxy[i]) {
+					  max_vtx1_outsed_mindaudxy = aux0.outsed_track_dxy[i];
+					  imax_vtx1_outsed_mindaudxy = i;
+				  }
+
+			  }
+			  if (imax_vtx1_outsed_mindaudxy != 9999) {
+				  h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_dxy[imax_vtx1_outsed_mindaudxy], aux1.outsed_track_tkdist_sig[imax_vtx1_outsed_mindaudxy], w);
+				  h_2D_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist->Fill(aux0.outsed_track_dxy[imax_vtx1_outsed_mindaudxy], aux1.outsed_track_tkdist_val[imax_vtx1_outsed_mindaudxy], w);
+				  h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[imax_vtx1_outsed_mindaudxy]), w);
+				  h_potential_evt_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux1.outsed_track_tkdist_sig[imax_vtx1_outsed_mindaudxy], w);
+
+				  if (aux1.ntracks() >= 3) {
+					  h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux0.outsed_track_dxy[imax_vtx1_outsed_mindaudxy], aux1.outsed_track_tkdist_sig[imax_vtx1_outsed_mindaudxy], w);
+					  h_2D_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdist->Fill(aux0.outsed_track_dxy[imax_vtx1_outsed_mindaudxy], aux1.outsed_track_tkdist_val[imax_vtx1_outsed_mindaudxy], w);
+					  h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_nsigmadxybs->Fill(fabs(aux0.outsed_track_nsigmadxy[imax_vtx1_outsed_mindaudxy]), w);
+					  h_potential_evt_3trk_vtx1_max_outseedtrk_dxy_by_min_daudxy_trkdistsig->Fill(aux1.outsed_track_tkdist_sig[imax_vtx1_outsed_mindaudxy], w);
+
+				  }
+			  }
+
+			  h_potential_evt_n2trksv->Fill(vec_i2trksv.size(), w);
+
+			  for (size_t ibin = 0; ibin < 10; ++ibin) {
+				  double gendist3dllp0_cutoff = ibin * (0.04 / 10);
+				  int count_n2trksv_cutoff0 = 0;
+				  double gendist3dllp1_cutoff = ibin * (0.04 / 10);
+				  int count_n2trksv_cutoff1 = 0;
+				  for (size_t i = 0; i < vec_2trksv_gendist3dllpvtx0.size(); ++i) {
+					  if (vec_2trksv_gendist3dllpvtx0[i] < gendist3dllp0_cutoff) {
+						  count_n2trksv_cutoff0++;
+						  if (ibin == 9) {
+							  const MFVVertexAux& aux2trk = auxes->at(vec_i2trksv[i]);
+							  double phi2trk = atan2(aux2trk.y - mevent->bsy_at_z(aux2trk.z), aux2trk.x - mevent->bsx_at_z(aux2trk.z));
+							  double phi0 = atan2(aux0.y - mevent->bsy_at_z(aux2trk.z), aux0.x - mevent->bsx_at_z(aux2trk.z));
+							  h_potential_evt_gendist3dresllp0_400um_2trksv_dbv->Fill(mag(aux2trk.x - mevent->bsx_at_z(aux2trk.z), aux2trk.y - mevent->bsy_at_z(aux2trk.z)), w);
+							  h_potential_evt_gendist3dresllp0_400um_2trksv_absdphivtx0->Fill(fabs(reco::deltaPhi(phi0, phi2trk)), w);
+							  h_potential_evt_gendist3dresllp0_400um_2trksv_absdphillp0->Fill(vec_2trksv_absdphiauxllp0[i], w);
+							  h_potential_evt_gendist3dresllp0_400um_2trksv_3ddistvtx0->Fill(mag(aux0.x - aux2trk.x, aux0.y - aux2trk.y, aux0.z - aux2trk.z), w);
+
+						  }
+					  }
+					  if (ibin == 0)
+						  h_potential_evt_gendist3dresllp0_2trksv->Fill(vec_2trksv_gendist3dllpvtx0[i], w);
+				  }
+				  h_2D_potential_evt_gendist3dresllp0_n2trksv->Fill(gendist3dllp0_cutoff, count_n2trksv_cutoff0, w);
+
+				  for (size_t i = 0; i < vec_2trksv_gendist3dllpvtx1.size(); ++i) {
+					  if (vec_2trksv_gendist3dllpvtx1[i] < gendist3dllp1_cutoff) {
+						  count_n2trksv_cutoff1++;
+						  if (ibin == 9) {
+							  const MFVVertexAux& aux2trk = auxes->at(vec_i2trksv[i]);
+							  double phi2trk = atan2(aux2trk.y - mevent->bsy_at_z(aux2trk.z), aux2trk.x - mevent->bsx_at_z(aux2trk.z));
+							  double phi1 = atan2(aux1.y - mevent->bsy_at_z(aux2trk.z), aux1.x - mevent->bsx_at_z(aux2trk.z));
+							  h_potential_evt_gendist3dresllp1_400um_2trksv_dbv->Fill(mag(aux2trk.x - mevent->bsx_at_z(aux2trk.z), aux2trk.y - mevent->bsy_at_z(aux2trk.z)), w);
+							  h_potential_evt_gendist3dresllp1_400um_2trksv_absdphivtx1->Fill(fabs(reco::deltaPhi(phi1, phi2trk)), w);
+							  h_potential_evt_gendist3dresllp1_400um_2trksv_absdphillp1->Fill(vec_2trksv_absdphiauxllp1[i], w);
+							  h_potential_evt_gendist3dresllp1_400um_2trksv_3ddistvtx1->Fill(mag(aux1.x - aux2trk.x, aux1.y - aux2trk.y, aux1.z - aux2trk.z), w);
+							  if (aux1.ntracks() >= 3) {
+								  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_dbv->Fill(mag(aux2trk.x - mevent->bsx_at_z(aux2trk.z), aux2trk.y - mevent->bsy_at_z(aux2trk.z)), w);
+								  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphivtx1->Fill(fabs(reco::deltaPhi(phi1, phi2trk)), w);
+								  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_absdphillp1->Fill(vec_2trksv_absdphiauxllp1[i], w);
+								  h_potential_evt_gendist3dres3trkllp1_400um_2trksv_3ddistvtx1->Fill(mag(aux1.x - aux2trk.x, aux1.y - aux2trk.y, aux1.z - aux2trk.z), w);
+
+							  }
+						  }
+					  }
+					  if (ibin == 0)
+						  h_potential_evt_gendist3dresllp1_2trksv->Fill(vec_2trksv_gendist3dllpvtx1[i], w);
+				  }
+				  h_2D_potential_evt_gendist3dresllp1_n2trksv->Fill(gendist3dllp1_cutoff, count_n2trksv_cutoff1, w);
+				  if (aux1.ntracks() >= 3)
+					  h_2D_potential_evt_gendist3dres3trkllp1_n2trksv->Fill(gendist3dllp1_cutoff, count_n2trksv_cutoff1, w);
+			  }
+			  
 			  
 	  }
 	  
   }
-  
+  */
+
   std::vector<std::vector<int> > sv_track_which_jet;
   std::vector<std::vector<int> > sv_track_which_track;
   for (int isv = 0; isv < nsv; ++isv) { 
@@ -792,7 +998,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           sv_track_which_track.push_back(track_which_track);
   }
 
-  double llp0_flight_mom_phi = mevent->gen_lsp_p4(0).Vect().DeltaPhi(mevent->gen_lsp_flight(0));
+  /*
+  double llp0_flight_mom_phi = 0.0;//mevent->gen_lsp_p4(0).Vect().DeltaPhi(mevent->gen_lsp_flight(0));
   //std::cout << "llp0 : energy (GeV) = " << mevent->gen_lsps[0].Energy() << " betagamma = " << lspbetagamma0 << " r3d (cm) " << r3d0 << " dphi(GEN mom, GEN flight) " << llp0_flight_mom_phi << std::endl;
   if (isv_llp0 != -99) {
 	  const MFVVertexAux& aux = auxes->at(isv_llp0);
@@ -807,7 +1014,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  //std::cout << "     :  loose-btagged jet? : " << mevent->is_btagged(ijet, 0) << std::endl;
 	  }
   }
-  double llp1_flight_mom_phi = mevent->gen_lsp_p4(1).Vect().DeltaPhi(mevent->gen_lsp_flight(1));
+  double llp1_flight_mom_phi = 0.0;//mevent->gen_lsp_p4(1).Vect().DeltaPhi(mevent->gen_lsp_flight(1));
   //std::cout << "llp1 : energy (GeV) = " << mevent->gen_lsps[1].Energy() << " betagamma = " << lspbetagamma1 << " r3d (cm) " << r3d1 << " dphi(GEN mom, GEN flight) " << llp1_flight_mom_phi << std::endl;
   if (isv_llp1 != -99) {
           const MFVVertexAux& aux = auxes->at(isv_llp1); 
@@ -817,553 +1024,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           for (size_t i = 0; i < sv_track_which_jet[isv_llp1].size(); ++i) {
                   int ijet = sv_track_which_jet[isv_llp1][i];
                   int itrack = sv_track_which_track[isv_llp1][i];
-                  //std::cout << "     :  track's dxy : " <<  aux.track_dxy[itrack]; 
+           //std::cout << "     :  track's dxy : " <<  aux.track_dxy[itrack]; 
 		  //std::cout << "     :  jet's idx : " << ijet << " jet's pT : " << mevent->jet_pt[ijet] << " jet's eta : " << mevent->jet_eta[ijet] << " jet's phi : " << mevent->jet_phi[ijet] << std::endl;
 		  //std::cout << "     :  loose-btagged jet? : " << mevent->is_btagged(ijet, 0) << std::endl;
 	  }
   }
   //std::cout << "*** END GEN-level information ***" << std::endl;
-
-  /*
-  if (mevent->gen_bchain_nonb_had_eta.size() == 4 && nsv > 0) {
-
-	  std::cout << __LINE__ << std::endl;
-          const double r3d = mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
-	  const double lspbeta = mevent->gen_lsps[0].P() / mevent->gen_lsps[0].Energy();
-	  const double lspbetagamma = lspbeta / sqrt(1 - lspbeta * lspbeta);
-	  const double ctau = r3d / lspbetagamma;
-	  std::cout << __LINE__ << std::endl; 
-          h_llp_r3d->Fill(r3d, w);
-	  h_llp_ctau->Fill(ctau, w);
-	  h_llp_gammabeta->Fill(lspbetagamma, w);
-
-	  std::cout << __LINE__ << std::endl; 
-          for (int isv = 0; isv < nsv; ++isv) {
-
-		  const MFVVertexAux& aux = auxes->at(isv);
-		  h_gvtx_sv_ntrack->Fill(aux.ntracks(), w);
-	  }
-	  h_gvtx_nsv->Fill(nsv, w);
-	  h_gvtx_njet->Fill(mevent->njets(20), w);
-	  for (int i = 0; i < 3; ++i) {
-		  h_nbtags[i]->Fill(mevent->nbtags(i), w);
-		  h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
-	  }
-
-	  std::cout << __LINE__ << std::endl;
-          size_t shared_bjet = 0;
-	  
-
-	  std::vector<size_t> vec_bquark_jet = {};
-	  std::vector<size_t> vec_bquark_jet_no_duplicate = {};
-	  std::vector<size_t> vec_bsv_idx_no_duplicate = {};
-	  std::vector<size_t> vec_loosebtagged_jet_no_duplicate = {};
-
-	  for (size_t i = 0; i < 4; ++i) {
-		  double mindR_bquark = 4.0;
-		  size_t bquark_jet = 0;
-		  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-			  if (mevent->jet_pt[ijet] < 20.0)  // Jets have a cut at 20 GeV
-				  continue;
-			  // finding a GEN bjet for each b-quark by minimum dR
-			  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi()) < mindR_bquark) {
-				  mindR_bquark = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi());
-				  bquark_jet = ijet;
-			  }
-
-
-		  }
-
-		  // condition we have found a GEN bjet matching with a b-quark 
-		  if (mindR_bquark < 0.4) {
-
-
-			  vec_bquark_jet.push_back(bquark_jet);
-			  vec_bquark_jet_no_duplicate.push_back(bquark_jet);
-			  if (std::count(vec_bquark_jet.begin(), vec_bquark_jet.end(), bquark_jet) == 2) {
-				  shared_bjet = 1;
-				  vec_bquark_jet_no_duplicate.pop_back();
-			  }
-
-
-
-			  size_t jet_all_ntrack = 0;
-			  size_t jet_seed_ntrack = 0;
-			  size_t jet_nm1_nsigmadxy_seed_ntrack = 0;
-			  size_t jet_nm1_pT_seed_ntrack = 0;
-
-			  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-				  if (bquark_jet == mevent->jet_track_which_jet[j]) {
-					  jet_all_ntrack++;
-					  h_gvtx_all_track_pt_from_GEN_bjets->Fill(mevent->jet_track_pt(j), w);
-					  h_gvtx_all_track_sigmadxybs_from_GEN_bjets->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
-					  h_gvtx_all_track_npxhits_from_GEN_bjets->Fill(mevent->jet_track_npxhits(j), w);
-					  h_gvtx_all_track_nsthits_from_GEN_bjets->Fill(mevent->jet_track_nsthits(j), w);
-					  h_gvtx_all_track_npxlayers_from_GEN_bjets->Fill(mevent->jet_track_npxlayers(j), w);
-					  h_gvtx_all_track_nstlayers_from_GEN_bjets->Fill(mevent->jet_track_nstlayers(j), w);
-					  h_gvtx_all_track_rmin_from_GEN_bjets->Fill(mevent->jet_track_hp_rmin[j], w);
-
-					  //nm1 plots of all tracks
-					  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1)
-						  h_gvtx_jet_seed_nm1_pt_from_GEN_bjets->Fill(mevent->jet_track_pt(j), w);
-					  if (mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
-						  h_gvtx_jet_seed_nm1_npxlayers_from_GEN_bjets->Fill(mevent->jet_track_npxlayers(j), w);
-					  if (mevent->jet_track_npxlayers(j) > 1 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
-						  h_gvtx_jet_seed_nm1_nstlayers_from_GEN_bjets->Fill(mevent->jet_track_nstlayers(j), w);
-					  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
-						  h_gvtx_jet_seed_nm1_sigmadxybs_from_GEN_bjets->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
-					  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4)
-						  h_gvtx_jet_seed_nm1_rmin_from_GEN_bjets->Fill(mevent->jet_track_hp_rmin[j], w);
-
-
-					  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1) {
-						  jet_nm1_nsigmadxy_seed_ntrack++;
-						  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
-							  jet_seed_ntrack++;
-						  }
-					  }
-					  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 0.5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
-						  jet_nm1_pT_seed_ntrack++;
-					  }
-
-				  }
-			  }
-
-
-			  h_gvtx_is_tight_btag_per_GEN_bjet_or_not->Fill(mevent->is_btagged(bquark_jet, 2), w);
-			  h_gvtx_is_medium_btag_per_GEN_bjet_or_not->Fill(mevent->is_btagged(bquark_jet, 1), w);
-			  h_gvtx_is_loose_btag_per_GEN_bjet_or_not->Fill(mevent->is_btagged(bquark_jet, 0), w);
-
-
-			  h_gvtx_all_tracks_per_GEN_bjet->Fill(jet_all_ntrack, w);
-              h_gvtx_seed_tracks_per_GEN_bjet->Fill(jet_seed_ntrack, w);
-			  h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-			  h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-
-		  }
-		  
-  
-	  }
-
-	  std::cout << __LINE__ << std::endl;
-          for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-		  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)  // this jet is a GEN jet 
-			  continue;
-		  
-		  size_t jet_all_ntrack = 0;
-		  size_t jet_seed_ntrack = 0;
-		  size_t jet_nm1_nsigmadxy_seed_ntrack = 0;
-		  size_t jet_nm1_pT_seed_ntrack = 0;
-
-		  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-			  
-				  jet_all_ntrack++;
-				  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1) {
-					  jet_nm1_nsigmadxy_seed_ntrack++;
-					  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
-						  jet_seed_ntrack++;
-					  }
-				  }
-				  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 0.5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
-					  jet_nm1_pT_seed_ntrack++;
-				  }
-
-		  }
-
-		  h_gvtx_all_tracks_per_NONGEN_bjet->Fill(jet_all_ntrack, w);
-		  h_gvtx_seed_tracks_per_NONGEN_bjet->Fill(jet_seed_ntrack, w);
-		  h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-		  h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-	  }
-
-	  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_dxy_or_not = {};
-	  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_dxy_or_not = {};
-
-	  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_pT_or_not = {};
-	  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_pT_or_not = {};
-
-	  std::cout << __LINE__ << std::endl;
-          int count_loosebtagged_jet = 0;
-	  int count_loosebtaggedOR3seedtrk_jet = 0;
-	  bool is_loosebtaggedOR3seedtrk_jet = false; 
-	  // no cuts on GEN-level are applied, looking at all loose-btagged jets  
-	  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-
-		  
-		   std::vector<size_t> vec_isv_btag0_jet = {};
-		   size_t jet_all_ntrack = 0;
-		   size_t jet_seed_ntrack = 0;
-		   size_t jet_nm1_nsigmadxy_seed_ntrack = 0;
-		   size_t jet_nm1_pT_seed_ntrack = 0;
-		   for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-			  if (ijet == mevent->jet_track_which_jet[j]) {
-				  jet_all_ntrack++;
-			      if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1) {
-						  jet_nm1_nsigmadxy_seed_ntrack++;
-						  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
-							  jet_seed_ntrack++;
-
-							  for (int isv = 0; isv < nsv; ++isv) {
-
-								  const MFVVertexAux& aux = auxes->at(isv);
-
-								  for (int itk = 0; itk < aux.ntracks(); ++itk) {
-
-
-									  if (fabs(aux.track_pt(itk) - fabs(mevent->jet_track_qpt[j])) < 0.0001 &&
-										  fabs(aux.track_eta[itk] - mevent->jet_track_eta[j]) < 0.0001 &&
-										  fabs(aux.track_phi[itk] - mevent->jet_track_phi[j]) < 0.0001) {
-										  vec_isv_btag0_jet.push_back(isv);
-									  }
-								  }
-
-							  }
-
-						  }
-				  }
-
-				  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 0.5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
-					  jet_nm1_pT_seed_ntrack++;
-				  }
-
-
-			  }
-		   }
-
-		   h_gvtx_all_tracks_per_jet->Fill(jet_all_ntrack, w);
-		   h_gvtx_seed_tracks_per_jet->Fill(jet_seed_ntrack, w);
-		   h_gvtx_nm1_nsigmadxy_seed_tracks_per_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-		   h_gvtx_nm1_pT_seed_tracks_per_jet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-		   if (jet_seed_ntrack >= 3) { //FIXME
-			   is_loosebtaggedOR3seedtrk_jet = true; 
-			   if (mevent->is_btagged(ijet, 0)) {
-				   h_gvtx_three_categories_3tightseedjet->Fill(1.0, w);
-			   }
-			   else {
-				   h_gvtx_three_categories_3tightseedjet->Fill(2.0, w);
-			   }
-		   }
-
-		   if (mevent->is_btagged(ijet, 0)) {
-			  is_loosebtaggedOR3seedtrk_jet = true;
-			  count_loosebtagged_jet++;
-			  h_gvtx_all_tracks_per_loosebtaggedjet->Fill(jet_all_ntrack, w);
-			  h_gvtx_seed_tracks_per_loosebtaggedjet->Fill(jet_seed_ntrack, w);
-			  h_gvtx_nm1_nsigmadxy_seed_tracks_per_loosebtaggedjet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-			  h_gvtx_nm1_pT_seed_tracks_per_loosebtaggedjet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-			  if (jet_seed_ntrack < 3) { //FIXME
-				  h_gvtx_three_categories_loosebtaggedjet->Fill(0.0, w);
-			  }
-			  else {
-				  h_gvtx_three_categories_loosebtaggedjet->Fill(1.0, w);
-			  }
-
-
-			  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			  int nbsv_by_btag0_jet = 0;
-			  int nloosebsv_by_btag0_jet = 0;
-			  std::vector<int> vec_ntrack_loosebsv = {};
-			  std::vector<size_t> vec_jet_seedtrack_loosebsv = {};
-			  std::vector<size_t> vec_jet_idx_loosebsv = {};
-			  std::vector<size_t> vec_jet_idx_matched_genbvtx = {};
-
-			  for (int isv = 0; isv < nsv; ++isv) {
-				  const MFVVertexAux& aux = auxes->at(isv);
-				  int jet_seed_ntrack_from_trk_bsv = std::count(vec_isv_btag0_jet.begin(), vec_isv_btag0_jet.end(), isv);
-				  if (jet_seed_ntrack_from_trk_bsv == aux.ntracks()) {
-					  nbsv_by_btag0_jet++;
-					  if (std::count(vec_bsv_idx_no_duplicate.begin(), vec_bsv_idx_no_duplicate.end(), isv) == 0)
-						  vec_bsv_idx_no_duplicate.push_back(isv);
-				  }
-				  if (jet_seed_ntrack_from_trk_bsv >= 1) {
-					  nloosebsv_by_btag0_jet++;
-					  vec_ntrack_loosebsv.push_back(aux.ntracks());
-					  vec_jet_seedtrack_loosebsv.push_back(jet_seed_ntrack_from_trk_bsv);
-					  vec_jet_idx_loosebsv.push_back(isv);
-				  }
-
-
-			  }
-
-			  bool is_two_b_decay_jet = false;
-			  double sum_b_quark_pT = 0.0;
-			  std::vector<double> vec_b_pair_dist3d = {};
-			  int count_bquark_match = 0;
-			  size_t i = 0;
-			  for (size_t llp = 0; llp < 2; ++llp) {
-				  int count_match = 0;
-				  for (size_t b = 0; b < 2; ++b) {
-
-					  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi()) < 0.4) {
-						  count_match++;
-						  count_bquark_match++;
-						  sum_b_quark_pT += mevent->gen_daughters[i].Pt();
-						  vec_jet_idx_matched_genbvtx.push_back(i);
-						  if (std::count(vec_loosebtagged_jet_no_duplicate.begin(), vec_loosebtagged_jet_no_duplicate.end(), ijet) == 0) {
-							  vec_loosebtagged_jet_no_duplicate.push_back(ijet);
-						  }
-
-					  }
-					  i++;
-				  }
-				  if (count_match == 2) {  // a jet considered as a two-b-decay jet has exactly two b-quarks matched
-					  is_two_b_decay_jet = true;
-					  if (llp == 0) {
-						  h_gvtx_shared_loosebtaggedjet_nm1_dist3d_bpair->Fill(sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2) + pow(mevent->gen_b_llp0_decay[2] - mevent->gen_b_llp0_decay[5], 2)));
-						  h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair->Fill(sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2) + pow(mevent->gen_b_llp0_decay[2] - mevent->gen_b_llp0_decay[5], 2)));
-					  }
-					  else {
-						  h_gvtx_shared_loosebtaggedjet_nm1_dist3d_bpair->Fill(sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2) + pow(mevent->gen_b_llp1_decay[2] - mevent->gen_b_llp1_decay[5], 2)));
-						  h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair->Fill(sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2) + pow(mevent->gen_b_llp1_decay[2] - mevent->gen_b_llp1_decay[5], 2)));
-					  }
-				  }
-			  }
-
-			  h_gvtx_count_bquarks_match_to_loosebtaggedjet->Fill(count_bquark_match);
-
-			  if (is_two_b_decay_jet) {
-				  h_gvtx_seed_tracks_per_shared_jet->Fill(jet_seed_ntrack, w);
-				  h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-				  h_gvtx_nm1_pT_seed_tracks_per_shared_jet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-				  if (jet_nm1_nsigmadxy_seed_ntrack >= 5) {
-					  vec_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
-				  }
-
-				  if (jet_nm1_pT_seed_ntrack >= 5) {
-					  vec_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
-				  }
-
-				  if (jet_seed_ntrack >= 5) {
-					  vec_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
-				  }
-
-				  h_gvtx_shared_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
-				  h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
-				  h_gvtx_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv->Fill(mevent->jet_pt[ijet] / sum_b_quark_pT, w);
-				  h_gvtx_shared_loosebtaggedjet_nm1_jet_pT->Fill(mevent->jet_pt[ijet], w);
-
-				  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
-					  h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
-					  double min_genbvtxdist3d = 5.0;
-					  size_t isv = vec_jet_idx_loosebsv[i];
-					  const MFVVertexAux& aux = auxes->at(isv);
-
-					  for (size_t j = 0; j < vec_jet_idx_matched_genbvtx.size(); ++j) {
-						  double genbvtxdist3d = 0.0;
-						  if (vec_jet_idx_matched_genbvtx[j] == 0) {
-							  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
-						  }
-						  else if (vec_jet_idx_matched_genbvtx[j] == 1) {
-							  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
-						  }
-						  else if (vec_jet_idx_matched_genbvtx[j] == 2) {
-							  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
-						  }
-						  else {
-							  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
-						  }
-						  if (min_genbvtxdist3d > genbvtxdist3d)
-							  min_genbvtxdist3d = genbvtxdist3d;
-					  }
-					  h_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv->Fill(min_genbvtxdist3d, w);
-					  h_2D_gvtx_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv->Fill(min_genbvtxdist3d, vec_ntrack_loosebsv[i], w);
-				  }
-
-				  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
-					  h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
-				  else
-					  h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
-
-			  }
-			  else {
-
-				  if (count_bquark_match >= 1) {
-					  h_gvtx_seed_tracks_per_no_shared_jet->Fill(jet_seed_ntrack, w);
-					  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-					  h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet->Fill(jet_nm1_pT_seed_ntrack, w);
-
-					  if (jet_nm1_nsigmadxy_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
-					  }
-
-					  if (jet_nm1_pT_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
-					  }
-
-					  if (jet_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
-					  }
-
-					  h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
-					  h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
-					  h_gvtx_no_shared_loosebtaggedjet_nm1_pT_ratio_loosebsv->Fill(mevent->jet_pt[ijet] / sum_b_quark_pT, w);
-					  h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT->Fill(mevent->jet_pt[ijet], w);
-
-					  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
-						  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
-						  double min_genbvtxdist3d = 5.0;
-						  size_t isv = vec_jet_idx_loosebsv[i];
-						  const MFVVertexAux& aux = auxes->at(isv);
-
-						  for (size_t j = 0; j < vec_jet_idx_matched_genbvtx.size(); ++j) {
-							  double genbvtxdist3d = 0.0;
-							  if (vec_jet_idx_matched_genbvtx[j] == 0) {
-								  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
-							  }
-							  else if (vec_jet_idx_matched_genbvtx[j] == 1) {
-								  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
-							  }
-							  else if (vec_jet_idx_matched_genbvtx[j] == 2) {
-								  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
-							  }
-							  else {
-								  genbvtxdist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
-							  }
-							  if (min_genbvtxdist3d > genbvtxdist3d)
-								  min_genbvtxdist3d = genbvtxdist3d;
-						  }
-						  h_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_loosebsv->Fill(min_genbvtxdist3d, w);
-						  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_genbvtxdist3d_ntrack_loosebsv->Fill(min_genbvtxdist3d, vec_ntrack_loosebsv[i], w);
-					  }
-
-					  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
-						  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
-					  else
-						  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
-				  }
-
-				  else {
-
-					  h_gvtx_seed_tracks_per_no_matched_jet->Fill(jet_seed_ntrack, w);
-					  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
-					  h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet->Fill(jet_nm1_pT_seed_ntrack, w);
-					  h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT->Fill(mevent->jet_pt[ijet], w);
-
-					  if (jet_nm1_nsigmadxy_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
-					  }
-
-					  if (jet_nm1_pT_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
-					  }
-
-					  if (jet_seed_ntrack >= 3) {
-						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
-					  }
-
-					  h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
-					  h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
-
-					  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
-						  h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
-					  }
-
-					  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
-						  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
-					  else
-						  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
-
-				  }
-			  }
-
-			  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		   }
-
-		   if (is_loosebtaggedOR3seedtrk_jet)
-			  count_loosebtaggedOR3seedtrk_jet++;
-
-	  }
-
-	  std::cout << __LINE__ << std::endl;
-          h_gvtx_nbquarkjet->Fill(vec_bquark_jet_no_duplicate.size(), w);
-	  h_gvtx_nloosebtaggedjet->Fill(count_loosebtagged_jet, w);
-	  h_gvtx_nloosebtaggedOR3seedtrkjet->Fill(count_loosebtaggedOR3seedtrk_jet, w);
-	  h_gvtx_shared_GEN_bjet_or_not->Fill(shared_bjet, w);
-
-	  h_gvtx_nbsv->Fill(vec_bsv_idx_no_duplicate.size(), w);
-
-	  for (size_t ibv = 0; ibv < vec_bsv_idx_no_duplicate.size(); ++ibv) {
-		  const MFVVertexAux& aux = auxes->at(vec_bsv_idx_no_duplicate[ibv]);
-		  h_gvtx_bsv_ntrack->Fill(aux.ntracks(), w);
-		  h_gvtx_bsv_rescale_bsbs2ddist->Fill(mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)), w);
-		  h_gvtx_bsv_rescale_bs2derr->Fill(aux.rescale_bs2derr, w);
-
-		  double min_sv_genbdist3d = 0.2;
-		  // trying to get a resolution of 3d distance b/w GEN b-decay vertex and reconstructed vertex 
-		  for (size_t i = 0; i < 4; ++i) {
-			  double b_sv_dist3d = 0.0;
-			  if (i == 0) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
-			  }
-			  else if (i == 1) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
-			  }
-			  else if (i == 2) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
-			  }
-			  else {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
-			  }
-			  if (min_sv_genbdist3d > b_sv_dist3d) {
-				  min_sv_genbdist3d = b_sv_dist3d;
-			  }
-		  }
-
-		  if (min_sv_genbdist3d < 0.2)
-			  h_gvtx_bsv_genb3ddist->Fill(min_sv_genbdist3d, w);
-
-	  }
-
-	  std::cout << __LINE__ << std::endl;
-          double min_sv_genbdist3d = 0.2;
-	  double min_sv_genllpdist3d = 0.2;
-	  for (int isv = 0; isv < nsv; ++isv) {
-		  const MFVVertexAux& aux = auxes->at(isv);
-		  if (aux.ntracks() < 3)
-			  continue;
-		  // trying to get a resolution of 3d distance b/w GEN b-decay vertex and reconstructed vertex 
-		  for (size_t i = 0; i < 4; ++i) {
-			  double b_sv_dist3d = 0.0;
-			  if (i == 0) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
-			  }
-			  else if (i == 1) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
-			  }
-			  else if (i == 2) {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
-			  }
-			  else {
-				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
-			  }
-			  if (min_sv_genbdist3d > b_sv_dist3d) {
-				  min_sv_genbdist3d = b_sv_dist3d;
-			  }
-		  }
-
-		  // trying to get a resolution of 3d distance b/w GEN llp-decay vertex and reconstructed vertex 
-		  for (size_t i = 0; i < 2; ++i) {
-			  double llp_sv_dist3d = sqrt(pow(mevent->gen_lsp_decay[i * 3 + 0] - aux.x, 2) + pow(mevent->gen_lsp_decay[i * 3 + 1] - aux.y, 2) + pow(mevent->gen_lsp_decay[i * 3 + 2] - aux.z, 2));
-			  if (min_sv_genllpdist3d > llp_sv_dist3d) {
-				  min_sv_genllpdist3d = llp_sv_dist3d;
-			  }
-		  }
-
-		  
-	  }
-
-	  if (min_sv_genbdist3d < 0.2)
-		  h_gvtx_sv_all_genb3ddist->Fill(min_sv_genbdist3d, w);
-	  if (min_sv_genllpdist3d < 0.2)
-		  h_gvtx_sv_all_genllp3ddist->Fill(min_sv_genllpdist3d, w);
-
-  }
   */
 	
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);

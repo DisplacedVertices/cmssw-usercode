@@ -143,7 +143,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   mevent->gen_valid = false;
 
-  if (!event.isRealData()) {
+  if (true){ //!event.isRealData()) {
     edm::Handle<GenEventInfoProduct> gen_info;
     event.getByToken(gen_info_token, gen_info);
 
@@ -220,7 +220,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     event.getByToken(mci_token, mci);
 
     std::vector<reco::GenParticleRef> mci_lep;
-
     if (mci->valid()) {
       mevent->gen_valid = true;
       assert(mci->primaries().size() == 2);
@@ -244,7 +243,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           reco::GenParticle* s = (reco::GenParticle*)first_candidate(&*s_temp); 
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
-		  mevent->gen_daughter_ngdau.push_back(s->numberOfDaughters());
+	  mevent->gen_daughter_ngdau.push_back(s->numberOfDaughters());
         }
       }
 
