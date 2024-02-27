@@ -104,7 +104,7 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   const double w = *weight;
 
   edm::ESHandle<JetCorrectorParametersCollection> jet_corr;
-  setup.get<JetCorrectionsRecord>().get("AK4PF", jet_corr);
+  setup.get<JetCorrectionsRecord>().get("AK4Calo", jet_corr);
   JetCorrectionUncertainty jec_unc((*jet_corr)["Uncertainty"]);
 
   h_w->Fill(w);

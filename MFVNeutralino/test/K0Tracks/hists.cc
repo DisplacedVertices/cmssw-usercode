@@ -9,6 +9,7 @@ int main(int argc, char** argv) {
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& ntt = nt.tracks();
+  auto& muons = nt.muons();
   //auto& pf = nt.pf();
   auto& bs = nt.bs();
 
@@ -144,6 +145,10 @@ int main(int argc, char** argv) {
     
     //if (pf.metnomu() < 200 || !(pf.passmetfilters()) || !(pf.passfakemetveto()))
     //  NR_loop_cont(w);
+    //
+    for (auto muon : muons) {
+        std::cout << muon.pt() << std::endl;
+    }
 
     for (int isv = 0, isve = nt.svs().n(); isv < isve; ++isv) {
 

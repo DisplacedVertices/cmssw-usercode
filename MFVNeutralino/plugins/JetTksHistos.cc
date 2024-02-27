@@ -79,6 +79,7 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   const bool get_hlt_btag_factors_pf;
   const bool get_hlt_btag_factors_calo;
   const bool get_hlt_btag_factors_calo_low;
+  const bool force_hlt_btag_study;
   const bool require_match_to_hlt;
   const bool require_early_b_filt;
   const bool apply_hlt_btagging;
@@ -203,7 +204,7 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_sumtk_dR[CATEGORIES];
 
   TH1F* h_online_btags;
-  TH1F* h_hard_online_btags;
+  TH1F* h_online_calo_btags;
   TH1F* h_satisfies_online_tags;
 
 };
@@ -232,6 +233,7 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     get_hlt_btag_factors_pf(cfg.getParameter<bool>("get_hlt_btag_factors_pf")),
     get_hlt_btag_factors_calo(cfg.getParameter<bool>("get_hlt_btag_factors_calo")),
     get_hlt_btag_factors_calo_low(cfg.getParameter<bool>("get_hlt_btag_factors_calo_low")),
+    force_hlt_btag_study(cfg.getParameter<bool>("force_hlt_btag_study")),
     require_match_to_hlt(cfg.getParameter<bool>("require_match_to_hlt")),
     require_early_b_filt(cfg.getParameter<bool>("require_early_b_filt")),
     apply_hlt_btagging(cfg.getParameter<bool>("apply_hlt_btagging")),
@@ -374,7 +376,7 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   }
 
   h_online_btags = fs->make<TH1F>("h_online_btags", ";# of offline jets tagged @ HLT; entries", 15, 0, 15);
-  h_hard_online_btags = fs->make<TH1F>("h_hard_online_btags", ";# of offline jets tagged @ HLT w/ online p_{T} > 80GeV; entries", 15, 0, 15);
+  h_online_calo_btags = fs->make<TH1F>("h_online_calo_btags", ";# of offline jets tagged @ HLT w/ online p_{T} > 80GeV; entries", 15, 0, 15);
   h_satisfies_online_tags = fs->make<TH1F>("h_satisfies_online_tags", ";Event has enough online btags?; entries", 2, -0.01, 1.01);
 }
 
@@ -428,7 +430,8 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     int  calojet_npass_hlt    = 0;
     int  calojet_npass_prompt = 0;
     int n_online_btags      = 0;
-    int n_hard_online_btags = 0;
+    int n_online_calo_btags    = 0;
+    int n_online_calo_lo_btags = 0;
     double online_pfht    = 0.0;
     double online_caloht  = 0.0;
     double offline_pfht   = 0.0;
@@ -442,8 +445,6 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (int i = 0, ie=mevent->calo_jet_pt.size(); i < ie; ++i) {
         if ((mevent->calo_jet_pt[i] > 30.0) and (fabs(mevent->calo_jet_eta[i]) < 2.5)) offline_caloht += mevent->calo_jet_pt[i];
     }
-
-    //if (offline_caloht < 400.0 or (trigger_bit==19 and offline_caloht < 600.0) or (not mevent->pass_l1(mfv::b_L1_HTT380er))) return;
 
     if (require_two_good_leptons) {
         bool has_nice_muon = false;
@@ -478,7 +479,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     std::vector<int> tri_symm_kine_filter_bits;
     std::vector<int> tri_skew_kine_filter_bits;
 
-    if (year == 20161 or 20162) {
+    if (year == 20161 or year == 20162) {
         di_kine_filter_bits = { mfv::b_hltDoubleJetsC100, mfv::b_hltDoublePFJetsC100, mfv::b_hltDoublePFJetsC100MaxDeta1p6 };
 
         tri_symm_kine_filter_bits = { mfv::b_hltQuadCentralJet45, mfv::b_hltQuadPFCentralJetLooseID45 };
@@ -524,11 +525,6 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
     }
 
-
-
-//    for (auto bit : di_kine_filter_bits) {
-//        if (not mevent->pass_filter(bit)) return;
-//    }
 
     // Get closest online/offline pfjet match and calculate on/off pfht
     for (int i = 0; i < mevent->njets(); ++i) {
@@ -764,7 +760,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         bool pass_offline_tagreqs = ((trigger_bit == 18 and pass_prompt_req and pass_alt_disp_req and pass_pt_req) or (trigger_bit == 19 and pass_prompt_req and pass_pt_req));
         bool pass_online_tagreqs  = ((trigger_bit == 18 and matches_disp_cjet and matches_promptpass_cjet) or (trigger_bit == 19 and matches_promptpass_cjet));
         bool pass_category        = true;
-        bool pass_pure_region     = mevent->calo_jet_pt[i] > 80.0 ;
+        bool pass_pure_region     = mevent->calo_jet_pt[i] > 50.0 ;
 
         if (not pass_pure_region) continue;
        
@@ -884,32 +880,38 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   START PFJET STUFF
 
     // This might messes up something down around L1150 or so. FIXME!!! at some point
-    bool pass_di_kine_filters      = get_hlt_btag_factors_calo;
-    bool pass_alt_tri_kine_filters = get_hlt_btag_factors_calo_low;
-    bool pass_tri_kine_filters     = get_hlt_btag_factors_pf;
+    bool debug = false;
+    if (debug) std::cout << "\n\n--------------------------------------\n--------------------------------------\nStarting tag and probe" << std::endl;
+    if (debug) std::cout << "# of HLT PF btags      : " << mevent->hlt_pfforbtag_jet_pt.size() << std::endl;
+    if (debug) std::cout << "# of HLT Calo btags    : " << mevent->hlt_calo_jet_pt.size() << std::endl;
+    if (debug) std::cout << "# of HLT Calo low-btags: " << mevent->hlt_low_calo_b_jet_pt.size() << std::endl;
+    // bool pass_di_kine_filters      = true;
+    // bool pass_alt_tri_kine_filters = (year == 20161 or year == 20162);
+    // bool pass_tri_kine_filters     = (year == 2017  or year == 2018);
+    bool pass_di_kine_filters      = get_hlt_btag_factors_calo or force_hlt_btag_study;
+    bool pass_tri_kine_filters     = get_hlt_btag_factors_pf   or (force_hlt_btag_study and (year == 2017 or year == 2018)); 
+    bool pass_alt_tri_kine_filters = get_hlt_btag_factors_calo_low or (force_hlt_btag_study and (year == 20161 or year == 20162));
 
-    if (get_hlt_btag_factors_calo) {
-        for (auto bit : di_kine_filter_bits) {
-            if (not mevent->pass_filter(bit)) {
-                pass_di_kine_filters = false;
-                break;
-            };
-        }
+    for (auto bit : di_kine_filter_bits) {
+        if (not mevent->pass_filter(bit)) {
+            pass_di_kine_filters = false;
+            break;
+        };
     }
 
-    if (get_hlt_btag_factors_pf) {
-        for (auto bit : tri_kine_filter_bits) {
-            if (not mevent->pass_filter(bit)) {
-                pass_tri_kine_filters = false;
-                break;
-            };
-        }
+    for (auto bit : tri_kine_filter_bits) {
+        if (not mevent->pass_filter(bit)) {
+            pass_tri_kine_filters = false;
+            break;
+        };
     }
 
     // Gotta do something a bit differently for the two 2016 tri-bjet triggers
     if (get_hlt_btag_factors_calo_low) {
+        if (debug) std::cout << "In get_hlt_btag_factors_calo_low conditional!" << std::endl;
         bool pass_symm = true;
         bool pass_skew = true;
+        if (debug) std::cout << "Before filt check: pass_symm: " << pass_symm << "     pass_skew: " << pass_skew << std::endl;
 
         for (auto bit : tri_symm_kine_filter_bits) {
             if (not mevent->pass_filter(bit)) {
@@ -924,20 +926,25 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
 
+        if (debug) std::cout << "After  filt check: pass_symm: " << pass_symm << "     pass_skew: " << pass_skew << std::endl;
+
         if (not (pass_skew or pass_symm)) {
             pass_alt_tri_kine_filters = false;
         }
     }
 
     bool satisfies_kine_reqs = (pass_tri_kine_filters or pass_di_kine_filters or pass_alt_tri_kine_filters);
+    if (debug) std::cout << "satisfies_kine_reqs = " << satisfies_kine_reqs << "\n" << std::endl;
     
+    if (debug) std::cout << "Starting jet loop!" << std::endl;
     for (int i = 0; i < mevent->njets(); ++i) {
+        if (debug) std::cout << "\nJet #" << i << "\n----------------------------" << std::endl;
+        if (debug) std::cout << "DeepJet score: " << mevent->jet_bdisc_deepflav[i] << std::endl;
+        if (debug) std::cout << "|eta|:         " << fabs(mevent->nth_jet_eta(i)) << std::endl;
         bool matches_online_bjet          = false;
         bool matches_online_calo_bjet     = false;
         bool matches_online_calo_low_bjet = false;
         bool matches_online_jet           = false;
-        bool reject_hlt_bjet              = false;
-        bool reject_hlt_calo_bjet         = false;
 
         if (mevent->jet_bdisc_deepcsv[i] < offline_csv || mevent->nth_jet_pt(i) < pt_lo_for_tag_probe ||
             mevent->nth_jet_pt(i) > pt_hi_for_tag_probe || fabs(mevent->nth_jet_eta(i)) > 2.4) continue;
@@ -954,6 +961,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
 
         if ( (get_hlt_btag_factors_pf or get_hlt_btag_factors_calo or get_hlt_btag_factors_calo_low) and ((not has_tag_jet_buddy) or (not satisfies_kine_reqs)) ) continue;
+        if (debug) std::cout << "Has buddy AND satisfies basic kinematic reqs" << std::endl;
 
     
         float sum_nsigmadxy = 0.0;
@@ -1003,6 +1011,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
         if(jet_min_hlt_bjet_dR < 0.40) { matches_online_bjet = true; }
+        if (debug) std::cout << "matches_online_bjet = " << matches_online_bjet << std::endl;
 
         //See if this jet matches to an HLT calojet
         float jet_min_hlt_calo_dR = 0.801;
@@ -1029,6 +1038,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
         if(jet_min_hlt_calo_bjet_dR < 0.40) { matches_online_calo_bjet = true; }
+        if (debug) std::cout << "matches_online_calo_bjet = " << matches_online_calo_bjet << std::endl;
 
         //See if this jet matches to one which satisfies the HLT calo bjet (low-score) filter
         float jet_min_hlt_calo_low_bjet_dR = 9.9;
@@ -1043,22 +1053,22 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
         if(jet_min_hlt_calo_low_bjet_dR < 0.40) { matches_online_calo_low_bjet = true; }
-
-
+        if (debug) std::cout << "matches_online_calo_low_bjet = " << matches_online_calo_low_bjet << std::endl;
 
         // Study the effects of online/offline btagging differences by punishing online tags in MC
-        if (matches_online_bjet and apply_hlt_btagging) {
+        if (apply_hlt_btagging) {
             float rand_y = distribution(rng);
-            reject_hlt_bjet = jmt::UncertTools::reject_btag_hlt(mevent->jet_bdisc_deepcsv[i], rand_y, 0, year);
+            float rand_z = distribution(rng);
+            float rand_w = distribution(rng);
+
+            matches_online_bjet          = jmt::UncertTools::refactor_btag_hlt(mevent->jet_bdisc_deepcsv[i], matches_online_bjet, rand_y, year);
+            matches_online_calo_bjet     = jmt::UncertTools::refactor_calo_btag_hlt(mevent->jet_bdisc_deepcsv[i], matches_online_calo_bjet, rand_z, year);
+            matches_online_calo_low_bjet = jmt::UncertTools::refactor_calo_lo_btag_hlt(mevent->jet_bdisc_deepcsv[i], matches_online_calo_low_bjet, rand_w, year);
         }
 
-        if (matches_online_calo_bjet and apply_hlt_btagging) {
-            float rand_y = distribution(rng);
-            reject_hlt_calo_bjet = jmt::UncertTools::reject_calo_btag_hlt(mevent->jet_bdisc_deepcsv[i], rand_y, 0, year);
-        }
-
-        if (matches_online_bjet      and (not reject_hlt_bjet))      n_online_btags++;
-        if (matches_online_calo_bjet and (not reject_hlt_calo_bjet)) n_hard_online_btags++;
+        if (matches_online_bjet         ) n_online_btags++;
+        if (matches_online_calo_bjet    ) n_online_calo_btags++;
+        if (matches_online_calo_low_bjet) n_online_calo_lo_btags++;
 
         // Which histograms do we need to fill?
         std::vector<int> fill_hists;
@@ -1204,13 +1214,18 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
     }
 
-    // This is messed up due to changed method at ~L850, so... FIXME!!!
     bool satisfies_online_tags = false;
-    if      (pass_di_kine_filters  and n_hard_online_btags >= 2) satisfies_online_tags = true;
-    else if (pass_tri_kine_filters and      n_online_btags >= 3) satisfies_online_tags = true;
+    if (year == 2017 or year == 2018) {
+        if      (pass_di_kine_filters  and n_online_calo_btags >= 2) satisfies_online_tags = true;
+        else if (pass_tri_kine_filters and      n_online_btags >= 3) satisfies_online_tags = true;
+    }
+    else {
+        if (pass_alt_tri_kine_filters and n_online_calo_lo_btags >= 3) satisfies_online_tags = true;
+        if (pass_di_kine_filters      and    n_online_calo_btags >= 2) satisfies_online_tags = true;
+    }
 
     h_online_btags->Fill(n_online_btags, w);
-    h_hard_online_btags->Fill(n_hard_online_btags, w);
+    h_online_calo_btags->Fill(n_online_calo_btags, w);
     h_satisfies_online_tags->Fill((int)(satisfies_online_tags), w);
       
     //////////////////////////////////////////////////////////////////////////////

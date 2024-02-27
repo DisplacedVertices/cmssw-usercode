@@ -37,6 +37,12 @@ namespace mfv {
     std::vector<TLorentzVector> hltpfjetsforbtag;
     int nhltpfjetsforbtag() const { return hltpfjetsforbtag.size(); }
 
+    std::vector<TLorentzVector> hltcalobjets;
+    int nhltcalobjets() const { return hltcalobjets.size(); }
+
+    std::vector<TLorentzVector> hltcalobjets_low;
+    int nhltcalobjets_low() const { return hltcalobjets_low.size(); }
+
     float met_pt;
     float met_phi;
     float met_pt_calo;

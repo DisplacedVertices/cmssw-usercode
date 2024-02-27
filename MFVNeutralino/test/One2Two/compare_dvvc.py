@@ -6,7 +6,7 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 only_10pc = False
 year = '2017p8'
-version = 'V25m'
+version = 'V27m'
 
 #mode = 'vary_eff'
 #mode = 'vary_dphi'

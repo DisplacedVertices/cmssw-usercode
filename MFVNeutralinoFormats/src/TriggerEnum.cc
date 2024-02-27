@@ -11,20 +11,20 @@ namespace mfv {
     "HLT_Mu50_v",
     "HLT_Ele15_IsoVVVL_PFHT450_v",
     "HLT_Mu15_IsoVVVL_PFHT450_v",
+    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v",
+    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v",
+    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
+    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
 
     // 2017 bjet triggers
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v",
     "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v",
-    "HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2_v",
-    "HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_v",
-    "HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5_v",
+    "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_v",
 
     // 2018 bjet triggers
     "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v",
     "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v",
-    "HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5_v",
-    "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v",
-    "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v",
+    "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_v",
 
     // 2017 + 2018 Displaced Dijet triggers
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
@@ -42,8 +42,9 @@ namespace mfv {
     // MET trigger
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
 
-    // Low-HT trigger to study filters requiring HLT tracks
+    // Low-HT triggers to study filters requiring HLT tracks
     "HLT_HT425_v",
+    "HLT_HT325_v",
 
   };
 
@@ -88,7 +89,6 @@ namespace mfv {
     "Flag_globalTightHalo2016Filter",
     "Flag_CSCTightHalo2015Filter"
   };
-
 
   const char* filter_paths[mfv::n_filter_paths] = {
 

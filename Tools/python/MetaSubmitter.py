@@ -34,9 +34,16 @@ def era_modifier(sample):
             my_sample_name.replace('APV','')
             is2016APV = True
 
-        mo = re.search(r'(201\d)([A-Z])', my_sample_name)
-        assert mo
-        yr, era = mo.groups()
+        if not is2016APV:
+            mo = re.search(r'(201\d)([A-Z])', my_sample_name)
+            assert mo
+            yr, era = mo.groups()
+
+        else:
+            mo = re.search(r'(2016APV)([A-Z])', my_sample_name)
+            assert mo
+            yr = 2016
+            garbage, era = mo.groups()
 
         if int(yr) == 2016 :
             if is2016APV : yr = 20161
@@ -207,13 +214,51 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=20, limit_ttbar=False):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=5, limit_ttbar=False):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
+            'SingleMuon': 3,
+            'MuonEG': 4,
+            'DisplacedJet': 4,
+            'ttbar_2016APV': 3,
+            'ttbar_ll_2016APV': 3,
+            'qcdht0300_2016APV': 4,
+            'qcdht0500_2016APV': 4,
+            'qcdht0700_2016APV': 4,
+            'qcdht1000_2016APV': 9,
+            'qcdht1500_2016APV': 9,
+            'qcdht2000_2016APV': 9,
+#            'SingleMuon2016F': 8,
+#            'SingleMuon2016G': 8,
+#            'SingleMuon2016H': 8,
+#            'MuonEG2016F': 4,
+#            'MuonEG2016G': 4,
+#            'MuonEG2016H': 4,
+#            'DisplacedJet2016F': 4,
+#            'DisplacedJet2016G': 4,
+#            'DisplacedJet2016H': 4,
+            'qcdht0300_2016': 4,
+            'qcdht0500_2016': 4,
+            'qcdht0700_2016': 4,
+            'qcdht1000_2016': 9,
+            'qcdht1500_2016': 9,
+            'qcdht2000_2016': 9,
+            'ttbar_2016': 3,
+            'ttbar_ll_2016': 3,
+#            'SingleMuon2017B': 3,
+#            'SingleMuon2017C': 3,
+#            'SingleMuon2017D': 3,
+#            'SingleMuon2017E': 3,
+#            'SingleMuon2017F': 3,
+            'qcdht0300_2017': 2,
+            'qcdht0500_2017': 2,
+            'qcdht0700_2017': 2,
             'qcdht1000_2017': 11,
             'qcdht1500_2017': 11,
             'qcdht2000_2017': 11,
-            'ttbar_2017': 22,
+            'ttbar_2017': 3,
+            'ttbar_ll_2017': 3,
+            'wjetstolnu_2017': 3,
             'ttbarht0600_2017': 8,
             'ttbarht0800_2017': 8,
             'ttbarht1200_2017': 8,
@@ -221,7 +266,16 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             'qcdht1000_2018': 11,
             'qcdht1500_2018': 11,
             'qcdht2000_2018': 11,
-            'ttbar_2018': 22,
+            'ttbar_2018': 8,
+            'ttbar_ll_2018': 8,
+#            'SingleMuon2018A': 8,
+#            'SingleMuon2018B': 8,
+#            'SingleMuon2018C': 8,
+#            'SingleMuon2018D': 8,
+#            'MuonEG2018A': 4,
+#            'MuonEG2018B': 4,
+#            'MuonEG2018C': 4,
+#            'MuonEG2018D': 4,
             'ttbarht0600_2018': 8,
             'ttbarht0800_2018': 8,
             'ttbarht1200_2018': 8,
@@ -230,6 +284,10 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
+            name = sample.name
+            match = re.match(r"([A-Za-z]+)(201\d{1}[A-Za-z]*)", name)
+            if match:
+                name = match.group(1)
             sample.files_per = d.get(sample.name, 10000)
 
     elif jobtype == 'ntuple' or jobtype == 'trackmover':

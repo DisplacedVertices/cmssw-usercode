@@ -58,6 +58,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_svdist3d;
   TH1F* h_sumdbv;
   TH2F* h_sumdbv_trigcomb;
+  TH2F* h_caloht_trigcomb;
   TH3F* h_dbv0dbv1_trgbit;
   TH2F* h_sv0pvdz_v_sv1pvdz;
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
@@ -376,6 +377,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 2);
   h_sumdbv = fs->make<TH1F>("h_sumdbv", ";#Sigma(d_{BV}) (cm);arb. units", 400, 0, 4);
   h_sumdbv_trigcomb = fs->make<TH2F>("h_sumdbv_trigcomb", ";#Sigma(d_{BV}) (cm);", 400, 0, 4, 9, 0, 9);   // 2016
+  h_caloht_trigcomb = fs->make<TH2F>("h_caloht_trigcomb", ";CaloHT(30);",  500, 0, 2000, 9, 0, 9);   // 2016
   //h_sumdbv_trigcomb = fs->make<TH2F>("h_sumdbv_trigcomb", ";#Sigma(d_{BV}) (cm);", 400, 0, 4, 8, 0, 8); // 2017
   h_dbv0dbv1_trgbit = fs->make<TH3F>("h_dbv0dbv1_trgbit", ";;;", 200, 0, 2, 200, 0, 2, 9, 0, 9);   // 2016
   //h_dbv0dbv1_trgbit = fs->make<TH3F>("h_dbv0dbv1_trgbit", ";;;", 200, 0, 2, 200, 0, 2, 8, 0, 8); // 2017
@@ -406,6 +408,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double bsz = mevent->bsz;
   const math::XYZPoint bs(bsx, bsy, bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
+  double caloht = 0.0;
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
@@ -415,9 +418,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   int ncalojets      = mevent->calo_jet_pt.size();
   int calojetsptpass = 0;
-  for (int i=0; i < ncalojets; i++) { if (mevent->calo_jet_pt[i] > 60.0) calojetsptpass++; }
-  
-
+  for (int i=0; i < ncalojets; i++) { 
+    if (mevent->calo_jet_pt[i] > 30.0 and fabs(mevent->calo_jet_eta[i]) < 2.5) caloht += mevent->calo_jet_pt[i];
+    if (mevent->calo_jet_pt[i] > 50.0) calojetsptpass++;
+  }
+ 
   // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
   double nmatched_0 = 0;
   double nmatched_1 = 0;
@@ -840,12 +845,14 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_sumdbv->Fill(dbv0 + dbv1, w);
 
     h_sumdbv_trigcomb->Fill(dbv0 + dbv1 , 0., w);
+    h_caloht_trigcomb->Fill(caloht, 0., w);
     h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 0., w);
 
     if (this_year == 2016) {
       for (int jt=20; jt<22; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-19)+0.1, w);   //     bin #2 (x-val = 1.1)
+          h_caloht_trigcomb->Fill(caloht, float(jt-19)+0.1, w);                //     bin #2 (x-val = 1.1)
           h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-19)+0.1, w);    // and bin #3 (x-val = 2.1)
           pass_trig = true;
           pass_dd   = true;
@@ -854,6 +861,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       for (int jt=22; jt<25; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-18)+0.1, w);  // bins #5, 6, 7, (x-vals = 4.1, 5.1, 6.1)
+          h_caloht_trigcomb->Fill(caloht,     float(jt-18)+0.1, w);          
           h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-18)+0.1, w);
           pass_trig = true;
           pass_bjet = true;
@@ -869,7 +877,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       for (int jt=18; jt<20; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-17)+0.1, w); 
-          h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-17)+0.1, w);
+          h_caloht_trigcomb->Fill(caloht,      float(jt-17)+0.1, w);          
+          h_dbv0dbv1_trgbit->Fill(dbv0, dbv1,  float(jt-17)+0.1, w);
           pass_trig = true;
           pass_dd   = true;
         }   
@@ -877,15 +886,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       for (int jt=8; jt<10; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-4)+0.1, w); 
+          h_caloht_trigcomb->Fill(caloht,     float(jt-4)+0.1, w);          
           h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-4)+0.1, w);
           pass_trig = true;
           pass_bjet = true;
         }   
       }   
   
-      if (pass_dd)   { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 3.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 3.1, w); }
-      if (pass_bjet) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 6.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 6.1, w); }
-      if (pass_trig) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 7.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 7.1, w); }
+      if (pass_dd)   { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 3.1, w); h_caloht_trigcomb->Fill(caloht, 3.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 3.1, w); }
+      if (pass_bjet) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 6.1, w); h_caloht_trigcomb->Fill(caloht, 6.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 6.1, w); }
+      if (pass_trig) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 7.1, w); h_caloht_trigcomb->Fill(caloht, 7.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 7.1, w); }
     }
 
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);

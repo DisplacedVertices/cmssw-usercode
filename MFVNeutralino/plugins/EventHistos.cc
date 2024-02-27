@@ -25,6 +25,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
         //const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
         const edm::EDGetTokenT<double> weight_token;
 
+        const double temp_caloht_cut;
+        const bool   require_two_good_leptons;
+
         TH1F* h_w;
         TH1F* h_eventid;
 
@@ -94,54 +97,36 @@ class MFVEventHistos : public edm::EDAnalyzer {
         TH1F* h_ncalojets40;
         TH1F* h_nhltcalojets;
         TH1F* h_nhltcalojets40;
+        TH1F* h_nhltbjets;
+        TH1F* h_nhltcalobjets;
+        TH1F* h_nhltcalobjets_low;
         static const int MAX_NJETS = 10;
         TH1F* h_jet_pt[MAX_NJETS+1];
         TH1F* h_jet_eta[MAX_NJETS+1];
         TH1F* h_jet_phi[MAX_NJETS+1];
         TH1F* h_jet_nseedtrack[MAX_NJETS+1];
-        //TH1F* h_jet_bhad_match_bscore;
-        //TH1F* h_jet_bhad_match_pt;
-        //TH1F* h_jet_bhad_match_pt_pass_l;
-        //TH1F* h_jet_bhad_match_pt_pass_m;
-        //TH1F* h_jet_bhad_match_pt_pass_t;
-        //TH1F* h_jet_ddqk_match_bscore;
-        //TH1F* h_jet_ddqk_match_dbv;
-        //TH1F* h_jet_ddqk_match_pt;
-        //TH1F* h_jet_ddqk_match_pt_pass_l;
-        //TH1F* h_jet_ddqk_match_pt_pass_m;
-        //TH1F* h_jet_ddqk_match_pt_pass_t;
+
         TH1F* h_jet_energy;
         TH1F* h_jet_ht;
         TH1F* h_jet_ht_40;
+        TH2F* h_jet_calojet_ht;
+        TH2F* h_jet_calojet_ht_40;
+        TH1F* h_jet_diagnostics_lo;
+        TH1F* h_jet_diagnostics_hi;
 
         TH1F* h_calojet_pt[MAX_NJETS+1];
         TH1F* h_calojet_eta[MAX_NJETS+1];
         TH1F* h_calojet_phi[MAX_NJETS+1];
         TH2F* h_calojet_i_pt;
+        TH1F* h_calojet_ht_30;
         TH1F* h_calojet_ht_40;
-        TH1F* h_calojet_ht_m;
-
-        TH1F* h_hltcalojet_pt[MAX_NJETS+1];
-        TH1F* h_hltcalojet_eta[MAX_NJETS+1];
-        TH1F* h_hltcalojet_phi[MAX_NJETS+1];
-        TH1F* h_hltcalojet_ht_40;
-        TH2F* h_off_hlt_calojet_ht_40;
-        TH1F* h_calojet_htdiff_on_off;
-        TH1F* h_calojet_ht_dropped;
-
-        TH1F* h_hltcalojet_pairdr;
-        TH1F* h_hltcalojet_hasmatch;
-
-        TH1F* h_hltcalojet_matched_pt;
-        TH1F* h_hltcalojet_matched_eta;
-        TH1F* h_hltcalojet_matched_phi;
-
-        TH1F* h_hltcalojet_unmatched_pt;
-        TH1F* h_hltcalojet_unmatched_eta;
-        TH1F* h_hltcalojet_unmatched_phi;
+        TH1F* h_calojet_diagnostics_lo;
+        TH1F* h_calojet_diagnostics_hi;
 
         TH1F* h_jet_pairdphi;
         TH1F* h_jet_pairdr;
+
+        TH1F* h_min_hltcalo_pfjet_dr;
 
         TH1F* h_met;
         TH1F* h_metphi;
@@ -162,8 +147,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
         TH1F* h_thresh_csvtags;
         TH1F* h_thresh_hardcsvtags;
-//        TH1F* h_online_btags;
-//        TH1F* h_hard_online_btags;
 
         TH1F* h_nmuons[2];
         TH1F* h_nelectrons[2];
@@ -178,8 +161,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
         TH1F* h_leptons_iso[2][2];
 
         TH1F* h_n_reljettks;
-//        TH1F* h_n_relhlttks;
-//        TH2F* h_n_relhlttks_reljettks;
 
         TH1F* h_n_vertex_seed_tracks;
         TH1F* h_vertex_seed_track_chi2dof;
@@ -208,8 +189,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    //gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    temp_caloht_cut(cfg.getParameter<double>("temp_caloht_cut")),
+    require_two_good_leptons(cfg.getParameter<bool>("require_two_good_leptons"))
 {
     edm::Service<TFileService> fs;
 
@@ -298,58 +280,39 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_ncalojets40 = fs->make<TH1F>("h_ncalojets40", ";# of calojets with p_{T} > 40 GeV;entries", 30, 0, 30);
     h_nhltcalojets = fs->make<TH1F>("h_nhltcalojets", ";# of HLT calojets;entries", 30, 0, 30);
     h_nhltcalojets40 = fs->make<TH1F>("h_nhltcalojets40", ";# of HLT calojets with p_{T} > 40 GeV;entries", 30, 0, 30);
+    h_nhltbjets = fs->make<TH1F>("h_nhltbjets", ";# of HLT bjets;entries", 20, 0, 20);
+    h_nhltcalobjets = fs->make<TH1F>("h_nhltcalobjets", ";# of HLT CALO bjets;entries", 20, 0, 20);
+    h_nhltcalobjets_low = fs->make<TH1F>("h_nhltcalobjets_low", ";# of low-score HLT CALO bjets;entries", 20, 0, 20);
     for (int i = 0; i < MAX_NJETS+1; ++i) {
         TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
         h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
         h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
         h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
         h_jet_nseedtrack[i] = fs->make<TH1F>(TString::Format("h_jet_nseedtrack_%s", ijet.Data()), TString::Format(";jet #%s number of seed tracks;arb. units", ijet.Data()), 50, 0, 50);
-        h_calojet_pt[i] = fs->make<TH1F>(TString::Format("h_calojet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calojet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 800);
+        h_calojet_pt[i] = fs->make<TH1F>(TString::Format("h_calojet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calojet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
         h_calojet_eta[i] = fs->make<TH1F>(TString::Format("h_calojet_eta_%s", ijet.Data()), TString::Format(";#eta of calojet #%s (GeV);events/0.05", ijet.Data()), 120, 0, 6);
         h_calojet_phi[i] = fs->make<TH1F>(TString::Format("h_calojet_phi_%s", ijet.Data()), TString::Format(";#phi of calojet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
-        h_hltcalojet_pt[i] = fs->make<TH1F>(TString::Format("h_hltcalojet_pt_%s", ijet.Data()), TString::Format(";p_{T} of HLT calojet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 800);
-        h_hltcalojet_eta[i] = fs->make<TH1F>(TString::Format("h_hltcalojet_eta_%s", ijet.Data()), TString::Format(";#eta of HLT calojet #%s (GeV);events/0.05", ijet.Data()), 120, 0, 6);
-        h_hltcalojet_phi[i] = fs->make<TH1F>(TString::Format("h_hltcalojet_phi_%s", ijet.Data()), TString::Format(";#phi of HLT calojet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
     }
-    //h_jet_bhad_match_bscore = fs->make<TH1F>("h_jet_bhad_match_bscore", ";bscore of jets matched to gen b-hadrons;entries/bin", 100, 0, 1.0);
-    //h_jet_bhad_match_pt      = fs->make<TH1F>("h_jet_bhad_match_pt", ";p_{T} of jets matched to gen b-hadrons;entries/bin", 200, 0, 1000);
-    //h_jet_bhad_match_pt_pass_l = fs->make<TH1F>("h_jet_bhad_match_pt_pass_l", ";p_{T} of loose btagged jets matched to gen b-hadrons;entries/bin", 200, 0, 1000);
-    //h_jet_bhad_match_pt_pass_m = fs->make<TH1F>("h_jet_bhad_match_pt_pass_m", ";p_{T} of medium btagged jets matched to gen b-hadrons;entries/bin", 200, 0, 1000);
-    //h_jet_bhad_match_pt_pass_t = fs->make<TH1F>("h_jet_bhad_match_pt_pass_t", ";p_{T} of tightbtagged jets matched to gen b-hadrons;entries/bin", 200, 0, 1000);
-    //h_jet_ddqk_match_bscore = fs->make<TH1F>("h_jet_ddqk_match_bscore", ";bscore of jets matched to gen disp d-quarks;entries/bin", 100, 0, 1.0);
-    //h_jet_ddqk_match_dbv    = fs->make<TH1F>("h_jet_ddqk_match_dbv", ";d_{BV} of gen disp d-quarks matched to jets;entries/bin", 200, 0, 2.0);
-    //h_jet_ddqk_match_pt      = fs->make<TH1F>("h_jet_ddqk_match_pt", ";p_{T} of jets matched to gen disp d-quarks;entries/bin", 200, 0, 1000);
-    //h_jet_ddqk_match_pt_pass_l = fs->make<TH1F>("h_jet_ddqk_match_pt_pass_l", ";p_{T} of loose btagged jets matched to gen disp d-quarks;entries/bin", 200, 0, 1000);
-    //h_jet_ddqk_match_pt_pass_m = fs->make<TH1F>("h_jet_ddqk_match_pt_pass_m", ";p_{T} of medium btagged jets matched to gen disp d-quarks;entries/bin", 200, 0, 1000);
-    //h_jet_ddqk_match_pt_pass_t = fs->make<TH1F>("h_jet_ddqk_match_pt_pass_t", ";p_{T} of tight btagged jets matched to gen disp d-quarks;entries/bin", 200, 0, 1000);
     h_calojet_i_pt = fs->make<TH2F>("h_calojet_i_pt", ";calojet index;calojet pT (GeV)", 30, 0, 30, 200, 0, 1000);
-    h_calojet_ht_40 = fs->make<TH1F>("h_calojet_ht_40", ";H_{T} of calojets with p_{T} > 40 GeV (GeV);entries", 100, 0, 1000);
-    h_calojet_ht_m  = fs->make<TH1F>("h_calojet_ht_m", ";H_{T} of calojets matched to HLT jets w/ p_{T}>40GeV; entries", 100, 0, 1000);
-    h_hltcalojet_ht_40 = fs->make<TH1F>("h_hltcalojet_ht_40", ";H_{T} of HLT calojets with p_{T} > 40 GeV (GeV);entries", 100, 0, 1000);
-    h_off_hlt_calojet_ht_40 = fs->make<TH2F>("h_off_hlt_calojet_ht_40", ";H_{T} of calojets with p_{T} > 40 GeV; H_{T} of HLT calojets with p_{T} > 40 GeV", 100, 0, 1000, 100, 0, 1000);
-    h_calojet_htdiff_on_off = fs->make<TH1F>("h_calojet_htdiff_on_off", ";Online-Offline H_{T}(40) (GeV);entries", 100, 0, 500);
-    h_calojet_ht_dropped = fs->make<TH1F>("h_calojet_ht_dropped", ";Lost offline H_{T}(40) due to dropped jets; entries", 100, 0, 500);
-
-    h_hltcalojet_pairdr = fs->make<TH1F>("h_hltcalojet_pairdr", ";HLT calojet pair #DeltaR;entries", 100, 0, 6.3);
-    h_hltcalojet_hasmatch = fs->make<TH1F>("h_hltcalojet_hasmatch", ";HLT calojet matches to offline?; entries", 2, -0.1, 1.1);
-    h_hltcalojet_matched_pt  = fs->make<TH1F>("h_hltcalojet_matched_pt", ";p_{T} of HLT calojets w/ offline match (GeV);entries", 200, 0, 800);
-    h_hltcalojet_matched_eta = fs->make<TH1F>("h_hltcalojet_matched_eta", ";#eta of HLT calojets w/ offline match;entries", 60, 0, 3.0 );
-    h_hltcalojet_matched_phi = fs->make<TH1F>("h_hltcalojet_matched_phi", ";#phi of HLT calojets w/ offline match;entries", 63, -M_PI, M_PI);
-
-    h_hltcalojet_unmatched_pt  = fs->make<TH1F>("h_hltcalojet_unmatched_pt", ";p_{T} of HLT calojets w/o offline match (GeV);entries", 200, 0, 800);
-    h_hltcalojet_unmatched_eta = fs->make<TH1F>("h_hltcalojet_unmatched_eta", ";#eta of HLT calojets w/o offline match;entries", 60, 0, 3.0);
-    h_hltcalojet_unmatched_phi = fs->make<TH1F>("h_hltcalojet_unmatched_phi", ";#phi of HLT calojets w/o offline match;entries", 63, -M_PI, M_PI);
+    h_calojet_ht_30 = fs->make<TH1F>("h_calojet_ht_30", ";H_{T} of calojets with p_{T} > 30 GeV (GeV);entries", 150, 0, 1500);
+    h_calojet_ht_40 = fs->make<TH1F>("h_calojet_ht_40", ";H_{T} of calojets with p_{T} > 40 GeV (GeV);entries", 150, 0, 1500);
+    h_calojet_diagnostics_lo = fs->make<TH1F>("h_calojet_diagnostics_lo", ";calojet diagnostic code (low-HT);entries", 4,  -0.5, 3.5);
+    h_calojet_diagnostics_hi = fs->make<TH1F>("h_calojet_diagnostics_hi", ";calojet diagnostic code (high-HT);entries", 4, -0.5, 3.5);
 
     h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
-    h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);entries", 100, 0, 1000);
-    h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;entries", 100, 0, 1000);
+    h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets with p_{T} > 30 GeV (GeV);entries", 150, 0, 1500);
+    h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;entries", 150, 0, 1500);
+    h_jet_calojet_ht = fs->make<TH2F>("h_jet_calojet_ht", ";H_{T} of PFJets with p_{T} > 30GeV;H_{T} of CaloJets with p_{T} > 30GeV", 150, 0, 1500, 150, 0, 1500);
+    h_jet_calojet_ht_40 = fs->make<TH2F>("h_jet_calojet_ht_40", ";H_{T} of PFJets with p_{T} > 40GeV;H_{T} of CaloJets with p_{T} > 40GeV", 150, 0, 1500, 150, 0, 1500);
+    h_jet_diagnostics_lo = fs->make<TH1F>("h_jet_diagnostics_lo", ";jet diagnostic code (low-HT);entries",  4, -0.5, 3.5);
+    h_jet_diagnostics_hi = fs->make<TH1F>("h_jet_diagnostics_hi", ";jet diagnostic code (high-HT);entries" ,4, -0.5, 3.5);
 
     h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
     h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.063", 100, 0, 6.3);
 
+    h_min_hltcalo_pfjet_dr = fs->make<TH1F>("h_min_hltcalo_pfjet_dr", ";#Delta R between HLT CaloJets and Offline PFJets;entries", 82, -0.2, 0.8);
+
     h_n_reljettks = fs->make<TH1F>("h_n_reljettks", ";# of jettks w/ |#eta| < 2 and p_{T} > 1;entries/bin", 80, 0, 80);
-//    h_n_relhlttks = fs->make<TH1F>("h_n_relhlttks", ";# of hlttks w/ |#eta| < 2 and p_{T} > 1;entries/bin", 80, 0, 80);
-//    h_n_relhlttks_reljettks = fs->make<TH2F>("h_n_relhlttks_reljettks", ";# of hlttks w/ |#eta| < 2 and p_{T} > 1;# of jettks w/ same reqs", 80, 0, 80, 80, 0, 80);
 
     h_n_vertex_seed_tracks = fs->make<TH1F>("h_n_vertex_seed_tracks", ";# vertex seed tracks;events", 100, 0, 100);
     h_vertex_seed_track_chi2dof = fs->make<TH1F>("h_vertex_seed_track_chi2dof", ";vertex seed track #chi^{2}/dof;tracks/1", 10, 0, 10);
@@ -398,8 +361,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
     h_thresh_csvtags = fs->make<TH1F>("h_thresh_csvtags", ";# of loose CSV btags; entries", 15, 0, 15);
     h_thresh_hardcsvtags = fs->make<TH1F>("h_thresh_hardcsvtags", ";# of loose CSV btags w/ p_{T} > 80GeV; entries", 15, 0, 15);
-//    h_online_btags = fs->make<TH1F>("h_online_btags", ";# of offline jets tagged @ HLT; entries", 15, 0, 15);
-//    h_hard_online_btags = fs->make<TH1F>("h_hard_online_btags", ";# of offline jets tagged @ HLT w/ online p_{T} > 80GeV; entries", 15, 0, 15);
 
     const char* lep_ex[2] = {"any", "selected"};
     for (int i = 0; i < 2; ++i) {
@@ -428,25 +389,80 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_w->Fill(w);
     h_eventid->Fill(event.id().event());
 
-    bool has_nice_muon = false;
-    bool has_nice_ele  = false;
-    for (size_t ilep = 0; ilep < mevent->nlep(); ++ilep) {
-        if (mevent->is_electron(ilep)) {
-            if (mevent->lep_pt(ilep) > 30.0) {
-                has_nice_ele = true;
-            }
-        }
-        else if (mevent->lep_iso[ilep] < 0.15 and mevent->lep_pt(ilep) > 27.0) {
-            has_nice_muon = true;
-        }
-    }
-    if ((not has_nice_muon) or (not has_nice_ele)) return;
-
-
-    int nhltcalojets = mevent->hlt_calo_jet_pt.size();
     int ncalojets    = mevent->calo_jet_pt.size();
+    int raw_nhltcalojets = mevent->hlt_calo_jet_pt.size(); // Has a much wider eta range than what we'll ultimately want
 
     //////////////////////////////////////////////////////////////////////////////
+
+    // (Temporarily?) moving this earlier in the code for **reasons**
+    int nhltcalojets   = 0;
+    int nhltcalojets40 = 0;
+    float hltcalojet_ht_40 = 0.0;
+    for (int i=0; i < raw_nhltcalojets; ++i) {
+        if (fabs(mevent->hlt_calo_jet_eta[i]) > 2.5) continue;
+        float min_hltcalo_pfjet_dr = 8.0;
+        nhltcalojets++;
+
+        if (mevent->hlt_calo_jet_pt[i] > 40.0) {
+            nhltcalojets40++;
+            hltcalojet_ht_40 += mevent->hlt_calo_jet_pt[i];
+        }
+        for (int j=0; j < (int)(mevent->jet_pt.size()); j++) {
+            float temp_dR = reco::deltaR(mevent->jet_eta[j], mevent->jet_phi[j], mevent->hlt_calo_jet_eta[i], mevent->hlt_calo_jet_phi[i]);
+            if (temp_dR < min_hltcalo_pfjet_dr) { min_hltcalo_pfjet_dr = temp_dR; }
+        }
+        h_min_hltcalo_pfjet_dr->Fill( (min_hltcalo_pfjet_dr < 0.8 ? min_hltcalo_pfjet_dr : -0.19), w);
+    }
+
+
+    float temp_calojet_ht = 0.0; // ugh...
+    for (int i=0; i < ncalojets; ++i) {
+        if (fabs(mevent->calo_jet_eta[i]) > 2.5) continue;
+        if (mevent->calo_jet_pt[i] > 40.0) { temp_calojet_ht += mevent->calo_jet_pt[i]; }
+    }
+    if (not (temp_calojet_ht > temp_caloht_cut)) return;
+
+    if (require_two_good_leptons) {
+        bool has_nice_muon = false;
+        bool has_nice_ele  = false;
+        for (size_t ilep = 0; ilep < mevent->nlep(); ++ilep) {
+            if (mevent->is_electron(ilep)) {
+                float ele_eta = mevent->lep_eta[ilep]; 
+                float ele_pt  = mevent->lep_pt(ilep);
+                if (fabs(ele_eta) > 2.4 or ele_pt < 30.0) continue;
+                else if (fabs(ele_eta) < 1.479) {
+                    if (mevent->lep_iso[ilep] < (0.0287+(0.506/ele_pt))) {
+                        has_nice_ele = true;
+                    }
+                }
+                else {  
+                    if (mevent->lep_iso[ilep] < (0.0445+(0.963/ele_pt))) {
+                        has_nice_ele = true;
+                    }
+                }
+            }
+            else if (mevent->lep_iso[ilep] < 0.15 and mevent->lep_pt(ilep) > 30.0 and fabs(mevent->lep_eta[ilep]) < 2.4) {
+                has_nice_muon = true;
+            }
+        }
+
+        //if ((not has_nice_muon) or (not has_nice_ele)) return;
+        if ((not has_nice_muon) or (not has_nice_ele) or (mevent->nbtags(1) < 2)) return;
+    }
+
+
+//    bool passes_dilepton = false;
+//    std::vector<int> dilepton_trigs = {mfv::b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL,
+//                                       mfv::b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL,
+//                                       mfv::b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ,
+//                                       mfv::b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ};
+//    for (auto trig : dilepton_trigs) {
+//        if (mevent->pass_hlt(trig)) {
+//            passes_dilepton = true;
+//            break;
+//        }
+//    }
+//    if (not passes_dilepton) return;
 
     h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
     h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
@@ -555,23 +571,42 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_njets->Fill(mevent->njets(), w);
     h_njets20->Fill(mevent->njets(20), w);
 
-
-    if (mevent->njets() == 0 or ncalojets == 0) return;
+    int n_good_lo_pfjets = 0;
+    int n_good_hi_pfjets = 0;
     for (int i = 0; i < MAX_NJETS; ++i) {
-        if (mevent->jet_bdisc_csv[i] < 0.9)
-            continue;
         h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
-        h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
+        h_jet_eta[i]->Fill(mevent->nth_jet_eta(i), w);
         h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
+        
+        if (fabs(mevent->nth_jet_eta(i)) < 2.0 and mevent->nth_jet_pt(i) > 52.0) {
+            n_good_lo_pfjets++;
+            if (mevent->nth_jet_pt(i) > 72.0) {
+                n_good_hi_pfjets++;
+            }
+        }
     }
 
+    float calojet_ht_30 = 0.0;
     float calojet_ht_40 = 0.0;
     int   ncalojets40 = 0;
+    int   n_good_lo_calojets = 0;
+    int   n_good_hi_calojets = 0;
     for (int i=0; i < ncalojets; ++i) {
         if (fabs(mevent->calo_jet_eta[i]) > 2.5) continue;
         if (mevent->calo_jet_pt[i] > 40.0) {
             ncalojets40++;
             calojet_ht_40 += mevent->calo_jet_pt[i];
+        }
+        if (mevent->calo_jet_pt[i] > 30.0) {
+            calojet_ht_30 += mevent->calo_jet_pt[i];
+        }
+
+
+        if (fabs(mevent->calo_jet_eta[i]) < 2.0 and mevent->calo_jet_pt[i] > 40.0) {
+            n_good_lo_calojets++;
+            if (mevent->calo_jet_pt[i] > 60.0) {
+                n_good_hi_calojets++;
+            }
         }
 
         h_calojet_pt[MAX_NJETS]->Fill(mevent->calo_jet_pt[i], w);
@@ -585,42 +620,37 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_calojet_i_pt->Fill(i, mevent->calo_jet_pt[i],       w);
     }
 
-    int nhltcalojets40 = 0;
-    float hltcalojet_ht_40 = 0.0;
-    for (int i=0; i < nhltcalojets; ++i) {
-        if (fabs(mevent->hlt_calo_jet_eta[i]) > 2.5) continue;
-        if (mevent->hlt_calo_jet_pt[i] > 40.0) {
-            nhltcalojets40++;
-            hltcalojet_ht_40 += mevent->hlt_calo_jet_pt[i];
-        }
-
-        h_hltcalojet_pt[MAX_NJETS]->Fill(mevent->hlt_calo_jet_pt[i],         w);
-        h_hltcalojet_eta[MAX_NJETS]->Fill(fabs(mevent->hlt_calo_jet_eta[i]), w);
-        h_hltcalojet_phi[MAX_NJETS]->Fill(mevent->hlt_calo_jet_phi[i],       w);
-
-        if (i >= MAX_NJETS) continue;
-        h_hltcalojet_pt[i]->Fill(mevent->hlt_calo_jet_pt[i],         w);
-        h_hltcalojet_eta[i]->Fill(fabs(mevent->hlt_calo_jet_eta[i]), w);
-        h_hltcalojet_phi[i]->Fill(mevent->hlt_calo_jet_phi[i],       w);
-    }
-
     h_ncalojets->Fill(ncalojets, w);
     h_ncalojets40->Fill(ncalojets40, w);
 
     h_nhltcalojets->Fill(nhltcalojets, w);
     h_nhltcalojets40->Fill(nhltcalojets40, w);
 
+    h_nhltbjets->Fill(mevent->hlt_pfforbtag_jet_pt.size(), w);
+    h_nhltcalobjets->Fill(mevent->hlt_calo_b_jet_pt.size(), w);
+    h_nhltcalobjets_low->Fill(mevent->hlt_low_calo_b_jet_pt.size(), w);
+
+    int calojet_diag_code_lo = (1 * (calojet_ht_30 > 430)) + (2 * (n_good_lo_calojets >= 2));
+    int calojet_diag_code_hi = (1 * (calojet_ht_30 > 650)) + (2 * (n_good_hi_calojets >= 2));
+
+    int jet_diag_code_lo     = (1 * (mevent->jet_ht(30) > 560)) + (2 * (n_good_lo_pfjets >= 2));
+    int jet_diag_code_hi     = (1 * (mevent->jet_ht(30) > 770)) + (2 * (n_good_hi_pfjets >= 2));
+
+    h_calojet_ht_30->Fill(fabs(calojet_ht_30), w);
     h_calojet_ht_40->Fill(fabs(calojet_ht_40), w);
-    h_hltcalojet_ht_40->Fill(fabs(hltcalojet_ht_40), w);
-    h_off_hlt_calojet_ht_40->Fill(calojet_ht_40, hltcalojet_ht_40, w);
-    h_calojet_htdiff_on_off->Fill(hltcalojet_ht_40 - calojet_ht_40, w);
-    h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
+    h_jet_ht->Fill(mevent->jet_ht(30), w);
     h_jet_ht_40->Fill(mevent->jet_ht(40), w);
+
+    h_jet_calojet_ht->Fill(mevent->jet_ht(30), fabs(calojet_ht_30), w);
+    h_jet_calojet_ht_40->Fill(mevent->jet_ht(40), fabs(calojet_ht_40), w);
+
+    h_calojet_diagnostics_lo->Fill(calojet_diag_code_lo, w);
+    h_calojet_diagnostics_hi->Fill(calojet_diag_code_hi, w);
+    h_jet_diagnostics_lo->Fill(jet_diag_code_lo, w);
+    h_jet_diagnostics_hi->Fill(jet_diag_code_hi, w);
 
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
         if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
-            continue;
-        if (mevent->jet_bdisc_csv[ijet] < 0.9)
             continue;
         h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
         h_jet_eta[MAX_NJETS]->Fill(fabs(mevent->jet_eta[ijet]), w);
@@ -634,58 +664,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
 
     }
-
-    float calojet_ht_m = 0.0;
-    float calojet_ht_dropped = 0.0;
-    std::vector<TVector3> matched_jets;
-    std::vector<TVector3> offline_friends;
-    std::vector<TVector3> unmatched_jets;
-    for (int i = 0; i < nhltcalojets; i++) {
-        for (int j=i+1; j < nhltcalojets; j++) {
-            h_hltcalojet_pairdr->Fill(reco::deltaR(mevent->hlt_calo_jet_eta[i], mevent->hlt_calo_jet_phi[i], mevent->hlt_calo_jet_eta[j], mevent->hlt_calo_jet_phi[j]), w);
-        }
-
-        bool matches_offline = false;
-        if (fabs(mevent->hlt_calo_jet_eta[i]) > 2.5) continue;
-        for (int j=0; j < ncalojets; j++) {
-            float on_off_dR = reco::deltaR(mevent->hlt_calo_jet_eta[i], mevent->hlt_calo_jet_phi[i], mevent->calo_jet_eta[j], mevent->calo_jet_phi[j]);
-            if (on_off_dR < 0.2) {
-                matches_offline = true;
-                TVector3 tmpvec;
-                tmpvec.SetPtEtaPhi(mevent->calo_jet_pt[j], mevent->calo_jet_eta[j], mevent->calo_jet_phi[j]);
-                offline_friends.push_back(tmpvec);
-
-                calojet_ht_m += mevent->calo_jet_pt[j];
-                if (mevent->calo_jet_pt[j] < 40.0) calojet_ht_dropped += mevent->calo_jet_pt[j];
-                break;
-            }
-        }
-
-        h_hltcalojet_hasmatch->Fill((int)matches_offline, w);
-
-        if (matches_offline) {
-            h_hltcalojet_matched_pt->Fill(mevent->hlt_calo_jet_pt[i], w);
-            h_hltcalojet_matched_eta->Fill(fabs(mevent->hlt_calo_jet_eta[i]), w);
-            h_hltcalojet_matched_phi->Fill(mevent->hlt_calo_jet_phi[i], w);
-            
-            TVector3 tmpvec;
-            tmpvec.SetPtEtaPhi(mevent->hlt_calo_jet_pt[i], mevent->hlt_calo_jet_eta[i], mevent->hlt_calo_jet_phi[i]);
-            matched_jets.push_back(tmpvec);
-
-        }
-        else {
-            h_hltcalojet_unmatched_pt->Fill(mevent->hlt_calo_jet_pt[i], w);
-            h_hltcalojet_unmatched_eta->Fill(fabs(mevent->hlt_calo_jet_eta[i]), w);
-            h_hltcalojet_unmatched_phi->Fill(mevent->hlt_calo_jet_phi[i], w);
-
-            TVector3 tmpvec;
-            tmpvec.SetPtEtaPhi(mevent->hlt_calo_jet_pt[i], mevent->hlt_calo_jet_eta[i], mevent->hlt_calo_jet_phi[i]);
-            unmatched_jets.push_back(tmpvec);
-        }
-    }
-
-    h_calojet_ht_m->Fill(calojet_ht_m, w);
-    h_calojet_ht_dropped->Fill(calojet_ht_dropped, w);
 
     for (int i = 0; i < 2; ++i) {
         h_nmuons[i]->Fill(mevent->nmu(i), w);
@@ -744,31 +722,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                 }
             }
         }
-
-//        for (size_t ihlt = 0; ihlt < mevent->hlt_pfforbtag_jet_pt.size(); ihlt++) {
-//            float off_pt = mevent->jet_pt[ijet];
-//            float off_eta = mevent->jet_eta[ijet];
-//            float off_phi = mevent->jet_phi[ijet];
-//            float off_deepjet = mevent->jet_bdisc_deepflav[ijet];
-//            float hlt_pt  = mevent->hlt_pfforbtag_jet_pt[ihlt];
-//            float hlt_eta = mevent->hlt_pfforbtag_jet_eta[ihlt];
-//            float hlt_phi = mevent->hlt_pfforbtag_jet_phi[ihlt];
-//
-//            if (reco::deltaR(off_eta, off_phi, hlt_eta, hlt_phi) < 0.14) {
-//                // Being in this loop means that our offline jet is tagged @ HLT
-//                bool reject_btag = jmt::UncertTools::reject_btag_hlt(off_deepjet, off_pt, rand_x, 0, 2017);
-//                if (study_hlt_btagging and reject_btag) break;
-//
-//                n_online_btags++;
-//                if (hlt_pt > 80.0) n_hard_online_btags++;
-//            }
-//        }
     }
 
     h_thresh_csvtags->Fill(thresh_csvtags, w);
     h_thresh_hardcsvtags->Fill(thresh_hardcsvtags, w);
-//    h_online_btags->Fill(n_online_btags, w);
-//    h_hard_online_btags->Fill(n_hard_online_btags, w);
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -779,15 +736,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         if (fabs(mevent->jet_track_qpt[itk]) > 1.0 and fabs(mevent->jet_track_eta[itk]) < 2.0) nreljettks++;
     }
 
-    // Count number of relevant hlttks in event
-    //int nrelhlttks = 0;
-    //for (size_t itk = 0; itk < mevent->hlt_tk_pt.size(); ++itk) {
-    //    if (fabs(mevent->hlt_tk_pt[itk]) > 1.0 and fabs(mevent->hlt_tk_eta[itk]) < 2.0) nrelhlttks++;
-    //}
-
     h_n_reljettks->Fill(nreljettks, w);
-    //h_n_relhlttks->Fill(nrelhlttks, w);
-    //h_n_relhlttks_reljettks->Fill(nrelhlttks, nreljettks, w);
 
     const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
     std::vector<int> track_which_jet;

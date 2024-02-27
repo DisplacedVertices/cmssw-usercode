@@ -48,7 +48,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
-        samples = Samples.BTagCSV_data_samples_2017 + Samples.DisplacedJet_data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        #samples = Samples.BTagCSV_data_samples_2017 + Samples.DisplacedJet_data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        samples = Samples.BTagCSV_data_samples_2016APV
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     elif use_MET_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)

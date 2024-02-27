@@ -1,13 +1,17 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV1'
-lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
+#ntuple_version_ = 'ULV9_dileptrig'
+#ntuple_version_ = 'ULV9_trigstudy_'
+#ntuple_version_ = 'UL16APVV9_trigstudy_'
+ntuple_version_ = 'ULV9'
+lsp_id = -1 # should do that in a smarter way would be -1 if not MET
 use_btag_triggers = True
 use_MET_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
+    lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
     ntuple_version_ += "MET"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
@@ -90,7 +94,8 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = False, **kwargs)
+        #setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
 ########################################################################
 
@@ -194,7 +199,7 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
-    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
+    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask:#, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
@@ -273,8 +278,8 @@ def miniaod_ntuple_process(settings):
 
     # change made to use corrected MET
     #process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    if not settings.is_mc:
-      process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
+    #if not settings.is_mc:
+    #  process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
     process.mfvTriggerFloats.year = settings.year
 
@@ -301,16 +306,16 @@ def miniaod_ntuple_process(settings):
 
     # MET correction and filters
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
-    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    #from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
-    runMetCorAndUncFromMiniAOD(process,
-                               isData = not settings.is_mc,
-                               )
+    #runMetCorAndUncFromMiniAOD(process,
+    #                           isData = not settings.is_mc,
+    #                           )
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
                          process.BadPFMuonFilterUpdateDz *
-                         process.fullPatMetSequence *
+                         #process.fullPatMetSequence *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
@@ -344,7 +349,7 @@ def ntuple_process(settings):
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
-            magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+            magic = "event_filter = 'bjets OR displaced dijet'"
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]

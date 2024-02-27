@@ -5,7 +5,7 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
+//#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -49,8 +49,8 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const edm::EDGetTokenT<reco::CaloJetCollection> calo_jets_token;
   const edm::EDGetTokenT<double> rho_token;
-  const bool use_met;
-  const edm::EDGetTokenT<pat::METCollection> met_token;
+  //const bool use_met;
+  //const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const bool use_vertex_seed_tracks;
@@ -89,8 +89,8 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     calo_jets_token(consumes<reco::CaloJetCollection>(cfg.getParameter<edm::InputTag>("calo_jets_src"))),
     rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
-    use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
-    met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
+    //use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
+    //met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     use_vertex_seed_tracks(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src").label() != ""),
@@ -360,7 +360,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  if (use_met) {
+  //if (use_met) {
     // getting MET using original source
     //edm::Handle<pat::METCollection> mets;
     //event.getByToken(met_token, mets);
@@ -369,19 +369,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     //mevent->mety = met.py();
 
     // getting corrected MET from TriggerFloats
-    mevent->pass_metfilters = triggerfloats->pass_metfilters;
+    //mevent->pass_metfilters = triggerfloats->pass_metfilters;
 
-    double met_pt = triggerfloats->met_pt;
-    double met_phi = triggerfloats->met_phi;
-    mevent->metx = met_pt*std::cos(met_phi);
-    mevent->mety = met_pt*std::sin(met_phi);
-    mevent->met_calo = triggerfloats->met_pt_calo;
+    //double met_pt = triggerfloats->met_pt;
+    //double met_phi = triggerfloats->met_phi;
+    //mevent->metx = met_pt*std::cos(met_phi);
+    //mevent->mety = met_pt*std::sin(met_phi);
+    //mevent->met_calo = triggerfloats->met_pt_calo;
 
-    double metNoMu_pt = triggerfloats->met_pt_nomu;
-    double metNoMu_phi = triggerfloats->met_phi_nomu;
-    mevent->metNoMux = metNoMu_pt*std::cos(metNoMu_phi);
-    mevent->metNoMuy = metNoMu_pt*std::sin(metNoMu_phi);
-  }
+    //double metNoMu_pt = triggerfloats->met_pt_nomu;
+    //double metNoMu_phi = triggerfloats->met_phi_nomu;
+    //mevent->metNoMux = metNoMu_pt*std::cos(metNoMu_phi);
+    //mevent->metNoMuy = metNoMu_pt*std::sin(metNoMu_phi);
+  //}
 
   //////////////////////////////////////////////////////////////////////
   
@@ -512,6 +512,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
      mevent->hlt_pfforbtag_jet_energy.push_back(bp4.E());
   }
 
+  for (const TLorentzVector& cb4 : triggerfloats->hltcalobjets) {
+     mevent->hlt_calo_b_jet_pt.push_back(cb4.Pt());
+     mevent->hlt_calo_b_jet_eta.push_back(cb4.Eta());
+     mevent->hlt_calo_b_jet_phi.push_back(cb4.Phi());
+     mevent->hlt_calo_b_jet_energy.push_back(cb4.E());
+  }
+
+  for (const TLorentzVector& lp4 : triggerfloats->hltcalobjets_low) {
+     mevent->hlt_low_calo_b_jet_pt.push_back(lp4.Pt());
+     mevent->hlt_low_calo_b_jet_eta.push_back(lp4.Eta());
+     mevent->hlt_low_calo_b_jet_phi.push_back(lp4.Phi());
+     mevent->hlt_low_calo_b_jet_energy.push_back(lp4.E());
+  }
 
   for (const TLorentzVector& ap4 : triggerfloats->hltcalojets_lowpt_fewprompt) {
      mevent->hlt_calo_jet_lowpt_fewprompt_pt.push_back(ap4.Pt());
@@ -575,7 +588,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     const auto pfIso = electron.pfIsolationVariables();
     const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-    const float iso = pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA) / electron.pt();
+    const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
 
     mevent->lep_push_back(MFVEvent::encode_el_id(id), electron, *electron.gsfTrack(), iso, triggerfloats->hltelectrons, beamspot->position(electron.gsfTrack()->vz()), primary_vertex_position);
   }

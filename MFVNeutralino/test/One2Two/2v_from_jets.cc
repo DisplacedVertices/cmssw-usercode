@@ -128,7 +128,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeULV1Bm";
+    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeULV4_trig_Bm_BjetAgnostic_P1p00";
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
@@ -139,58 +139,58 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   const char* samples[nbkg];
   float       weights[nbkg];
 
+  std::cout << "The year is: " << p.year() << std::endl;
+
   // FIXME these weights are based off of the number of finished ntuples (which is
   // close to, but not necessarily 100% of ntuples). When it comes time to do the
   // final studies, we'll need to make sure ALL ntuples/minitrees finish, and then
   // update some of the weights
   samples[0]  = "mfv_neu_tau001000um_M0800_2017";  weights[0]  = 0.00083;
-  samples[1]  = "qcdht0200_2017";                  weights[1]  = 1148.46;
-  samples[2]  = "qcdht0300_2017";                  weights[2]  = 251.99;
-  samples[3]  = "qcdht0500_2017";                  weights[3]  = 135.6;
-  samples[4]  = "qcdht0700_2017";                  weights[4]  = 6.24;
-  samples[5]  = "qcdht1000_2017";                  weights[5]  = 2.96;
-  samples[6]  = "qcdht1500_2017";                  weights[6]  = 0.54;
-  samples[7]  = "qcdht2000_2017";                  weights[7]  = 0.17;
-  samples[8]  = "ttbar_2017";                      weights[8]  = 0.14;
-  samples[9]  = "qcdht0200_2018";                  weights[9]  = 1658.9;
-  samples[10] = "qcdht0200ext_2018";               weights[10] = 1658.9;
-  samples[11] = "qcdht0300_2018";                  weights[11] = 482.34;
-  samples[12] = "qcdht0500_2018";                  weights[12] = 30.62;
-  samples[13] = "qcdht0700_2018";                  weights[13] = 8.01;
-  samples[14] = "qcdht1000_2018";                  weights[14] = 6.86;
-  samples[15] = "qcdht1500_2018";                  weights[15] = 0.56;
-  samples[16] = "qcdht2000_2018";                  weights[16] = 0.29;
-  samples[17] = "ttbar_2018";                      weights[17] = 0.15;
-  samples[18] = "mfv_neu_tau001000um_M0400_2018";  weights[18] = 0.00119;
-  samples[19] = "JetHT2017B";                      weights[19] = 1;
-  samples[20] = "JetHT2017C";                      weights[20] = 1;
-  samples[21] = "JetHT2017D";                      weights[21] = 1;
-  samples[22] = "JetHT2017E";                      weights[22] = 1;
-  samples[23] = "JetHT2017F";                      weights[23] = 1;
-  samples[24] = "JetHT2018A";                      weights[24] = 1;
-  samples[25] = "JetHT2018B";                      weights[25] = 1;
-  samples[26] = "JetHT2018C";                      weights[26] = 1;
-  samples[27] = "JetHT2018D";                      weights[27] = 1;
+  samples[1]  = "qcdht0300_2017";                  weights[1]  = 290.26;
+  samples[2]  = "qcdht0500_2017";                  weights[2]  = 24.29;
+  samples[3]  = "qcdht0700_2017";                  weights[3]  = 6.55;
+  samples[4]  = "qcdht1000_2017";                  weights[4]  = 3.86;
+  samples[5]  = "qcdht1500_2017";                  weights[5]  = 0.42;
+  samples[6]  = "ttbar_2017";                      weights[6]  = 0.54;
+  samples[7]  = "qcdht0200_2018";                  weights[7]  = 1710.53;
+  samples[8]  = "qcdht0300_2018";                  weights[8]  = 381.08;
+  samples[9]  = "qcdht0500_2018";                  weights[9]  = 33.30;
+  samples[10] = "qcdht0700_2018";                  weights[10] = 9.11;
+  samples[11] = "qcdht1000_2018";                  weights[11] = 5.00;
+  samples[12] = "qcdht1500_2018";                  weights[12] = 0.62;
+  samples[13] = "qcdht2000_2018";                  weights[13] = 0.26;
+  samples[14] = "ttbar_2018";                      weights[14] = 0.18;
+  samples[15] = "mfv_neu_tau001000um_M0400_2018";  weights[15] = 0.00119;
+  samples[16] = "JetHT2017B";                      weights[16] = 1;
+  samples[17] = "JetHT2017C";                      weights[17] = 1;
+  samples[18] = "JetHT2017D";                      weights[18] = 1;
+  samples[19] = "JetHT2017E";                      weights[19] = 1;
+  samples[20] = "JetHT2017F";                      weights[20] = 1;
+  samples[21] = "JetHT2018A";                      weights[21] = 1;
+  samples[22] = "JetHT2018B";                      weights[22] = 1;
+  samples[23] = "JetHT2018C";                      weights[23] = 1;
+  samples[24] = "JetHT2018D";                      weights[24] = 1;
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
-    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
-    else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 17; if (p.inject_signal()) ibkg_end = 18; }
-    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 17; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 18;} }
+    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  6; if (p.inject_signal()) ibkg_begin = 0; }
+    else if (p.year() == "2018")    { ibkg_begin =  7; ibkg_end = 14; if (p.inject_signal()) ibkg_end = 15; }
+    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 14; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 15;} }
     else { fprintf(stderr, "bad year"); exit(1); }
-  } else {
-    if (p.year() == "2017")         { ibkg_begin = 19; ibkg_end = 23; }
-    else if (p.year() == "2018")    { ibkg_begin = 24; ibkg_end = 27; }
-    else if (p.year() == "2017p8")  { ibkg_begin = 19; ibkg_end = 27; }
-    else if (p.year() == "2017B")   { ibkg_begin = 19; ibkg_end = 19; }
-    else if (p.year() == "2017C")   { ibkg_begin = 20; ibkg_end = 20; }
-    else if (p.year() == "2017D")   { ibkg_begin = 21; ibkg_end = 21; }
-    else if (p.year() == "2017E")   { ibkg_begin = 22; ibkg_end = 22; }
-    else if (p.year() == "2017F")   { ibkg_begin = 23; ibkg_end = 23; }
-    else if (p.year() == "2018A")   { ibkg_begin = 24; ibkg_end = 24; }
-    else if (p.year() == "2018B")   { ibkg_begin = 25; ibkg_end = 25; }
-    else if (p.year() == "2018C")   { ibkg_begin = 26; ibkg_end = 26; }
-    else if (p.year() == "2018D")   { ibkg_begin = 27; ibkg_end = 27; }
+  } 
+  else {
+    if (p.year() == "2017")         { ibkg_begin = 16; ibkg_end = 20; }
+    else if (p.year() == "2018")    { ibkg_begin = 21; ibkg_end = 24; }
+    else if (p.year() == "2017p8")  { ibkg_begin = 16; ibkg_end = 24; }
+    else if (p.year() == "2017B")   { ibkg_begin = 16; ibkg_end = 16; }
+    else if (p.year() == "2017C")   { ibkg_begin = 17; ibkg_end = 17; }
+    else if (p.year() == "2017D")   { ibkg_begin = 18; ibkg_end = 18; }
+    else if (p.year() == "2017E")   { ibkg_begin = 19; ibkg_end = 19; }
+    else if (p.year() == "2017F")   { ibkg_begin = 20; ibkg_end = 20; }
+    else if (p.year() == "2018A")   { ibkg_begin = 21; ibkg_end = 21; }
+    else if (p.year() == "2018B")   { ibkg_begin = 22; ibkg_end = 22; }
+    else if (p.year() == "2018C")   { ibkg_begin = 23; ibkg_end = 23; } 
+    else if (p.year() == "2018D")   { ibkg_begin = 24; ibkg_end = 24; }
     else { fprintf(stderr, "bad year"); exit(1); }
   }
 
@@ -278,6 +278,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     TFile* f = TFile::Open(fn);
     if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
 
+    std::cout << tree_path << std::endl;
     TTree* t = (TTree*)f->Get(tree_path);
     if (!t) { fprintf(stderr, "bad tree"); exit(1); }
 

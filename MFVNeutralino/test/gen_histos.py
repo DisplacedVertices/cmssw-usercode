@@ -3,7 +3,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
 
-sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017', 'ntupleulv1am', 5)
+sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017', 'ntupleulv4bm', 5)
+#sample_files(process, 'mfv_neu_tau001000um_M0300_2017', 'ntupleulv4bm', 5)
 tfileservice(process, 'gen_histos.root')
 file_event_from_argv(process)
 

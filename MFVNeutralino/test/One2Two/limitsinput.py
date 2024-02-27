@@ -10,19 +10,18 @@ set_style()
 class Params(object):
     def __init__(self):
         # Currently, bin size is 0.004, so make self.bins multiples of that value
-        self.step = 0.004
-        self.ns   = 20
-        self.bins = to_array(0., 0.040+(self.step*self.ns), 0.10+(self.step*self.ns), 4.)
+        self.bins = to_array(0., 0.04, 0.07, 4.)
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
-        self.years = '2016', '2017', '2018'
+        self.years = '2017', '2018'
+        #self.years = '2016', '2017', '2018'
         self.nyears = len(self.years)
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_2015p6, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
         self.fn = 'limitsinput.root'
-        self.l1eeprefiring_2017 = True # whether to simulate L1 EE prefiring in 2017
-        self.hem1516_2018 = True # whether to simulate the HEM 15/16 failure in for part of 2018
+        self.l1eeprefiring_2017 = False # whether to simulate L1 EE prefiring in 2017
+        self.hem1516_2018 = False # whether to simulate the HEM 15/16 failure in for part of 2018
 
 gp = Params()
 
@@ -238,6 +237,9 @@ def sig_uncert_alphas(name_year):
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
 
+    if kind.startswith('ggH'):
+        kind = 'mfv_stopdbardbar'
+
     fcns = {
             ('mfv_neu', 300, '2017') : lambda x: 8.412357E-02 + -1.492608E-04*x if x < 500 else 1.366428E-02 + -8.342191E-06*x if x < 1000 else 5.163025E-03,
             ('mfv_stopdbardbar', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
@@ -445,6 +447,8 @@ def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
                                         (1.835, 1.17, 0.667, 0.249, 0.23),
                                         (1.182, 0.838, 0.507, 0.174, 0.159), ), }, }
 
+    if kind.startswith('ggH'):
+        kind = 'mfv_stopdbardbar'
     vtm = trackmover[kind][year]
 
     # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
@@ -481,7 +485,8 @@ def sig_uncert_2017p8(name_year, debug=False):
         for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
             uncerts += [sig_trackmover_per_event_unc(name_year, debug, unc) / 100.]
 
-    uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
+    uncerts += [x/100. for x in (3,19,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
+    #uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
 
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
     if debug:
@@ -492,7 +497,7 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = ''
-    trees = '/uscms_data/d3/shogan/crab_dirs/MiniTreeULV1Bm/*.root'
+    trees = '/uscms_data/d3/shogan/crab_dirs/MiniTreeULV4_trig_Bm_BjetAgnostic_P1p00/*tau*.root'
     title = []
     sigs = {}
 
@@ -504,9 +509,12 @@ def make_signals_2017p8(f, name_list):
         sigs.update({os.path.basename(fn).replace('.root', '') : [fn] for fn in sorted(glob(trees))}) # overrides scanpack entries
     name_list['title'] = name_list.get('title', '') + '+' + '+'.join(title)
 
+    print name_list
+
     nsigs = len(sigs)
     for isig, (name_year, fns) in enumerate(sigs.iteritems()):
-        if isig%(nsigs/20) == 0:
+        iprint = 2 # Print status every N sigs
+        if isig%(nsigs/iprint) == 0:
             sys.stdout.write('\rmake_signals_2017p8: %i/%i' % (isig, nsigs)); sys.stdout.flush()
 
         name, year = name_year.rsplit('_',1)

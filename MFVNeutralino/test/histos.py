@@ -14,7 +14,7 @@ jth_trig = False
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017', dataset, 100)
-sample_files(process, 'mfv_stopdbardbar_tau000300um_M0300_2016APV', dataset, 20)
+#sample_files(process, 'mfv_stopdbardbar_tau000300um_M0300_2016APV', dataset, 20)
 #sample_files(process, 'ttbar_ll_2016APV', dataset, 3)
 #sample_files(process, 'MuonEG2016G', dataset, 6)
 tfileservice(process, 'histos.root')
@@ -69,13 +69,14 @@ if do_presuite_studies:
 
 if do_uncert_suite:
     # AnalysisCuts ONLY considers the low-HT dispalced dijet trigger
-    process.mfvAnalysisCutsLowHTPreSel = process.mfvAnalysisCuts.clone(trigbit_tostudy = b_lo, apply_vertex_cuts = True, require_trigbit = False)
+    process.mfvAnalysisCutsLowHTPreSel = process.mfvAnalysisCuts.clone(trigbit_tostudy = b_lo, apply_vertex_cuts = False, require_trigbit = False)
     process.mfvFilterHistosLowHTPreSel = process.mfvFilterHistos.clone()
-    process.mfvJetTksHistosLowHtNominal   = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = False)
-    process.mfvJetTksHistosLowHtRefactor  = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True)
-    process.mfvJetTksHistosLowHtRefactor2 = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True, apply_offline_dxy_res = True)
-    process.pEventLowHTPreSel = cms.Path(common * process.mfvAnalysisCutsLowHTPreSel * process.mfvJetTksHistosLowHtNominal
-                                                * process.mfvFilterHistosLowHTPreSel * process.mfvJetTksHistosLowHtRefactor * process.mfvJetTksHistosLowHtRefactor2)
+#    process.mfvJetTksHistosLowHtNominal   = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = False)
+#    process.mfvJetTksHistosLowHtRefactor  = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True)
+#    process.mfvJetTksHistosLowHtRefactor2 = process.mfvJetTksHistos.clone(calojet_category = calo_cat, require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True, apply_offline_dxy_res = True)
+#    process.pEventLowHTPreSel = cms.Path(common * process.mfvAnalysisCutsLowHTPreSel * process.mfvJetTksHistosLowHtNominal
+#                                               * process.mfvFilterHistosLowHTPreSel * process.mfvJetTksHistosLowHtRefactor * process.mfvJetTksHistosLowHtRefactor2)
+    process.pEventLowHTPreSel = cms.Path(common * process.mfvAnalysisCutsLowHTPreSel * process.mfvFilterHistosLowHTPreSel)
     
     # AnalysisCuts ONLY considers the High-HT displaced dijet trigger
     process.mfvAnalysisCutsHighHTPreSel = process.mfvAnalysisCuts.clone(trigbit_tostudy = b_hi, apply_vertex_cuts = False, require_trigbit = False)
@@ -119,11 +120,15 @@ nm1s = []
 #    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
 #    ]
 
-ntks = [5,]#,3,4,7,8,9]
+#ntks = [5,]#,3,4,7,8,9]
 #nvs = [0,1,2]
-nvs = [2,]
-#ntks = []
-#nvs = []
+#nvs = [2,]
+ntks = []
+nvs = []
+
+if do_uncert_suite:
+    nvs  = [2,]
+    ntks = [5,]
 
 for ntk in ntks:
     if ntk == 5:
@@ -150,6 +155,7 @@ for ntk in ntks:
 process.EX1mfvAnalysisCutsOnlyOneVtx      = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
 process.EX1mfvAnalysisCutsVtxSelOnly      = process.mfvAnalysisCuts.clone(EX2EX3apply_presel = 0)
 process.EX1mfvAnalysisCutsFullSel         = process.mfvAnalysisCuts.clone(EX2EX3)
+process.EX1mfvAnalysisCutsDijetFullSelNoTrig = process.mfvAnalysisCuts.clone(EX2EX3bjet_agnostic = True, require_trigbit = False)
 process.EX1mfvAnalysisCutsFullSelNoTrig   = process.mfvAnalysisCuts.clone(EX2EX3require_trigbit = False)
 process.EX1mfvAnalysisCutsFullSelDijetAgnosticNoTrig = process.mfvAnalysisCuts.clone(EX2EX3dijet_agnostic = True, require_trigbit = False)
 process.EX1mfvAnalysisCutsFullSelDijetAgnostic = process.mfvAnalysisCuts.clone(EX2EX3dijet_agnostic = True)
@@ -164,6 +170,11 @@ process.EX1mfvEventHistosOnlyOneVtx      = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosVtxSelOnly      = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel         = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSelNoTrig   = process.mfvEventHistos.clone()
+
+process.EX1mfvJetTksHistosLowHtNominal   = process.mfvJetTksHistos.clone(require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = False)
+process.EX1mfvJetTksHistosLowHtRefactor  = process.mfvJetTksHistos.clone(require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True)
+process.EX1mfvJetTksHistosLowHtRefactor2 = process.mfvJetTksHistos.clone(require_triggers = False, trigger_bit = b_lo, do_tk_filt_refactor = True, apply_offline_dxy_res = True)
+
 process.EX1mfvEventHistosFullSelDijetAgnosticNoTrig  = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSelDijetAgnostic        = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSelBjetAgnostic         = process.mfvEventHistos.clone()
@@ -188,6 +199,7 @@ process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx 
 process.EX1pVtxSelOnly  = cms.Path(common * process.EX1mfvAnalysisCutsVtxSelOnly  * process.EX1mfvEventHistosVtxSelOnly  * process.EX1mfvVertexHistosVtxSelOnly)
 process.EX1pFullSel       = cms.Path(common * process.EX1mfvAnalysisCutsFullSel     * process.EX1mfvEventHistosFullSel     * process.EX1mfvVertexHistosFullSel)
 process.EX1pFullSelNoTrig = cms.Path(common * process.EX1mfvAnalysisCutsFullSelNoTrig    * process.EX1mfvEventHistosFullSelNoTrig)
+process.EX1pFullSelBjetAgnosticNoTrig = cms.Path(common * process.EX1mfvAnalysisCutsDijetFullSelNoTrig * process.EX1mfvJetTksHistosLowHtNominal * process.EX1mfvJetTksHistosLowHtRefactor * process.EX1mfvJetTksHistosLowHtRefactor2)
 process.EX1pFullSelDijetAgnosticNoTrig = cms.Path(common * process.EX1mfvAnalysisCutsFullSelDijetAgnosticNoTrig    * process.EX1mfvEventHistosFullSelDijetAgnosticNoTrig)
 process.EX1pFullSelDijetAgnostic = cms.Path(common * process.EX1mfvAnalysisCutsFullSelDijetAgnostic    * process.EX1mfvEventHistosFullSelDijetAgnostic)
 process.EX1pFullSelBjetAgnostic  = cms.Path(common * process.EX1mfvAnalysisCutsFullSelBjetAgnostic     * process.EX1mfvEventHistosFullSelBjetAgnostic)
@@ -241,7 +253,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        #samples = Samples.ttbar_alt_samples_2016 + Samples.MuonEG_data_samples_2016 + Samples.ttbar_samples_2016 + Samples.DisplacedJet_data_samples_2016 + Samples.SingleMuon_data_samples_2016 + Samples.qcd_samples_2016
+        #samples = Samples.DisplacedJet_data_samples_2016APV + Samples.qcd_samples_2016APV
+        #samples = Samples.ttbar_alt_samples_2016APV + Samples.MuonEG_data_samples_2016APV + Samples.ttbar_samples_2016APV + Samples.DisplacedJet_data_samples_2016APV + Samples.SingleMuon_data_samples_2016APV + Samples.qcd_samples_2016APV
         samples = Samples.all_signal_samples_2016
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     elif use_MET_triggers:
@@ -255,7 +268,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version + '_2017_UNCERTS_NewOfflineReqs_Feb22',
+    cs = CondorSubmitter('Histos' + version + '_2016_UNCERTS_Feb26',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

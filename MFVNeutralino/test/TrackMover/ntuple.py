@@ -6,7 +6,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.event_filter = 'jets only novtx'
+settings.event_filter = 'leptons only novtx'
 
 version = settings.version + 'v1'
 
@@ -22,7 +22,8 @@ process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
 max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_year', dataset, 1)
+#sample_files(process, 'qcdht2000_year', dataset, 1)
+input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
 cmssw_from_argv(process)
 
 ####

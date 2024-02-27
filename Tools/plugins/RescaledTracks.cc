@@ -39,9 +39,9 @@ void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
   auto output_tracks_map = std::make_unique<jmt::TracksMap>();
 
   reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
-
   rescaler.setup(!event.isRealData() && which != -1,
-                 jmt::AnalysisEras::pick(event, this),
+                 jmt::AnalysisEras::pick(event.id().event()),
+                 //jmt::AnalysisEras::pick(event, this),
                  which);
 
   for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {

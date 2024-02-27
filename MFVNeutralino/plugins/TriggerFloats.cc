@@ -8,7 +8,7 @@
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
+//#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -17,7 +17,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
-#include "JMTucker/Tools/interface/METxyCorrection.h"
+//#include "JMTucker/Tools/interface/METxyCorrection.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include <cmath>
@@ -34,13 +34,11 @@ class MFVTriggerFloats : public edm::EDProducer {
         const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
         const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
         const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
-        //const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
         const edm::EDGetTokenT<bool> badPFMuonFilterUpdateDz_token;
 
         const edm::EDGetTokenT<pat::JetCollection> jets_token;
         const StringCutObjectSelector<pat::Jet> jet_selector;
 
-        //const edm::EDGetTokenT<pat::METCollection> met_token;
         const edm::EDGetTokenT<pat::MuonCollection> muons_token;
         const StringCutObjectSelector<pat::Muon> muon_selector;
         const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
@@ -56,11 +54,9 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
-    //met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
     badPFMuonFilterUpdateDz_token(consumes<bool>(edm::InputTag("BadPFMuonFilterUpdateDz"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
-    //met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
@@ -81,11 +77,7 @@ namespace {
 
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
     if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
-
-    //std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter", "Flag_ecalBadCalibFilter"};
-    //edm::Handle<edm::TriggerResults> metFilters;
-    //event.getByToken(met_filters_token, metFilters);
-    //const edm::TriggerNames &names = event.triggerNames(*metFilters);
+    //std::cout << "Starting TriggerFloats.cc" << std::endl;
 
     edm::Handle<edm::TriggerResults> trigger_results;
     event.getByToken(trigger_results_token, trigger_results);
@@ -97,9 +89,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     edm::Handle<l1t::JetBxCollection> l1_jets;
     event.getByToken(l1_jets_token, l1_jets);
-
-    //edm::Handle<pat::METCollection> mets;
-    //event.getByToken(met_token, mets);
 
     edm::Handle<pat::MuonCollection> muons;
     event.getByToken(muons_token, muons);
@@ -354,7 +343,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
         if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
-        if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
+        //if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
         if (is_ht) {
             if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon && !is_jet);
             else if (nids == 2) assert(!is_cluster && !is_photon);
@@ -425,7 +414,42 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
                 if (ipath != -1) break;
             }
 
-            // FIXME - keep all hlt CaloJetsCorrected objects for now. Move this into the following conditional when done
+            // Save all HLT PF btags
+            if(obj.collection() == "hltPFJetForBtag::HLT") {
+                bool save_this_jet = false;
+                for (auto label : obj.filterLabels()) {
+                    if (label == "hltBTagPFCSVp070Triple") { save_this_jet = true; }    // 2017 bjets
+                    if (label == "hltBTagPFDeepCSV4p5Triple") { save_this_jet = true; } // 2018 bjets
+                }
+                if (save_this_jet) {
+                    floats->hltpfjetsforbtag.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+                }
+            }
+
+            // Save HLT Calo BJets
+            else if (obj.collection() == "hltSelector6CentralJetsL1FastJet::HLT") {
+                bool save_this_jet = false;
+                for (auto label : obj.filterLabels()) {
+                    if (label == "hltBTagCalo80x6CSVp0p92DoubleWithMatching") { save_this_jet = true; } // 2017 bjets
+                    if (label == "hltBTagCaloDeepCSV0p71Double6Jets80")       { save_this_jet = true; } // 2018 bjets
+                    if (label == "hltBTagCaloCSVp014DoubleWithMatching")      { save_this_jet = true; } // 2016 high score bjets
+                }
+                if (save_this_jet) {
+                    floats->hltcalobjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+                }
+            }
+
+            // Save low-score HLT Calo BJets (for two of the 2016 triggers)
+            else if (obj.collection() == "hltSelector8CentralJetsL1FastJet::HLT") {
+                bool save_this_jet = false;
+                for (auto label : obj.filterLabels()) {
+                    if (label == "hltBTagCaloCSVp087Triple")      { save_this_jet = true; } // 2016 low score bjets
+                }
+                if (save_this_jet) {
+                    floats->hltcalobjets_low.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+                }
+            }
+
             if(obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
                 floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
             }
@@ -450,23 +474,17 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
                 // Note that all of the bjet triggers use PF jets for the kinematics, and the
                 // b-tagging discriminants aren't currently available in AODs, so this is
                 // sufficient for the trigger matching for now
+                
                 if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
                     floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }
-                else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
+
+
+                if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
                     floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }
                 else if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT") {
                     floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
-                }
-                else if(obj.collection() == "hltPFJetForBtag::HLT") {
-                    bool save_this_jet = false;
-                    for (auto label : obj.filterLabels()) {
-                        if (label == "hltBTagPFCSVp070Triple") { save_this_jet = true; }
-                    }
-                    if (save_this_jet) {
-                        floats->hltpfjetsforbtag.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
-                    }
                 }
 
                 if (prints) {
@@ -566,6 +584,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
             printf("%s,  npass: %i   Filter Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
     }
 
+    //std::cout << "Finishing TriggerFloats.cc" << std::endl;
     event.put(std::move(floats));
 }
 
