@@ -142,8 +142,9 @@ class limits:
         if key == 'tau':
             return [p.sample.tau for p in self.points]
         elif key == 'mass':
-            #return [(p.sample.massResonance*10000 + p.sample.mass if p.sample.massResonance is not None else p.sample.mass) for p in self.points]
             return [p.sample.mass for p in self.points]
+        elif key == 'massResonance':
+            return [p.sample.massResonance for p in self.points]
         else:
             return [getattr(p,key) for p in self.points]
 
@@ -351,7 +352,8 @@ def save_1d_plots():
                     #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
                     #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
                     #d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
-                    d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                    #d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                    d.parse(sample, 'combine_output_%s_lifetime_reweight_stealth_susy/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
                 else :
                     pass
                     #print "NOT USING ", sample.name, sample.massResonance, sample.mass, sample.tau
@@ -385,30 +387,33 @@ def save_2d_plots():
 
         #for kind in 'mfv_stopdbardbar', 'mfv_neu':
         #for kind in 'mfv_splitSUSY', :
-        for kind in 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b' :
+        #for kind in 'mfv_HtoLLPto4j', 'mfv_HtoLLPto4b', 'mfv_ZprimetoLLPto4j', 'mfv_ZprimetoLLPto4b' :
+        for kind in 'mfv_StealthSHH', 'mfv_StealthSYY' :
             d = limits()
             for sample in sample_iterator(in_f, years):
                 #if -sample.isample in (1,4,5,6,9,10,11,12,13,14,16,17,19,20,21,22,23,24,25,28,30,32,33,36,38,40,41,44,46,48,49,52,54,57,58,59,60,61,62,63,64,65,67,68,69,70,71,72,76,78,80,84,92,99,113,114,115,116,117,118,120,121,122,124,125,126,127,128,129,130,131,133,136,138,140,145,147,154,156,161,177,193,209,210,211,212,213,216,218,220,222,224,225,226,227,229,232,234,236,238,240,241,245) :
                 #    continue
                 if sample.kind != kind:
                     continue
+                #if sample.mass != 100 : continue
+                if abs(sample.massResonance - sample.mass) != 225 : continue
                 #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
                 #d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
                 #d.parse(sample, 'combine_results_dark_sector_%s/signal_%05i/results' % (which, sample.isample)) # condor
-                d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                #d.parse(sample, 'combine_results_dark_sector_%s_lifetime_reweight_final/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
+                d.parse(sample, 'combine_output_%s_lifetime_reweight_stealth_susy/crab_signals_-00001_-00100/crab_signal_%05i/results' % (which, sample.isample)) # crab
 
-            print d['tau'], d['mass']
-            taus, masses = axisize(d['tau']), axisize(d['mass'])
-            print masses
+            print d['tau'], d['mass'], d['massResonance']
+            taus, massResonances = axisize(d['tau']), axisize(d['massResonance'])
             #taus.remove(30.)
 
             out_f.mkdir(kind).cd()
 
             for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-                h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
+                h = ROOT.TH2D(x, '', len(massResonances)-1, massResonances, len(taus)-1, taus)
                 h.SetStats(0)
                 for p in d.points:
-                    h.SetBinContent(h.FindBin(p.sample.massResonance*10000 + p.sample.mass if p.sample.massResonance is not None else p.sample.mass, p.sample.tau), getattr(p, x))
+                    h.SetBinContent(h.FindBin(p.sample.massResonance, p.sample.tau), getattr(p, x))
                 h.Write()
 ####
 
@@ -580,14 +585,22 @@ env R_LIBS=~/.R R --no-save <<EOF
 '''
     print 'library(akima)'
     #for k in 'mfv_stopdbardbar', 'mfv_neu':
-    for k in 'splitSUSY_M2400_100', :
+    #for k in 'splitSUSY_M2400_100', :
+    for k in 'mfv_StealthSHH', 'mfv_StealthSYY' :
         for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
             x = '%s_%s' % (k,y)
             h = f.Get('%s/%s' % (k,y))
-            print h
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,100,by=10)))' # gluino interpretation
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(500, 1500, by=10), yo=c(0.1, 0.3, 1, 3, 10, 30, 100), linear=TRUE)' # 225 GeV mass splitting
+
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 1500, by=10), yo=c(0.1, 0.3, 1, 3, 10, 30, 100), linear=TRUE)' # fixed 100 GeV singlino
+
+            #print 'i<-interp(x=h\\$x, y=log10(h\\$y), z=h\\$z, xo=seq(300, 1500, by=10), yo=log10(c(seq(0.1,0.3,by=0.2), seq(0.3,1,by=0.7), seq(1,3,by=2), seq(3,10,by=7), seq(10,30,by=20), seq(30,100,by=70))), linear=TRUE, extrap=FALSE)' # stealth SUSY stop interpretation
+            #print 'i<-interp(x=h\\$x, y=log10(h\\$y), z=h\\$z, xo=seq(300, 1500, by=10), yo=log10(c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,90,by=10))), linear=TRUE, extrap=TRUE)' # stealth SUSY stop interpretation
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 1500, by=200), yo=c(seq(0.01,0.03,by=0.02), seq(0.03,0.1,by=0.07), seq(0.1,0.3,by=0.2), seq(0.3,1,by=0.7), seq(1,3,by=2), seq(3,10,by=7), seq(10,30,by=20), seq(30,100,by=70), seq(100,300,by=200), seq(300,1000,by=700)))' # stealth SUSY stop interpretation
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,100,by=10)))' # gluino interpretation
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,100,by=10)))' # gluino interpretation
             #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.16,0.915,by=0.1), seq(1,19,by=1), seq(20,100,by=5)))' # higgsino interpretation, for plot cosmetic reasons
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
@@ -597,8 +610,8 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        #lines = [x.strip() for x in open(os.path.join('.',fn)).read().replace('"', '').split('\n') if x.strip()]
-        lines = [x.strip() for x in open(os.path.join('/uscms/home/joeyr/public/to_r/run2',fn)).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('.',fn)).read().replace('"', '').split('\n') if x.strip()]
+        #lines = [x.strip() for x in open(os.path.join('/uscms/home/joeyr/public/to_r/run2',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
@@ -630,15 +643,15 @@ def one_from_r(ex, name):
     return h
 
 def from_r():
-    f = ROOT.TFile('limits_fromr.root', 'recreate')
+    f = ROOT.TFile('limits_fromr_run2.root', 'recreate')
     #for k in 'mfv_stopdbardbar', 'mfv_neu', 'mfv_splitSUSY':
-    for k in 'mfv_splitSUSY',:
+    for k in 'mfv_StealthSHH', 'mfv_StealthSYY':
         for opt in 'nm', 'up', 'dn':
             for ex in 'observed', 'expect50', 'expect16', 'expect84': # expect2p5 expect68 expect95 expect97p5
                 ex = k + '_' + ex
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
-                if k == 'mfv_stopdbardbar':
+                if k == 'mfv_stopdbardbar' or "mfv_Stealth" in k:
                     whichlist = ['stopstop']
                 elif k == 'mfv_neu' or k == 'mfv_splitSUSY':
                     whichlist = ['gluglu', 'higgsino_N2N1']

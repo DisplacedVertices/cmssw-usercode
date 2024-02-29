@@ -53,7 +53,8 @@ def do_swap_axes(obj) :
 
 for which in 'run2','2017p8':
     f = ROOT.TFile('signal_efficiency_%s.root' % which)
-    for kind in 'mfv_stopdbardbar', 'mfv_neu':
+    #for kind in 'mfv_stopdbardbar', 'mfv_neu':
+    for kind in 'mfv_StealthSHH', 'mfv_StealthSYY':
         c = ROOT.TCanvas('c', '', 950, 900)
         c.SetTopMargin(0.1)
         c.SetBottomMargin(0.12)

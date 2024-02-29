@@ -953,7 +953,7 @@ def points(f=None):
         f = ROOT.TFile(gp.fn)
     kinds  = sorted(set(s.kind for s in sample_iterator(f)))
     #masses = sorted(set( (s.massResonance*1000 + s.mass if s.massResonance is not None else s.mass) for s in sample_iterator(f))) # FIXME not used anywhere yet, let's not overcomplicate
-    masses = sorted(set(s.mass for s in sample_iterator(f)))
+    masses = sorted(set(s.massResonance for s in sample_iterator(f)))
     taus   = sorted(set(s.tau  for s in sample_iterator(f)))
     return kinds, masses, taus
 
@@ -1020,7 +1020,7 @@ def signal_efficiency():
                 mass = h.GetXaxis().GetBinLowEdge(ibin)
                 for jbin in xrange(1, ntaus+1):
                     tau = h.GetYaxis().GetBinLowEdge(jbin)
-                    pt = kind, tau, mass
+                    pt = kind, tau, 100, mass
 
                     isample, r = None, None
                     try:

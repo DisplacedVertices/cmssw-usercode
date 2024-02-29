@@ -5,9 +5,17 @@ from JMTucker.Tools.ROOTTools import *
 draw_pm1sigma_excl = True
 swap_axes = True
 
+massLabel = "mStop_minus_mSinglino_225GeV"
+#massLabel = "mSinglino_100GeV"
+
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_%s_June2021' % which, make=True)
+path = plot_dir('pretty_limits_%s_Stealth_SUSY_%s' % (which, massLabel), make=True)
+
+# whether to save everything to a single output file
+oneFile = True
+if oneFile : single_output_file = ROOT.TFile(path+"/all_limits.root", "RECREATE")
+
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -58,9 +66,10 @@ def do_swap_axes(obj) :
 
 f = ROOT.TFile('limits_%s.root' % which)
 f2 = ROOT.TFile('limits_fromr_%s.root' % which)
-f3 = ROOT.TFile('limits_fromr_neu_%s.root' % which)
+#f3 = ROOT.TFile('limits_fromr_neu_%s.root' % which)
 
-for kind in 'mfv_stopdbardbar', 'mfv_neu':
+#for kind in 'mfv_stopdbardbar', 'mfv_neu':
+for kind in 'mfv_StealthSHH', 'mfv_StealthSYY':
     c = ROOT.TCanvas('c', '', 950, 900)
     c.SetTopMargin(0.160)
     c.SetBottomMargin(0.12)
@@ -107,10 +116,10 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
     h.Draw('colz')
     h.GetXaxis().SetNoExponent()
     print kind, h.GetMinimum(), h.GetMaximum()
-    h.SetMinimum(0.01)
-    h.SetMaximum(100)
+    h.SetMinimum(0.1)
+    h.SetMaximum(10000)
 
-    if   kind == 'mfv_stopdbardbar' :
+    if   kind == 'mfv_stopdbardbar' or "mfv_Stealth" in kind :
         theories = ['stopstop']
     elif kind == 'mfv_neu' :
         theories = ['gluglu', 'higgsino_N2N1']
@@ -166,20 +175,20 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         for g in (g_obsup, g_obsdn, g_expup, g_expdn):
             g.SetLineWidth(1)
 
-        if kind == 'mfv_neu':
-            disp_jet_excl = array('d', [2229, 2498, 2616, 2645, 2641])
-        else:
-            disp_jet_excl = array('d', [1479, 1711, 1805, 1823, 1802])
-        ys = array('d', [1., 3., 10., 30., 100.])
-        g_dispjet_excl = ROOT.TGraph(len(ys), disp_jet_excl, ys)
-        if swap_axes :
-            g_dispjet_excl = do_swap_axes(g_dispjet_excl)
-        g_dispjet_excl.SetName("g_dispjet_excl")
-        g_dispjet_excl.SetLineColor(ROOT.kTeal)
-        g_dispjet_excl.SetLineWidth(3)
-        g_dispjet_excl.SetLineStyle(4)
+        #if kind == 'mfv_neu':
+        #    disp_jet_excl = array('d', [2229, 2498, 2616, 2645, 2641])
+        #else:
+        #    disp_jet_excl = array('d', [1479, 1711, 1805, 1823, 1802])
+        #ys = array('d', [1., 3., 10., 30., 100.])
+        #g_dispjet_excl = ROOT.TGraph(len(ys), disp_jet_excl, ys)
+        #if swap_axes :
+        #    g_dispjet_excl = do_swap_axes(g_dispjet_excl)
+        #g_dispjet_excl.SetName("g_dispjet_excl")
+        #g_dispjet_excl.SetLineColor(ROOT.kTeal)
+        #g_dispjet_excl.SetLineWidth(3)
+        #g_dispjet_excl.SetLineStyle(4)
 
-        excl_to_draw = [g_dispjet_excl, g_obs, g_obsup, g_obsdn, g_exp, g_expup, g_expdn] if draw_pm1sigma_excl else [g_exp, g_obs]
+        excl_to_draw = [g_obs, g_obsup, g_obsdn, g_exp, g_expup, g_expdn] if draw_pm1sigma_excl else [g_exp, g_obs]
         for g in excl_to_draw:
             g.Draw('L')
 
@@ -203,7 +212,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             leg.AddEntry(g_dispjet_excl, '#kern[-0.2]{CMS disp. jets (#tilde{g})}', 'L')
             leg.AddEntry(g_exp_clone, '#kern[-0.16]{Expected #pm 1 #sigma_{exp}}', 'L')
         else:
-            leg.AddEntry(g_dispjet_excl, '#kern[-0.2]{CMS disp. jets}', 'L')
+            #leg.AddEntry(g_dispjet_excl, '#kern[-0.2]{CMS disp. jets}', 'L')
             leg.AddEntry(g_exp, '#kern[-0.16]{Expected #pm 1 #sigma_{exp}}', 'L')
     else:
         # force the lines in the legend to be black
@@ -230,8 +239,15 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         t.DrawLatexNDC(0.395,0.4,'#color[%i]{#tilde{#chi}^{0}}' % neu_color)
     else:
         stop_color = ROOT.kRed
-        model = '#kern[-0.%i]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}' % (52 if draw_pm1sigma_excl else 22)
-        t.DrawLatexNDC(0.22, 0.895, model)
+        if kind == "mfv_StealthSHH" :
+            model = '#kern[-0.%i]{#tilde{t} #rightarrow t#tilde{S}, #tilde{S} #rightarrow S#tilde{G}, S#rightarrow bb}' % (52 if draw_pm1sigma_excl else 0)
+            t.DrawLatexNDC(0.22+0.1, 0.895, model)
+        elif kind == "mfv_StealthSYY" :
+            model = '#kern[-0.%i]{#tilde{t} #rightarrow t#tilde{S}g, #tilde{S} #rightarrow S#tilde{G}, S#rightarrow gg}' % (52 if draw_pm1sigma_excl else 0)
+            t.DrawLatexNDC(0.22+0.1, 0.895, model)
+        else :
+            model = '#kern[-0.%i]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}' % (52 if draw_pm1sigma_excl else 22)
+            t.DrawLatexNDC(0.22, 0.895, model)
         t.SetTextSize(0.07)
         t.DrawLatexNDC(0.405,0.54,'#color[%i]{#tilde{t}}' % stop_color)
 
@@ -273,5 +289,10 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
+
+    if oneFile : 
+        g_obs.SetName(kind+"_"+massLabel)
+        single_output_file.cd()
+        g_obs.Write()
 
     del c
