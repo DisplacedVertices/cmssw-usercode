@@ -54,6 +54,9 @@ def setup_event_filter(process,
         trigger_filter = event_filter = 'bjets OR displaced dijet veto HT'
     elif mode == 'bjets OR displaced dijet':
         trigger_filter = event_filter = 'bjets OR displaced dijet'
+    elif mode == 'bjets OR displaced dijet novtx':
+        trigger_filter = event_filter = 'bjets OR displaced dijet'
+        event_filter_require_vertex = False
     elif mode == 'displaced dijet veto bjets':
         trigger_filter = event_filter = 'displaced dijet veto bjets'
         event_filter_require_vertex = False

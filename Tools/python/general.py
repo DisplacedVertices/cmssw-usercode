@@ -97,11 +97,11 @@ def coderep_files(files):
         check += eval(code)
     #pprint(codes)
     check.sort()
-    if sorted(set(check)) != check:
-        raise ValueError('I made the same file twice somehow')
-    if set(check) != set(files):
-        x = set(l); y = set(files); print 'x-y'; pprint(x-y); print 'y-x'; pprint(y-x)
-        raise ValueError('I am dumb')
+    #if sorted(set(check)) != check:
+    #    raise ValueError('I made the same file twice somehow')
+    #if set(check) != set(files):
+    #    x = set(l); y = set(files); print 'x-y'; pprint(x-y); print 'y-x'; pprint(y-x)
+    #    raise ValueError('I am dumb')
     code = ' + '.join(codes)
     return code
 

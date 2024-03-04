@@ -4,7 +4,7 @@ from JMTucker.Tools.Year import year
 #ntuple_version_ = 'ULV9_dileptrig'
 #ntuple_version_ = 'ULV9_trigstudy_'
 #ntuple_version_ = 'UL16APVV9_trigstudy_'
-ntuple_version_ = 'ULV9'
+ntuple_version_ = 'OnnormdzULV30'
 lsp_id = -1 # should do that in a smarter way would be -1 if not MET
 use_btag_triggers = True
 use_MET_triggers = False

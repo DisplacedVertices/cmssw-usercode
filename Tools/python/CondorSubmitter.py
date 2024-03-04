@@ -319,7 +319,7 @@ def get(i): return _l[i]
                 stageout_user = username # JMTBAD use getUsernameFromSiteDB?
                 if stageout_path:
                     stageout_path = '/' + stageout_path
-                stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
+                stageout_path = 'root://cmseos.fnal.gov//store/group/lpclonglived/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
@@ -363,7 +363,6 @@ def get(i): return _l[i]
         filenames = sample.filenames
         if not self.is_cmsRun:
             filenames = self.normalize_fns(filenames)
-
         if sample.split_by == 'events':
             per = sample.events_per
             assert sample.nevents_orig > 0 or sample.total_events > 0
@@ -371,7 +370,7 @@ def get(i): return _l[i]
             njobs = int_ceil(nevents, per)
             fn_groups = [filenames]
         else:
-            use_njobs = sample.files_per < 0
+            use_njobs = sample.files_per < 0 
             per = abs(sample.files_per)
             if sample.total_files > 0:
                 filenames = filenames[:sample.total_files]
@@ -379,12 +378,12 @@ def get(i): return _l[i]
             fn_groups = [x for x in (filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
             if not use_njobs:
                 njobs = len(fn_groups) # let it fail downward
+        
         if self._njobs is not None:
             assert self._njobs <= njobs
             njobs = self._njobs
 
         encoded_filelist = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
-
         files_to_write = [
             ('cs_outputfiles',   self.output_files),
             ('cs_stageoutfiles', self.stageout_files),
@@ -533,7 +532,7 @@ def get(i): return _l[i]
         for sample in samples:
             self.submit(sample)
 
-def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1, split={}):
+def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1, split={}, input_fns_extra=[]):
     meat = '''
 job=$(<cs_job)
 njobs=$(<cs_njobs)
@@ -561,5 +560,6 @@ fi
         sample.files_per = -1
         sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split.get(sample.name, split_default))
 
-    cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
+    cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn]+input_fns_extra, output_files=[output_fn], stageout_files='all')
+    #cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn]+input_fns_extra, output_files=[output_fn])
     cs.submit_all(samples)

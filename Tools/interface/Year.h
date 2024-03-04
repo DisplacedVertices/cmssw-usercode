@@ -1,7 +1,7 @@
 #ifndef JMTucker_Tools_interface_Year_h
 #define JMTucker_Tools_interface_Year_h
 
-#define MFVNEUTRALINO_20161
+#define MFVNEUTRALINO_2017
 
 #define MFVNEUTRALINO_YEARS {2017, 2018, 20161, 20162}
 // 20161 = Pre-VFP      20162 = Post-VFP
