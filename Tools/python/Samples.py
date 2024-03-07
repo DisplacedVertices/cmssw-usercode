@@ -49,6 +49,7 @@ def _decay(sample):
         'mfv_splitSUSY': r'\tilde{g} \rightarrow qq\tilde{\chi}',
         'ggHToSSTobbbb' : r'ggH \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
         'ggHToSSTodddd' : r'ggH \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
+        'ggHToSSTo4l' : r'ggH \rightarrow SS \rightarrow llll',
         }[_model(s)]
     year = int(s.rsplit('_')[-1]) if ('APV' not in s) else 2016
     assert 2015 <= year <= 2018
@@ -415,7 +416,7 @@ qcd_samples_2017 = [
     MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',   62033260, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=3.025e4),
     MCSample('qcdht0700_2017', '/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',  48737689, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.398e3),
     MCSample('qcdht1000_2017', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 14491736, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.122e3),
-    MCSample('qcdht1500_2017', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 12941701, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=109.4),
+    #MCSample('qcdht1500_2017', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 12941701, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=109.4),
     #MCSample('qcdht2000_2017', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',   5898290, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=21.74),
     ]
 
@@ -630,11 +631,15 @@ HToSSTodddd_samples_2017 = [
     MCSample('ggHToSSTodddd_tau100mm_M55_2017',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
 ]
 
+HToSSTo4l_samples_2017 = [
+    MCSample('ggHToSSTo4l_tau1mm_M350_2017', '/ggH_HToSSTo4l_lowctau_MH-800_MS-350_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 49643),
+]
+
 selected_HToSSTodddd_samples_2017 = [HToSSTodddd_samples_2017[1]]
 
 
 samples_for_minitree_2017 = [HToSSTodddd_samples_2017[1], mfv_signal_samples_2017[7]]
-all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017 + mfv_splitSUSY_samples_2017
+all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017 + mfv_splitSUSY_samples_2017 + HToSSTo4l_samples_2017 
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
 
@@ -1060,6 +1065,7 @@ __all__ = [
     'mfv_stopbbarbbar_samples_2017',
     'HToSSTobbbb_samples_2017',
     'HToSSTodddd_samples_2017',
+    'HToSSTo4l_samples_2017',
     'qcd_samples_2018',
     'qcd_samples_sum_2018',
     'ttbar_samples_2018',
@@ -1255,7 +1261,7 @@ qcdht0300_2017.add_dataset('miniaod', '/QCD_HT300to500_TuneCP5_13TeV-madgraphMLM
 qcdht0500_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 62026995)
 qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 48666395)
 qcdht1000_2017.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 14487903)
-qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 12941701)
+#qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 12941701)
 #qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 5900070)
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 249133364)
 
@@ -1329,7 +1335,7 @@ for sample in all_signal_samples_2016APV:
 for sample in all_signal_samples_2016:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
-for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTodddd_samples_2017:
+for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTodddd_samples_2017 + HToSSTo4l_samples_2017:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
 for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + HToSSTodddd_samples_2018:
@@ -1338,6 +1344,11 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 ########
 # ntuples
 ########
+for x in mfv_stopdbardbar_tau001000um_M0800_2017, ggHToSSTo4l_tau1mm_M350_2017:
+    x.add_dataset("trackmovermctruthonnormdzulv30bmv6")
+
+for x in qcdht0300_2017, qcdht0500_2017, qcdht0700_2017, qcdht1000_2017, ttbar_2017, BTagCSV2017B, BTagCSV2017C, BTagCSV2017D, BTagCSV2017E, BTagCSV2017F, DisplacedJet2017C, DisplacedJet2017D, DisplacedJet2017E, DisplacedJet2017F:
+    x.add_dataset("trackmoveronnormdzulv30bmv6")
 
 for x in qcd_samples_2017 + ttbar_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017:
     x.add_dataset('nr_trackingtreer_ul17')
@@ -1398,7 +1409,7 @@ condorable = {
         "miniaod": [EGamma2018D, MET2017E, MET2018A, MET2018B, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018],
         },
     "T3_US_FNALLPC": {
-        "miniaod": mfv_splitSUSY_samples_2017
+        "miniaod": mfv_splitSUSY_samples_2017 + mfv_stopdbardbar_samples_2017 + qcd_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017 + [ttbar_2017, ] #FIXME
         },
     "T2_IN_TIFR": {
         "miniaod": [mfv_stopbbarbbar_tau001000um_M0800_2018,]

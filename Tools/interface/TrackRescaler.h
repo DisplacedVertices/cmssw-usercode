@@ -48,6 +48,10 @@ namespace jmt {
     void set_JetHT2018B(double pt, double eta);
     void set_JetHT2018C(double pt, double eta);
     void set_JetHT2018D(double pt, double eta);
+    void set_BTagDispJet20161(double pt, double eta);
+    void set_BTagDispJet20162(double pt, double eta);
+    void set_BTagDispJet2017(double pt, double eta);
+    void set_BTagDispJet2018(double pt, double eta);
 
     void set(double era, int which, double pt, double eta);
     void set(double pt, double eta) { set(era_, which_, pt, eta); }
