@@ -234,7 +234,14 @@ mfv_stopbbarbbar_samples_2016APV = [
     MCSample('mfv_stopbbarbbar_tau030000um_M3000_2016APV', '/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   10000),
 ]
 
-all_signal_samples_2016APV = mfv_signal_samples_2016APV + mfv_stopdbardbar_samples_2016APV + mfv_stopbbarbbar_samples_2016APV
+
+HToSSTodddd_samples_2016APV = [ 
+    MCSample('ggHToSSTodddd_tau1mm_M55_2016APV',     '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   256935),
+    MCSample('ggHToSSTodddd_tau10mm_M55_2016APV',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  270736),
+    MCSample('ggHToSSTodddd_tau100mm_M55_2016APV',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 268570),
+]
+
+all_signal_samples_2016APV = mfv_signal_samples_2016APV + mfv_stopdbardbar_samples_2016APV + mfv_stopbbarbbar_samples_2016APV + HToSSTodddd_samples_2016APV
 
 ########
 # 2016 MC
@@ -388,8 +395,13 @@ mfv_stopbbarbbar_samples_2016 = [
     MCSample('mfv_stopbbarbbar_tau030000um_M3000_2016', '/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 10000),
 ]
 
+HToSSTodddd_samples_2016 = [ 
+    MCSample('ggHToSSTodddd_tau1mm_M55_2016',     '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',   271240),
+    MCSample('ggHToSSTodddd_tau10mm_M55_2016',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  259184),
+    MCSample('ggHToSSTodddd_tau100mm_M55_2016',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 261360),
+]
 
-all_signal_samples_2016 = mfv_signal_samples_2016 + mfv_stopdbardbar_samples_2016 + mfv_stopbbarbbar_samples_2016
+all_signal_samples_2016 = mfv_signal_samples_2016 + mfv_stopdbardbar_samples_2016 + mfv_stopbbarbbar_samples_2016 + HToSSTodddd_samples_2016
 
 
 ########
@@ -812,9 +824,9 @@ mfv_stopbbarbbar_samples_2018 = [
 mfv_selected_stopbbarbbar_samples_2018 = mfv_stopbbarbbar_samples_2018[0:24]
 
 HToSSTodddd_samples_2018 = [
-    MCSample('ggHToSSTodddd_tau1mm_M55_2018',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM', 546940),
-    MCSample('ggHToSSTodddd_tau10mm_M55_2018', '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM', 525760),
-    #MCSample('ggHToSSTodddd_tau1mm_M40_2018', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 181513),
+    MCSample('ggHToSSTodddd_tau1mm_M55_2018',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',   546940),
+    MCSample('ggHToSSTodddd_tau10mm_M55_2018',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',  525760),
+    MCSample('ggHToSSTodddd_tau100mm_M55_2018', '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM', 506379),
 ]
 
 samples_for_minitree_2018 = [HToSSTodddd_samples_2018[1], mfv_signal_samples_2018[7]]
@@ -1333,8 +1345,13 @@ for x in qcd_samples_2017 + ttbar_samples_2017 + BTagCSV_data_samples_2017 + Dis
 for x in all_signal_samples_2016 + all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018 + SingleMuon_data_samples_2017:
     x.add_dataset('ntupleulv4bm')
 
-for x in all_signal_samples_2016APV + all_signal_samples_2016 + all_signal_samples_2017 + SingleMuon_data_samples_2017 + ttbar_samples_2017 + all_signal_samples_2018:
+for x in all_signal_samples_2016APV + all_signal_samples_2016 + all_signal_samples_2017 + all_signal_samples_2018 + \
+         ttbar_samples_2017    + qcd_samples_2017    + SingleMuon_data_samples_2017 + \
+         ttbar_samples_2018    + qcd_samples_2018    + \
+         ttbar_samples_2016    + qcd_samples_2016    + \
+         ttbar_samples_2016APV + qcd_samples_2016APV:
     x.add_dataset('ntupleulv9bm')
+    x.add_dataset('ntupleulv9bm_ntkseeds')
 
 for x in SingleMuon_data_samples_2017 + ttbar_samples_2017:
     x.add_dataset('ntupleulv9_more_hltcalobm')
@@ -1460,7 +1477,7 @@ if __name__ == '__main__':
                     nevents = DBS.numevents_in_dataset(dataset)
                     print "    MCSample('%s_tau%06ium_M%04i_%s', '%s', %i)," % (model, tau, mass, year, dataset, nevents)
 
-    if 1:
+    if 0:
         print '{'
         for s in all_signal_samples_2017 + all_signal_samples_2018:
             l = DBS.datasets('/%s/*/MINIAODSIM' % s.primary_dataset)
