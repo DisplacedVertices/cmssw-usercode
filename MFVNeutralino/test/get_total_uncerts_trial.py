@@ -220,10 +220,6 @@ def get_hlt_btagging_uncert(fn):
 
     return {'num': var_yield, 'den': nom_yield}
 
-
-#def bjet_is_primary_q(bjet_uncerts, dijet_uncerts):
-#    return bjet_uncerts < dijet_uncerts
-
 def bjet_is_primary_q(d):
     bjet_sources = ["bjet_hlt", "bjet_signal"]
     bjet_sf      = ["bjet_sf_up", "bjet_sf_dn"]
@@ -261,7 +257,7 @@ dijet_kine_data_mc_uncert = .005
 ctaus  = ['000100', '000300', '001000', '010000', '030000']
 masses = ['0200', '0300', '0400', '0600', '0800', '1200', '1600', '3000']
 
-yr   = '2016APV' # FIXME do this a bit better
+yr   = '2017' # FIXME do this a bit better
 flist = ['mfv_stopdbardbar_tau' + ctau + 'um_M' + mass + '_' + yr + '.root' for mass in masses for ctau in ctaus]
 flist += ['mfv_stopbbarbbar_tau' + ctau + 'um_M' + mass + '_' + yr + '.root' for mass in masses for ctau in ctaus]
 flist += ['mfv_neu_tau' + ctau + 'um_M' + mass + '_' + yr + '.root' for mass in masses for ctau in ctaus]
@@ -269,8 +265,8 @@ flist += ['ggHToSSTodddd_tau1mm_M55_' +yr+'.root', 'ggHToSSTodddd_tau10mm_M55_'+
 #flist = ['histos.root']
 
 #dirname  = '/uscms_data/d3/shogan/crab_dirs/HistosULV9Bm_2018_UncertSuite_reFix_Feb02/'
-#dirname  = '/uscms_data/d3/shogan/crab_dirs/HistosULV9Bm_2017_UncertSuite_newFix_Jan2/'
-dirname = '/uscms_data/d3/shogan/crab_dirs/HistosULV9Bm_2016APV_UNCERTS_SomeFixes_Feb23/'
+dirname  = '/uscms_data/d3/shogan/crab_dirs/HistosULV9Bm_2017_UncertSuite_newFix_Jan2/'
+#dirname = '/uscms_data/d3/shogan/crab_dirs/HistosULV9Bm_2016APV_UNCERTS_SomeFixes_Feb23/'
 
 big_dict = {}
 
@@ -293,7 +289,6 @@ for fname in flist:
     bjet_hlt_tag_uncert    = get_hlt_btagging_uncert(logical_name)
     jer_uncert             = get_jer_correction_uncert(logical_name)
     jes_uncert             = get_jes_correction_uncert(logical_name)
-
 
     sub_dict['tracking_hlt']    = get_dijet_hlt_track_uncert(logical_name)
     sub_dict['tracking_count']  = get_dijet_offline_track_uncert(logical_name)
@@ -321,6 +316,31 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'getdict' in sys.argv:
     print "here!"
     pprint.pprint(big_dict)
 
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'geteffdict' in sys.argv:
+    eff_dict = {}
+    root_file_dir = dirname
+
+    multijet = [s for s in Samples.mfv_signal_samples_2017]
+    dijet_d = [s for s in Samples.mfv_stopdbardbar_samples_2017]
+    dijet_b = [s for s in Samples.mfv_stopbbarbbar_samples_2017]
+    
+    for sample in multijet + dijet_d + dijet_b:
+        fn = os.path.join(root_file_dir, sample.name + '.root')
+        if not os.path.exists(fn):
+            continue
+
+        sub_dict = {}
+ 
+        for key in ['tracking_hlt', 'tracking_count', 'dijet_kine', 'bjet_signal', 'bjet_sf_avg', 'bjet_hlt', 'jer_dn', 'jer_up', 'jes_dn', 'jes_up']:
+            comp = key
+            eff, err = eff_from_dict(sample.name, comp, big_dict, yr, normalize=True)
+
+            sub_dict[key] = round(eff, 4)
+
+        eff_dict[sample.name] = sub_dict
+
+    pprint.pprint(eff_dict)
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'makeplots' in sys.argv:
     set_style()
@@ -330,9 +350,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'makeplots' in sys.argv:
     for key in ['tracking_hlt', 'tracking_count', 'dijet_kine', 'bjet_signal', 'bjet_sf_avg', 'bjet_hlt', 'jer_dn', 'jer_up', 'jes_dn', 'jes_up']:
         comp = key
     
-        multijet = [s for s in Samples.mfv_signal_samples_2016APV]
-        dijet_d = [s for s in Samples.mfv_stopdbardbar_samples_2016APV]
-        dijet_b = [s for s in Samples.mfv_stopbbarbbar_samples_2016APV]
+        multijet = [s for s in Samples.mfv_signal_samples_2017]
+        dijet_d = [s for s in Samples.mfv_stopdbardbar_samples_2017]
+        dijet_b = [s for s in Samples.mfv_stopbbarbbar_samples_2017]
     
         for sample in multijet + dijet_d + dijet_b:# + higgs:
             fn = os.path.join(root_file_dir, sample.name + '.root')
