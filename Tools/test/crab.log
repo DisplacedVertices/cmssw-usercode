@@ -1,0 +1,374 @@
+DEBUG 2023-02-03 14:09:11.925 UTC: 	 CRAB Client version: v3.221018
+DEBUG 2023-02-03 14:09:11.925 UTC: 	 Running on: Linux cmslpc160.fnal.gov 3.10.0-1160.81.1.el7.x86_64 #1 SMP Tue Dec 13 09:53:21 CST 2022 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux 7.9 (Nitrogen)
+DEBUG 2023-02-03 14:09:11.925 UTC: 	 Executing command: 'checkusername'
+DEBUG 2023-02-03 14:09:11.942 UTC: 	 Found CRAB cache file /uscms/home/shogan/.crab3
+DEBUG 2023-02-03 14:09:11.945 UTC: 	 Checking credentials
+DEBUG 2023-02-03 14:09:11.945 UTC: 	 Found proxy file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:09:11.945 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2023-02-03 14:09:11.945 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:09:11.976 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:09:11.976 UTC: 	 Getting proxy life time left
+DEBUG 2023-02-03 14:09:11.976 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 output : 618640
+618640
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Proxy valid for 171:50:40 hours
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Command use: checkusername
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Options use: []
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Instance is None
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Server base url is None
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Retrieving username ...
+DEBUG 2023-02-03 14:09:12.006 UTC: 	 Retrieving username from CRIC...
+DEBUG 2023-02-03 14:09:13.538 UTC: 	 username is shogan
+INFO 2023-02-03 14:09:13.538 UTC: 	 Username is: shogan
+DEBUG 2023-02-03 14:11:45.584 UTC: 	 CRAB Client version: v3.221018
+DEBUG 2023-02-03 14:11:45.584 UTC: 	 Running on: Linux cmslpc160.fnal.gov 3.10.0-1160.81.1.el7.x86_64 #1 SMP Tue Dec 13 09:53:21 CST 2022 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux 7.9 (Nitrogen)
+DEBUG 2023-02-03 14:11:45.584 UTC: 	 Executing command: 'createmyproxy'
+DEBUG 2023-02-03 14:11:45.585 UTC: 	 Found CRAB cache file /uscms/home/shogan/.crab3
+DEBUG 2023-02-03 14:11:45.586 UTC: 	 Checking credentials
+DEBUG 2023-02-03 14:11:45.586 UTC: 	 Found proxy file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:45.586 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2023-02-03 14:11:45.586 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:45.617 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:45.617 UTC: 	 Getting proxy life time left
+DEBUG 2023-02-03 14:11:45.617 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:45.645 UTC: 	 output : 691104
+691104
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:45.646 UTC: 	 Proxy valid for 191:58:24 hours
+DEBUG 2023-02-03 14:11:45.696 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2023-02-03 14:11:45.697 UTC: 	 Executing command :
+ curl -v -X GET -H "User-Agent: CRABClient/v3.221018" -H "Accept: */*" --data @/tmp/crab_curlDataJb1LfH --cert "/uscms/home/shogan/x509up_u50569" --key "/uscms/home/shogan/x509up_u50569" --capath "/etc/grid-security/certificates/" "https://cmsweb.cern.ch:8443/crabserver/prod/info?subresource=delegatedn" | tee /dev/stderr 
+DEBUG 2023-02-03 14:11:46.296 UTC: 	 output : {"result": [
+ {"services": ["/DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch"]}
+]}
+
+ error:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 188.185.101.116...
+* TCP_NODELAY set
+* Connected to cmsweb.cern.ch (188.185.101.116) port 8443 (#0)
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: /etc/grid-security/certificates/
+* TLSv1.2 (OUT), TLS header, Certificate Status (22):
+} [5 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+{ [109 bytes data]
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+{ [6237 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+{ [333 bytes data]
+* TLSv1.2 (IN), TLS handshake, Request CERT (13):
+{ [13332 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+{ [4 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Certificate (11):
+} [6337 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+} [70 bytes data]
+* TLSv1.2 (OUT), TLS handshake, CERT verify (15):
+} [264 bytes data]
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+} [16 bytes data]
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+{ [1 bytes data]
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+{ [16 bytes data]
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server accepted to use http/1.1
+* Server certificate:
+*  subject: DC=ch; DC=cern; OU=computers; CN=cmsweb.cern.ch
+*  start date: Feb 17 13:05:12 2022 GMT
+*  expire date: Mar 24 13:05:12 2023 GMT
+*  subjectAltName: host "cmsweb.cern.ch" matched cert's "cmsweb.cern.ch"
+*  issuer: DC=ch; DC=cern; CN=CERN Grid Certification Authority
+*  SSL certificate verify ok.
+} [5 bytes data]
+> GET /crabserver/prod/info?subresource=delegatedn HTTP/1.1
+> Host: cmsweb.cern.ch:8443
+> User-Agent: CRABClient/v3.221018
+> Accept: */*
+> Content-Length: 22
+> Content-Type: application/x-www-form-urlencoded
+> 
+} [22 bytes data]
+* upload completely sent off: 22 out of 22 bytes
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Fri, 03 Feb 2023 14:11:46 GMT
+< Server: Apache
+< Content-Type: application/json
+< Content-Length: 216
+< Vary: Accept
+< Cache-Control: max-age=3600
+< X-Rest-Status: 100
+< Etag: "531fb58a933656ea08a7f418b273fdae3c95932a"
+< X-Rest-Time: 2922.773 us
+< CMS-Server-Time: D=11421 t=1675433506227218
+< 
+{ [5 bytes data]
+100   238  100   216  100    22    370     37 --:--:-- --:--:-- --:--:--   408
+* Connection #0 to host cmsweb.cern.ch left intact
+{"result": [
+ {"services": ["/DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch"]}
+]}
+
+ retcode : 0
+DEBUG 2023-02-03 14:11:46.297 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch
+DEBUG 2023-02-03 14:11:46.297 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:46.325 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=shogan/CN=766216/CN=Shaun Hogan
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:46.326 UTC: 	 Getting myproxy life time left for 3099485e6123d26b11dc85cbc009e72b899c6d04
+DEBUG 2023-02-03 14:11:46.326 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 3099485e6123d26b11dc85cbc009e72b899c6d04
+DEBUG 2023-02-03 14:11:47.110 UTC: 	 output : username: 3099485e6123d26b11dc85cbc009e72b899c6d04
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=shogan/CN=766216/CN=Shaun Hogan
+  renewal policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch
+  trusted retrieval policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch
+  timeleft: 699:48:19  (29.2 days)
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Myproxy is valid: 2519280
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: 3099485e6123d26b11dc85cbc009e72b899c6d04  - validity: 29 days, 3:48:00
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Command use: createmyproxy
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Options use: []
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2023-02-03 14:11:47.111 UTC: 	 Executing command :
+ curl -v -X GET -H "User-Agent: CRABClient/v3.221018" -H "Accept: */*" --data @/tmp/crab_curlDataig86xX --cert "/uscms/home/shogan/x509up_u50569" --key "/uscms/home/shogan/x509up_u50569" --capath "/etc/grid-security/certificates/" "https://cmsweb.cern.ch:8443/crabserver/prod/info?subresource=version" | tee /dev/stderr 
+DEBUG 2023-02-03 14:11:47.707 UTC: 	 output : {"result": [
+ ["3.3.19", "3.3.20", "v3", "development", "v3.221027"]
+]}
+
+ error:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 188.185.101.116...
+* TCP_NODELAY set
+* Connected to cmsweb.cern.ch (188.185.101.116) port 8443 (#0)
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: /etc/grid-security/certificates/
+* TLSv1.2 (OUT), TLS header, Certificate Status (22):
+} [5 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+{ [109 bytes data]
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+{ [6237 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+{ [333 bytes data]
+* TLSv1.2 (IN), TLS handshake, Request CERT (13):
+{ [13332 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+{ [4 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Certificate (11):
+} [6337 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+} [70 bytes data]
+* TLSv1.2 (OUT), TLS handshake, CERT verify (15):
+} [264 bytes data]
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+} [16 bytes data]
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+{ [1 bytes data]
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+{ [16 bytes data]
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server accepted to use http/1.1
+* Server certificate:
+*  subject: DC=ch; DC=cern; OU=computers; CN=cmsweb.cern.ch
+*  start date: Feb 17 13:05:12 2022 GMT
+*  expire date: Mar 24 13:05:12 2023 GMT
+*  subjectAltName: host "cmsweb.cern.ch" matched cert's "cmsweb.cern.ch"
+*  issuer: DC=ch; DC=cern; CN=CERN Grid Certification Authority
+*  SSL certificate verify ok.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0} [5 bytes data]
+> GET /crabserver/prod/info?subresource=version HTTP/1.1
+> Host: cmsweb.cern.ch:8443
+> User-Agent: CRABClient/v3.221018
+> Accept: */*
+> Content-Length: 19
+> Content-Type: application/x-www-form-urlencoded
+> 
+} [19 bytes data]
+* upload completely sent off: 19 out of 19 bytes
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Fri, 03 Feb 2023 14:11:47 GMT
+< Server: Apache
+< Content-Type: application/json
+< Content-Length: 72
+< Vary: Accept
+< Cache-Control: max-age=3600
+< X-Rest-Status: 100
+< Etag: "d93f7bb6a049cf36e3064f429217b26af3532092"
+< X-Rest-Time: 1751.423 us
+< CMS-Server-Time: D=8459 t=1675433507642091
+< 
+{ [5 bytes data]
+100    91  100    72  100    19    124     32 --:--:-- --:--:-- --:--:--   156
+* Connection #0 to host cmsweb.cern.ch left intact
+{"result": [
+ ["3.3.19", "3.3.20", "v3", "development", "v3.221027"]
+]}
+
+ retcode : 0
+DEBUG 2023-02-03 14:11:47.708 UTC: 	 CRABClient version: v3.221018
+DEBUG 2023-02-03 14:11:47.708 UTC: 	 Instance is prod
+DEBUG 2023-02-03 14:11:47.708 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2023-02-03 14:11:47.708 UTC: 	 Command api workflow
+INFO 2023-02-03 14:11:47.708 UTC: 	 Checking credentials
+DEBUG 2023-02-03 14:11:47.710 UTC: 	 Checking credentials
+DEBUG 2023-02-03 14:11:47.710 UTC: 	 Found proxy file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:47.710 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2023-02-03 14:11:47.710 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:47.738 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:47.739 UTC: 	 Getting proxy life time left
+DEBUG 2023-02-03 14:11:47.739 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:47.767 UTC: 	 output : 691102
+691102
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:47.767 UTC: 	 Proxy valid for 191:58:22 hours
+DEBUG 2023-02-03 14:11:47.767 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2023-02-03 14:11:47.768 UTC: 	 Executing command :
+ curl -v -X GET -H "User-Agent: CRABClient/v3.221018" -H "Accept: */*" --data @/tmp/crab_curlDataUcAgy9 --cert "/uscms/home/shogan/x509up_u50569" --key "/uscms/home/shogan/x509up_u50569" --capath "/etc/grid-security/certificates/" "https://cmsweb.cern.ch:8443/crabserver/prod/info?subresource=delegatedn" | tee /dev/stderr 
+DEBUG 2023-02-03 14:11:48.366 UTC: 	 output : {"result": [
+ {"services": ["/DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch"]}
+]}
+
+ error:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 188.184.73.32...
+* TCP_NODELAY set
+* Connected to cmsweb.cern.ch (188.184.73.32) port 8443 (#0)
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: /etc/grid-security/certificates/
+* TLSv1.2 (OUT), TLS header, Certificate Status (22):
+} [5 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+{ [109 bytes data]
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+{ [6237 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+{ [333 bytes data]
+* TLSv1.2 (IN), TLS handshake, Request CERT (13):
+{ [13332 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+{ [4 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Certificate (11):
+} [6337 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+} [70 bytes data]
+* TLSv1.2 (OUT), TLS handshake, CERT verify (15):
+} [264 bytes data]
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+} [16 bytes data]
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+{ [1 bytes data]
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+{ [16 bytes data]
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server accepted to use http/1.1
+* Server certificate:
+*  subject: DC=ch; DC=cern; OU=computers; CN=cmsweb.cern.ch
+*  start date: Feb 17 13:05:12 2022 GMT
+*  expire date: Mar 24 13:05:12 2023 GMT
+*  subjectAltName: host "cmsweb.cern.ch" matched cert's "cmsweb.cern.ch"
+*  issuer: DC=ch; DC=cern; CN=CERN Grid Certification Authority
+*  SSL certificate verify ok.
+} [5 bytes data]
+> GET /crabserver/prod/info?subresource=delegatedn HTTP/1.1
+> Host: cmsweb.cern.ch:8443
+> User-Agent: CRABClient/v3.221018
+> Accept: */*
+> Content-Length: 22
+> Content-Type: application/x-www-form-urlencoded
+> 
+} [22 bytes data]
+* upload completely sent off: 22 out of 22 bytes
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Fri, 03 Feb 2023 14:11:48 GMT
+< Server: Apache
+< Content-Type: application/json
+< Content-Length: 216
+< Vary: Accept
+< Cache-Control: max-age=3600
+< X-Rest-Status: 100
+< Etag: "531fb58a933656ea08a7f418b273fdae3c95932a"
+< X-Rest-Time: 2432.108 us
+< CMS-Server-Time: D=10283 t=1675433508297818
+< 
+{ [5 bytes data]
+100   238  100   216  100    22    371     37 --:--:-- --:--:-- --:--:--   408
+* Connection #0 to host cmsweb.cern.ch left intact
+{"result": [
+ {"services": ["/DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch"]}
+]}
+
+ retcode : 0
+INFO 2023-02-03 14:11:48.366 UTC: 	 Registering user credentials in myproxy
+DEBUG 2023-02-03 14:11:48.366 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /uscms/home/shogan/x509up_u50569
+DEBUG 2023-02-03 14:11:48.396 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=shogan/CN=766216/CN=Shaun Hogan
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:48.396 UTC: 	 Getting myproxy life time left for 3099485e6123d26b11dc85cbc009e72b899c6d04
+DEBUG 2023-02-03 14:11:48.396 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 3099485e6123d26b11dc85cbc009e72b899c6d04
+DEBUG 2023-02-03 14:11:49.237 UTC: 	 output : username: 3099485e6123d26b11dc85cbc009e72b899c6d04
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=shogan/CN=766216/CN=Shaun Hogan
+  renewal policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch
+  trusted retrieval policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod|dev)-tw(01|02|03).cern.ch|/DC=ch/DC=cern/OU=computers/CN=stefanov(m|m2).cern.ch|/DC=ch/DC=cern/OU=computers/CN=dciangot-tw.cern.ch
+  timeleft: 699:48:17  (29.2 days)
+
+ error: 
+ retcode : 0
+DEBUG 2023-02-03 14:11:49.237 UTC: 	 Myproxy is valid: 2519280
+INFO 2023-02-03 14:11:49.237 UTC: 	 Credential exists on myproxy: username: 3099485e6123d26b11dc85cbc009e72b899c6d04  - validity: 29 days, 3:48:00
+INFO 2023-02-03 14:11:49.241 UTC: 	 Log file is /uscms/homes/s/shogan/work/mfv_10627/src/JMTucker/Tools/test/crab.log

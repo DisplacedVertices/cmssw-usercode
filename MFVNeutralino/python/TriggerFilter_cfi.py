@@ -6,7 +6,8 @@ jet_paths = [
     ]
 
 low_HT_paths = [
-    "HLT_HT425_v*",
+    "HLT_HT325_v*",  # for 2016 HLT track studies
+    "HLT_HT425_v*",  # for 2017+8 HLT track studies
     ]
 
 bjet_paths = [
@@ -32,12 +33,19 @@ displaced_dijet_paths = [
     ]
 
 lepton_paths = [
-    "HLT_Ele35_WPTight_Gsf_v*",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+    #"HLT_Ele35_WPTight_Gsf_v*",
+    #"HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+    #"HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
     "HLT_IsoMu27_v*",
-    "HLT_Mu50_v*",
+    #"HLT_Mu50_v*",
     ]
+
+dilepton_paths = [
+    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
+    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+]
 
 cross_paths = [
     "HLT_Ele15_IsoVVVL_PFHT450_v*", # JMTBAD these two cross triggers are rendered useless with the offline ht and lepton pt cuts imposed in eventFilter
@@ -58,7 +66,17 @@ mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(
         throw = False,
         )
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
-mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(HLTPaths = lepton_paths)
+mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(
+        HLTPaths = lepton_paths,
+        andOr = True, # OR
+        throw = False,
+        )
+
+mfvTriggerFilterDileptonOnly = mfvTriggerFilter.clone(
+        HLTPaths = dilepton_paths,
+        andOr = True, # OR
+        throw = False,
+        )
 
 mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = jet_paths + bjet_paths + displaced_dijet_paths,
@@ -74,6 +92,12 @@ mfvTriggerFilterBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hl
 
 mfvTriggerFilterBjetsORDisplacedDijetVetoHT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = bjet_paths + displaced_dijet_paths,
+        andOr = True, # OR
+        throw = False,
+        )
+
+mfvTriggerFilterDisplacedDijetVetoBjets = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = displaced_dijet_paths,
         andOr = True, # OR
         throw = False,
         )

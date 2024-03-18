@@ -8,7 +8,7 @@ settings.is_mc = True
 
 global_tag(process, which_global_tag(settings))
 tfileservice(process, 'btageff.root')
-sample_files(process, 'qcdht2000_%s' % year, 'miniaod', 1)
+#sample_files(process, 'qcdht2000_%s' % year, 'miniaod', 1)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -34,7 +34,8 @@ if year == 2017:
     process.p *= process.JMTBTagEfficiencyOld
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
+setup_event_filter(process, input_is_miniaod=True, mode='low HT online track test', event_filter_jes_mult=0)
+#setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
 ReferencedTagsTaskAdder(process)('p')
 
@@ -43,6 +44,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
+    if year == 20161:
+        samples = Samples.qcd_samples_2016APV + Samples.ttbar_samples_2016APV
+    if year == 20162:
+        samples = Samples.qcd_samples_2016 + Samples.ttbar_samples_2016
     if year == 2017:
         samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
     elif year == 2018:

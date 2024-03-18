@@ -491,6 +491,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 }
 
 void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+
+//  std::cout << "Here 0!" << std::endl;
   setup.getData(pdt);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
@@ -518,6 +520,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_gen_vtx_y->Fill(y0);
   h_gen_vtx_z->Fill(z0);
 
+//  std::cout << "Here 1!" << std::endl;
   if (!mci->valid()) {
     if (!mci_warned)
       edm::LogWarning("GenHistos") << "MCInteraction invalid; no further warnings!";
@@ -719,6 +722,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           fill(Qs[i][j], &*mci->secondaries()[i*2+j]);
       }
     }
+//  std::cout << "Here 2!" << std::endl;
   }
 
   // Now look at b quarks separately. Count the number of status-3 b
@@ -735,6 +739,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   std::vector<int> bquarks_ids;
   std::vector<double> bquarks_eta;
   std::vector<double> bquarks_phi;
+//  std::cout << "Here 3!" << std::endl;
   for (const reco::GenParticle& gen : *gen_particles) {
     if (abs(gen.pdgId()) == 5) {
       bool has_b_dau = false;
@@ -779,6 +784,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
   h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
   h_nbquarks->Fill(nbquarks);
+//  std::cout << "Here 4!" << std::endl;
   if (bquarks_ids.size() == 2) {
     double dphi = reco::deltaPhi(bquarks_phi[0], bquarks_phi[1]);
     double deta = bquarks_eta[0] - bquarks_eta[1];
@@ -801,28 +807,36 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int njets30 = 0;
   int njets20 = 0; 
   float ht = 0, ht30 = 0, ht40 = 0;
+//  std::cout << "Here 5!" << std::endl;
   for (const reco::GenJet& jet : *gen_jets) {
-    if (jet.pt() < 20)// || fabs(jet.eta()) > 2.5)
+    if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
       continue;
 
+//    std::cout << "Here 5.0!" << std::endl;
     ++njets;
     ht += jet.pt();
+//    std::cout << "Here 5.1!" << std::endl;
     if (jet.pt() > 20)
       ++njets20;
+//    std::cout << "Here 5.2!" << std::endl;
     if (jet.pt() > 30){
       ht30 += jet.pt();
       ++njets30;
     }
+//    std::cout << "Here 5.3!" << std::endl;
     if (jet.pt() > 40){
       ht40 += jet.pt();
       ++njets40;
     }
+//    std::cout << "Here 5.4!" << std::endl;
     if (jet.pt() > 60)
       ++njets60;
 
     int nchg = 0;
+//    std::cout << "Here 5.5!" << std::endl;
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
+//    std::cout << "Here 5.6!" << std::endl;
     for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
       const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
       if (g && g->charge())
@@ -833,6 +847,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
     float fchg = float(nchg)/jet.nConstituents();
 
+//    std::cout << "Here 5.7!" << std::endl;
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
     JetEmE->Fill(jet.emEnergy());
@@ -843,8 +858,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     JetFChargedConst->Fill(fchg);
     JetNtracksPt->Fill(jet.pt(), nchg);
     JetNtracksptgt3Pt->Fill(jet.pt(), ntracksptgt3);
+//    std::cout << "Here 5.8!" << std::endl;
 
     fill_by_label(JetIds, id != 0 ? pdt->particle(id)->name() : "N/A");
+//    std::cout << "Here 5.9!" << std::endl;
 
     if (id == 5) {
       ++nbjets;
@@ -858,7 +875,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       BJetNChargedConst->Fill(nchg);
       BJetFChargedConst->Fill(fchg);
     }      
+//    std::cout << "Here 5.10!" << std::endl;
   }
+//  std::cout << "Here 6!" << std::endl;
   NJets->Fill(njets);
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
@@ -868,6 +887,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_ht20->Fill(ht);
   h_ht30->Fill(ht30);
   h_ht40->Fill(ht40);
+//  std::cout << "Here 7!" << std::endl;
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);

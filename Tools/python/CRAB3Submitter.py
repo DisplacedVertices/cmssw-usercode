@@ -137,6 +137,7 @@ class CRABSubmitter:
         self.cfg_template.JobType.pluginName = 'Analysis' # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
         self.cfg_template.JobType.allowUndistributedCMSSW = True
 
+
         if input_files:
             if type(input_files) == str:
                 input_files = [input_files]
@@ -160,6 +161,8 @@ class CRABSubmitter:
         self.dataset = dataset
         self.cfg_template.Data.inputDataset = 'SETLATER'
         self.cfg_template.Data.inputDBS = 'SETLATER'
+        self.cfg_template.Data.partialDataset = True          # less-hacky way to try and get around RUCIO bugginess
+        #self.cfg_template.Data.runRange = '0'                # Hacky way to try and get around RUCIO bugginess
 
         self.cfg_template.General.requestName = 'SETLATER'
 

@@ -16,7 +16,7 @@ def write(font, size, x, y, text):
 
 for is_mc in True,: #False:
     #for year in 2017,:#, 2018, '2017p8':
-    for year in 2018,:
+    for year in '2017p8',:
         in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
         in_f = ROOT.TFile(in_fn)
 

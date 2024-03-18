@@ -26,9 +26,29 @@ def zerobias_modifier(sample):
 
 def era_modifier(sample):
     if not sample.is_mc:
-        mo = re.search(r'(201\d)([A-Z])', sample.name)
-        assert mo
-        yr, era = mo.groups()
+
+        my_sample_name = sample.name
+        is2016APV = False
+        
+        if 'APV' in my_sample_name : 
+            my_sample_name.replace('APV','')
+            is2016APV = True
+
+        if not is2016APV:
+            mo = re.search(r'(201\d)([A-Z])', my_sample_name)
+            assert mo
+            yr, era = mo.groups()
+
+        else:
+            mo = re.search(r'(2016APV)([A-Z])', my_sample_name)
+            assert mo
+            yr = 2016
+            garbage, era = mo.groups()
+
+        if int(yr) == 2016 :
+            if is2016APV : yr = 20161
+            else         : yr = 20162
+
         assert year == int(yr)
         magic = '\nsettings.is_mc ='
         return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
@@ -194,13 +214,51 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=20, limit_ttbar=False):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=5, limit_ttbar=False):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
+            'SingleMuon': 3,
+            'MuonEG': 4,
+            'DisplacedJet': 4,
+            'ttbar_2016APV': 3,
+            'ttbar_ll_2016APV': 3,
+            'qcdht0300_2016APV': 4,
+            'qcdht0500_2016APV': 4,
+            'qcdht0700_2016APV': 4,
+            'qcdht1000_2016APV': 9,
+            'qcdht1500_2016APV': 9,
+            'qcdht2000_2016APV': 9,
+#            'SingleMuon2016F': 8,
+#            'SingleMuon2016G': 8,
+#            'SingleMuon2016H': 8,
+#            'MuonEG2016F': 4,
+#            'MuonEG2016G': 4,
+#            'MuonEG2016H': 4,
+#            'DisplacedJet2016F': 4,
+#            'DisplacedJet2016G': 4,
+#            'DisplacedJet2016H': 4,
+            'qcdht0300_2016': 4,
+            'qcdht0500_2016': 4,
+            'qcdht0700_2016': 4,
+            'qcdht1000_2016': 9,
+            'qcdht1500_2016': 9,
+            'qcdht2000_2016': 9,
+            'ttbar_2016': 3,
+            'ttbar_ll_2016': 3,
+#            'SingleMuon2017B': 3,
+#            'SingleMuon2017C': 3,
+#            'SingleMuon2017D': 3,
+#            'SingleMuon2017E': 3,
+#            'SingleMuon2017F': 3,
+            'qcdht0300_2017': 2,
+            'qcdht0500_2017': 2,
+            'qcdht0700_2017': 2,
             'qcdht1000_2017': 11,
             'qcdht1500_2017': 11,
             'qcdht2000_2017': 11,
-            'ttbar_2017': 22,
+            'ttbar_2017': 3,
+            'ttbar_ll_2017': 3,
+            'wjetstolnu_2017': 3,
             'ttbarht0600_2017': 8,
             'ttbarht0800_2017': 8,
             'ttbarht1200_2017': 8,
@@ -208,7 +266,16 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             'qcdht1000_2018': 11,
             'qcdht1500_2018': 11,
             'qcdht2000_2018': 11,
-            'ttbar_2018': 22,
+            'ttbar_2018': 8,
+            'ttbar_ll_2018': 8,
+#            'SingleMuon2018A': 8,
+#            'SingleMuon2018B': 8,
+#            'SingleMuon2018C': 8,
+#            'SingleMuon2018D': 8,
+#            'MuonEG2018A': 4,
+#            'MuonEG2018B': 4,
+#            'MuonEG2018C': 4,
+#            'MuonEG2018D': 4,
             'ttbarht0600_2018': 8,
             'ttbarht0800_2018': 8,
             'ttbarht1200_2018': 8,
@@ -217,6 +284,10 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
+            name = sample.name
+            match = re.match(r"([A-Za-z]+)(201\d{1}[A-Za-z]*)", name)
+            if match:
+                name = match.group(1)
             sample.files_per = d.get(sample.name, 10000)
 
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
@@ -231,7 +302,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'qcdht1000_2017':   ( 3,  551000),
                 'qcdht1500_2017':   ( 1,  186000),
                 'qcdht2000_2017':   ( 1,  202000),
-                'ttbar_2017':       ( 5, 3040000),
+                'ttbar_2017':       (50, 3040000),
                 'ttbarht0600_2017': ( 5,   71500),
                 'ttbarht0800_2017': ( 3,   45000),
                 'ttbarht1200_2017': ( 3,   32500),
@@ -260,6 +331,10 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
             if 'JetHT' in name:
                 name = 'JetHT'
+            elif 'BTagCSV' in name:
+                name = 'BTagCSV'
+            elif 'DisplacedJet' in name:
+                name = 'DisplacedJet'
             elif 'MET' in name:
                 name = 'MET'
             elif sample.is_signal:
@@ -282,6 +357,9 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
             sample.files_per = default_files_per 
+
+            if 'BTagCSV' in sample.name or 'DisplacedJet' in sample.name:
+                sample.files_per = int(round(sample.files_per / 3.))
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)
@@ -310,7 +388,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False,  
+                 qcd=False, ttbar=False, all_signal=False, data=False, JetHT_data=False, BTagCSV_data=False, DisplacedJet_data=False, leptonic=False, bjet=False,  
                  splitSUSY=False, Zvv=False, met=False,
                  span_signal=False):
 
@@ -318,7 +396,7 @@ def pick_samples(dataset, both_years=False,
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'JetHT_data', 'BTagCSV_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -333,13 +411,16 @@ def pick_samples(dataset, both_years=False,
             if a2 != a:
                 args[a2] = False
 
-    years = [2017, 2018] if both_years else [year]
+    years = [20161, 20162, 2017, 2018] if both_years else [year]
 
     samples = []
     for a in argnames:
         if args[a]:
             for yr in years:
-                samples += getattr(Samples, '%s_samples_%i' % (a, yr))
+                if   yr == 20161 : yr = "2016APV"
+                elif yr == 20162 : yr = "2016"
+                samples += getattr(Samples, '%s_samples_%s' % (a, yr))
+    print([s.name for s in samples])
     return [s for s in samples if s.has_dataset(dataset)]
 
 ####

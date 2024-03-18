@@ -15,6 +15,21 @@ namespace jmt {
 
   //  template <typename T, typename T2> T2 mag(const T& v) { return mag<T2>(v.x(), v.y(), v.z()); }
 
+  template <typename T>
+    void sortVector(std::vector<T>& vec) {
+    std::sort(vec.begin(), vec.end());
+  }
+
+  template <typename T>
+    T computeMedian(const std::vector<T>& vec) {
+    const size_t n = vec.size();
+    if (n % 2 == 1) {
+        return vec[n/2];
+    } else {
+        return (vec[n/2-1] + vec[n/2]) / static_cast<T>(2);
+    }
+  }
+
   template <typename T> T signed_mag(T x, T y) {
     T m = mag(x,y);
     if (y < 0) return -m;

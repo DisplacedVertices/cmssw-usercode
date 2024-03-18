@@ -591,7 +591,7 @@ def compare_hists(ps, samples, **kwargs):
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,
-                        res_fit='pol1',
+                        res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
                         res_y_range=0.15,
@@ -1591,6 +1591,8 @@ def plot_dir(x='', make=False, temp=False):
         d = '/publicweb/j/joeyr/plots'
     elif 'fnal.gov' in hostname and username == 'ali':
         d = '/publicweb/a/ali/'
+    elif 'fnal.gov' in hostname :
+        d = os.environ['HOME']+'/nobackup/DVplots/'
     if d:
         x = os.path.join(d,x)
     else:

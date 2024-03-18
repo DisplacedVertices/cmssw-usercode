@@ -13,7 +13,21 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                                              # 6 = bjets/displaced dijet (HT agnostic)
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
-                               require_bquarks = cms.bool(False),
+                               require_bquarks  = cms.bool(False),
+                               require_trigbit  = cms.bool(True),
+                               require_gen_sumdbv  = cms.bool(False),
+                               require_bjet_psel   = cms.bool(True), # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               study_btag_sf       = cms.bool(False),
+                               study_btag_sfvar    = cms.int32(0), # Only used if above bool = True. Set to +1 for up-var, -1 for dn-var, 0 for central val
+                               dijet_agnostic      = cms.bool(False),
+                               bjet_agnostic       = cms.bool(False),
+                               bjet_veto           = cms.bool(False),
+                               study_jer           = cms.bool(False),
+                               study_jes           = cms.bool(False),
+                               jes_jer_var_up      = cms.bool(True), # Only used if study_jer or study_jes is true. True = var_up, False = var_down
+                               btagger_choice  = cms.int32(2), # 0 = CSV, 1 = DeepCSV, 2 = DeepJet
+                               btag_wp         = cms.int32(0), # 0 = Loose, 1 = Medium, 2 = Tight
+                               trigbit_tostudy = cms.int32(99999),
                                # to make any of the next 3 trigger cuts work, or min/max_njets/ht, you have to set apply_presel = 0 above
                                l1_bit = cms.int32(-1),
                                trigger_bit = cms.int32(-1),

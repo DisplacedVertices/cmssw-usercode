@@ -14,30 +14,31 @@ namespace mfv {
   enum {
 
     // HT-triggered analysis trigger
-    b_HLT_PFHT1050,
+    b_HLT_PFHT1050,  // 0
 
     // Lepton triggers
-    b_HLT_Ele35_WPTight_Gsf,
+    b_HLT_Ele35_WPTight_Gsf,  // 1
     b_HLT_Ele115_CaloIdVT_GsfTrkIdT,
     b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165,
     b_HLT_IsoMu27,
     b_HLT_Mu50,
     b_HLT_Ele15_IsoVVVL_PFHT450,
     b_HLT_Mu15_IsoVVVL_PFHT450, 
+    b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL,
+    b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL,
+    b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ,
+    b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,
+
     
     // 2017 bjet triggers
-    b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33,
+    b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33,  // 12
     b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0,
-    b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,
-    b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,
-    b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5,
+    b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40, // Control for the preceding trigger
 
     // 2018 bjet triggers
-    b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71,
+    b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71,  // 15
     b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5,
-    b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5,
-    b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94,
-    b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59,
+    b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40, // Control for the preceding trigger
 
     // 2017 + 2018 Displaced Dijet triggers
     b_HLT_HT430_DisplacedDijet40_DisplacedTrack,
@@ -55,9 +56,10 @@ namespace mfv {
     // MET Trigger
     b_HLT_PFMET120_PFMHT120_IDTight,
 
-    // // Low HT trigger to study filters using HLT tracking
-    b_HLT_HT425, // Low HT trigger to study filters using HLT tracking
-    n_hlt_paths, // = 27
+    // // Low HT triggers to study filters using HLT tracking. Both are highly prescaled
+    b_HLT_HT425, // 2017/2018
+    b_HLT_HT325,
+    n_hlt_paths,
 
     // seeding PFHT1050, the bjet triggers, and the displaced dijet triggers
     b_L1_HTT120er=0, b_L1_HTT160er, b_L1_HTT200er, b_L1_HTT220er, b_L1_HTT240er, b_L1_HTT255er, b_L1_HTT270er, b_L1_HTT280er, b_L1_HTT300er, b_L1_HTT320er, b_L1_HTT340er, b_L1_HTT360er, b_L1_HTT380er, b_L1_HTT400er, b_L1_HTT450er, b_L1_HTT500er, b_L1_HTT250er_QuadJet_70_55_40_35_er2p5, b_L1_HTT280er_QuadJet_70_55_40_35_er2p5, b_L1_HTT300er_QuadJet_70_55_40_35_er2p5, b_L1_HTT320er_QuadJet_70_55_40_40_er2p4, b_L1_DoubleJet100er2p3_dEta_Max1p6, b_L1_DoubleJet112er2p3_dEta_Max1p6,
@@ -75,12 +77,12 @@ namespace mfv {
     // Filters unique to 2018 di-bjet trigger (4, 5, 6  n=3)
     b_hltBTagCaloDeepCSV0p71Double6Jets80, b_hltDoublePFJets116Eta2p3, b_hltDoublePFJets116Eta2p3MaxDeta1p6, 
 
-    // Filters for 2017 tri-bjet trigger (some are shared with 2018) (7-16, n=10)
+    // Filters for 2017 tri-bjet trigger (some are shared with 2018 and 2016) (7-16, n=10)
     b_hltQuadCentralJet30, b_hltCaloQuadJet30HT300, b_hltBTagCaloCSVp05Double, b_hltPFCentralJetLooseIDQuad30, b_hlt1PFCentralJetLooseID75, b_hlt2PFCentralJetLooseID60,
     b_hlt3PFCentralJetLooseID45, b_hlt4PFCentralJetLooseID40, b_hltPFCentralJetsLooseIDQuad30HT300, b_hltBTagPFCSVp070Triple,
     
     // Filters unique to 2018 tri-bjet trigger (17-20, n=4)
-    b_hltCaloQuadJet30HT320, b_hltBTagCaloDeepCSVp17Double, hltPFCentralJetsLooseIDQuad30HT330, hltBTagPFDeepCSV4p5Triple,
+    b_hltCaloQuadJet30HT320, b_hltBTagCaloDeepCSVp17Double, b_hltPFCentralJetsLooseIDQuad30HT330, b_hltBTagPFDeepCSV4p5Triple,
 
     // Filters for 2017/8 Displaced Dijet + Displaced Track trigger (21-25, n=5)
     b_hltHT430, b_hltDoubleCentralCaloJetpt40, b_hltTwoPromptHLTL3DisplacedDijetFullTracksHLTCaloJetTagFilterLowPt, b_hltL4PromptDisplacedDijetFullTracksHLTCaloJetTagFilterLowPt, b_hltL4DisplacedDijetFullTracksHLTCaloJetTagFilterLowPt,

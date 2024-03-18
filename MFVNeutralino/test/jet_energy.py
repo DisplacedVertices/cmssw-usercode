@@ -1,7 +1,7 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
-dataset+='_genjetenergy'
+#dataset+='_genjetenergy'
 sample_files(process, 'mfv_neu_tau001000um_M0600_2017', dataset, 10)
 tfileservice(process, 'jet_energy.root')
 global_tag(process)
