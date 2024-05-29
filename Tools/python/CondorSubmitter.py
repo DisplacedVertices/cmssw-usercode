@@ -13,6 +13,8 @@ if not os.environ.has_key('SCRAM_ARCH') or not os.environ.has_key('CMSSW_VERSION
 class CondorSubmitter:
     sh_template = '''#!/bin/bash
 
+export X509_CERT_DIR=/cvmfs/grid.cern.ch/etc/grid-security/certificates/
+
 workdir=$(pwd)
 realjob=$1
 mapfile -t jobmap < cs_jobmap
