@@ -105,6 +105,7 @@ notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el7:x86_64"
 x509userproxy = $ENV(X509_USER_PROXY)
 __EXTRAS__
 Queue __NJOBS__
@@ -441,7 +442,7 @@ def get(i): return _l[i]
         cwd = os.getcwd()
         os.chdir(working_dir)
         try:
-            submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
+            submit_out, submit_ret = popen('ssh `uname -n` "export X509_USER_PROXY=%s; cd %s; condor_submit < cs_submit.jdl"' % (os.environ['X509_USER_PROXY'], working_dir), return_exit_code=True)
             ok = False
             cluster = None
             schedd = None
