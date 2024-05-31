@@ -180,7 +180,8 @@ def cs_analyze(d,
         if os.path.isfile(log_fn):
             for line in open(log_fn):
                 # later lines can override earlier lines, e.g. held = killed, then released -> idle
-                if 'Image size of job updated' in line:
+                #if 'Image size of job updated' in line:
+                if 'Job executing on host' in line:
                     ret = -2
                 elif 'Job was evicted' in line:
                     ret = -3
