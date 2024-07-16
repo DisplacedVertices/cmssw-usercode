@@ -38,7 +38,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '~/nobackup/crabdirs/WplsuH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #set_events(process, [(1, 12002, 31167330)])
-#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 cmssw_from_argv(process)
 
 
@@ -48,12 +48,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     # if use_btag_triggers :
     #     samples = pick_samples(dataset, qcd=True, ttbar=False, data=False) # no data currently; no sliced ttbar since inclusive is used
-    # if use_MET_triggers :
+    if use_MET_triggers :
+        samples = [getattr(Samples, 'wjetstolnu_amcatnlo_2017')]
+        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     #     samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
 
-    if use_Muon_triggers :
+    # if use_Muon_triggers :
         #samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=False)
-        samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
+        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
         #samples = [getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2017')] 
         #samples = [getattr(Samples, 'mfv_stoplb_tau001000um_M0400_2017')] 
     elif use_Electron_triggers :

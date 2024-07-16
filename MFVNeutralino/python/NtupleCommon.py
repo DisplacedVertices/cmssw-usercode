@@ -4,8 +4,8 @@ from JMTucker.Tools.Year import year
 ntuple_version_ = 'OnnormdzULV30'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
-use_MET_triggers = False
-use_Muon_triggers = True
+use_MET_triggers = True
+use_Muon_triggers = False
 use_Electron_triggers = False
 use_DisplacedLepton_triggers = False
 if use_btag_triggers : 

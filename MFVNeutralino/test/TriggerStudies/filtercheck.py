@@ -7,7 +7,9 @@ settings.is_miniaod = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
 #sample_files(process, 'qcdht1000_2017', 'miniaod')
-sample_files(process, 'mfv_stoplb_tau000100um_M0800_2017', 'miniaod')
+#sample_files(process, 'mfv_stoplb_tau000100um_M0800_2017', 'miniaod')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
+#max_events(process, 1000)
 geometry_etc(process, settings)
 tfileservice(process, 'filtercheck.root')
 cmssw_from_argv(process)
@@ -15,14 +17,14 @@ cmssw_from_argv(process)
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
 sef('pTrigger', mode = 'trigger jets only')
-#sef('pTriggerMET', mode = 'trigger met only', name_ex = 'met')
+sef('pTriggerMET', mode = 'trigger met only', name_ex = 'met')
 #sef('pTriggerBjets', mode = 'trigger bjets only',name_ex = 'bjets')
 #sef('pTriggerDispDijet', mode = 'trigger displaced dijet only',name_ex = 'displaced_dijet')
 #sef('pTriggerOR', mode = 'trigger HT OR bjets OR displaced dijet', name_ex = 'HT_OR_bjets_OR_displaced_dijet')
 #sef('pJets',    mode = 'jets only novtx',   name_ex = 'NoVtx') # be sure to generate a different name for each subsequent use
 #sef('pNoJESUp', mode = 'jets only novtx',   name_ex = 'NoJESUp', event_filter_jes_mult = 0)
 #sef('pFull',    mode = 'jets only',         name_ex = 'Full') # uncomment to get efficiency of ntuple-level vertex filter
-sef('pTriggerLeptons', mode = 'trigger leptons only',name_ex = 'leptons')
+sef('pTriggerMuons', mode = 'trigger muons only',name_ex = 'muons')
 
 
 
@@ -42,14 +44,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if year == 2017:
         #samples = Samples.mfv_splitSUSY_samples_2017
-        samples = Samples.mfv_stoplb_samples_2017 + Samples.mfv_stopld_samples_2017
+        #samples = Samples.mfv_stoplb_samples_2017 + Samples.mfv_stopld_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
         #samples = Samples.all_signal_samples_2017
         #samples += Samples.leptonic_samples_2017
+        samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')] 
+        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     elif year == 2018:
         samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
         #samples = Samples.all_signal_samples_2018
 
-    ms = MetaSubmitter('TrigFiltCheckV3', dataset='miniaod')
+    ms = MetaSubmitter('TrigFiltCheckP0', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.submit(samples)
