@@ -37,6 +37,8 @@
   <class name="MFVVertexAux"/>
   <class name="std::vector<MFVVertexAux>"/>
   <class name="edm::Wrapper<std::vector<MFVVertexAux> >"/>
+  <class name="MFVSeedTracks"/>
+  <class name="edm::Wrapper<MFVSeedTracks>"/>
 
   <class name="VertexerPairEff"/>
   <class name="std::vector<VertexerPairEff>"/>

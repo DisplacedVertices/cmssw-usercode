@@ -34,11 +34,14 @@ namespace jmt {
       double dxydszcov_;
     };
 
-    TrackRescaler() : enable_(false), era_(0), which_(w_BTagDispJet) {}
-    void setup(bool enable, int era, int which) { enable_ = enable; era_ = era; which_ = which; }
+    //track rescaler takes in not only a track's pt and eta, but also the type 
+    // ie if it is a general track vs. muon or electron candidate 
+    TrackRescaler() : enable_(false), era_(0), which_(w_BTagDispJet), type_("") {}
+    void setup(bool enable, int era, int which) { enable_ = enable; era_ = era; which_ = which; } //no need to pass track type
+    //void setup(bool enable, int era, int which, std::string type) { enable_ = enable; era_ = era; which_ = which;  type_ = type; } //when need track type
     void enable(bool enable) { enable_ = enable; }
 
-    enum { w_BTagDispJet, w_max };
+    enum { w_BTagDispJet, w_SingleLep, w_JetHT, w_max };
 
     void set_JetHT2017B(double pt, double eta);
     void set_JetHT2017C(double pt, double eta);
@@ -53,13 +56,21 @@ namespace jmt {
     void set_BTagDispJet2017(double pt, double eta);
     void set_BTagDispJet2018(double pt, double eta);
 
+    void set_SingleLep2017(double pt, double eta, std::string type);
+    void set_SingleLep2018(double pt, double eta, std::string type);
+
     void set(double era, int which, double pt, double eta);
     void set(double pt, double eta) { set(era_, which_, pt, eta); }
+
+    //when it is necessary to scale a track based on type
+    void set(double era, int which, double pt, double eta, std::string type);
+    void set(double pt, double eta, std::string type) { set(era_, which_, pt, eta, type); }
 
     const Scales& scales() const { return scales_; }
     bool enable() const { return enable_; }
     int era() const { return era_; }
     int which() const { return which_; }
+    std::string type() const { return type_; }
 
 #ifndef JMT_STANDALONE
     struct ret_t {
@@ -68,6 +79,7 @@ namespace jmt {
     };
 
     ret_t scale(const reco::Track& tk);
+    ret_t scale(const reco::Track& tk, std::string type); //when necessary to scale a track based on type
 #endif
 
   private:
@@ -75,6 +87,7 @@ namespace jmt {
     bool enable_;
     int era_;
     int which_;
+    std::string type_;
   };
 }
 

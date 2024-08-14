@@ -278,6 +278,7 @@ namespace jmt {
     bool fill_tracks_;
     int tracks_cut_level_;
     tracks_cut_fcn tracks_cut_;
+    bool use_separated_leptons_;
   public:
     TrackingAndJetsNtupleFillerParams()
       : pvs_subtract_bs_(false),
@@ -286,7 +287,8 @@ namespace jmt {
         jets_cut_(nullptr),
         fill_tracks_(true),
         tracks_cut_level_(-1),
-        tracks_cut_(nullptr)
+        tracks_cut_(nullptr),
+        use_separated_leptons_(true) // true if use_displaced_lepton 
     {}
 
     bool pvs_subtract_bs() const { return pvs_subtract_bs_; }
@@ -296,6 +298,7 @@ namespace jmt {
     bool fill_tracks() const { return fill_tracks_; }
     int tracks_cut_level() const { return tracks_cut_level_; }
     tracks_cut_fcn tracks_cut() const { return tracks_cut_; }
+    bool use_separated_leptons() const { return use_separated_leptons_; }
 
     TrackingAndJetsNtupleFillerParams pvs_subtract_bs           (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.pvs_subtract_bs_  = x; return y; }
     TrackingAndJetsNtupleFillerParams pvs_filter                (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.pvs_filter_       = x; return y; }
@@ -304,6 +307,7 @@ namespace jmt {
     TrackingAndJetsNtupleFillerParams fill_tracks               (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.fill_tracks_      = x; return y; }
     TrackingAndJetsNtupleFillerParams tracks_cut_level           (int x) { TrackingAndJetsNtupleFillerParams y(*this); y.tracks_cut_level_ = x; return y; }
     TrackingAndJetsNtupleFillerParams tracks_cut      (tracks_cut_fcn x) { TrackingAndJetsNtupleFillerParams y(*this); y.tracks_cut_       = x; return y; }
+    TrackingAndJetsNtupleFillerParams use_separated_leptons      (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.use_separated_leptons_      = x; return y; }
   };
     
     // this is not great but I didn't want to spend time figuring out how to share a single ConsumesCollector instance

@@ -28,6 +28,7 @@
 #include "JMTucker/Tools/interface/Math.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+
 #include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -133,10 +134,15 @@ std::pair<bool, Measurement1D> MFVVertexAuxProducer::track_dist(const reco::Tran
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one
+  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one (0 : BTagDisplJet, 1 : SingleLepton, 2 : JetHT, -1 disable)
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
                        jmt::AnalysisEras::pick(event, this),
                        track_rescaler_which);
+
+  // track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
+  //                      jmt::AnalysisEras::pick(event, this),
+  //                      track_rescaler_which,
+  //                      "");
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
@@ -191,8 +197,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   event.getByToken(gen_vertices_token, gen_vertices);
   assert(gen_vertices->size() == 6);
 
-  //////////////////////////////////////////////////////////////////////
-
   edm::Handle<reco::VertexCollection> secondary_vertices;
   event.getByToken(vertex_token, secondary_vertices);
   const int nsv = int(secondary_vertices->size());
@@ -206,7 +210,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
-  //std::set<int> trackicity;
+  std::set<int> trackicity;
+  std::set<std::pair<int, int>> buffer_trackicity; // the buffer will be storing the track id & track key 
   std::vector<size_t> sort_ntrack = {};
   std::vector<size_t> sort_irawsv = {};
   for (int isv = 0; isv < nsv; ++isv){
@@ -244,7 +249,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     const reco::VertexRef svref(secondary_vertices, isv);
     MFVVertexAux& aux = auxes->at(irawsv);
     aux.which = int2uchar(isv);
-    
     aux.x = sv.x();
     aux.y = sv.y();
     aux.z = sv.z();
@@ -258,13 +262,31 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
+    aux.ntracks_ = sv.tracksSize(); //get the ntracks using cmssw -- to use for minitrees
 
+    //need to split into : general tracks, muon candidate tracks, electron candidate tracks
     std::vector<reco::TransientTrack> ttks, rs_ttks;
     for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it){
       reco::TrackRef tk = it->castTo<reco::TrackRef>();
       if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
         ttks.push_back(tt_builder->build(**it));
-        rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+        //need to double check track ids w/ types
+        reco::TrackRef tk = it->castTo<reco::TrackRef>();
+
+        // using generalized function to separate into track types
+        if (track_rescaler_which == 1){
+          if ((tk.id().id() == 155) & (tk->pt() >= 20.0)) {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "electron").rescaled_tk));
+          }
+          else if ((tk.id().id() == 156) & (tk->pt() >= 20.0))  {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "muon").rescaled_tk));
+          }
+          else {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "").rescaled_tk));
+          }
+        }
+        else rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+
       }
       //get seed tracks outside all vertices
       size_t sedtki = 0;
@@ -280,24 +302,28 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
     if (rs_ttks.size() > 1) {
-      reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
-      if (rs_sv.isValid()) {
-        const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
-        aux.rescale_chi2 = rs_sv.chi2();
-        aux.rescale_x = rs_sv.x();
-        aux.rescale_y = rs_sv.y();
-        aux.rescale_z = rs_sv.z();
-        aux.rescale_cxx = rs_sv.covariance(0,0);
-        aux.rescale_cxy = rs_sv.covariance(0,1);
-        aux.rescale_cxz = rs_sv.covariance(0,2);
-        aux.rescale_cyy = rs_sv.covariance(1,1);
-        aux.rescale_cyz = rs_sv.covariance(1,2);
-        aux.rescale_czz = rs_sv.covariance(2,2);
-        aux.rescale_bs2ddist = d.value();
-        aux.rescale_bs2derr = d.error();
+      try {
+        reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
+        if (rs_sv.isValid()) {
+          const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
+          aux.rescale_chi2 = rs_sv.chi2();
+          aux.rescale_x = rs_sv.x();
+          aux.rescale_y = rs_sv.y();
+          aux.rescale_z = rs_sv.z();
+          aux.rescale_cxx = rs_sv.covariance(0,0);
+          aux.rescale_cxy = rs_sv.covariance(0,1);
+          aux.rescale_cxz = rs_sv.covariance(0,2);
+          aux.rescale_cyy = rs_sv.covariance(1,1);
+          aux.rescale_cyz = rs_sv.covariance(1,2);
+          aux.rescale_czz = rs_sv.covariance(2,2);
+          aux.rescale_bs2ddist = d.value();
+          aux.rescale_bs2derr = d.error();
+        }
+        else {
+          aux.rescale_chi2 = -1;
+        }
       }
-      else
-        aux.rescale_chi2 = -1;
+      catch (...) {}
     }
 
     if (ttks.size() > 2) {
@@ -328,7 +354,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             ttks_nm1[j-(j>=i)] = ttks[j];
 
         if (verbose) {
-          printf("refit %lu, pts:", i);
+          // printf("refit %lu, pts:", i);
           for (size_t j = 0; j < nttks-1; ++j)
             printf(" %f", ttks_nm1[j].track().pt());
         }
@@ -355,7 +381,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     }
 
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
-
     math::XYZVector bs2sv = sv.position() - beamspot->position();
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
@@ -363,7 +388,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
     p4s[mfv::PTracksOnly] = p4s[mfv::PJetsByNtracks] = p4s[mfv::PTracksPlusJetsByNtracks] = sv.p4();
-
  
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
@@ -452,34 +476,27 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.nelectrons = 0;
     aux.nmuons = 0;
     aux.nleptons = 0;
+    aux.neleptgt20 = 0;
+    aux.nmuptgt20 = 0;
+    aux.nlepptgt20 = 0;
 
-    //setting up everything for calculating transverse impact parameter between lepton and sv 
-    std::pair<bool, Measurement1D> mu_vtx_dist;
-    std::pair<bool, Measurement1D> ele_vtx_dist;
-    std::vector<reco::TransientTrack> mu_ttracks;
-    std::vector<reco::TransientTrack> ele_ttracks;
-    std::pair<bool, Measurement1D> matchedmu_vtx_dist;
-    std::pair<bool, Measurement1D> matchedele_vtx_dist;
+    //calculating transverse impact parameter between lepton and sv requires a trasient track
     std::vector<reco::TransientTrack> matchedmu_ttracks;
     std::vector<reco::TransientTrack> matchedele_ttracks;
-    
+
     if (use_sv_to_ele) {
       const int nele = sv_to_ele->numberOfAssociations(svref);
-      aux.nelectrons = nele;
-      aux.nleptons = nele;
+      aux.nelectrons += nele;
       if (verbose) printf("    nele %i:\n", nele);
-      //getting all info from matched electron; including transverse IP 
       if (nele > 0) {
         const edm::RefVector<pat::ElectronCollection>& electronref = (*sv_to_ele)[svref];
         for (int iel = 0; iel < nele; ++iel) {
           reco::GsfTrackRef etk = electronref[iel]->gsfTrack();
           if (!etk.isNull()) {
             matchedele_ttracks.push_back(tt_builder->build(etk));    
-          
             const auto pfIso = electronref[iel]->pfIsolationVariables();
             const float eA = electron_effective_areas.getEffectiveArea(fabs(electronref[iel]->superCluster()->eta()));
             const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electronref[iel]->pt();
-
 
             bool isVetoEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-veto");
             bool isLooseEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-loose");
@@ -492,10 +509,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             eleID.push_back(isLooseEl);
             eleID.push_back(isMedEl);
             eleID.push_back(isTightEl);
-            
             aux.electron_ID.push_back(eleID);
-
             aux.electron_pt.push_back(electronref[iel]->pt());
+
+            if (electronref[iel]->pt() >= 20.0) aux.neleptgt20 += 1;
             aux.electron_eta.push_back(electronref[iel]->eta());
             aux.electron_phi.push_back(electronref[iel]->phi());
             aux.electron_x.push_back(etk->vx());
@@ -510,20 +527,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             aux.electron_dzerr.push_back(etk->dzError());
           }
         }
-      }
-      //now also getting transverse IP from all electrons (not just matched)
-      for (const pat::Electron& electron : *electrons) {
-        reco::GsfTrackRef etk = electron.gsfTrack();
-        if (!etk.isNull()) {
-          ele_ttracks.push_back(tt_builder->build(etk));
+        for (auto mettk : matchedele_ttracks ) {
+          std::pair<bool, Measurement1D> ele_vtx_dist = IPTools::absoluteTransverseImpactParameter(mettk, sv);
+          aux.elevtxtip.push_back(ele_vtx_dist.second.value());
+          aux.elevtxtiperr.push_back(ele_vtx_dist.second.error());
+          aux.elevtxtipsig.push_back(ele_vtx_dist.second.significance());
         }
-      }
+      }  
     }
 
     if (use_sv_to_muons) {
       const int nmu = sv_to_muons->numberOfAssociations(svref);
-      aux.nmuons = nmu;
-      aux.nleptons += nmu;
+      aux.nmuons += nmu;
       if (verbose) printf("    nmu %i:\n", nmu);
       if (nmu > 0) {
         const edm::RefVector<pat::MuonCollection>& muonref = (*sv_to_muons)[svref];
@@ -543,10 +558,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             muID.push_back(isLooseMuon);
             muID.push_back(isMedMuon);
             muID.push_back(isTightMuon);
-
             aux.muon_ID.push_back(muID);
 
             aux.muon_pt.push_back(muonref[imu]->pt());
+            if (muonref[imu]->pt() >= 20.0) aux.nmuptgt20 += 1;
             aux.muon_eta.push_back(muonref[imu]->eta());
             aux.muon_phi.push_back(muonref[imu]->phi());
             aux.muon_x.push_back(mtk->vx());
@@ -561,39 +576,16 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             aux.muon_dzerr.push_back(mtk->dzError());
           }
         }
-      }
-      for (const pat::Muon& muon : *muons) {
-        reco::TrackRef mtk = muon.innerTrack();
-        if (!mtk.isNull()) {
-          mu_ttracks.push_back(tt_builder->build(mtk));
+        for (auto mmttk : matchedmu_ttracks ) {
+          std::pair<bool, Measurement1D> mu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mmttk, sv);
+          aux.muvtxtip.push_back(mu_vtx_dist.second.value());
+          aux.muvtxtiperr.push_back(mu_vtx_dist.second.error());
+          aux.muvtxtipsig.push_back(mu_vtx_dist.second.significance());
         }
       }
     }
-    for (auto ettk : ele_ttracks) {
-      ele_vtx_dist = IPTools::absoluteTransverseImpactParameter(ettk, sv);
-      aux.elevtxtip.push_back(ele_vtx_dist.second.value());
-      aux.elevtxtiperr.push_back(ele_vtx_dist.second.error());
-      aux.elevtxtipsig.push_back(ele_vtx_dist.second.significance());
-    }
-    for (auto mettk : matchedele_ttracks ) {
-      matchedele_vtx_dist = IPTools::absoluteTransverseImpactParameter(mettk, sv);
-      aux.matchedelevtxtip.push_back(matchedele_vtx_dist.second.value());
-      aux.matchedelevtxtiperr.push_back(matchedele_vtx_dist.second.error());
-      aux.matchedelevtxtipsig.push_back(matchedele_vtx_dist.second.significance());
-    }
-    for (auto mttk : mu_ttracks ) {
-      mu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mttk, sv);
-      aux.muvtxtip.push_back(mu_vtx_dist.second.value());
-      aux.muvtxtiperr.push_back(mu_vtx_dist.second.error());
-      aux.muvtxtipsig.push_back(mu_vtx_dist.second.significance());
-    }
-    for (auto mmttk : matchedmu_ttracks ) {
-      matchedmu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mmttk, sv);
-      aux.matchedmuvtxtip.push_back(matchedmu_vtx_dist.second.value());
-      aux.matchedmuvtxtiperr.push_back(matchedmu_vtx_dist.second.error());
-      aux.matchedmuvtxtipsig.push_back(matchedmu_vtx_dist.second.significance());
-    }
-
+    aux.nleptons = int(matchedmu_ttracks.size() + matchedele_ttracks.size());
+    aux.nlepptgt20 = aux.nmuptgt20 + aux.neleptgt20;
     if (verbose) printf("    momenta:\n");
     for (int i = 0; i < mfv::NMomenta; ++i) {
       aux.pt[i]   = p4s[i].pt();
@@ -603,11 +595,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (verbose) printf("    %i <%f,%f,%f,%f>\n", i, aux.pt[i], aux.eta[i], aux.phi[i], aux.mass[i]);
     }
       
-    //const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
-    //const double sv_z = fabs(sv.position().z() - bsz);
-
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
+    float sumpt2 = 0;
 
     std::vector<double> costhtkmomvtxdisps;
 
@@ -617,11 +607,19 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       const reco::TransientTrack sedtri = tt_builder->build(**trki); 
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
+      sumpt2 += pow(tri->pt(),2);
 
-      //if (trackicity.count(tri.key()) > 0)
-        //throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
-      //else
-        //trackicity.insert(tri.key());
+      if (buffer_trackicity.count({tri.key(), tri.id().id()}) > 0)
+        throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      else 
+        buffer_trackicity.insert({tri.key(), tri.id().id()});
+  
+      // if (trackicity.count(tri.key()) > 0)
+      //   throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      // else {
+      //   trackicity.insert(tri.key());
+      // }
+
 
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
@@ -671,6 +669,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
 
+    aux.sumpt2_ = sumpt2;
     jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
     aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min.back());
     aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max.back());
@@ -722,7 +721,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
 
-    if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.bs2derr);
+    if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f rescaled bs2ddist %f bs2derr %f rescaled bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.rescale_bs2ddist, aux.bs2derr, aux.rescale_bs2derr);
   }
   //investigate outside seed tracks from vertices 
   for (int irawsv = 0; irawsv < nsv; ++irawsv) {

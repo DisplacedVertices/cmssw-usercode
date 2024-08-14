@@ -4,10 +4,11 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 
 ####
 
+_qcdlepenrich = bool_from_argv('qcdlepenrich')
 _leptonpresel = bool_from_argv('leptonpresel')
 _btagpresel = bool_from_argv('btagpresel')
 _metpresel = bool_from_argv('metpresel')
-_presel_s = '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else '_btagpresel' if _btagpresel else ''
+_presel_s = '_qcdlepenrich' if _qcdlepenrich else '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else '_btagpresel' if _btagpresel else ''
 
 ####
 
@@ -67,7 +68,7 @@ def cmd_report_data():
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
-    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron', 'MET':
+    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron', 'MET', 'EGamma':
         print ds
         files = set(glob(ds + '*.root'))
         if not files:
@@ -128,7 +129,11 @@ def cmd_rm_mc_parts():
                     os.remove(y)
 
 def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
-    if _leptonpresel or trigeff: #FIXME
+    if _qcdlepenrich:
+        x = ['qcdmupt15']
+        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170]]
+        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    elif _leptonpresel or trigeff: #FIXME
         if bkg_tag == 'wjetstolnu':
             x = ['wjetstolnu_0j']
             x += ['wjetstolnu_1j']
@@ -166,7 +171,7 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017): #HERE
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:

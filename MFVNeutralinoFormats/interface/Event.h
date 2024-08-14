@@ -77,7 +77,11 @@ struct MFVEvent {
   std::vector<TLorentzVector> gen_bquarks;
   std::vector<TLorentzVector> gen_leptons;
   std::vector<TLorentzVector> gen_electrons;
+  std::vector<double> gen_ele_dxy;
+  std::vector<double> gen_ele_dxybs;
   std::vector<TLorentzVector> gen_muons;
+  std::vector<double> gen_mu_dxy;
+  std::vector<double> gen_mu_dxybs;
   std::vector<TLorentzVector> gen_jets;
 
   int gen_lepton_id(int which) { // same convention as reco lep_id below, el=1, mu=0

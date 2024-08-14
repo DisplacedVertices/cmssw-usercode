@@ -463,7 +463,7 @@ namespace jmt {
 
   //////
   MuonsSubNtuple::MuonsSubNtuple() {
-    set_pfx("muons");
+    set_pfx("mutk");
     clear();
     p_qpt_ = 0;
     p_eta_ = 0;
@@ -614,7 +614,7 @@ namespace jmt {
 
   ////
   ElectronsSubNtuple::ElectronsSubNtuple() {
-    set_pfx("electrons");
+    set_pfx("eletk");
     clear();
     p_qpt_ = 0;
     p_eta_ = 0;

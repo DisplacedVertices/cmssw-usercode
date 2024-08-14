@@ -1,5 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import signal_uses_random_pars_modifier
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -51,7 +52,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')] 
         #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     elif year == 2018:
-        samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
+        #samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
+        samples = Samples.mfv_stoplb_samples_2018 + Samples.mfv_stopld_samples_2018
         #samples = Samples.all_signal_samples_2018
 
     ms = MetaSubmitter('TrigFiltCheckP0', dataset='miniaod')

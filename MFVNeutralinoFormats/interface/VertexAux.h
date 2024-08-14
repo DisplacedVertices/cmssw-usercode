@@ -54,11 +54,17 @@ struct MFVVertexAux {
       costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
       pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = missdistsv0[i] = missdistsv0err[i] = 0;
     }
-    nmuons = 0;
-    nelectrons = 0;
+    nmuons = nelectrons = nleptons = 0;
+    nmuptgt20 = neleptgt20 = nlepptgt20 = 0;
+    ntracks_ = 0;
+    sumpt2_ = 0;
+    sumpt2_new = 0;
   }
   uchar which;
-  
+  int ntracks_;
+  float sumpt2_;
+  float sumpt2_new = 0;
+
   float x;
   float y;
   float z;
@@ -109,9 +115,14 @@ struct MFVVertexAux {
   float phi [mfv::NMomenta];
   float mass[mfv::NMomenta];
 
+  // electrons, muons associated to the SV
   int nelectrons;
   int nmuons;
   int nleptons;
+  //now w/ pt requirement
+  int neleptgt20;
+  int nmuptgt20;
+  int nlepptgt20;
 
   std::vector<float> muon_pt;
   std::vector<float> muon_eta;
@@ -126,6 +137,9 @@ struct MFVVertexAux {
   std::vector<float> muon_dzerr;
   std::vector<float> muon_iso;
   std::vector<std::vector<int>> muon_ID;
+  std::vector<float> muvtxtip;
+  std::vector<float> muvtxtiperr;
+  std::vector<float> muvtxtipsig;
 
   std::vector<float> electron_pt;
   std::vector<float> electron_eta;
@@ -140,22 +154,9 @@ struct MFVVertexAux {
   std::vector<float> electron_dzerr;
   std::vector<float> electron_iso;
   std::vector<std::vector<int>> electron_ID;
-
-// there are both leptons that match and those that do not match 
-// when considering the transverse impact parameter between lepton and vertex 
   std::vector<float> elevtxtip;
-  std::vector<float> matchedelevtxtip;
-  std::vector<float> muvtxtip;
-  std::vector<float> matchedmuvtxtip; 
   std::vector<float> elevtxtiperr;
-  std::vector<float> matchedelevtxtiperr;
-  std::vector<float> muvtxtiperr;
-  std::vector<float> matchedmuvtxtiperr; 
   std::vector<float> elevtxtipsig;
-  std::vector<float> matchedelevtxtipsig;
-  std::vector<float> muvtxtipsig;
-  std::vector<float> matchedmuvtxtipsig; 
-  
 
 
   TLorentzVector p4(int w=0) const {
@@ -227,7 +228,6 @@ struct MFVVertexAux {
   void costhjetmomvtxdispavg(float costhjetmomvtxdispavg) { costhjetmomvtxdispavg_ = bin(costhjetmomvtxdispavg, -1, 1); }
   void costhjetmomvtxdisprms(float costhjetmomvtxdisprms) { costhjetmomvtxdisprms_ = bin(costhjetmomvtxdisprms, -1, 1); }
 
-
   float geo2ddist() const { return mag(x,y); }
   float geo3ddist() const { return mag(x,y,z); }
 
@@ -256,23 +256,24 @@ struct MFVVertexAux {
 
   float pvdz() const { return sqrt(pv3ddist*pv3ddist - pv2ddist*pv2ddist); }
   float pvdzerr() const {
-    // JMTBAD
-    float z = pvdz();
-    if (z == 0)
+    float pvz = pvdz();
+    if (pvz == 0)
       return -1;
-    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/z;
+    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/pvz;
   }
   float pvdzsig() const { return sig(pvdz(), pvdzerr()); }
 
+
+  //for tracks associated to jets only (mfv::NMomenta)
   uchar costhmombs_  [mfv::NMomenta];
   uchar costhmompv2d_[mfv::NMomenta];
   uchar costhmompv3d_[mfv::NMomenta];
   float costhmombs  (size_t i) const { return unbin(costhmombs_  [i], -1, 1); }
   float costhmompv2d(size_t i) const { return unbin(costhmompv2d_[i], -1, 1); }
   float costhmompv3d(size_t i) const { return unbin(costhmompv3d_[i], -1, 1); }
-  void costhmombs  (size_t i, float x) { costhmombs_  [i] = bin(x, -1, 1); }
-  void costhmompv2d(size_t i, float x) { costhmompv2d_[i] = bin(x, -1, 1); }
-  void costhmompv3d(size_t i, float x) { costhmompv3d_[i] = bin(x, -1, 1); }
+  void costhmombs  (size_t i, float xval) { costhmombs_  [i] = bin(xval, -1, 1); }
+  void costhmompv2d(size_t i, float xval) { costhmompv2d_[i] = bin(xval, -1, 1); }
+  void costhmompv3d(size_t i, float xval) { costhmompv3d_[i] = bin(xval, -1, 1); }
 
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
@@ -389,9 +390,9 @@ struct MFVVertexAux {
       n == track_cov.size();
   }
 
-  TLorentzVector track_p4(int i, float mass=0) const {
+  TLorentzVector track_p4(int i, float assumed_mass=0) const {
     TLorentzVector v;
-    v.SetXYZM(track_px[i], track_py[i], track_pz[i], mass);
+    v.SetXYZM(track_px[i], track_py[i], track_pz[i], assumed_mass);
     return v;
   }
 
@@ -625,12 +626,12 @@ struct MFVVertexAux {
   float maxtrackpt() const { return _max(track_pts(), false); }
 
   float maxmntrackpt(int n) const {
-    std::vector<float> pt = track_pts();
-    int nt = int(pt.size());
+    std::vector<float> tkpts = track_pts();
+    int nt = int(tkpts.size());
     if (n > nt - 1)
       return -1;
-    std::sort(pt.begin(), pt.end());
-    return pt[nt-1-n];
+    std::sort(tkpts.begin(), tkpts.end());
+    return tkpts[nt-1-n];
   }
 
   float trackptavg() const { return _avg(track_pts(), false); }
@@ -709,6 +710,19 @@ struct MFVVertexAux {
   float trackpairdphimax() const { return stats(this, trackpairdphis()).max; }
   float trackpairdphiavg() const { return stats(this, trackpairdphis()).avg; }
   float trackpairdphirms() const { return stats(this, trackpairdphis()).rms; }
+
+
+  // std::vector<float> sv_tracks_phi() const {
+  //   std::vector<float> v;
+  //   size_t n = ntracks();
+  //   if (n >= 2)
+  //     for (size_t i = 0, ie = n-1; i < ie; ++i)
+  //       if (use_track(i))
+  //         v.push_back(track_phi[i]);
+  //   return v;
+  // }
+
+  // float sv_tracks_phiavg() const { return stats(this, sv_tracks_phi()).avg; }
 
   std::vector<float> trackpairdrs() const {
     std::vector<float> v;

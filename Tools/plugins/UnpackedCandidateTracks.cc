@@ -21,6 +21,7 @@ private:
   const bool add_lost_candidates;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lost_candidates_token;
   const int cut_level;
+  const int lep_pt_cutoff;
   const bool skip_weirdos;
   const bool debug;
 
@@ -53,18 +54,16 @@ private:
     return false;
   }
 
-
+  //noLostInnerHits : takes into account geometrical or detector inefficiencies (i.e. the hit wasn't expected to be there)
   bool pass_tk(const reco::Track& tk, bool req_base, bool req_min_r, bool req_nsigmadxy) const {
     return
       (!req_base || (tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6)) &&
-      (!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
+      (!req_min_r || (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) || (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,2) && tk.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)==0))) &&
       (!req_nsigmadxy || fabs(tk.dxy() / tk.dxyError()) > 4);
   }
 
   bool pass_tk(const reco::Track& tk) const { return pass_tk(tk, cut_level >= 0, cut_level >= 1, cut_level >= 2); }
 
-
-  //specific requirements for lepton tracks : 
   //noLostInnerHits : takes into account geometrical or detector inefficiencies (i.e. the hit wasn't expected to be there)
     bool pass_leptk(const reco::Track& tk, bool req_base, bool req_min_r, bool req_nsigmadxy) const {
     return
@@ -94,6 +93,7 @@ JMTUnpackedCandidateTracks::JMTUnpackedCandidateTracks(const edm::ParameterSet& 
     add_lost_candidates(cfg.getParameter<bool>("add_lost_candidates")),
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
     cut_level(cfg.getParameter<int>("cut_level")),
+    lep_pt_cutoff(cfg.getParameter<double>("lep_pt_cutoff")),
     skip_weirdos(cfg.getParameter<bool>("skip_weirdos")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
@@ -126,16 +126,12 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   event.getByToken(electrons_token, electrons);
 
   auto tracks = std::make_unique<reco::TrackCollection>();
-  auto lost_tracks = std::make_unique<reco::TrackCollection>();
   auto tracks_map = std::make_unique<jmt::UnpackedCandidateTracksMap>();
   auto ele_tracks = std::make_unique<reco::TrackCollection>();
   auto mu_tracks = std::make_unique<reco::TrackCollection>();
-  auto lost_ele_tracks = std::make_unique<reco::TrackCollection>();
-  auto lost_mu_tracks = std::make_unique<reco::TrackCollection>();
   auto ele_tracks_map = std::make_unique<jmt::UnpackedCandidateTracksMap>();
   auto mu_tracks_map = std::make_unique<jmt::UnpackedCandidateTracksMap>();
   auto tracks_pvs = std::make_unique<std::vector<unsigned>>();
-  auto lost_tracks_pvs = std::make_unique<std::vector<unsigned>>();
  
   auto tight_ele_tracks = std::make_unique<reco::TrackCollection>();
   auto med_mu_tracks = std::make_unique<reco::TrackCollection>();
@@ -145,11 +141,10 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   reco::TrackRefProd h_output_ele_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
 
-  int ntkpass = 0, nlosttkpass = 0, nmtkpass=0, netkpass=0, nlostmtkpass = 0, nlostetkpass = 0;
+  int ntkpass = 0, nmtkpass=0, netkpass=0;
 
   //https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2014#Packed_ParticleFlow_Candidates
 
-  //going to do this twice; once for electrons, once for muons ... 
   std::vector<const reco::Candidate *> mu_cand;
   std::vector<const reco::Candidate *> ele_cand;
   for (const pat::Muon &mu : *muons) mu_cand.push_back(&mu);
@@ -195,14 +190,6 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
         }
       }
     }
-    // //loop on lost candidates
-    // for (unsigned int i = 0, ie = lost_candidates->size(); i < ie; ++i) {
-    //   const pat::PackedCandidate& cand = (*lost_candidates)[i];
-    //   if (deltaR(cand,*muon) < 0.002) {
-    //     midx_lost_toremove.push_back(i);
-    //     continue;
-    //   }
-    // }
   }
   for (const reco::Candidate *electron : ele_cand) {
     // get a list of the PF candidates used to build this lepton, so to exclude them
@@ -225,14 +212,6 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
         }
       }
     }
-    //loop on lost candidates
-    // for (unsigned int i = 0, ie = lost_candidates->size(); i < ie; ++i) {
-    //   const pat::PackedCandidate& cand = (*lost_candidates)[i];
-    //   if (deltaR(cand,*electron) < 0.002) {
-    //     eidx_lost_toremove.push_back(i);
-    //     continue;
-    //   }
-    // }
   }
 
   //now doing everything again, but just for the leptons that passed cutbased ID 
@@ -285,6 +264,7 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   // electron tracks pt >= 20 GeV 
   // muon tracks pt >= 20 GeV 
   // all other tracks (including lepton tracks with pt < 20 GeV) 
+  // iff separate_leptons == True 
   for (int i = 0, n = packed_candidates->size(); i < n; ++i) {
     const pat::PackedCandidate& cand = (*packed_candidates)[i];
     if (separate_leptons) {
@@ -295,7 +275,7 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
           if (debug) debug_tk(mtk, "", mu_tracks->size());
           
 
-          if (mtk.pt() >= 20.0) {
+          if (mtk.pt() >= lep_pt_cutoff) {
             if (pass_leptk(mtk)) {
               ++nmtkpass;
               mu_tracks->push_back(mtk);
@@ -326,7 +306,7 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
           const reco::Track& etk = cand.pseudoTrack();
           if (debug) debug_tk(etk, "", ele_tracks->size());
 
-          if (etk.pt() >= 20.0) {
+          if (etk.pt() >= lep_pt_cutoff) {
             if (pass_leptk(etk)) {
               ++netkpass;
 
@@ -334,7 +314,7 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
               ele_tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_ele_tracks, ele_tracks->size() - 1));
               tracks_pvs->push_back(encode_vertex_ref(cand));
 
-              //temporary : also getting the ele tracks (w/ cutbased Tight) --> they will be a subset of above, hence we can put it here. 
+              //also getting the ele tracks (w/ cutbased Tight) --> they will be a subset of above, hence we can put it here. 
               if (std::find(tight_eidx_toremove.begin(), tight_eidx_toremove.end(), i) != eidx_toremove.end()) {
                 tight_ele_tracks->push_back(etk);
               }
@@ -369,103 +349,8 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
     if (debug) std::cout << "\n";
   }
 
-
-
-  for (size_t i = 0, ie = lost_candidates->size(); i < ie; ++i) {
-    const pat::PackedCandidate& cand = (*lost_candidates)[i];
-    if (separate_leptons) {
-      if (std::find(midx_lost_toremove.begin(), midx_lost_toremove.end(), i) != midx_lost_toremove.end()) {
-        if (pass_cand(cand)) {
-          const reco::Track& mtk = cand.pseudoTrack();
-          if (debug) debug_tk(mtk, "lost_mu", lost_mu_tracks->size());
-          
-
-          if (mtk.pt() >= 20.0) {
-            if (pass_leptk(mtk)) {
-              ++nlostmtkpass;
-              if (add_lost_candidates) {
-                mu_tracks->push_back(mtk);
-                mu_tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_mu_tracks, mu_tracks->size() - 1));
-                tracks_pvs->push_back(encode_vertex_ref(cand));
-              }
-              lost_mu_tracks->push_back(mtk);
-            }
-          }
-          else {
-            if (pass_tk(mtk)) {
-              ++nlosttkpass;
-              if (add_lost_candidates) {
-                tracks->push_back(mtk);
-                tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
-                tracks_pvs->push_back(encode_vertex_ref(cand));
-              }
-            }
-            lost_tracks->push_back(mtk);
-          }
-        }
-        continue;
-      }
-
-      else if (std::find(eidx_lost_toremove.begin(), eidx_lost_toremove.end(), i) != eidx_lost_toremove.end()) {
-        if (pass_cand(cand)) {
-          const reco::Track& etk = cand.pseudoTrack();
-          if (debug) debug_tk(etk, "lost_ele", lost_ele_tracks->size());
-
-          if (etk.pt() >= 20.0) {
-            if (pass_leptk(etk)) {
-              ++nlostetkpass;
-
-              if (add_lost_candidates) {
-                ele_tracks->push_back(etk);
-                ele_tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_ele_tracks, ele_tracks->size() - 1));
-                tracks_pvs->push_back(encode_vertex_ref(cand));
-              }
-              lost_ele_tracks->push_back(etk);
-            }
-          }
-          else {
-            if (pass_tk(etk)) {
-              ++nlosttkpass;
-
-              if (add_lost_candidates) {
-                tracks->push_back(etk);
-                tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
-                tracks_pvs->push_back(encode_vertex_ref(cand));
-              }
-              lost_tracks->push_back(etk);
-            }
-          }
-        }
-        continue;
-      }
-    }
-
-    if (debug) debug_cand(cand, "lost", i);
-
-    if (pass_cand(cand)) {
-      const reco::Track& tk = cand.pseudoTrack();
-      if (debug) debug_tk(tk, "lost", lost_tracks->size());
-
-      if (pass_tk(tk)) {
-        ++nlosttkpass;
-
-        if (add_lost_candidates) {
-          tracks->push_back(tk);
-          tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
-          tracks_pvs->push_back(encode_vertex_ref(cand));
-        }
-
-        lost_tracks->push_back(tk);
-        lost_tracks_pvs->push_back(encode_vertex_ref(cand));
-      }
-    }
-
-    if (debug) std::cout << "\n";
-  }
-
-  if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: npass/ntk = " << ntkpass << " / " << tracks->size() << " npass/nlost = " << nlosttkpass << " / " << lost_tracks->size() << "\n";
+  if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: npass/ntk = " << ntkpass << " / " << tracks->size() << "\n";
   if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: nmupass/nmtk = " << nmtkpass << " / " << mu_tracks->size() << " nelepass/netk = " << netkpass << " / " << ele_tracks->size() << "\n";
-  if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: nmupass/nlostmtk = " << nlostmtkpass << " / " << lost_mu_tracks->size() << " nelepass/nlostetk = " << nlostetkpass << " / " << lost_ele_tracks->size() << "\n";
 
   event.put(std::move(tracks));
   if (separate_leptons) {
@@ -477,10 +362,8 @@ void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
     event.put(std::move(tight_ele_tracks), "tightele");
     event.put(std::move(med_mu_tracks), "medmu");
   }
-  event.put(std::move(lost_tracks), "lost");
   event.put(std::move(tracks_map));
   event.put(std::move(tracks_pvs));
-  event.put(std::move(lost_tracks_pvs));
 }
 
 DEFINE_FWK_MODULE(JMTUnpackedCandidateTracks);

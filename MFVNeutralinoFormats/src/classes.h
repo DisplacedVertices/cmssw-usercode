@@ -13,6 +13,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/SeedTracks.h"
 
 namespace JMTucker_MFVNeutralinoFormats {
   struct dictionary {
@@ -43,6 +44,7 @@ namespace JMTucker_MFVNeutralinoFormats {
 
     edm::Wrapper<MFVEvent> we;
     edm::Wrapper<std::vector<MFVVertexAux> > wvva;
+    edm::Wrapper<MFVSeedTracks> wst;
 
     edm::Wrapper<mfv::MCInteraction> wmci;
     edm::Wrapper<mfv::TriggerFloats> wtf;

@@ -11,7 +11,6 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
 			      const math::XYZPoint& beamspot,
 			      const math::XYZPoint& primary_vertex) {
 
-  
   muon_pt.push_back(muon.pt());
   muon_eta.push_back(muon.eta());
   muon_phi.push_back(muon.phi());
@@ -23,18 +22,12 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
   muon_z.push_back(trk.vz());
   muon_lxy.push_back(mag(trk.vx(), trk.vy()));
   muon_l.push_back(mag(trk.vx(), trk.vy(), trk.vz()));
-
-  
   muon_iso.push_back(iso);
-  
   muon_dxy.push_back(trk.dxy(primary_vertex));
   muon_dz.push_back(trk.dz(primary_vertex));
   muon_dxybs.push_back(trk.dxy(beamspot));
   muon_dxyerr.push_back(trk.dxyError());
   muon_dzerr.push_back(trk.dzError());
- 
-  
-
   muon_chi2dof.push_back(trk.normalizedChi2());
   
   muon_hp_push_back(trk.hitPattern().numberOfValidPixelHits(),
@@ -50,7 +43,6 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
     }
   }
   muon_minr.push_back(min_r);
-  
 }
 
 void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
@@ -59,32 +51,29 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
 				  const math::XYZPoint& beamspot,
 				  const math::XYZPoint& primary_vertex) {
 
-   electron_pt.push_back(electron.pt());
-   electron_eta.push_back(electron.eta());
-   electron_phi.push_back(electron.phi());
-   electron_pt_err.push_back(trk.ptError());
-   electron_eta_err.push_back(trk.etaError());
-   electron_phi_err.push_back(trk.phiError());
-   electron_x.push_back(trk.vx());
-   electron_y.push_back(trk.vy());
-   electron_z.push_back(trk.vz());
-   electron_lxy.push_back(mag(trk.vx(), trk.vy()));
-   electron_l.push_back(mag(trk.vx(), trk.vy(), trk.vz()));
-     
-   electron_iso.push_back(iso);
+  electron_pt.push_back(electron.pt());
+  electron_eta.push_back(electron.eta());
+  electron_phi.push_back(electron.phi());
+  electron_pt_err.push_back(trk.ptError());
+  electron_eta_err.push_back(trk.etaError());
+  electron_phi_err.push_back(trk.phiError());
+  electron_x.push_back(trk.vx());
+  electron_y.push_back(trk.vy());
+  electron_z.push_back(trk.vz());
+  electron_lxy.push_back(mag(trk.vx(), trk.vy()));
+  electron_l.push_back(mag(trk.vx(), trk.vy(), trk.vz()));
+  electron_iso.push_back(iso);
+  electron_dxy.push_back(trk.dxy(primary_vertex));
+  electron_dz.push_back(trk.dz(primary_vertex));
+  electron_dxybs.push_back(trk.dxy(beamspot));
+  electron_dxyerr.push_back(trk.dxyError());
+  electron_dzerr.push_back(trk.dzError());
+  electron_chi2dof.push_back(trk.normalizedChi2());
 
-   electron_dxy.push_back(trk.dxy(primary_vertex));
-   electron_dz.push_back(trk.dz(primary_vertex));
-   electron_dxybs.push_back(trk.dxy(beamspot));
-   electron_dxyerr.push_back(trk.dxyError());
-   electron_dzerr.push_back(trk.dzError());
-   
-
-   electron_chi2dof.push_back(trk.normalizedChi2());
-   electron_hp_push_back(trk.hitPattern().numberOfValidPixelHits(),
-   			 trk.hitPattern().numberOfValidStripHits(),
-   			 trk.hitPattern().pixelLayersWithMeasurement(),
-   			 trk.hitPattern().stripLayersWithMeasurement());
+  electron_hp_push_back(trk.hitPattern().numberOfValidPixelHits(),
+        trk.hitPattern().numberOfValidStripHits(),
+        trk.hitPattern().pixelLayersWithMeasurement(),
+        trk.hitPattern().stripLayersWithMeasurement());
    
   int min_r = 2000000000;
   for (int i = 1; i <= 4; ++i) {
@@ -94,7 +83,6 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
     }
   }
   electron_minr.push_back(min_r);
-
 }
 
 void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets){

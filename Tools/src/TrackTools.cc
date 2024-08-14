@@ -29,6 +29,7 @@ namespace jmt {
         track_rescaler.setup(!ev->isRealData() && track_rescaler_which != -1,
                              jmt::AnalysisEras::pick(ev->id().event()), // JMTBAD hardcoded use of which == -1 = int.lumi. distributed
                              track_rescaler_which);
+                             //""); 
       }
 
       const auto rs = track_rescaler.scale(tk);

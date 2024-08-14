@@ -27,6 +27,7 @@ private:
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jet_token;
   const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
+
   bool mci_warned;
 
   edm::ESHandle<ParticleDataTable> pdt;
@@ -683,7 +684,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
        
 
-    if (mci->type() == mfv::mci_MFVtbs) { // || mci->type() == mci_Ttbar) {
+    if (mci->type() == mfv::mci_MFVtbs || mci->type() == mfv::mci_Ttbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Lsps           [i], &*mci->lsp(i));
         fill(Stranges       [i], &*mci->strange(i));
@@ -764,13 +765,18 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         fill(Downs          [i], &*mci->down(i));
       }
     }
-    // if (mci->type() == mfv::mci_stoplq) {
-    //   for (int i = 0; i < 2; ++i) {
-    //  	fill(Lsps           [i], &*mci->lsp(i));
-    //  	fill(Downs          [i], &*mci->down(i));
-    //  	fill(Bottoms        [i], &*mci->primary_bottom(i));
-    //   }
-    // }
+    if (mci->type() == mfv::mci_stoplq) {
+      std::cout << "at stoplq mci type" << std::endl;
+      for (int i = 0; i < 2; ++i) {
+        fill(Hs[i], &*mci->primaries()[i]);
+     	  fill(Lsps           [i], &*mci->lsp(i));
+     	  fill(Downs          [i], &*mci->down(i));
+     	  fill(Bottoms        [i], &*mci->primary_bottom(i));
+        for (int j = 0; j < 2; ++j) {
+          fill(Qs[i][j], &*mci->secondaries()[i*2+j]);
+        }
+      }
+    }
     
     else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq || mci->type() == mfv::mci_stopdbardbar) {
       for (int i = 0; i < 2; ++i) {

@@ -527,6 +527,20 @@ def want_summary(process, val=True):
 def which_global_tag(settings=None):
     if not settings:
         settings = CMSSWSettings()
+    # if settings.year == 2017:
+    #     print 'year is 2017'
+    #     if settings.is_mc:
+    #         #qcdleptenriched is v6
+    #         return '106X_mc2017_realistic_v8'
+    #     else:
+    #         return '106X_dataRun2_v32'
+    # elif settings.year == 2018:
+    #     print 'year is 2018'
+    #     if settings.is_mc:
+    #         return '106X_upgrade2018_realistic_v15_L1v1'
+    #         #return '106X_upgrade2018_realistic_v4'
+    #     else:
+    #         return '106X_dataRun2_v32'
     if settings.year == 2017:
         if settings.is_mc:
             return '106X_mc2017_realistic_v8'

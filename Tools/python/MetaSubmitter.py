@@ -39,6 +39,15 @@ def era_modifier(sample):
         return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
     else:
         return [], []
+    # if not sample.is_mc:
+    #     mo = re.search(r'(201\d)([A-Z])', sample.name)
+    #     assert mo
+    #     yr, era = mo.groups()
+    #     assert year == int(yr)
+    #     magic = '\nsettings.is_mc ='
+    #     return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
+    # else:
+    #     return [], []
 
 def repro_modifier(sample):
     if sample.name.startswith('Repro'):
@@ -199,7 +208,7 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=20, limit_ttbar=False):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=10, limit_ttbar=False):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
             'qcdht1000_2017': 11,
@@ -218,6 +227,9 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             'ttbarht0800_2018': 8,
             'ttbarht1200_2018': 8,
             'ttbarht2500_2018': 8,
+            'ttbar_semilep_2018': 10,
+            'ttbar_had_2018': 10,
+            'ttbar_lep_2018': 10
             }
         for sample in samples:
             sample.set_curr_dataset(dataset)
@@ -348,7 +360,9 @@ def pick_samples(dataset, both_years=False,
         if args[a]:
             print a
             for yr in years:
-                samples += getattr(Samples, '%s_samples_%i' % (a, yr))
+                if   yr == 20161 : yr = "2016APV"
+                elif yr == 20162 : yr = "2016"
+                samples += getattr(Samples, '%s_samples_%s' % (a, yr))
     return [s for s in samples if s.has_dataset(dataset)]
 
 ####

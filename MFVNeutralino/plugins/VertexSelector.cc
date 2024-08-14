@@ -56,6 +56,8 @@ private:
   const unsigned int min_ntracknsigma4;
   const int min_njetsntks;
   const int max_njetsntks;
+  const int min_nlep20_inSV;
+  const int max_nlep20_inSV;
   const double max_chi2dof;
   const double min_tkonlypt;
   const double max_abstkonlyeta;
@@ -157,6 +159,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_ntracknsigma4(cfg.getParameter<int>("min_ntracknsigma4")),
     min_njetsntks(cfg.getParameter<int>("min_njetsntks")),
     max_njetsntks(cfg.getParameter<int>("max_njetsntks")),
+    min_nlep20_inSV(cfg.getParameter<int>("min_nlep20_inSV")),
+    max_nlep20_inSV(cfg.getParameter<int>("max_nlep20_inSV")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     min_tkonlypt(cfg.getParameter<double>("min_tkonlypt")),
     max_abstkonlyeta(cfg.getParameter<double>("max_abstkonlyeta")),
@@ -379,6 +383,8 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vec_vtx_nsigmadxy4.size() >= min_ntracknsigma4 &&  
     vtx.njets[mfv::JByNtracks] >= min_njetsntks &&
     vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
+    vtx.nlepptgt20 >= min_nlep20_inSV &&
+    vtx.nlepptgt20 <= max_nlep20_inSV &&
     vtx.chi2dof() < max_chi2dof &&
     vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
     fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
@@ -435,6 +441,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent)
     event.getByToken(mevent_token, mevent);
 
+
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_aux_token, auxes);
 
@@ -448,10 +455,10 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   std::unique_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
-  for (const MFVVertexAux& aux : *auxes)
+  for (const MFVVertexAux& aux : *auxes) {
     if (use_vertex(!event.isRealData(), aux, use_mevent ? &*mevent : 0))
       selected->push_back(aux);
-
+  }
   sorter.sort(*selected);
 
   if (produce_vertices || produce_refs) {

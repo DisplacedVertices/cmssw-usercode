@@ -10,8 +10,11 @@
 #include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/Geometry.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 class MFVVertexHistos : public edm::EDAnalyzer {
  public:
@@ -22,6 +25,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+
   const int max_ntrackplots;
   const bool do_scatterplots;
 
@@ -33,6 +38,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   void fill(PairwiseHistos* hs, const int, const PairwiseHistos::ValueMap& val, const double weight) const { hs[sv_all].Fill(val, -1, weight); }
 
   Measurement1D miss_dist(const math::XYZPoint&, const math::XYZPoint&, const math::XYZPoint&, const double [9], const double [9]);
+  // Measurement1D miss_dist(const math::XYZPoint&, const math::XYZPoint&, const math::XYZTLorentzVector&, const double [9], const double [9]);
 
   PairwiseHistos h_sv[sv_num_indices];
 
@@ -40,80 +46,65 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
   TH2F* h_sv_bs2derr_bsbs2ddist[sv_num_indices];
   TH2F* h_pvrho_bsbs2ddist[sv_num_indices];
+  TH2F* h_sv_elept_eleID[sv_num_indices];
+  TH2F* h_sv_mupt_muID[sv_num_indices];
+  TH2F* h_sv_elept_eleiso[sv_num_indices];
+  TH2F* h_sv_mupt_muiso[sv_num_indices];
 
   TH1F* h_w;
   TH1F* h_nsv;
-  // assoc. lep in sv
-  TH1F* h_nsv_wlep;
+  TH1F* h_nsv_wlep;  // assoc. lep in sv
 
-  TH1F* h_nsv_eflavor;
-  TH1F* h_nsv_mflavor;
-  TH1F* h_nsv_emuflavor;
-  TH1F* h_nmsv;
-  TH1F* h_nesv;
-  TH1F* h_nemusv;
+  /////////////////////////////////////////////////////////////////////////////////////
+  // for signal 
+  //genmatched vertices separated by flavor : {all, ele, mu, tau} 
+  TH1F* h_ngenmatched_sv_[4];
+  TH1F* h_sv_gensv_mag_[4]; //2d distance of sv to gensv
 
-  TH1F* h_nsv_genmatched;
-  //distance from SV to gen SV 
-  TH1F* h_sv_genv_mag;
-  TH1F* h_sv_ele_genv_mag;
-  TH1F* h_sv_mu_genv_mag;
-  TH1F* h_sv_tau_genv_mag;
+  //gen leptons; 
+  TH1F* h_ngendau_[4]; // gen leptons --> can infer what the genvertices will be 
+  TH1F* h_ngenmatched_[2]; //only concerned with genmatching ele and mu 
+  TH1F* h_closestdR_gen_[2];
+  TH1F* h_lepdau_novtx_[2]; //no vertex matched; is the reco ele/mu gen-matched? 
+  TH1F* h_lepdau_wvtx_[2];   //vertex matched; is the reco ele/mu gen-matched? 
+  TH1F* h_lepdau_invtx_[2];   // gen daughter is one of the tracks in the vertex (matching via lepton association) 
+  //below is filled ONLY if lepton and SV have been genmatched 
+  //these are the matched leptons in the vertex; 
+  TH1F* h_lepdau_inSV_pt_[2];
+  TH1F* h_lepdau_inSV_dxy_[2];
+  TH1F* h_lepdau_inSV_dxyerr_[2];
+  TH1F* h_lepdau_inSV_nsigmadxy_[2];
+  TH1F* h_lepdau_inSV_missdist_[2];
+  TH1F* h_lepdau_inSV_missdisterr_[2];
+  TH1F* h_lepdau_inSV_missdistsig_[2];
+  TH1F* h_lepdau_inSV_iso_[2];
+  //then similarly for those matched leptons but not in vertex; 
+  // TODO : calculate the missdist to the closest SV 
+  TH1F* h_lepdau_outSV_pt_[2];
+  TH1F* h_lepdau_outSV_dxy_[2];
+  TH1F* h_lepdau_outSV_dxyerr_[2];
+  TH1F* h_lepdau_outSV_nsigmadxy_[2];
+  TH1F* h_lepdau_outSV_missdist_[2];
+  TH1F* h_lepdau_outSV_missdisterr_[2];
+  TH1F* h_lepdau_outSV_missdistsig_[2];
+  TH1F* h_lepdau_outSV_iso_[2];
+  /////////////////////////////////////////////////////////////////////////////////////
 
-  TH2F* h_svidx_assoclep;
-  TH2F* h_svidx_assocmu;
-  TH2F* h_svidx_assocel;
-
-  //lepton specifc 
-  TH1F* h_gen_ele_closestdR;
-  TH1F* h_gen_mu_closestdR;
-  TH1F* h_nmatchele;
-  TH1F* h_nmatchmu;
-
-  //gen daughter reconstructed but no vertex
-  TH1F* h_lepdau_novtx_[2];
-  //gen daughter reconstructed and the vertex is reconstructed 
-  TH1F* h_lepdau_wvtx_[2];
-  // gen daughter is one of the tracks in the vertex (matching via)
-  TH1F* h_lepdau_invtx_[2];
-
-  TH1F* h_matchlep_dxy_[2];
-  TH1F* h_matchlep_dxyerr_[2];
-  TH1F* h_matchlep_missdist_[2];
-  TH1F* h_matchlep_nsigmadxy_[2];
-  TH1F* h_matchlep_missdisterr_[2];
-  TH1F* h_matchlep_missdistsig_[2];
-  TH1F* h_matchlep_pt_[2];
-
-  //track requirements 
-  TH1F* h_matchlep_nm1_minr_[2];
-  TH1F* h_matchlep_nm1_npxlayers_[2];
-  TH1F* h_matchlep_nm1_nstlayers_[2];
-  TH1F* h_matchlep_nm1_nsigmadxy_[2];
-  TH2F* h_matchlep_genvtx_pos_[2];
-
-  TH1F* h_nomatchlep_dxy_[2];
-  TH1F* h_nomatchlep_dxyerr_[2];
-  TH1F* h_nomatchlep_missdist_[2];
-  TH1F* h_nomatchlep_nsigmadxy_[2];
-  TH1F* h_nomatchlep_missdisterr_[2];
-  TH1F* h_nomatchlep_missdistsig_[2];
-  TH1F* h_nomatchlep_pt_[2];
-  TH1F* h_nomatchlep_trkdR_[2];
-
-  //track requirements 
-  TH1F* h_nomatchlep_nm1_minr_[2];
-  TH1F* h_nomatchlep_nm1_npxlayers_[2];
-  TH1F* h_nomatchlep_nm1_nstlayers_[2];
-  TH1F* h_nomatchlep_nm1_nsigmadxy_[2];
-  TH2F* h_nomatchlep_genvtx_pos_[2];
-
-
-  TH1F* h_sv_gen2ddist_signed;
+  TH1F* h_sv_gen2ddist_signed; 
   TH2F* h_sv_ntk_genbs2ddist;
   TH2F* h_sv_ntk_bs2ddist;
   TH2F* h_sv_ntk_gen2ddist;
   TH2F* h_sv_ntk_njet;
+
+  TH1F* h_sv_ntkfromjets;
+  TH3F* h_sv_nallbtags;
+  TH3F* h_sv_nallbtks;
+  TH1F* h_sv_nbtags[3];
+  TH1F* h_sv_nbtks[3];
+  TH1F* h_sv_nlep_nbtks[3]; //combining to look at tracks from : lepton & bjets -> I think this is double counting
+  TH1F* h_sv_mindeltaphi_svbjet[3];
+  TH1F* h_sv_mindeltar_sv_bjet[3];
+
   TH2F* h_sv_ntk0_ntk1;
   TH2F* h_sv_nsv_nmatchjet;
 
@@ -167,6 +158,10 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv1_med_nsigmadxy_bsp;
   TH1F* h_sv1_med_dxy_bsp;
 
+  TH1F* h_sv_lep_2ddist;
+  TH1F* h_sv_lep_deltaphi;
+
+  TH1F* h_sv_tracks_sumpt2[sv_num_indices];
   TH1F* h_sv_track_weight[sv_num_indices];
   TH1F* h_sv_track_q[sv_num_indices];
   TH1F* h_sv_track_pt[sv_num_indices];
@@ -189,31 +184,52 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_injet[sv_num_indices];
   TH1F* h_sv_track_inpv[sv_num_indices];
 
+  //these are from lepton association
   TH1F* h_sv_eletrack_pt[sv_num_indices];
+  TH2F* h_sv_eletrack_pt_vs_dxy[sv_num_indices];
+  TH2F* h_sv_eletrack_pt_vs_dxyerr[sv_num_indices];
   TH1F* h_sv_eletrack_eta[sv_num_indices];
   TH1F* h_sv_eletrack_phi[sv_num_indices];
   TH1F* h_sv_eletrack_dxy[sv_num_indices];
   TH1F* h_sv_eletrack_iso[sv_num_indices];
   TH1F* h_sv_eletrack_ID[sv_num_indices];
-  // TH1F* h_sv_alleletrack_tip[sv_num_indices];
-  // TH1F* h_sv_alleletrack_tiperr[sv_num_indices];
-  // TH1F* h_sv_alleletrack_tipsig[sv_num_indices];
-  // TH1F* h_sv_matchedeletrack_tip[sv_num_indices];
-  // TH1F* h_sv_matchedeletrack_tiperr[sv_num_indices];
-  // TH1F* h_sv_matchedeletrack_tipsig[sv_num_indices];
+  TH1F* h_sv_eletrack_dz[sv_num_indices];
+  TH1F* h_sv_eletrack_missdist[sv_num_indices];
+  TH1F* h_sv_eletrack_missdisterr[sv_num_indices];
+  TH1F* h_sv_eletrack_missdistsig[sv_num_indices];
 
   TH1F* h_sv_mutrack_pt[sv_num_indices];
+  TH2F* h_sv_mutrack_pt_vs_dxy[sv_num_indices];
+  TH2F* h_sv_mutrack_pt_vs_dxyerr[sv_num_indices];
+
   TH1F* h_sv_mutrack_eta[sv_num_indices];
   TH1F* h_sv_mutrack_phi[sv_num_indices];
   TH1F* h_sv_mutrack_dxy[sv_num_indices];
+  TH1F* h_sv_mutrack_dz[sv_num_indices];
   TH1F* h_sv_mutrack_iso[sv_num_indices];
   TH1F* h_sv_mutrack_ID[sv_num_indices];
-  // TH1F* h_sv_allmutrack_tip[sv_num_indices];
-  // TH1F* h_sv_allmutrack_tiperr[sv_num_indices];
-  // TH1F* h_sv_allmutrack_tipsig[sv_num_indices];
-  // TH1F* h_sv_matchedmutrack_tip[sv_num_indices];
-  // TH1F* h_sv_matchedmutrack_tiperr[sv_num_indices];
-  // TH1F* h_sv_matchedmutrack_tipsig[sv_num_indices];
+  TH1F* h_sv_mutrack_missdist[sv_num_indices];
+  TH1F* h_sv_mutrack_missdisterr[sv_num_indices];
+  TH1F* h_sv_mutrack_missdistsig[sv_num_indices];
+
+  //gen level investigations (general MC)
+  TH1F* h_sv_geneleinSV_pt[sv_num_indices];
+  TH1F* h_sv_geneleinSV_dxy[sv_num_indices];
+  TH2F* h_sv_geneleinSV_pt_vs_dxy[sv_num_indices];
+  // TH1F* h_sv_geneleinSV_motherID[sv_num_indices];
+  // TH1F* h_sv_genIDs_recoeleinSV[sv_num_indices];
+  // TH2F* h_sv_geninSVrecoele_pt_vs_dxy[sv_num_indices];
+  // TH1F* h_sv_biggenIDs_recoeleinSV[sv_num_indices];
+  // TH2F* h_sv_biggeninSVrecoele_pt_vs_dxy[sv_num_indices];
+
+  TH1F* h_sv_genmuinSV_pt[sv_num_indices];
+  TH1F* h_sv_genmuinSV_dxy[sv_num_indices];
+  TH2F* h_sv_genmuinSV_pt_vs_dxy[sv_num_indices];
+  // TH1F* h_sv_genmuinSV_motherID[sv_num_indices];
+  // TH1F* h_sv_genIDs_recomuinSV[sv_num_indices];
+  // TH2F* h_sv_geninSVrecomu_pt_vs_dxy[sv_num_indices];
+  // TH1F* h_sv_biggenIDs_recomuinSV[sv_num_indices];
+  // TH2F* h_sv_biggeninSVrecomu_pt_vs_dxy[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
@@ -222,6 +238,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     max_ntrackplots(cfg.getParameter<int>("max_ntrackplots")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
@@ -229,63 +246,44 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 15, 0, 15);
-  h_nsv_wlep = fs->make<TH1F>("h_nsv_wlep", ";# of secondary vertices with at least 1 assoc. lep;arb. units", 15, 0, 15);
-  h_nsv_eflavor = fs->make<TH1F>("h_nsv_eflavor", "; # of secondary vertices genmatched to ele sv; arb. units", 4, 0, 4);
-  h_nsv_mflavor = fs->make<TH1F>("h_nsv_mflavor", "; # of secondary vertices genmatched to mu sv; arb. units", 4, 0, 4);
-  h_nsv_emuflavor = fs->make<TH1F>("h_nsv_emuflavor", "; # of secondary vertices genmatched to ele or mu sv; arb. units", 6, 0, 6);
-  h_nmsv = fs->make<TH1F>("h_nmsv", "; # of secondary vertices genmatched to mu sv with mu in sv; arb. units", 4, 0, 4);
-  h_nesv = fs->make<TH1F>("h_nesv", "; # of secondary vertices genmatched to ele sv with ele in sv; arb. units", 4, 0, 4);
-  h_nemusv = fs->make<TH1F>("h_nemusv", "; # of secondary vertices genmatched to ele or mu sv with ele or mu in sv; arb. units", 6, 0, 6);
+  h_nsv_wlep = fs->make<TH1F>("h_nsv_wlep", ";# of secondary vertices with at least 1 assoc. lep;arb. units", 10, 0, 10);
+  // h_gensv_winbp = fs->make<TH1F>("h_gensv_winbp", ";# of gen sv within beampipe;arb. units", 2, 0, 2);
 
-  h_nsv_genmatched = fs->make<TH1F>("h_nsv_genmatched", ";# of secondary vertices < 0.02 away from gen vertex;arb. units", 15, 0, 15);
-  h_sv_genv_mag = fs->make<TH1F>("h_sv_genv_mag", ";Mag(genvtx, closest recovtx);arb. units", 200, 0, 0.2);
-  h_sv_ele_genv_mag = fs->make<TH1F>("h_sv_ele_genv_mag", ";Mag(genvtx with ele, closest recovtx);arb. units", 200, 0, 0.2);
-  h_sv_mu_genv_mag = fs->make<TH1F>("h_sv_mu_genv_mag", ";Mag(genvtx with mu, closest recovtx);arb. units", 200, 0, 0.2);
-  h_sv_tau_genv_mag = fs->make<TH1F>("h_sv_tau_genv_mag", ";Mag(genvtx with tau, closest recovtx);arb. units", 200, 0, 0.2);
-
-  h_svidx_assoclep = fs->make<TH2F>("h_svidx_assoclep", "; N of associated leptons in the SV);SV Index", 10, 0, 10, 10, 0, 10);
-  h_svidx_assocmu  = fs->make<TH2F>("h_svidx_assocmu", "; N of associated muons in the SV);SV Index", 10, 0, 10, 10, 0, 10);
-  h_svidx_assocel  = fs->make<TH2F>("h_svidx_assocel", "; N of associated electrons in the SV);SV Index", 10, 0, 10, 10, 0, 10);
-
-  h_gen_ele_closestdR = fs->make<TH1F>("h_gen_ele_closestdR", "; dR of best match btwn gen - reco ele", 200, 0, 0.2);
-  h_gen_mu_closestdR = fs->make<TH1F>("h_gen_mu_closestdR", "; dR of best match btwn gen - reco mu", 200, 0, 0.2);
-  h_nmatchele = fs->make<TH1F>("h_nmatchele", "; # of electrons matched to gen-level electrons;events", 10, 0, 10);
-  h_nmatchmu = fs->make<TH1F>("h_nmatchmu", "; # of muons matched to gen-level muons;events", 10, 0, 10);
-
-
+  //lep flavor is based on the genSV; all indicates no distinction between flavor (ele, mu, tau)
+  const char* lep_flav[4] = {"all", "ele", "mu", "tau"};
+  for (int i = 0; i < 4; ++i) {
+    h_ngenmatched_sv_[i] = fs->make<TH1F>(TString::Format("h_ngenmatched_sv_%s", lep_flav[i]), TString::Format("; n of SV < 0.02 away from %s-flavor genvtx;arb. units", lep_flav[i]), 3, 0, 3);
+    h_sv_gensv_mag_[i] = fs->make<TH1F>(TString::Format("h_sv_%s_gensv_mag", lep_flav[i]), TString::Format("; Mag(%s-flavor genvtx, closest recovtx);arb. units", lep_flav[i]), 200, 0, 0.2);
+    if (i != 0) {
+      h_ngendau_[i] = fs->make<TH1F>(TString::Format("h_ngendau_%s", lep_flav[i]), TString::Format("; n of gendau %s;arb. units", lep_flav[i]), 3, 0, 3);
+    }
+  }
   const char* lep_tag[2] = {"ele", "mu"};
   for (int i = 0; i< 2; ++i) {
+    h_ngenmatched_[i] = fs->make<TH1F>(TString::Format("h_ngenmatched_%s", lep_tag[i]), TString::Format("; n of genmatched %s;arb. units", lep_tag[i]), 3, 0, 3);
+    h_closestdR_gen_[i] = fs->make<TH1F>(TString::Format("h_closestdR_gen_%s", lep_tag[i]), TString::Format("; closest gen-reco %s dR;arb. units", lep_tag[i]), 200, 0, 2);
+
     h_lepdau_novtx_[i] = fs->make<TH1F>(TString::Format("h_lepdau_novtx_%s", lep_tag[i]), TString::Format("; no SV matched - is the reco %s matched?;", lep_tag[i]), 3, 0, 3);
     h_lepdau_wvtx_[i] = fs->make<TH1F>(TString::Format("h_lepdau_wvtx_%s", lep_tag[i]), TString::Format("; SV is matched - is the reco %s matched?;", lep_tag[i]), 3, 0, 3);
     h_lepdau_invtx_[i] = fs->make<TH1F>(TString::Format("h_lepdau_invtx_%s", lep_tag[i]), TString::Format("; SV & %s are matched - is the %s in the SV?;", lep_tag[i], lep_tag[i]), 3, 0, 3);
-    h_matchlep_dxy_[i] = fs->make<TH1F>(TString::Format("h_matchlep_dxy_%s", lep_tag[i]), TString::Format("; genmatched %s inSV dxy;", lep_tag[i]), 150, 0, 3.0);
-    h_matchlep_dxyerr_[i] = fs->make<TH1F>(TString::Format("h_matchlep_dxyerr_%s", lep_tag[i]), TString::Format("; genmatched %s inSV dxyerr;", lep_tag[i]), 100, 0, 0.05);
-    h_matchlep_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_matchlep_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nsigmadxy;", lep_tag[i]), 200, 0, 200);
-    h_matchlep_pt_[i] = fs->make<TH1F>(TString::Format("h_matchlep_pt_%s", lep_tag[i]), TString::Format("; genmatched %s inSV pt;", lep_tag[i]), 200, 0, 1000);
-    h_matchlep_nm1_minr_[i] = fs->make<TH1F>(TString::Format("h_matchlep_nm1_minr_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nm1 minr;", lep_tag[i]), 10, 0, 10);
-    h_matchlep_nm1_npxlayers_[i] = fs->make<TH1F>(TString::Format("h_matchlep_nm1_npxlayers_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nm1 npxlayers;", lep_tag[i]), 20, 0, 20);
-    h_matchlep_nm1_nstlayers_[i] = fs->make<TH1F>(TString::Format("h_matchlep_nm1_nstlayers_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nm1 nstlayers;", lep_tag[i]), 20, 0, 20);
-    h_matchlep_nm1_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_matchlep_nm1_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nm1 nsigmadxy;", lep_tag[i]), 200, 0, 200);
-    h_matchlep_genvtx_pos_[i] = fs->make<TH2F>(TString::Format("h_matchlep_genvtx_pos_%s", lep_tag[i]), ";genSV x (cm); genSV y (cm);", 100, -4, 4, 100, -4, 4);
+    h_lepdau_inSV_pt_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_pt_%s", lep_tag[i]), TString::Format("; genmatched %s inSV pt;", lep_tag[i]), 200, 0, 1000);
+    h_lepdau_inSV_dxy_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_dxy_%s", lep_tag[i]), TString::Format("; genmatched %s inSV dxy;", lep_tag[i]), 150, 0, 3.0);
+    h_lepdau_inSV_dxyerr_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_dxyerr_%s", lep_tag[i]), TString::Format("; genmatched %s inSV dxyerr;", lep_tag[i]), 100, 0, 0.05);
+    h_lepdau_inSV_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s inSV nsigmadxy;", lep_tag[i]), 200, 0, 200);
+    h_lepdau_inSV_missdist_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_missdist_%s", lep_tag[i]), TString::Format(";missdist btwn SV and genmatched %s inSV;", lep_tag[i]), 150, 0, 3.0);
+    h_lepdau_inSV_missdisterr_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_missdisterr_%s", lep_tag[i]), TString::Format(";missdisterr btwn SV and genmatched %s inSV;", lep_tag[i]), 100, 0, 0.05);
+    h_lepdau_inSV_missdistsig_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_missdistsig_%s", lep_tag[i]), TString::Format(";missdistsig btwn SV and genmatched %s inSV;", lep_tag[i]), 200, 0, 100);
+    h_lepdau_inSV_iso_[i] = fs->make<TH1F>(TString::Format("h_lepdau_inSV_iso_%s", lep_tag[i]), TString::Format("; iso of genmatched %s inSV;", lep_tag[i]), 100, 0, 1.0);
 
-    h_nomatchlep_dxy_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_dxy_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV dxy;", lep_tag[i]), 150, 0, 3.0);
-    h_nomatchlep_dxyerr_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_dxyerr_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV dxyerr;", lep_tag[i]), 100, 0, 0.05);
-    h_nomatchlep_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nsigmadxy;", lep_tag[i]), 200, 0, 200);
-    h_nomatchlep_pt_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_pt_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV pt;", lep_tag[i]), 200, 0, 1000);
-    h_nomatchlep_nm1_minr_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_nm1_minr_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nm1 minr;", lep_tag[i]), 10, 0, 10);
-    h_nomatchlep_nm1_npxlayers_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_nm1_npxlayers_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nm1 npxlayers;", lep_tag[i]), 20, 0, 20);
-    h_nomatchlep_nm1_nstlayers_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_nm1_nstlayers_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nm1 nstlayers;", lep_tag[i]), 20, 0, 20);
-    h_nomatchlep_nm1_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_nm1_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nm1 nsigmadxy;", lep_tag[i]), 200, 0, 200);
-    h_nomatchlep_genvtx_pos_[i] = fs->make<TH2F>(TString::Format("h_nomatchlep_genvtx_pos_%s", lep_tag[i]), ";genSV x (cm); genSV y (cm);", 100, -4, 4, 100, -4, 4);
-
-    h_nomatchlep_trkdR_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_trkdR_%s", lep_tag[i]), TString::Format("; deltaR between SV tracks and genmatched %s not inSV;", lep_tag[i]), 200, 0, 5.0);
-    h_nomatchlep_missdist_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_missdist_%s", lep_tag[i]), TString::Format(";missdist btwn SV and genmatched %s not inSV;", lep_tag[i]), 150, 0, 3.0);
-    h_nomatchlep_missdisterr_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_missdisterr_%s", lep_tag[i]), TString::Format(";missdisterr btwn SV and reco %s not inSV;", lep_tag[i]), 100, 0, 0.05);
-    h_nomatchlep_missdistsig_[i] = fs->make<TH1F>(TString::Format("h_nomatchlep_missdistsig_%s", lep_tag[i]), TString::Format(";missdistsig btwn SV and reco %s not inSV;", lep_tag[i]), 200, 0, 100);
-    h_matchlep_missdist_[i] = fs->make<TH1F>(TString::Format("h_matchlep_missdist_%s", lep_tag[i]), TString::Format(";missdist btwn SV and genmatched %s inSV;", lep_tag[i]), 150, 0, 3.0);
-    h_matchlep_missdisterr_[i] = fs->make<TH1F>(TString::Format("h_matchlep_missdisterr_%s", lep_tag[i]), TString::Format(";missdisterr btwn SV and reco %s inSV;", lep_tag[i]), 100, 0, 0.05);
-    h_matchlep_missdistsig_[i] = fs->make<TH1F>(TString::Format("h_matchlep_missdistsig_%s", lep_tag[i]), TString::Format(";missdistsig btwn SV and reco %s inSV;", lep_tag[i]), 200, 0, 100);
-  }
+    h_lepdau_outSV_pt_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_pt_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV pt;", lep_tag[i]), 200, 0, 1000);
+    h_lepdau_outSV_dxy_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_dxy_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV dxy;", lep_tag[i]), 150, 0, 3.0);
+    h_lepdau_outSV_dxyerr_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_dxyerr_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV dxyerr;", lep_tag[i]), 100, 0, 0.05);
+    h_lepdau_outSV_nsigmadxy_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_nsigmadxy_%s", lep_tag[i]), TString::Format("; genmatched %s not inSV nsigmadxy;", lep_tag[i]), 200, 0, 200);
+    h_lepdau_outSV_missdist_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_missdist_%s", lep_tag[i]), TString::Format(";missdist btwn SV and genmatched %s not inSV;", lep_tag[i]), 150, 0, 3.0);
+    h_lepdau_outSV_missdisterr_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_missdisterr_%s", lep_tag[i]), TString::Format(";missdisterr btwn SV and genmatched %s not inSV;", lep_tag[i]), 100, 0, 0.05);
+    h_lepdau_outSV_missdistsig_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_missdistsig_%s", lep_tag[i]), TString::Format(";missdistsig btwn SV and genmatched %s not inSV;", lep_tag[i]), 200, 0, 100);
+    h_lepdau_outSV_iso_[i] = fs->make<TH1F>(TString::Format("h_lepdau_outSV_iso_%s", lep_tag[i]), TString::Format("; iso of genmatched %s not inSV;", lep_tag[i]), 100, 0, 1.0);
+ }
 
   PairwiseHistos::HistoDefs hs;
 
@@ -336,9 +334,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackminnhits",                 "min number of hits on track per SV",                                           40,    0,      40);
   hs.add("trackmaxnhits",                 "max number of hits on track per SV",                                           40,    0,      40);
   hs.add("njetsntks",                     "# of jets assoc. by tracks to SV",                                             10,    0,      10);
-  hs.add("nelensv",                       " # of ele assoc. to SV",                                                        5,    0,       5);
-  hs.add("nmunsv",                        " # of mu assoc. to SV",                                                        10,    0,      10);
-  hs.add("nlepnsv",                       " # of leptons assoc. to SV",                                                   10,    0,      10);
+  hs.add("nelectrons",                    " # of ele assoc. to SV",                                                        5,    0,       5);
+  hs.add("nmuons",                        " # of mu assoc. to SV",                                                        10,    0,      10);
+  hs.add("nleptons",                      " # of leptons assoc. to SV",                                                   10,    0,      10);
+  hs.add("nleptonspt20",                  " # of leptons w/ p_{T} >= 20 GeV",                                             10,    0,      10);
   hs.add("chi2dof",                       "SV #chi^2/dof",                                                                50,    0,       7);
   hs.add("chi2dofprob",                   "SV p(#chi^2, dof)",                                                            50,    0,       1.2);
 
@@ -380,7 +379,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("missdisttksjetsntkpvsig",       "N#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",          100,    0,     100);
 
 					  
-  hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                  50,    0,    10000);
+  hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                200,    0,    10000);
+  //hs.add("trackpairdrmax",                "max dR between two tracks in SV",                                              50,   -4,        4);
+  hs.add("tracktripmassmax",              "max #Sigma M (GeV) between three tracks in SV",                               200,   0,    2000);
+
 
   hs.add("ntrackssharedwpv",  "number of tracks shared with the PV", 30, 0, 30);
   hs.add("ntrackssharedwpvs", "number of tracks shared with any PV", 30, 0, 30);
@@ -505,34 +507,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("track%i_injet",         i), TString::Format("track%i in-jet?",                     i),   2,  0,      2);
     hs.add(TString::Format("track%i_inpv",          i), TString::Format("track%i in-PV?",                      i),  10, -1,      9);
     hs.add(TString::Format("track%i_jet_deltaphi0", i), TString::Format("track%i |#Delta#phi| to closest jet", i),  25,  0,      3.15);
-
-    hs.add(TString::Format("eletrack%i_pt",         i), TString::Format("p_{T} of ele track%i assoc to SV (GeV)", i),   200,      0,     1000);
-    hs.add(TString::Format("eletrack%i_eta",        i), TString::Format("eta of ele track%i assoc to SV",         i),    50,     -4,       4);
-    hs.add(TString::Format("eletrack%i_phi",        i), TString::Format("phi of ele track%i assoc to SV",         i),    50,  -3.15,    3.15);
-    hs.add(TString::Format("eletrack%i_dxy",        i), TString::Format("dxy (cm) of ele track%i assoc to SV",    i),   200,   -2.0,     2.0);
-    hs.add(TString::Format("eletrack%i_iso",        i), TString::Format("iso of ele track%i assoc to SV",         i),   100,      0,     2.0);
-    hs.add(TString::Format("eletrack%i_ID",         i), TString::Format("ID of ele track%i assoc to SV",          i),     5,      0,       5);
-    // hs.add(TString::Format("alleletrack%i_tip",    i), TString::Format("transverse IP of all ele track%i to SV", i), 100,    0,       2.0);
-    // hs.add(TString::Format("alleletrack%i_tiperr", i), TString::Format("transverse IP err of all ele track%i to SV", i), 100,    0,       0.05);
-    // hs.add(TString::Format("alleletrack%i_tipsig", i), TString::Format("transverse IP sig. of all ele track%i to SV", i),  100,   0,   100);
-    // hs.add(TString::Format("matchedeletrack%i_tip",  i), TString::Format("transverse IP of ele track%i assoc to SV", i), 100,    0,       2.0);
-    // hs.add(TString::Format("matchedeletrack%i_tiperr", i), TString::Format("transverse IP err of ele track%i assoc to SV", i), 100,    0,       0.05);
-    // hs.add(TString::Format("matchedeletrack%i_tipsig", i), TString::Format("transverse IP sig. of ele track%i assoc to SV", i),  100,   0,   100);
-
-
-    hs.add(TString::Format("mutrack%i_pt",          i), TString::Format("p_{T} of mu track%i assoc to SV (GeV)",  i),  200,      0,    1000);
-    hs.add(TString::Format("mutrack%i_eta",         i), TString::Format("eta of mu track%i assoc to SV",          i),   50,     -4,       4);
-    hs.add(TString::Format("mutrack%i_phi",         i), TString::Format("phi of mu track%i assoc to SV",          i),   50,  -3.15,    3.15);
-    hs.add(TString::Format("mutrack%i_dxy",         i), TString::Format("dxy (cm) of mu track%i assoc to SV",     i),  200,   -2.0,     2.0);
-    hs.add(TString::Format("mutrack%i_iso",         i), TString::Format("iso of mu track%i assoc to SV",          i),  100,      0,     2.0);
-    hs.add(TString::Format("mutrack%i_ID",          i), TString::Format("ID of mu track%i assoc to SV",           i),    4,      0,      4);
-    // hs.add(TString::Format("allmutrack%i_tip",     i), TString::Format("transverse IP of all mu track%i to SV", i),  100,      0,     2.0);
-    // hs.add(TString::Format("allmutrack%i_tiperr",  i), TString::Format("transverse IP err of all mu track%i to SV", i),  100,      0,     0.05);
-    // hs.add(TString::Format("allmutrack%i_tipsig",  i), TString::Format("transverse IP sig. of all mu track%i to SV", i),  100,   0,     100);
-    // hs.add(TString::Format("matchedmutrack%i_tip",   i), TString::Format("transverse IP of mu track%i assoc to SV", i),  100,      0,     2.0);
-    // hs.add(TString::Format("matchedmutrack%i_tiperr", i), TString::Format("transverse IP err of mu track%i assoc to SV", i),  100,      0,     0.05);
-    // hs.add(TString::Format("matchedmutrack%i_tipsig", i), TString::Format("transverse IP sig. of mu track%i assoc to SV", i),  100,   0,     100);
-
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
@@ -545,6 +519,13 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
     h_sv_bs2derr_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 500, 0, 2.5, 100, 0, 0.05);
     h_pvrho_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_pvrho_sv_%s_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);dist2d(PV, beamspot)) (cm)", exc), 5000, 0, 2.5, 200, 0, 0.1);
+
+    h_sv_elept_eleID[j] = fs->make<TH2F>(TString::Format("h_sv_%s_elept_eleID", exc), TString::Format("%s SV;assoc. ele pt; assoc. ele ID", exc), 200, 0, 1000, 5, 0, 5);
+    h_sv_elept_eleiso[j] = fs->make<TH2F>(TString::Format("h_sv_%s_elept_eleiso", exc), TString::Format("%s SV;assoc. ele pt; assoc. ele iso", exc), 200, 0, 1000, 200, 0, 0.2);
+    h_sv_mupt_muID[j] = fs->make<TH2F>(TString::Format("h_sv_%s_mupt_muID", exc), TString::Format("%s SV;assoc. mu pt; assoc. mu ID", exc), 200, 0, 1000, 4, 0, 4);
+    h_sv_mupt_muiso[j] = fs->make<TH2F>(TString::Format("h_sv_%s_mupt_muiso", exc), TString::Format("%s SV;assoc. mu pt; assoc. mu iso", exc), 200, 0, 1000, 200, 0, 0.2);
+
+    h_sv_tracks_sumpt2[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_sumpt2", exc), TString::Format("; %s SV tracks sumpt^2;arb. units", exc), 200, 0, 1000);
 
     h_sv_track_weight[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_weight", exc), TString::Format(";%s SV tracks weight;arb. units", exc), 21, 0, 1.05);
     h_sv_track_q[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_q", exc), TString::Format(";%s SV tracks charge;arb. units.", exc), 4, -2, 2);
@@ -569,31 +550,50 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
   
     h_sv_eletrack_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_pt", exc), TString::Format(";%s SV assoc. electron p_{T} (GeV);arb. units", exc), 200, 0, 1000);
+    h_sv_eletrack_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_eletrack_pt_vs_dxy", exc), TString::Format(";%s SV assoc. electron p_{T} (GeV);assoc. electron dxy (cm)", exc), 200, 0, 400, 200, 0, 0.2);
+    h_sv_eletrack_pt_vs_dxyerr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_eletrack_pt_vs_dxyerr", exc), TString::Format("%s SV ;assoc. electron p_{T} (GeV);assoc. electron dxyerr (cm)", exc), 200, 0, 400, 200, 0, 0.1);
+
     h_sv_eletrack_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_eta", exc), TString::Format(";%s SV assoc. electron #eta;arb. units", exc), 50, -4, 4);
     h_sv_eletrack_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_phi", exc), TString::Format(";%s SV assoc. electron #phi;arb. units", exc), 50, -3.15, 3.15);
     h_sv_eletrack_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_dxy", exc), TString::Format(";%s SV assoc. electron dxy (cm);arb. units", exc), 200, -2.0, 2.0);
+    h_sv_eletrack_dz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_dz", exc), TString::Format(";%s SV assoc. electron dz (cm);arb. units", exc), 200, -2.0, 2.0);
     h_sv_eletrack_iso[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_iso", exc), TString::Format(";%s SV assoc. electron iso;arb. units", exc), 100, 0, 2.0);
     h_sv_eletrack_ID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_ID", exc), TString::Format(";%s SV assoc. electron ID;arb. units", exc), 5, 0, 5);
-    // h_sv_matchedeletrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matchedeletrack_tip", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter; arb. units", exc), 100, 0, 2.0);
-    // h_sv_matchedeletrack_tiperr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matchedeletrack_tiperr", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter err; arb. units", exc), 100, 0, 0.05);
-    // h_sv_matchedeletrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matcheledetrack_tipsig", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter sig.; arb. units", exc), 100, 0, 100);
-    // h_sv_alleletrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_alleletrack_tip", exc), TString::Format(";%s SV - electron transverse impact parameter; arb. units", exc), 100, 0, 2.0);
-    // h_sv_alleletrack_tiperr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_alleletrack_tiperr", exc), TString::Format(";%s SV - electron transverse impact parameter err; arb. units", exc), 100, 0, 0.05);
-    // h_sv_alleletrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_alleletrack_tipsig", exc), TString::Format(";%s SV - electron transverse impact parameter sig.; arb. units", exc), 100, 0, 100);
+    h_sv_eletrack_missdist[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_missdist", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter; arb. units", exc), 100, 0, 0.2);
+    h_sv_eletrack_missdisterr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_missdisterr", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter err; arb. units", exc), 100, 0, 0.1);
+    h_sv_eletrack_missdistsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_eletrack_missdistsig", exc), TString::Format(";%s SV - assoc. electron transverse impact parameter sig.; arb. units", exc), 100, 0, 50);
+    
+    h_sv_geneleinSV_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_geneleinSV_pt", exc), TString::Format(";%s SV assoc. gen electron p_{T} (GeV);arb. units", exc), 200, 0, 400);
+    h_sv_geneleinSV_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_geneleinSV_dxy", exc), TString::Format(";%s SV assoc. gen electron dxy (cm);arb. units", exc), 200, 0, 0.2);
+    h_sv_geneleinSV_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_geneleinSV_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen ele pt; assoc. gen ele dxy", exc), 200, 0, 400, 200, 0, 0.2);
+    // h_sv_geninSVrecoele_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_geninSVrecoele_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen matched to ele pt; assoc. gen matched to ele dxy", exc), 200, 0, 400, 200, 0, 0.2);
+    // h_sv_geneleinSV_motherID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mothergenIDs_geneleinSV", exc), TString::Format("%s SV;mother genID of assoc. gen ele;arb. units", exc), 600, 0, 600);
+    // h_sv_genIDs_recoeleinSV[j] = fs->make<TH1F>(TString::Format("h_sv_%s_genIDs_recoeleinSV", exc), TString::Format(";genIDs matched to %s SV assoc. electrons ;arb. units", exc), 213, 0, 213);
+    // h_sv_biggenIDs_recoeleinSV[j] = fs->make<TH1F>(TString::Format("h_sv_%s_biggenIDs_recoeleinSV", exc), TString::Format(";genIDs matched to %s SV assoc. electrons ;arb. units", exc), 300, 212, 512);
+    // h_sv_biggeninSVrecoele_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_biggeninSVrecoele_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen matched to ele pt; assoc. gen matched to ele dxy", exc), 200, 0, 400, 200, 0, 0.2);
 
     h_sv_mutrack_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_pt", exc), TString::Format(";%s SV assoc. muon p_{T} (GeV);arb. units", exc), 200, 0, 1000);
+    h_sv_mutrack_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_mutrack_pt_vs_dxy", exc), TString::Format(";%s SV assoc. muon p_{T} (GeV);assoc. muon dxy (cm)", exc), 200, 0, 400, 200, 0, 0.2);
+    h_sv_mutrack_pt_vs_dxyerr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_mutrack_pt_vs_dxyerr", exc), TString::Format("%s SV;assoc. muon p_{T} (GeV);assoc. muon dxyerr (cm)", exc), 200, 0, 400, 200, 0, 0.1);
+
     h_sv_mutrack_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_eta", exc), TString::Format(";%s SV assoc. muon #eta;arb. units", exc), 50, -4, 4);
     h_sv_mutrack_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_phi", exc), TString::Format(";%s SV assoc. muon #phi;arb. units", exc), 50, -3.15, 3.15);
     h_sv_mutrack_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_dxy", exc), TString::Format(";%s SV assoc. muon dxy (cm);arb. units", exc), 200, -2.0, 2.0);
+    h_sv_mutrack_dz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_dz", exc), TString::Format(";%s SV assoc. muon dz (cm);arb. units", exc), 200, -2.0, 2.0);
     h_sv_mutrack_iso[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_iso", exc), TString::Format(";%s SV assoc. muon iso;arb. units", exc), 1000, 0, 2.0);
     h_sv_mutrack_ID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_ID", exc), TString::Format(";%s SV assoc. muon ID;arb. units", exc), 4, 0, 4);
-    // h_sv_matchedmutrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matchedmutrack_tip", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter; arb. units", exc), 100, 0, 2.0);
-    // h_sv_matchedmutrack_tiperr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matchedmutrack_tiperr", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter err; arb. units", exc), 100, 0, 0.05);
-    // h_sv_matchedmutrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_matchedmutrack_tipsig", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter sig.; arb. units", exc), 100, 0, 100);
-    // h_sv_allmutrack_tip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_allmutrack_tip", exc), TString::Format(";%s SV - muon transverse impact parameter; arb. units", exc), 100, 0, 2.0);
-    // h_sv_allmutrack_tiperr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_allmutrack_tiperr", exc), TString::Format(";%s SV - muon transverse impact parameter err; arb. units", exc), 100, 0, 0.05);
-    // h_sv_allmutrack_tipsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_allmutrack_tipsig", exc), TString::Format(";%s SV - muon transverse impact parameter sig.; arb. units", exc), 100, 0, 100);
-  }
+    h_sv_mutrack_missdist[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_missdist", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter; arb. units", exc), 100, 0, 0.2);
+    h_sv_mutrack_missdisterr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_missdisterr", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter err; arb. units", exc), 100, 0, 0.1);
+    h_sv_mutrack_missdistsig[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mutrack_msisdistsig", exc), TString::Format(";%s SV - assoc. muon transverse impact parameter sig.; arb. units", exc), 100, 0, 50);
+    h_sv_genmuinSV_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_genmuinSV_pt", exc), TString::Format(";%s SV assoc. gen mu p_{T} (GeV);arb. units", exc), 200, 0, 400);
+    h_sv_genmuinSV_dxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_genmuinSV_dxy", exc), TString::Format(";%s SV assoc. gen mu dxy (cm);arb. units", exc), 200, 0, 0.2);
+    h_sv_genmuinSV_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_genmuinSV_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen mu pt; assoc. gen mu dxy", exc), 200, 0, 400, 200, 0, 0.2);
+    // h_sv_geninSVrecomu_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_geninSVrecomu_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen matched to mu pt; assoc. gen matched to mu dxy", exc), 200, 0, 400, 200, 0, 0.2);
+    // h_sv_genmuinSV_motherID[j] = fs->make<TH1F>(TString::Format("h_sv_%s_mothergenIDs_genmuinSV", exc), TString::Format("%s SV;mother genID of assoc. gen mu;arb. units", exc), 600, 0, 600);
+    // h_sv_genIDs_recomuinSV[j] = fs->make<TH1F>(TString::Format("h_sv_%s_genIDs_recomuinSV", exc), TString::Format(";genIDs matched to %s SV assoc. muons ;arb. units", exc), 213, 0, 213);
+    // h_sv_biggenIDs_recomuinSV[j] = fs->make<TH1F>(TString::Format("h_sv_%s_biggenIDs_recomuinSV", exc), TString::Format(";genIDs matched to %s SV assoc. muons ;arb. units", exc), 300, 212, 512);
+    // h_sv_biggeninSVrecomu_pt_vs_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_biggeninSVrecomu_pt_vs_dxy", exc), TString::Format("%s SV;assoc. gen matched to mu pt; assoc. gen matched to mu dxy", exc), 200, 0, 400, 200, 0, 0.2);
+ }
 
   h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
@@ -601,6 +601,18 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
   h_sv_nsv_nmatchjet = fs->make<TH2F>("h_sv_nsv_nmatchjet", ";# jets matched with gen quarks;# SV", 10, 0, 10, 10, 0, 10);
 
+  h_sv_ntkfromjets = fs->make<TH1F>("h_sv_ntkfromjets", ";# tracks from jets;arb. units", 20,0,20);
+  h_sv_nallbtags = fs->make<TH3F>("h_sv_nallbtags", ";# loose B jets asso. w/SV;# medium B jets asso. w/SV;# tight B jets asso. w/SV",10,0,10,10,0,10,10,0,10);
+  h_sv_nallbtks = fs->make<TH3F>("h_sv_nallbtks", ";# tracks from loose b jets;# tracks from medium b jets;# tracks from tight b jets",20,0,20,20,0,20,20,0,20);
+  const char* bname[3] = {"loose", "medium", "tight"};
+  for (int i = 0; i < 3; ++i) {
+    h_sv_nbtags[i] = fs->make<TH1F>(TString::Format("h_sv_nbtags_%i",i), TString::Format(";# %s B jets asso. w/ SV;arb. units",bname[i]), 10,0,10);
+    h_sv_nbtks[i] = fs->make<TH1F>(TString::Format("h_sv_nbtks_%i",i), TString::Format(";# tracks from %s B jets;arb. units",bname[i]), 20,0,20);
+    h_sv_nlep_nbtks[i] = fs->make<TH1F>(TString::Format("h_sv_nlep_nbtks_%i",i), TString::Format(";# tracks from leptons and %s B jets;arb. units",bname[i]), 20,0,20);
+  
+    h_sv_mindeltaphi_svbjet[i] = fs->make<TH1F>(TString::Format("h_sv_mindeltaphi_svbjet_%i",i), TString::Format(";|#Delta#phi(SV-PV,closest asso. %s B jet)|;arb. units",bname[i]),50, 0, 3.15);
+    h_sv_mindeltar_sv_bjet[i] = fs->make<TH1F>(TString::Format("h_sv_mindeltar_sv_bjet_%i",i), TString::Format(";#Delta R(SV-PV,closest asso. %s B jet);arb. units",bname[i]),150,0,7);
+  }
 
   h_sv_ntk_njet = fs->make<TH2F>("h_sv_ntk_njet", "; # tracks of SV; # associated jets of SV", 40,0,40,10,0,10);
   h_sv_ntk0_ntk1 = fs->make<TH2F>("h_sv_ntk0_ntk1", "; # tracks of SV0; # tracks of SV1", 40,0,40,40,0,40);
@@ -669,8 +681,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
 }
 
-Measurement1D MFVVertexHistos::miss_dist(const math::XYZPoint& pv, const math::XYZPoint& sv, const math::XYZPoint& lep, const double pv_arr [9], const double sv_arr [9]) {
 
+Measurement1D MFVVertexHistos::miss_dist(const math::XYZPoint& pv, const math::XYZPoint& sv, const math::XYZPoint& lep, const double pv_arr [9], const double sv_arr [9]) {
   // miss distance is magnitude of (lepton direction (= n) cross (tv - sv) ( = d))
   // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2 
   // returns the unit vector -> to get the direction 
@@ -711,37 +723,28 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
 
+
+
   const int nsv = int(auxes->size());
   h_nsv->Fill(nsv, w);
+
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByToken(gen_particles_token, gen_particles);
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
   // do the same but with gen leptons from LLPs;
   // nmatched 0 refers to the first llp; nmatched 1 refers to the second llp
   double nmatched_0 = 0;
   double nmatched_1 = 0;
-  double nelematched_0 = 0;
-  double nelematched_1 = 0;
-  double nmumatched_0 = 0;
-  double nmumatched_1 = 0;
 
-  //vector of important variables : (eta, phi, pt, dxybs, dxyerr, nsigmadxy, minr, npxlayers, nstlayers)
-  std::vector<float> elematched_0; 
-  std::vector<float> elematched_1;
-  std::vector<float> mumatched_0;
-  std::vector<float> mumatched_1;
-
-
-  int ngen_ele = 0;
-  int ngen_mu = 0;
-  int ngen_tau = 0;
-
-  int genele0 = 0;
-  int genele1 = 0;
-  int genmu0 = 0;
-  int genmu1 = 0;
+  std::vector<std::pair<std::string, int>> genmatchedlep{{"lep0", -1}, {"lep1", -1}}; //{ {"lepton0_type", idx}, {"lepton1_type", idx} } if lepton type is tau, force idx = -1 ? 
   
   for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
     // skip stops and only look at leptons and quarks
     // FIXME: this only works for stoplq samples
+    // idx 0, 2 == jets; idx 1, 3 == leptons 
     if (abs(mevent->gen_daughter_id[i])==1000006) {
       continue;
     }
@@ -749,10 +752,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       double gd_eta = mevent->gen_daughters[i].Eta();
       double gd_phi = mevent->gen_daughters[i].Phi();
       int n_matched = 0;
-      int n_ematched = 0;
-      int ngen_e = 0;
-      int n_mmatched = 0;
-      int ngen_m = 0;
+
       if (abs(mevent->gen_daughter_id[i]) >= 1 && abs(mevent->gen_daughter_id[i]) <= 5) {
         for (int ij = 0; ij<mevent->njets(); ++ij){
           double dR2 = reco::deltaR2(mevent->nth_jet_eta(ij), mevent->nth_jet_phi(ij), gd_eta, gd_phi);
@@ -762,147 +762,127 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
       }
       else if (abs(mevent->gen_daughter_id[i]) == 11) { 
-        ngen_ele += 1;
-        ngen_e +=1;
+        genmatchedlep[(i < 2) ? 0 : 1].first = "electron";
         std::vector<int> matched_ele_indx; 
         std::vector<double> mindR;
-
         for (int ie=0; ie<mevent->nelectrons(); ++ie){
           double dR = reco::deltaR(mevent->nth_ele_eta(ie), mevent->nth_ele_phi(ie), gd_eta, gd_phi);
           mindR.push_back(dR);
           matched_ele_indx.push_back(ie);
         }
         if (mindR.size() !=0) {
-          h_gen_ele_closestdR->Fill(*min_element(mindR.begin(), mindR.end()), w);
+          h_closestdR_gen_[0]->Fill(*min_element(mindR.begin(), mindR.end()), w);
           float best_dR = *min_element(mindR.begin(), mindR.end());
           int best_idx = std::min_element(mindR.begin(), mindR.end()) - mindR.begin();
-          //since the electrons are ordered; the best mindR index can be used for all electron variables 
           int bestele_idx = matched_ele_indx[best_idx];
 
-          // if (bestele_idx != best_idx) {
-          //   std::cout << bestele_idx << " " << best_idx << std::endl;
-          // }
           if (best_dR < 0.2) {
-            n_ematched +=1;
-            if (i < 2) {
-              elematched_0.push_back(mevent->nth_ele_eta(bestele_idx));
-              elematched_0.push_back(mevent->nth_ele_phi(bestele_idx));
-              elematched_0.push_back(mevent->nth_ele_pt(bestele_idx));
-              elematched_0.push_back(mevent->electron_dxybs[bestele_idx]);
-              elematched_0.push_back(mevent->electron_dxyerr[bestele_idx]);
-              elematched_0.push_back(fabs(mevent->electron_dxybs[bestele_idx]/mevent->electron_dxyerr[bestele_idx]));
-              elematched_0.push_back(mevent->electron_minr[bestele_idx]);
-              elematched_0.push_back(mevent->electron_npxlayers(bestele_idx));
-              elematched_0.push_back(mevent->electron_nstlayers(bestele_idx));
-            }
-            else if (i>2) {
-              elematched_1.push_back(mevent->nth_ele_eta(bestele_idx));
-              elematched_1.push_back(mevent->nth_ele_phi(bestele_idx));
-              elematched_1.push_back(mevent->nth_ele_pt(bestele_idx));
-              elematched_1.push_back(mevent->electron_dxybs[bestele_idx]);
-              elematched_1.push_back(mevent->electron_dxyerr[bestele_idx]);
-              elematched_1.push_back(fabs(mevent->electron_dxybs[bestele_idx]/mevent->electron_dxyerr[bestele_idx]));
-              elematched_1.push_back(mevent->electron_minr[bestele_idx]);
-              elematched_1.push_back(mevent->electron_npxlayers(bestele_idx));
-              elematched_1.push_back(mevent->electron_nstlayers(bestele_idx));
-            }
+            genmatchedlep[(i < 2) ? 0 : 1].second = bestele_idx;
           }
         }
       }
       else if (abs(mevent->gen_daughter_id[i]) == 13 ) {
-        ngen_mu += 1;
-        ngen_m +=1;
-        std::vector<double> mindR;
+        genmatchedlep[(i < 2) ? 0 : 1].first = "muon";
         std::vector<double> matched_mu_idx;
+        std::vector<double> mindR;
         for (int im=0; im<mevent->nmuons(); ++im){
           double dR = reco::deltaR(mevent->nth_mu_eta(im), mevent->nth_mu_phi(im), gd_eta, gd_phi);
           mindR.push_back(dR);
           matched_mu_idx.push_back(im);
         }
         if (mindR.size() !=0) {
-          h_gen_mu_closestdR->Fill(*min_element(mindR.begin(), mindR.end()), w);
+          h_closestdR_gen_[1]->Fill(*min_element(mindR.begin(), mindR.end()), w);
           float best_dR = *min_element(mindR.begin(), mindR.end());
           int best_idx = std::min_element(mindR.begin(), mindR.end()) - mindR.begin();
           int bestmu_idx = matched_mu_idx[best_idx];
 
-          // if (bestmu_idx != best_idx) {
-          //   std::cout << bestmu_idx << " " << best_idx << std::endl;
-          // }
           if (best_dR < 0.2) {
-            n_mmatched +=1;
-            if (i < 2) {
-              mumatched_0.push_back(mevent->nth_mu_eta(bestmu_idx));
-              mumatched_0.push_back(mevent->nth_mu_phi(bestmu_idx));
-              mumatched_0.push_back(mevent->nth_mu_pt(bestmu_idx));
-              mumatched_0.push_back(mevent->muon_dxybs[bestmu_idx]);
-              mumatched_0.push_back(mevent->muon_dxyerr[bestmu_idx]);
-              mumatched_0.push_back(fabs(mevent->muon_dxybs[bestmu_idx]/mevent->muon_dxyerr[bestmu_idx]));
-              mumatched_0.push_back(mevent->muon_minr[bestmu_idx]);
-              mumatched_0.push_back(mevent->muon_npxlayers(bestmu_idx));
-              mumatched_0.push_back(mevent->muon_nstlayers(bestmu_idx));
-
-            }
-            else if (i>2) {
-              mumatched_1.push_back(mevent->nth_mu_eta(bestmu_idx));
-              mumatched_1.push_back(mevent->nth_mu_phi(bestmu_idx));
-              mumatched_1.push_back(mevent->nth_mu_pt(bestmu_idx));
-              mumatched_1.push_back(mevent->muon_dxybs[bestmu_idx]);
-              mumatched_1.push_back(mevent->muon_dxyerr[bestmu_idx]);
-              mumatched_1.push_back(fabs(mevent->muon_dxybs[bestmu_idx]/mevent->muon_dxyerr[bestmu_idx]));
-              mumatched_1.push_back(mevent->muon_minr[bestmu_idx]);
-              mumatched_1.push_back(mevent->muon_npxlayers(bestmu_idx));
-              mumatched_1.push_back(mevent->muon_nstlayers(bestmu_idx));
-            }
+            genmatchedlep[(i < 2) ? 0 : 1].second = bestmu_idx;
           }
         }
       }
       else if (abs(mevent->gen_daughter_id[i]) == 15 ) {
-        ngen_tau +=1;
-      }
-      //should be 4 gen daughters; i = 0,1 belong to first vertex; i = 2,3 belong to second vertex
-      if (i<2){
-        nmatched_0 += n_matched;
-        nelematched_0 += n_ematched;
-        nmumatched_0 += n_mmatched;
-        genele0 += ngen_e;
-        genmu0 += ngen_m;
-        
-      }
-      else{
-        nmatched_1 += n_matched;
-        nelematched_1 += n_ematched;
-        nmumatched_1 += n_mmatched;
-        genele1 += ngen_e;
-        genmu1 += ngen_m;
+        genmatchedlep[(i < 2) ? 0 : 1].first = "tau";
       }
     }
   }
-  std::vector<int> genlep_dau{ngen_ele, ngen_mu, ngen_tau};
   h_sv_nsv_nmatchjet->Fill(nmatched_0+nmatched_1, nsv, w);
+  
+  int ngele = 0, ngmu = 0, ngtau = 0; //gen level ele, mu, tau 
+  int ngm_ele = 0, ngm_mu = 0; //genmatched ele, mu
 
-  if (genele0) h_nmatchele->Fill(nelematched_0, w);
-  if (genele1) h_nmatchele->Fill(nelematched_1, w);
-  if (genmu0) h_nmatchmu->Fill(nmumatched_0, w);
-  if (genmu1) h_nmatchmu->Fill(nmumatched_1, w);
+  for (int i=0; i < 2; ++i){
+    if (genmatchedlep[i].first == "electron") {
+      ngele +=1;
+      if (genmatchedlep[i].second >= 0) ngm_ele += 1; 
+    }
+    if (genmatchedlep[i].first == "muon") {
+      ngmu += 1;
+      if (genmatchedlep[i].second >= 0) ngm_mu += 1;
+    }
+    if (genmatchedlep[i].first == "tau") {
+      ngtau += 1;
+    }
+  }
+  h_ngendau_[1]->Fill(ngele, w);
+  h_ngendau_[2]->Fill(ngmu, w);
+  h_ngendau_[3]->Fill(ngtau, w);
+  if (ngele > 0 ) h_ngenmatched_[0]->Fill(ngm_ele, w); //only fill the histogram when expecting ele;mu
+  if  (ngmu > 0 ) h_ngenmatched_[1]->Fill(ngm_mu, w);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  //   //if genx geny within beampipe 
+  //   // if (jmt::Geometry::inside_beampipe(genx, geny)) {
+  //   //   h_gensv_winbp->Fill(1,w);
+  //   // }
+  // }
+
+  //for genmatching 
+  std::vector<std::pair<int, float>> isv_dR; // stores which gensv the sv is closest to (0 or 1) and the dR; the index is which sv it is 
+  std::vector<std::pair<std::string, int>> genmatchedvertex{{"vertexflavor0", -1}, {"vertexflavor1", -1}}; // -1 if vertex unmatched, otherwise it is the sv index 
+
+  int nsv_wlep = 0;
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
-    const int nmuons = aux.nmuons;
-    const int nelectrons = aux.nelectrons;
-
+    const math::XYZPoint pos_isv(aux.x, aux.y, aux.z);
 
     jmt::MinValue d;
     double sv_gen2ddist_sign = 1;
     for (int igenv = 0; igenv < 2; ++igenv) {
       double genx = mevent->gen_lsp_decay[igenv*3+0];
       double geny = mevent->gen_lsp_decay[igenv*3+1];
+      //getting the gen vertex flavor based on what gen daughter originates from the given sv 
+      if (mevent->gen_daughters.size() != 0) {
+        int genvtx_fl = abs(mevent->gen_daughter_id[igenv*2+1]);
+        if (genvtx_fl == 11) genmatchedvertex[igenv].first = "electron";
+        if (genvtx_fl == 13) genmatchedvertex[igenv].first = "muon";
+        if (genvtx_fl == 15) genmatchedvertex[igenv].first = "tau";
+      }
+      else {
+        genmatchedvertex[igenv].first = "none";
+      }
+
       d(igenv, mag(aux.x-genx,
                   aux.y-geny));  
     }
 
-    const int genvtx_2d = d.i();
+    if (d.i() == 0) {
+      isv_dR.push_back(std::make_pair(0, d.v())); //sv is closer to genvertex0
+      if (genmatchedvertex[0].first == "electron") h_sv_gensv_mag_[1]->Fill(d.v(), w);
+      if (genmatchedvertex[0].first == "muon") h_sv_gensv_mag_[2]->Fill(d.v(), w);
+      if (genmatchedvertex[0].first == "tau") h_sv_gensv_mag_[3]->Fill(d.v(), w);
+    }
+    if (d.i() == 1) {
+      isv_dR.push_back(std::make_pair(1, d.v())); //sv is closer to genvertex1
+      if (genmatchedvertex[1].first == "electron") h_sv_gensv_mag_[1]->Fill(d.v(), w);
+      if (genmatchedvertex[1].first == "muon") h_sv_gensv_mag_[2]->Fill(d.v(), w);
+      if (genmatchedvertex[1].first == "tau") h_sv_gensv_mag_[3]->Fill(d.v(), w);
+    }
+    h_sv_gensv_mag_[0]->Fill(d.v(), w);
 
+
+    const int genvtx_2d = d.i();
     double genbs2ddist = mevent->mag(mevent->gen_lsp_decay[genvtx_2d*3+0] - mevent->bsx_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]),
                                      mevent->gen_lsp_decay[genvtx_2d*3+1] - mevent->bsy_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]) 
           );
@@ -986,9 +966,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackminnhits",           aux.trackminnhits()},
         {"trackmaxnhits",           aux.trackmaxnhits()},
         {"njetsntks",               aux.njets[mfv::JByNtracks]},
-        {"nelensv",                 nelectrons},
-        {"nmunsv",                  nmuons},
-        {"nlepnsv",                 aux.nleptons},
+        {"nelectrons",              aux.nelectrons},
+        {"nmuons",                  aux.nmuons},
+        {"nleptons",                aux.nleptons},
+        {"nleptonspt20",            aux.nlepptgt20},
         {"chi2dof",                 aux.chi2dof()},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof())},
 
@@ -1032,6 +1013,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"missdisttksjetsntkpvsig",     aux.missdistpvsig(mfv::PTracksPlusJetsByNtracks)},
 
         {"sumpt2",                  aux.sumpt2()},
+        {"trackpairdrmax",          aux.trackpairdrmax()},
+        {"tracktripmassmax",        aux.tracktripmassmax()},
 
         {"ntrackssharedwpv", aux.ntrackssharedwpv()},
         {"ntrackssharedwpvs", aux.ntrackssharedwpvs()},
@@ -1085,7 +1068,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackpairdetarms", trackpairdeta_stats.rms},
 
         {"trackpairdrmin",  trackpairdr_stats.min},
-        {"trackpairdrmax",  trackpairdr_stats.max},
+        //{"trackpairdrmax",  trackpairdr_stats.max},
         {"trackpairdravg",  trackpairdr_stats.avg},
         {"trackpairdrrms",  trackpairdr_stats.rms},
 
@@ -1169,10 +1152,14 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       v[TString::Format("jet%d_deltaphi1", i).Data()] = 1 > njets - 1 ? -1 : jetdeltaphis[1];
     }
 
+
+
     fill(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
     fill(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
 
+    double sumpt2_tracks = 0;
     for (int i = 0; i < ntracks; ++i) {
+      sumpt2_tracks += aux.track_pt(i);
       fill(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill(h_sv_track_q, isv, aux.track_q(i), w);
       fill(h_sv_track_pt, isv, aux.track_pt(i), w);
@@ -1196,11 +1183,14 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill(h_sv_track_inpv, isv, aux.track_inpv[i], w);
     }
 
-    for (int i=0; i < nelectrons; ++i) {
+    fill(h_sv_tracks_sumpt2, isv, sumpt2_tracks, w);
+
+
+    for (int i=0; i < aux.nelectrons; ++i) {
+
       fill(h_sv_eletrack_pt,  isv, aux.electron_pt[i],  w);
-      fill(h_sv_eletrack_eta, isv, aux.electron_eta[i], w);
-      fill(h_sv_eletrack_phi, isv, aux.electron_phi[i], w);
-      fill(h_sv_eletrack_dxy, isv, aux.electron_dxy[i], w);
+      fill(h_sv_eletrack_dxy, isv, aux.electron_dxybs[i], w);
+      fill(h_sv_eletrack_dz, isv, aux.electron_dz[i], w);
       fill(h_sv_eletrack_iso, isv, aux.electron_iso[i], w); 
       auto temp = aux.electron_ID[i]; 
       int id = 0;
@@ -1210,21 +1200,63 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       if ( temp[2] == 1 ) id = 3;
       if ( temp[3] == 1 ) id = 4;
       fill(h_sv_eletrack_ID,  isv, id,  w);
-    //   fill(h_sv_matchedeletrack_tip, isv, aux.matchedelevtxtip[i], w);
-    //   fill(h_sv_matchedeletrack_tiperr, isv, aux.matchedelevtxtiperr[i], w);
-    }
-    // for (size_t i = 0, ie = aux.elevtxtip.size(); i < ie; ++i) {
-    //   fill(h_sv_alleletrack_tip, isv, aux.elevtxtip[ie], w);
-    //   fill(h_sv_alleletrack_tiperr, isv, aux.elevtxtiperr[ie], w);
-    //   fill(h_sv_alleletrack_tipsig, isv, aux.elevtxtipsig[ie], w);
-    // }
 
-    for (int i=0; i < nmuons; ++i) {
+      fill(h_sv_elept_eleID, isv, aux.electron_pt[i], id, w);
+      fill(h_sv_elept_eleiso, isv, aux.electron_pt[i], aux.electron_iso[i], w);
+
+      //now genmatching (but only for electrons w/ pt >= 50, isolation, and nsigmadxy >= 4)
+      bool use_ele = aux.electron_pt[i] >= 50 &&
+                    aux.electron_iso[i] < 0.10 &&
+                    fabs(aux.electron_dxybs[i])/aux.electron_dxyerr[i] >= 4;
+      if (use_ele) {
+        fill(h_sv_eletrack_eta, isv, aux.electron_eta[i], w);
+        fill(h_sv_eletrack_phi, isv, aux.electron_phi[i], w);
+        fill(h_sv_eletrack_missdist, isv, aux.elevtxtip[i], w);
+        fill(h_sv_eletrack_missdisterr, isv, aux.elevtxtiperr[i], w);
+        fill(h_sv_eletrack_missdistsig, isv, aux.elevtxtipsig[i], w);
+
+        fill(h_sv_eletrack_pt_vs_dxy, isv, aux.electron_pt[i], fabs(aux.electron_dxybs[i]), w);
+        fill(h_sv_eletrack_pt_vs_dxyerr, isv, aux.electron_pt[i], fabs(aux.electron_dxyerr[i]), w);
+        std::vector<double> mindR;
+        for (const reco::GenParticle& gen : *gen_particles) {
+          double dR = reco::deltaR(aux.electron_eta[i], aux.electron_phi[i], gen.eta(), gen.phi());
+          mindR.push_back(dR);
+        }
+        if (*min_element(mindR.begin(), mindR.end()) < 0.01) {
+          int idx = std::min_element(mindR.begin(), mindR.end()) - mindR.begin();
+          const reco::GenParticle& gen = gen_particles->at(idx);
+          const int id = abs(gen.pdgId());
+          float geninSV_dxy = -(gen.vx() - mevent->bsx) *sin(gen.phi()) + (gen.vy() - mevent->bsy) * cos(gen.phi());
+          if (id == 11) {
+            fill(h_sv_geneleinSV_pt, isv, gen.pt(), w);
+            fill(h_sv_geneleinSV_dxy, isv, fabs(geninSV_dxy), w);
+            fill(h_sv_geneleinSV_pt_vs_dxy, isv, gen.pt(), fabs(geninSV_dxy), w);
+            // fill(h_sv_geneleinSV_motherID, isv, fabs(gen.mother()->pdgId()), w);
+          }
+          // else {
+          //   if (id < 213) {
+          //     // h_genIDs_recoeleinSV->Fill(abs(gen.pdgId()));
+          //     // h_geninSVrecoele_pt_vs_dxy->Fill(gen.pt(), geninSV_dxy);
+          //     fill(h_sv_genIDs_recoeleinSV, isv, abs(gen.pdgId()), w);
+          //     fill(h_sv_geninSVrecoele_pt_vs_dxy, isv, gen.pt(), fabs(geninSV_dxy), w);
+          //   }
+          //   else if (id > 212) {
+          //     // h_biggenIDs_recoeleinSV->Fill(abs(gen.pdgId()));
+          //     // h_biggeninSVrecoele_pt_vs_dxy->Fill(gen.pt(), geninSV_dxy);
+          //     fill(h_sv_biggenIDs_recoeleinSV, isv, abs(gen.pdgId()), w);
+          //     fill(h_sv_biggeninSVrecoele_pt_vs_dxy, isv, gen.pt(), fabs(geninSV_dxy), w);
+          //   }
+          // }
+        }
+      }
+    }
+    for (int i=0; i < aux.nmuons; ++i) {
       fill(h_sv_mutrack_pt,  isv, aux.muon_pt[i],  w);
-      fill(h_sv_mutrack_eta, isv, aux.muon_eta[i], w);
-      fill(h_sv_mutrack_phi, isv, aux.muon_phi[i], w);
-      fill(h_sv_mutrack_dxy, isv, aux.muon_dxy[i], w);
+
+      fill(h_sv_mutrack_dxy, isv, aux.muon_dxybs[i], w);
+      fill(h_sv_mutrack_dz, isv, aux.muon_dz[i], w);
       fill(h_sv_mutrack_iso, isv, aux.muon_iso[i], w); 
+
       auto temp = aux.muon_ID[i]; 
       int id = 0;
       if ( temp[0] == 0 ) id = 0; 
@@ -1232,28 +1264,59 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       if ( temp[1] == 1 ) id = 2; 
       if ( temp[2] == 1 ) id = 3;
       fill(h_sv_mutrack_ID,  isv, id,  w);
-      // fill(h_sv_matchedmutrack_tip, isv, aux.matchedmuvtxtip[i], w);
-      // fill(h_sv_matchedmutrack_tiperr, isv, aux.matchedmuvtxtiperr[i], w);
-      // fill(h_sv_matchedmutrack_tipsig, isv, aux.matchedmuvtxtipsig[i], w);
+
+      fill(h_sv_mupt_muID, isv, aux.muon_pt[i], id, w);
+      fill(h_sv_mupt_muiso, isv, aux.muon_pt[i], aux.muon_iso[i], w);
+
+      //now genmatching (but only for electrons w/ pt >= 50, isolation, and nsigmadxy >= 4)
+      bool use_mu = aux.muon_pt[i] >= 50 &&
+                    aux.muon_iso[i] < 0.10 &&
+                    fabs(aux.muon_dxybs[i])/aux.muon_dxyerr[i] >= 4;
+      if (use_mu) {
+        fill(h_sv_mutrack_eta, isv, aux.muon_eta[i], w);
+        fill(h_sv_mutrack_phi, isv, aux.muon_phi[i], w);
+        fill(h_sv_mutrack_missdist, isv, aux.muvtxtip[i], w);
+        fill(h_sv_mutrack_missdisterr, isv, aux.muvtxtiperr[i], w);
+        fill(h_sv_mutrack_missdistsig, isv, aux.muvtxtipsig[i], w);
+
+        fill(h_sv_mutrack_pt_vs_dxy, isv, aux.muon_pt[i], fabs(aux.muon_dxybs[i]), w);
+        fill(h_sv_mutrack_pt_vs_dxyerr, isv, aux.muon_pt[i], fabs(aux.muon_dxyerr[i]), w);
+        std::vector<double> mindR;
+        for (const reco::GenParticle& gen : *gen_particles) {
+          double dR = reco::deltaR(aux.muon_eta[i], aux.muon_phi[i], gen.eta(), gen.phi());
+          mindR.push_back(dR);
+        }
+        if (*min_element(mindR.begin(), mindR.end()) < 0.01) {
+          int idx = std::min_element(mindR.begin(), mindR.end()) - mindR.begin();
+          const reco::GenParticle& gen = gen_particles->at(idx);
+          const int id = abs(gen.pdgId());
+          float geninSV_dxy =   -( gen.vx() - mevent->bsx ) *sin(gen.phi()) + ( gen.vy() - mevent->bsy) * cos(gen.phi());
+          if (id == 13) {
+            fill(h_sv_genmuinSV_pt, isv, gen.pt(), w);
+            fill(h_sv_genmuinSV_dxy, isv, fabs(geninSV_dxy), w);
+            fill(h_sv_genmuinSV_pt_vs_dxy, isv, gen.pt(), fabs(geninSV_dxy), w);
+            // fill(h_sv_genmuinSV_motherID, isv, fabs(gen.mother()->pdgId()), w);
+          }
+          // else {
+          //   if (id < 213) {
+          //     // h_genIDs_recomuinSV->Fill(abs(gen.pdgId()));
+          //     // h_geninSVrecomu_pt_vs_dxy->Fill(gen.pt(), geninSV_dxy);
+          //     fill(h_sv_genIDs_recomuinSV, isv, abs(gen.pdgId()), w);
+          //     fill(h_sv_geninSVrecomu_pt_vs_dxy, isv, gen.pt(), fabs(geninSV_dxy), w);
+          //   }
+          //   else if (id > 212) {
+          //     // h_biggenIDs_recomuinSV->Fill(abs(gen.pdgId()));
+          //     // h_biggeninSVrecomu_pt_vs_dxy->Fill(gen.pt(), geninSV_dxy);
+          //     fill(h_sv_biggenIDs_recomuinSV, isv, abs(gen.pdgId()), w);
+          //     fill(h_sv_biggeninSVrecomu_pt_vs_dxy, isv, gen.pt(), geninSV_dxy, w);
+          //   }
+          // }
+        }
+      }
     }
-    // for (size_t j =0, im=aux.muvtxtip.size(); j < im; ++j) {
-    //   fill(h_sv_allmutrack_tip, isv, aux.muvtxtip[im], w);
-    //   fill(h_sv_allmutrack_tiperr, isv, aux.muvtxtiperr[im], w);
-    //   fill(h_sv_allmutrack_tipsig, isv, aux.muvtxtipsig[im], w);
-      // mu_isv_tip.push_back(aux.muvtxtip[im]);
-      // mu_isv_tiperr.push_back(aux.muvtxtiperr[im]);
-      // mu_isv_tipsig.push_back(aux.muvtxtipsig[im]);
-    //} 
-
-    // muon_sv_tip.push_back(mu_isv_tip);
-    // muon_sv_tiperr.push_back(mu_isv_tiperr);
-    // muon_sv_tipsig.push_back(mu_isv_tipsig);
-
-
-    h_svidx_assocel->Fill(nelectrons, isv, w);
-    h_svidx_assocmu->Fill(nmuons, isv, w);
-    h_svidx_assoclep->Fill(nelectrons+nmuons, isv, w);
    
+    if (aux.nelectrons + aux.nmuons > 0) nsv_wlep +=1;
+
     if (max_ntrackplots > 0) {
       std::vector<std::pair<int,float>> itk_pt;
       for (int i = 0; i < ntracks; ++i)
@@ -1322,529 +1385,210 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     fill(h_sv, isv, v, w);
   }
+  h_nsv_wlep->Fill(nsv_wlep, w);
+ ////////////////////////////////////////////////////////////////////////////////////////
+  //3. Find the best match (reco vtx to gen vtx)
 
-  //////////////////////////////////////////////////////////////////////
-
-  int nsv_wassoclept = 0;
-  //just storing nlep assoc. to sv 
-  std::vector<int> isv_elinsv;
-  std::vector<int> isv_muinsv; 
-
-  // // 2d vector storing : 
-  // // (e, mu, tau) 
-  // // index is sv 
-  std::vector<std::vector<int>> vtx_flavor;
-
-  // the dR between isv and gen vtx; 
-  // index is sv
-  std::vector<float> genvertex0_dR;
-  std::vector<float> genvertex1_dR;
-
-  //index should be sv
-  //going to revert to match by track... 
-  // std::vector<bool> genmatchedele0_bylep;
-  // std::vector<bool> genmatchedmu0_bylep;
-  // std::vector<bool> genmatchedele1_bylep;
-  // std::vector<bool> genmatchedmu1_bylep;
-  // std::vector<bool> genmatchedele_bytrk;
-  // std::vector<bool> genmatchedmu_bytrk;
-  std::vector<bool> genmatchedele0_bytrk;
-  std::vector<bool> genmatchedmu0_bytrk;
-  std::vector<bool> genmatchedele1_bytrk;
-  std::vector<bool> genmatchedmu1_bytrk;
-
-  //include : ntracks for each sv 
-  std::vector<float> ele0_vtx_ntracks;
-  std::vector<float> ele1_vtx_ntracks;
-  std::vector<float> mu0_vtx_ntracks;
-  std::vector<float> mu1_vtx_ntracks;
-
-
-  // index is sv; 
-  //2d vector of : dR between tracks and lepton 
-  // if no lepton -> {} 
-  std::vector<std::vector<float>> el_vtxtrk_dR;
-  std::vector<std::vector<float>> mu_vtxtrk_dR;
-
-  //index is sv; 
-  //2d vector of : missdist between lep and sv
-  std::vector<float> missdist_ele0;
-  std::vector<float> missdist_ele1;
-  std::vector<float> missdist_mu0;
-  std::vector<float> missdist_mu1;
-
-  std::vector<double> missdisterr_ele0;
-  std::vector<double> missdisterr_ele1;
-  std::vector<double> missdisterr_mu0;
-  std::vector<double> missdisterr_mu1;
-
-  double gensv[4] {mevent->gen_lsp_decay[0*3+0], mevent->gen_lsp_decay[0*3+1], mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[1*3+1]};
-
-  for (int isv = 0; isv < nsv; ++isv) {
-    const MFVVertexAux& aux = auxes->at(isv);
-    const int ntracks = aux.ntracks();
-    const math::XYZPoint pos_isv(aux.x, aux.y, aux.z);
-
-    double pvarr[9] {mevent->pvcxx, mevent->pvcxy, mevent->pvcxz, mevent->pvcxy, mevent->pvcyy, mevent->pvcyz, mevent->pvcxz, mevent->pvcyz, mevent->pvczz};
-    double svarr[9] {aux.cxx, aux.cxy, aux.cxz, aux.cxy, aux.cyy, aux.cyz, aux.cxz, aux.cyz, aux.czz};
-
-    //initializing all those 1d that will be stored in the 2d 
-    std::vector<int> elinsv;
-    std::vector<int> muinsv;
-    // vflavor : (ele, mu, tau, none) the last place is to catch events in which no gen particles present in ntuple
-    std::vector<int> vflavor{0,0,0,0};
-
-    std::vector<float> eltk_dr;
-    std::vector<float> mutk_dr;
-
-    float ele0_md = -99.;
-    float ele1_md = -99.;
-    float mu0_md = -99.;
-    float mu1_md = -99.;
-    double ele0_err = -99.;
-    double ele1_err = -99.;
-    double mu0_err = -99.;
-    double mu1_err = -99.;
-
-
-    // bool genmatchedele0_lep = false;
-    // bool genmatchedmu0_lep = false;
-    // bool genmatchedele1_lep = false;
-    // bool genmatchedmu1_lep = false;
-    bool genmatchedele0_trk = false;
-    bool genmatchedmu0_trk = false;
-    bool genmatchedele1_trk = false;
-    bool genmatchedmu1_trk = false;
-
-    const int nmuons = aux.nmuons;
-    const int nelectrons = aux.nelectrons;
-    elinsv.push_back(nelectrons);
-    muinsv.push_back(nmuons);
-
-    if (nmuons + nelectrons > 0 ) nsv_wassoclept +=1;
-
-    //have to do a work around (currently) to get the daughter id's from the correct decay 
-    // ie. indirectly getting lepton flavor of the lsp decay. 
-    // from eventproducer : 
-      // mci->decay_point[i] 
-      // mci->secondaries[i] 
-    // these will be in order since index is the same. Thus, 
-    // gen daughters are a list of 4 [a, b, c, d] 
-    // the quarks are a, c. the leptons are b and d 
-    // so since we need index 0 and 2, I do igen*2 + 1 
-    std::vector<int> genvtx_flavor;
-    jmt::MinValue d;
-   
-    for (int igenv = 0; igenv < 2; ++igenv) {
-      double genx = mevent->gen_lsp_decay[igenv*3+0];
-      double geny = mevent->gen_lsp_decay[igenv*3+1];
-      //hopefully temporary; possibly something went wrong with ntuple creation 
-      if (mevent->gen_daughters.size() != 0) {
-        int genvtx_fl = abs(mevent->gen_daughter_id[igenv*2+1]);
-        genvtx_flavor.push_back(genvtx_fl);
-
-      }
-      else {
-        int genvtx_fl = -1;
-        genvtx_flavor.push_back(genvtx_fl);
-      }
-      d(igenv, mag(aux.x-genx,
-                   aux.y-geny));
-    }
-
-    const int closest_genvtx_flavor = genvtx_flavor[d.i()];
-    if (closest_genvtx_flavor == 11 ) vflavor[0] += 1;
-    if (closest_genvtx_flavor == 13 ) vflavor[1] += 1;
-    if (closest_genvtx_flavor == 15 ) vflavor[2] += 1;
-    if (closest_genvtx_flavor == -1 ) vflavor[3] += 1;
- 
-    vtx_flavor.push_back(vflavor);
-
-    //needed a work-around to keep dR for each of the gen vertices separate. while also keeping nentries at nsv 
-    // so : dummy fill a large number : 10 for the gen vertex that isn't the closest to the reco vertex. 
-    if (d.i() == 0) {
-      genvertex0_dR.push_back(d.v());
-      genvertex1_dR.push_back(10.);
-      if (elematched_0.size() != 0) {
-        const math::XYZPoint elepos_0(elematched_0[3], elematched_0[0], elematched_0[1]);
-        ele0_md= miss_dist(pv, pos_isv, elepos_0, pvarr, svarr).value();
-        ele0_err= miss_dist(pv, pos_isv, elepos_0, pvarr, svarr).error();
-        // for (int i=0; i < nelectrons; ++i) {
-        //   if (elematched_0[0] == aux.electron_eta[i]) {
-        //     if (elematched_0[1] == aux.electron_phi[i]) {    
-        //       genmatchedele0_lep = true;
-        //     }
-        //   }
-        // }
-        for (int i = 0; i < ntracks; ++i) {
-          eltk_dr.push_back(reco::deltaR(elematched_0[0], elematched_0[1], aux.track_eta[i], aux.track_phi[i]));
-          if (reco::deltaR(elematched_0[0], elematched_0[1], aux.track_eta[i], aux.track_phi[i]) < 0.2) {
-            genmatchedele0_trk = true;
-          }
-        }
-      }
-      if (mumatched_0.size() != 0) {
-        const math::XYZPoint mupos_0(mumatched_0[3], mumatched_0[0], mumatched_0[1]);
-        mu0_md = (miss_dist(pv, pos_isv, mupos_0, pvarr, svarr).value());
-        mu0_err = (miss_dist(pv, pos_isv, mupos_0, pvarr, svarr).error());
-        // for (int i=0; i < nmuons; ++i) {
-        //   if (mumatched_0[0] == aux.muon_eta[i]) {
-        //     if (mumatched_0[1] == aux.muon_phi[i]) {
-        //       genmatchedmu0_lep = true;
-        //     }
-        //   }
-        // }
-        for (int i = 0; i < ntracks; ++i) {
-          mutk_dr.push_back(reco::deltaR(mumatched_0[0], mumatched_0[1], aux.track_eta[i], aux.track_phi[i]));
-          if (reco::deltaR(mumatched_0[0], mumatched_0[1], aux.track_eta[i], aux.track_phi[i]) < 0.2) {
-           genmatchedmu0_trk = true;
-          }
-        }
+  std::pair<int, float> best_gen0_dR{-1, 99.0}; //another pair-- need to know not only the best dR but which sv it is coming from
+  std::pair<int, float> best_gen1_dR{-1, 99.0};
+  std::pair<bool, bool> lepinvertex = {false, false}; // is the lepton in the vertex? --> lep0invtx0, lep1invtx1 
+  std::pair<int, int> idx_lepinvtx = {-1, -1}; // this is the idx of the lepton from the set of leptons associated to the vertexer 
+  int isv = 0;
+  for (const auto& n : isv_dR) {
+    if (n.first == 0) {
+      if (n.second < best_gen0_dR.second) {
+        best_gen0_dR.first = isv;
+        best_gen0_dR.second = n.second;
       }
     }
-    if (d.i() == 1) {
-      genvertex1_dR.push_back(d.v());
-      genvertex0_dR.push_back(10.);
-      
-      if (elematched_1.size() != 0) {
-        const math::XYZPoint elepos_1(elematched_1[3], elematched_1[0], elematched_1[1]);
-        ele1_md = (miss_dist(pv, pos_isv, elepos_1, pvarr, svarr).value());
-        ele1_err = (miss_dist(pv, pos_isv, elepos_1, pvarr, svarr).error());
-        // for (int i=0; i < nelectrons; ++i) {
-        //   if (elematched_1[0] == aux.electron_eta[i]) {
-        //     if (elematched_1[1] == aux.electron_phi[i]) {
-        //       genmatchedele1_lep = true;
-        //     }
-        //   } 
-        // }
-        for (int i = 0; i < ntracks; ++i) {
-          eltk_dr.push_back(reco::deltaR(elematched_1[0], elematched_1[1], aux.track_eta[i], aux.track_phi[i]));
-          if (reco::deltaR(elematched_1[0], elematched_1[1], aux.track_eta[i], aux.track_phi[i]) < 0.2) {
-            genmatchedele1_trk = true;
-          }
-        }
-      } 
-      if (mumatched_1.size() != 0) {
-        const math::XYZPoint mupos_1(mumatched_1[3], mumatched_1[0], mumatched_1[1]);
-        mu1_md = (miss_dist(pv, pos_isv, mupos_1, pvarr, svarr).value());
-        mu1_err = (miss_dist(pv, pos_isv, mupos_1, pvarr, svarr).error());
-        // for (int i=0; i < nmuons; ++i) {
-        //   if (mumatched_1[0] == aux.muon_eta[i]) {
-        //     if (mumatched_1[1] == aux.muon_phi[i]) {
-        //       genmatchedmu1_lep = true;
-        //     }
-        //   }
-        // }
-        for (int i = 0; i < ntracks; ++i) {
-          mutk_dr.push_back(reco::deltaR(mumatched_1[0], mumatched_1[1], aux.track_eta[i], aux.track_phi[i]));
-          if (reco::deltaR(mumatched_1[0], mumatched_1[1], aux.track_eta[i], aux.track_phi[i]) < 0.2) {
-            genmatchedmu1_trk = true;
-          }
-        }
-        //}
+    if (n.first == 1) {
+      if (n.second < best_gen1_dR.second) {
+        best_gen1_dR.first = isv;
+        best_gen1_dR.second = n.second;
       }
     }
-
-    // genmatchedele0_bylep.push_back(genmatchedele0_lep);
-    // genmatchedmu0_bylep.push_back(genmatchedmu0_lep);
-    // genmatchedele1_bylep.push_back(genmatchedele1_lep);
-    // genmatchedmu1_bylep.push_back(genmatchedmu1_lep);
-    genmatchedele0_bytrk.push_back(genmatchedele0_trk);
-    genmatchedmu0_bytrk.push_back(genmatchedmu0_trk);
-    genmatchedele1_bytrk.push_back(genmatchedele1_trk);
-    genmatchedmu1_bytrk.push_back(genmatchedmu1_trk);
-
-
-    mu_vtxtrk_dR.push_back(mutk_dr);
-    el_vtxtrk_dR.push_back(eltk_dr);
-
-    missdist_ele1.push_back(ele1_md);
-    missdist_mu0.push_back(mu0_md);
-    missdist_ele0.push_back(ele0_md);
-    missdist_mu1.push_back(mu1_md);
-    missdisterr_ele1.push_back(ele1_err);
-    missdisterr_mu0.push_back(mu0_err);
-    missdisterr_ele0.push_back(ele0_err);
-    missdisterr_mu1.push_back(mu1_err);
-
-    //this will be for all ... 
-    h_sv_genv_mag->Fill(d.v(), w);
-    if (closest_genvtx_flavor == 11) h_sv_ele_genv_mag->Fill(d.v(), w);
-    if (closest_genvtx_flavor == 13) h_sv_mu_genv_mag->Fill(d.v(), w);
-    if (closest_genvtx_flavor == 15) h_sv_tau_genv_mag->Fill(d.v(), w);
-
+    isv +=1;
   }
-
-  int good_match_sv0 = 0;
-  int good_match_sv1 = 0;
-  int eflavor = 0;
-  int mflavor = 0;
-  int evtx = 0;
-  int mvtx = 0;
-
-  // now its time to find the reconstructed vertices that are the closest to gen vertex 0 and gen vertex 1
-  // also getting the index of the min element 
-  if (genvertex0_dR.size() !=0) {
-    float best_sv_gen0_dR = *min_element(genvertex0_dR.begin(), genvertex0_dR.end());
-    int best_sv_gen0_isv = std::min_element(genvertex0_dR.begin(), genvertex0_dR.end()) - genvertex0_dR.begin();
-
-    // these two cases should be filled if we have nsv == 2 or nsv == 1 (matched)
-    if (best_sv_gen0_dR < 0.02) {
-      // sv matches 
-      // get the closest electron / muon to the sv in order to plot the tip/err/sig
-      good_match_sv0 += 1;
-      if (vtx_flavor[best_sv_gen0_isv][0]) {
-        h_lepdau_wvtx_[0]->Fill(nelematched_0, w);
-        eflavor +=1;
-        if (nelematched_0){
-          //minr, npxlayers, nstlayers, nsigmadxy
-          const bool nm1[4] = {
-            elematched_0[6] <= 1,
-            elematched_0[7] >= 2,
-            elematched_0[8] >= 6,
-            abs(elematched_0[5]) > 4
-          };
-
-          const bool nm1_minr = nm1[1] && nm1[2] && nm1[3];
-          const bool nm1_npxlayers = nm1[0] && nm1[2] && nm1[3];
-          const bool nm1_nstlayers = nm1[0] && nm1[1] && nm1[3];
-          const bool nm1_nsigmadxy = nm1[0] && nm1[1] && nm1[2];
-
-          evtx +=1;
-          h_lepdau_invtx_[0]->Fill(genmatchedele0_bytrk[best_sv_gen0_isv], w);
-          if (genmatchedele0_bytrk[best_sv_gen0_isv]) {
-            h_matchlep_pt_[0]->Fill(elematched_0[2], w);
-            h_matchlep_dxy_[0]->Fill(abs(elematched_0[3]), w);
-            h_matchlep_dxyerr_[0]->Fill(elematched_0[4], w);
-            h_matchlep_nsigmadxy_[0]->Fill(abs(elematched_0[5]), w);
-            h_matchlep_missdist_[0]->Fill(missdist_ele0[best_sv_gen0_isv], w);
-            h_matchlep_missdisterr_[0]->Fill(missdisterr_ele0[best_sv_gen0_isv], w);
-            h_matchlep_missdistsig_[0]->Fill(missdist_ele0[best_sv_gen0_isv]/missdisterr_ele0[best_sv_gen0_isv], w);
-            h_matchlep_genvtx_pos_[0]->Fill(gensv[0], gensv[1], w);
-            if (nm1_minr) h_matchlep_nm1_minr_[0]->Fill(elematched_0[6], w);
-            if (nm1_npxlayers) h_matchlep_nm1_npxlayers_[0]->Fill(elematched_0[7], w);
-            if (nm1_nstlayers) h_matchlep_nm1_nstlayers_[0]->Fill(elematched_0[8], w);
-            if (nm1_nsigmadxy) h_matchlep_nm1_nsigmadxy_[0]->Fill(abs(elematched_0[5]), w);
-          }
-
-          else {
-            h_nomatchlep_missdist_[0]->Fill(missdist_ele0[best_sv_gen0_isv], w);
-            h_nomatchlep_missdisterr_[0]->Fill(missdisterr_ele0[best_sv_gen0_isv], w);
-            h_nomatchlep_missdistsig_[0]->Fill(missdist_ele0[best_sv_gen0_isv]/missdisterr_ele0[best_sv_gen0_isv], w);
-            h_nomatchlep_pt_[0]->Fill(elematched_0[2], w);
-            h_nomatchlep_dxy_[0]->Fill(abs(elematched_0[3]), w);
-            h_nomatchlep_dxyerr_[0]->Fill(elematched_0[4], w);
-            h_nomatchlep_nsigmadxy_[0]->Fill(abs(elematched_0[5]), w);
-            h_nomatchlep_genvtx_pos_[0]->Fill(gensv[0], gensv[1], w);
-            if (nm1_minr) h_nomatchlep_nm1_minr_[0]->Fill(elematched_0[6], w);
-            if (nm1_npxlayers) h_nomatchlep_nm1_npxlayers_[0]->Fill(elematched_0[7], w);
-            if (nm1_nstlayers) h_nomatchlep_nm1_nstlayers_[0]->Fill(elematched_0[8], w);
-            if (nm1_nsigmadxy) h_nomatchlep_nm1_nsigmadxy_[0]->Fill(abs(elematched_0[5]), w);
-            if (el_vtxtrk_dR[best_sv_gen0_isv].size() != 0) {
-              for (float dr : el_vtxtrk_dR[best_sv_gen0_isv]) {
-                h_nomatchlep_trkdR_[0]->Fill(dr, w);
-              }
-            }
-          }
-        }
-
-      }
-      else if (vtx_flavor[best_sv_gen0_isv][1]) {
-        h_lepdau_wvtx_[1]->Fill(nmumatched_0, w);
-        mflavor +=1;
-        if (nmumatched_0){
-          mvtx +=1;
-          const bool nm1[4] = {
-            mumatched_0[6] <= 1,
-            mumatched_0[7] >= 2,
-            mumatched_0[8] >= 6,
-            mumatched_0[5] > 4
-          };
-
-          const bool nm1_minr = nm1[1] && nm1[2] && nm1[3];
-          const bool nm1_npxlayers = nm1[0] && nm1[2] && nm1[3];
-          const bool nm1_nstlayers = nm1[0] && nm1[1] && nm1[3];
-          const bool nm1_nsigmadxy = nm1[0] && nm1[1] && nm1[2];
-
-          h_lepdau_invtx_[1]->Fill(genmatchedmu0_bytrk[best_sv_gen0_isv], w);
-          if (genmatchedmu0_bytrk[best_sv_gen0_isv]) {
-            h_matchlep_pt_[1]->Fill(mumatched_0[2], w);
-            h_matchlep_dxy_[1]->Fill(abs(mumatched_0[3]), w);
-            h_matchlep_dxyerr_[1]->Fill(mumatched_0[4], w);
-            h_matchlep_nsigmadxy_[1]->Fill(abs(mumatched_0[5]), w);
-            h_matchlep_missdist_[1]->Fill(missdist_mu0[best_sv_gen0_isv], w);
-            h_matchlep_missdisterr_[1]->Fill(missdisterr_mu0[best_sv_gen0_isv], w);
-            h_matchlep_missdistsig_[1]->Fill(missdist_mu0[best_sv_gen0_isv]/missdisterr_mu0[best_sv_gen0_isv], w);
-            h_matchlep_genvtx_pos_[1]->Fill(gensv[0], gensv[1], w);
-            if (nm1_minr) h_matchlep_nm1_minr_[1]->Fill(mumatched_0[6], w);
-            if (nm1_npxlayers) h_matchlep_nm1_npxlayers_[1]->Fill(mumatched_0[7], w);
-            if (nm1_nstlayers) h_matchlep_nm1_nstlayers_[1]->Fill(mumatched_0[8], w);
-            if (nm1_nsigmadxy) h_matchlep_nm1_nsigmadxy_[1]->Fill(abs(mumatched_0[5]), w);
-          }
-          else {
-            h_nomatchlep_missdist_[1]->Fill(missdist_mu0[best_sv_gen0_isv], w);
-            h_nomatchlep_missdisterr_[1]->Fill(missdisterr_mu0[best_sv_gen0_isv], w);
-            h_nomatchlep_missdistsig_[1]->Fill(missdist_mu0[best_sv_gen0_isv]/missdisterr_mu0[best_sv_gen0_isv], w);
-            h_nomatchlep_pt_[1]->Fill(mumatched_0[2], w);
-            h_nomatchlep_dxy_[1]->Fill(abs(mumatched_0[3]), w);
-            h_matchlep_dxyerr_[1]->Fill(mumatched_0[4], w);
-            h_matchlep_nsigmadxy_[1]->Fill(abs(mumatched_0[5]), w);
-            h_nomatchlep_genvtx_pos_[1]->Fill(gensv[0], gensv[1], w);
-            if (nm1_minr) h_nomatchlep_nm1_minr_[1]->Fill(mumatched_0[6], w);
-            if (nm1_npxlayers) h_nomatchlep_nm1_npxlayers_[1]->Fill(mumatched_0[7], w);
-            if (nm1_nstlayers) h_nomatchlep_nm1_nstlayers_[1]->Fill(mumatched_0[8], w);
-            if (nm1_nsigmadxy) h_nomatchlep_nm1_nsigmadxy_[1]->Fill(abs(mumatched_0[5]), w);
-            if (mu_vtxtrk_dR[best_sv_gen0_isv].size() != 0) {
-              for (float dr : mu_vtxtrk_dR[best_sv_gen0_isv]) {
-                h_nomatchlep_trkdR_[1]->Fill(dr, w);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  if (genvertex1_dR.size() !=0) {
-    float best_sv_gen1_dR = *min_element(genvertex1_dR.begin(), genvertex1_dR.end());
-    int best_sv_gen1_isv = std::min_element(genvertex1_dR.begin(), genvertex1_dR.end()) - genvertex1_dR.begin();
-    if (best_sv_gen1_dR < 0.02) {
-      // sv matches 
-      good_match_sv1 += 1;
-      if (vtx_flavor[best_sv_gen1_isv][0]) {
-        eflavor +=1;
-        h_lepdau_wvtx_[0]->Fill(nelematched_1, w);
-        if (nelematched_1){
-          evtx +=1;
-          const bool nm1[4] = {
-            elematched_1[6] <= 1,
-            elematched_1[7] >= 2,
-            elematched_1[8] >= 6,
-            elematched_1[5] > 4
-          };
-
-          const bool nm1_minr = nm1[1] && nm1[2] && nm1[3];
-          const bool nm1_npxlayers = nm1[0] && nm1[2] && nm1[3];
-          const bool nm1_nstlayers = nm1[0] && nm1[1] && nm1[3];
-          const bool nm1_nsigmadxy = nm1[0] && nm1[1] && nm1[2];
-
-          h_lepdau_invtx_[0]->Fill(genmatchedele1_bytrk[best_sv_gen1_isv], w);
-          if (genmatchedele1_bytrk[best_sv_gen1_isv]) {
-            h_matchlep_pt_[0]->Fill(elematched_1[2], w);
-            h_matchlep_dxy_[0]->Fill(abs(elematched_1[3]), w);
-            h_matchlep_dxyerr_[0]->Fill(elematched_1[4], w);
-            h_matchlep_nsigmadxy_[0]->Fill(abs(elematched_1[5]), w);
-            h_matchlep_missdist_[0]->Fill(missdist_ele1[best_sv_gen1_isv], w);
-            h_matchlep_missdisterr_[0]->Fill(missdisterr_ele1[best_sv_gen1_isv], w);
-            h_matchlep_missdistsig_[0]->Fill(missdist_ele1[best_sv_gen1_isv]/missdisterr_ele1[best_sv_gen1_isv], w);
-            h_matchlep_genvtx_pos_[0]->Fill(gensv[2], gensv[3], w);
-            if (nm1_minr) h_matchlep_nm1_minr_[0]->Fill(elematched_1[6], w);
-            if (nm1_npxlayers) h_matchlep_nm1_npxlayers_[0]->Fill(elematched_1[7], w);
-            if (nm1_nstlayers) h_matchlep_nm1_nstlayers_[0]->Fill(elematched_1[8], w);
-            if (nm1_nsigmadxy) h_matchlep_nm1_nsigmadxy_[0]->Fill(abs(elematched_1[5]), w);
-          }
-          else {
-            h_nomatchlep_pt_[0]->Fill(elematched_1[2], w);
-            h_nomatchlep_dxy_[0]->Fill(abs(elematched_1[3]), w);
-            h_nomatchlep_dxyerr_[0]->Fill(elematched_1[4], w);
-            h_nomatchlep_nsigmadxy_[0]->Fill(abs(elematched_1[5]), w);
-            h_nomatchlep_missdist_[0]->Fill(missdist_ele1[best_sv_gen1_isv], w);
-            h_nomatchlep_missdisterr_[0]->Fill(missdisterr_ele1[best_sv_gen1_isv], w);
-            h_nomatchlep_missdistsig_[0]->Fill(missdist_ele1[best_sv_gen1_isv]/missdisterr_ele1[best_sv_gen1_isv], w);
-            h_nomatchlep_genvtx_pos_[0]->Fill(gensv[2], gensv[3], w);
-            if (nm1_minr) h_nomatchlep_nm1_minr_[0]->Fill(elematched_1[6], w);
-            if (nm1_npxlayers) h_nomatchlep_nm1_npxlayers_[0]->Fill(elematched_1[7], w);
-            if (nm1_nstlayers) h_nomatchlep_nm1_nstlayers_[0]->Fill(elematched_1[8], w);
-            if (nm1_nsigmadxy) h_nomatchlep_nm1_nsigmadxy_[0]->Fill(abs(elematched_1[5]), w);
-            if (el_vtxtrk_dR[best_sv_gen1_isv].size() != 0) {
-              for (float dr : el_vtxtrk_dR[best_sv_gen1_isv]) {
-                h_nomatchlep_trkdR_[0]->Fill(dr, w);
-              }
-            }
-          }
-        }
-      }
-      else if (vtx_flavor[best_sv_gen1_isv][1]) {
-        h_lepdau_wvtx_[1]->Fill(nmumatched_1, w);
-        mflavor +=1;   
-        if (nmumatched_1){
-          mvtx +=1;
-          const bool nm1[4] = {
-            mumatched_1[6] <= 1,
-            mumatched_1[7] >= 2,
-            mumatched_1[8] >= 6,
-            mumatched_1[5] > 4
-          };
-
-          const bool nm1_minr = nm1[1] && nm1[2] && nm1[3];
-          const bool nm1_npxlayers = nm1[0] && nm1[2] && nm1[3];
-          const bool nm1_nstlayers = nm1[0] && nm1[1] && nm1[3];
-          const bool nm1_nsigmadxy = nm1[0] && nm1[1] && nm1[2];
-
-          h_nmsv->Fill(1,w);
-          h_lepdau_invtx_[1]->Fill(genmatchedmu1_bytrk[best_sv_gen1_isv], w);
-          if (genmatchedmu1_bytrk[best_sv_gen1_isv]) {
-            h_matchlep_pt_[1]->Fill(mumatched_1[2], w);
-            h_matchlep_dxy_[1]->Fill(abs(mumatched_1[3]), w);
-            h_matchlep_dxyerr_[1]->Fill(mumatched_1[4], w);
-            h_matchlep_nsigmadxy_[1]->Fill(abs(mumatched_1[5]), w);
-            h_matchlep_missdist_[1]->Fill(missdist_mu1[best_sv_gen1_isv], w);
-            h_matchlep_missdisterr_[1]->Fill(missdisterr_mu1[best_sv_gen1_isv], w);
-            h_matchlep_missdistsig_[1]->Fill(missdist_mu1[best_sv_gen1_isv]/missdisterr_mu1[best_sv_gen1_isv], w);
-            h_matchlep_genvtx_pos_[1]->Fill(gensv[2], gensv[3], w);
-            if (nm1_minr) h_matchlep_nm1_minr_[1]->Fill(mumatched_1[6], w);
-            if (nm1_npxlayers) h_matchlep_nm1_npxlayers_[1]->Fill(mumatched_1[7], w);
-            if (nm1_nstlayers) h_matchlep_nm1_nstlayers_[1]->Fill(mumatched_1[8], w);
-            if (nm1_nsigmadxy) h_matchlep_nm1_nsigmadxy_[1]->Fill(abs(mumatched_1[5]), w);
-          }
-          else {
-            h_nomatchlep_pt_[1]->Fill(mumatched_1[2], w);
-            h_nomatchlep_missdist_[1]->Fill(missdist_mu1[best_sv_gen1_isv], w);
-            h_nomatchlep_missdisterr_[1]->Fill(missdisterr_mu1[best_sv_gen1_isv], w);
-            h_nomatchlep_missdistsig_[1]->Fill(missdist_mu1[best_sv_gen1_isv]/missdisterr_mu1[best_sv_gen1_isv], w);
-            h_nomatchlep_dxy_[1]->Fill(abs(mumatched_1[3]), w);
-            h_nomatchlep_dxyerr_[1]->Fill(mumatched_1[4], w);
-            h_nomatchlep_nsigmadxy_[1]->Fill(abs(mumatched_1[5]), w);
-            h_nomatchlep_genvtx_pos_[1]->Fill(gensv[2], gensv[3], w);
-            if (nm1_minr) h_nomatchlep_nm1_minr_[1]->Fill(mumatched_1[6], w);
-            if (nm1_npxlayers) h_nomatchlep_nm1_npxlayers_[1]->Fill(mumatched_1[7], w);
-            if (nm1_nstlayers) h_nomatchlep_nm1_nstlayers_[1]->Fill(mumatched_1[8], w);
-            if (nm1_nsigmadxy) h_nomatchlep_nm1_nsigmadxy_[1]->Fill(abs(mumatched_1[5]), w);
-            if (mu_vtxtrk_dR[best_sv_gen1_isv].size() != 0) {
-              for (float dr : mu_vtxtrk_dR[best_sv_gen1_isv]) {
-                h_nomatchlep_trkdR_[1]->Fill(dr, w);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (!good_match_sv0) {
-    if (genele0) h_lepdau_novtx_[0]->Fill(nelematched_0, w);
-    if (genmu0) h_lepdau_novtx_[1]->Fill(nmumatched_0, w);
-  }
+  //now we have the best match (i.e. the ivtx for 0 and 1) 
+  // do not consider the possibility that the flavor of the vertex will not be the same flavor of the genmatched lepton flavor. 
+  int ngm_elevtx = 0;
+  int ngm_muvtx = 0;
+  int ngm_tauvtx = 0;
+  if (best_gen0_dR.second < 0.02) {
+    genmatchedvertex[0].second = best_gen0_dR.first;
+    if (genmatchedvertex[0].first == "electron") ngm_elevtx +=1;
+    if (genmatchedvertex[0].first == "muon") ngm_muvtx +=1;
+    if (genmatchedvertex[0].first == "tau") ngm_tauvtx +=1;
   
-  if (!good_match_sv1) {
-    if (genele1) h_lepdau_novtx_[0]->Fill(nelematched_1, w);
-    if (genmu1) h_lepdau_novtx_[1]->Fill(nmumatched_1, w); 
+    //now to see if the lepton is in the vertex 
+    const MFVVertexAux& aux = auxes->at(best_gen0_dR.first);
+    bool ilepinvertex = false;
+    int idx_lep = -1;
+    if(genmatchedlep[0].first == "electron") {
+      int eleidx = genmatchedlep[0].second;
+      if (! (eleidx < 0) ) {
+        for (int i=0; i < aux.nelectrons; ++i) {
+          if (mevent->electron_eta[eleidx] == aux.electron_eta[i]) {
+            if (mevent->electron_phi[eleidx] == aux.electron_phi[i]) {    
+              ilepinvertex = true;
+              idx_lep = i;
+            }
+          }
+        }
+      }
+    }
+    if(genmatchedlep[0].first == "muon") {
+      int muidx = genmatchedlep[0].second;
+      if (! (muidx < 0)) {
+        for (int i=0; i < aux.nmuons; ++i) {
+          if (mevent->muon_eta[muidx] == aux.muon_eta[i]) {
+            if (mevent->muon_phi[muidx] == aux.muon_phi[i]) {
+              ilepinvertex = true;
+              idx_lep = i;
+            }
+          }
+        }
+      }
+    }
+    lepinvertex.first = ilepinvertex; 
+    idx_lepinvtx.first = idx_lep;
   }
+  if (best_gen1_dR.second < 0.02) {
+    genmatchedvertex[1].second = best_gen1_dR.first;
+    if (genmatchedvertex[1].first == "electron") ngm_elevtx +=1;
+    if (genmatchedvertex[1].first == "muon") ngm_muvtx +=1;
+    if (genmatchedvertex[1].first == "tau") ngm_tauvtx +=1;
+  
+    //now to see if the lepton is in the vertex 
+    const MFVVertexAux& aux = auxes->at(best_gen1_dR.first);
+    bool ilepinvertex = false;
+    int idx_lep = -1;
+    //as long as the electron has been genmatched, check if the electron is in the vertex. 
+    if(genmatchedlep[1].first == "electron") {
+      int eleidx = genmatchedlep[1].second;
+      if (! (eleidx < 0) ) {
+        for (int i=0; i < aux.nelectrons; ++i) {
+          if (mevent->electron_eta[eleidx] == aux.electron_eta[i]) {
+            if (mevent->electron_phi[eleidx] == aux.electron_phi[i]) {    
+              ilepinvertex = true;
+              idx_lep = i;
+            }
+          }
+        }
+      }
+    }
+    //as long as the muon has been genmatched, check if the muon is in the vertex. 
+    if(genmatchedlep[1].first == "muon") {
+      int muidx = genmatchedlep[1].second;
+      if (! (muidx < 0) ) { 
+        for (int i=0; i < aux.nmuons; ++i) {
+          if (mevent->muon_eta[muidx] == aux.muon_eta[i]) {
+            if (mevent->muon_phi[muidx] == aux.muon_phi[i]) {
+              ilepinvertex = true;
+              idx_lep = i;
+            }
+          }
+        }
+      }
+    }
+    lepinvertex.second = ilepinvertex;
+    idx_lepinvtx.second = idx_lep;
+  }
+  h_ngenmatched_sv_[0]->Fill(ngm_elevtx + ngm_muvtx + ngm_tauvtx, w);
+  if (ngele > 0)  h_ngenmatched_sv_[1]->Fill(ngm_elevtx, w); //only fill if expect at least 1 ele vtx; (etc)
+  if (ngmu > 0 )  h_ngenmatched_sv_[2]->Fill(ngm_muvtx, w);
+  if (ngtau > 0)  h_ngenmatched_sv_[3]->Fill(ngm_tauvtx, w);
 
-  // if possible, fill and take care of all lepton associated to vertices information 
-  h_nsv_wlep->Fill(nsv_wassoclept, w);
-  h_nsv_genmatched->Fill(good_match_sv0+good_match_sv1, w);
 
-  if (genlep_dau[0] > 0 ) {
-    h_nsv_eflavor->Fill(eflavor,w);
-    h_nesv->Fill(evtx,w);
-  }
-  if (genlep_dau[1] > 0 ) {
-    h_nsv_mflavor->Fill(mflavor,w);
-    h_nmsv->Fill(mvtx,w);
-  }
-  if (genlep_dau[0] > 0 || genlep_dau[1] > 0) {
-    h_nsv_emuflavor->Fill(eflavor + mflavor,w);
-    h_nemusv->Fill(evtx+mvtx,w);
+  //so now we have info on : 
+  // if lepton has been genmatched and to which LLP (0, 1) 
+  // if vertex has been genmatched, which LLP (0,1) and if the corresponding lepton is in the vertex. 
+  //loop over the results from both LLPs (2 genmatched vertices, 2 genmatched leptons)
+  // double pvarr[9] {mevent->pvcxx, mevent->pvcxy, mevent->pvcxz, mevent->pvcxy, mevent->pvcyy, mevent->pvcyz, mevent->pvcxz, mevent->pvcyz, mevent->pvczz};
+  for (int i =0; i < 2; ++i) {
+    
+    int vidx = genmatchedvertex[i].second; // -1 if not matched; 0 - X gives vertex idx 
+    bool sv_exists = vidx >= 0;
+    int idx = genmatchedlep[i].second;
+    bool lep_exists = idx >= 0;
+    bool lep_invtx = (i < 1) ? lepinvertex.first : lepinvertex.second;
+    int lepidx_invtx = (i < 1) ? idx_lepinvtx.first : idx_lepinvtx.second;
+    if (sv_exists) {
+      const MFVVertexAux& aux = auxes->at(vidx);
+      // const math::XYZPoint pos_isv(aux.x, aux.y, aux.z);
+      // double svarr[9] {aux.cxx, aux.cxy, aux.cxz, aux.cxy, aux.cyy, aux.cyz, aux.cxz, aux.cyz, aux.czz};
+
+      if (genmatchedlep[i].first == "electron") {
+        h_lepdau_wvtx_[0]->Fill(lep_exists, w);
+        if (lep_exists) {
+          h_lepdau_invtx_[0]->Fill(lep_invtx, w);
+
+          // const math::XYZPoint elepos(mevent->electron_x[idx], mevent->electron_y[idx], mevent->electron_z[idx]);
+          // // const math::XYZTLorentzVector elepos(mevent->electron_pt[i], mevent->electron_eta[i], mevent->electron_phi[w], 0);
+          // double ele_md= miss_dist(pv, pos_isv, elepos, pvarr, svarr).value();
+          // double ele_err= miss_dist(pv, pos_isv, elepos, pvarr, svarr).error();
+        
+          if ( lep_invtx ) {
+            h_lepdau_inSV_pt_[0]->Fill(mevent->electron_pt[idx], w);
+            h_lepdau_inSV_dxy_[0]->Fill(mevent->electron_dxybs[idx], w);
+            h_lepdau_inSV_dxyerr_[0]->Fill(mevent->electron_dxyerr[idx], w);
+            h_lepdau_inSV_nsigmadxy_[0]->Fill(mevent->electron_dxybs[idx] / mevent->electron_dxyerr[idx], w);
+            //assuming that the index from mevent will not be the same as from aux 
+            h_lepdau_inSV_missdist_[0]->Fill(aux.elevtxtip[lepidx_invtx], w);
+            h_lepdau_inSV_missdisterr_[0]->Fill(aux.elevtxtiperr[lepidx_invtx], w);
+            h_lepdau_inSV_missdistsig_[0]->Fill(aux.elevtxtipsig[lepidx_invtx], w);
+            h_lepdau_inSV_iso_[0]->Fill(mevent->electron_iso[lepidx_invtx], w);
+          }
+          else {
+            h_lepdau_outSV_pt_[0]->Fill(mevent->electron_pt[idx], w);
+            h_lepdau_outSV_dxy_[0]->Fill(mevent->electron_dxybs[idx], w);
+            h_lepdau_outSV_dxyerr_[0]->Fill(mevent->electron_dxyerr[idx], w);
+            h_lepdau_outSV_nsigmadxy_[0]->Fill(mevent->electron_dxybs[idx] / mevent->electron_dxyerr[idx], w);    
+            // h_lepdau_outSV_missdist_[0]->Fill(aux.elevtxtip[lepidx_invtx], w);
+            // h_lepdau_outSV_missdisterr_[0]->Fill(aux.elevtxtiperr[lepidx_invtx], w); 
+            // h_lepdau_outSV_missdistsig_[0]->Fill(aux.elevtxtipsig[lepidx_invtx], w);
+            h_lepdau_outSV_iso_[0]->Fill(mevent->electron_iso[idx], w);
+          }
+        }
+      }
+      if (genmatchedlep[i].first == "muon") {
+        h_lepdau_wvtx_[1]->Fill(lep_exists, w);
+        if (lep_exists) {
+          h_lepdau_invtx_[1]->Fill(lep_invtx, w);
+
+          // const math::XYZPoint mupos(mevent->muon_x[idx], mevent->muon_y[idx], mevent->muon_z[idx]);
+          // // const math::XYZTLorentzVector mupos(mevent->muon_pt[i], mevent->muon_eta[i], mevent->muon_phi[w], 0);
+          // double mu_md= miss_dist(pv, pos_isv, mupos, pvarr, svarr).value();
+          // double mu_err= miss_dist(pv, pos_isv, mupos, pvarr, svarr).error();
+
+          if ( lep_invtx ) {
+            h_lepdau_inSV_pt_[1]->Fill(mevent->muon_pt[idx], w);
+            h_lepdau_inSV_dxy_[1]->Fill(mevent->muon_dxybs[idx], w);
+            h_lepdau_inSV_dxyerr_[1]->Fill(mevent->muon_dxyerr[idx], w);
+            h_lepdau_inSV_nsigmadxy_[1]->Fill(mevent->muon_dxybs[idx] / mevent->muon_dxyerr[idx], w);
+            h_lepdau_inSV_missdist_[1]->Fill(aux.muvtxtip[lepidx_invtx], w);
+            h_lepdau_inSV_missdisterr_[1]->Fill(aux.muvtxtiperr[lepidx_invtx], w);
+            h_lepdau_inSV_missdistsig_[1]->Fill(aux.muvtxtipsig[lepidx_invtx], w);
+            h_lepdau_inSV_iso_[1]->Fill(mevent->muon_iso[idx], w);
+          }
+          else {
+            h_lepdau_outSV_pt_[1]->Fill(mevent->muon_pt[idx], w);
+            h_lepdau_outSV_dxy_[1]->Fill(mevent->muon_dxybs[idx], w);
+            h_lepdau_outSV_dxyerr_[1]->Fill(mevent->muon_dxyerr[idx], w);
+            h_lepdau_outSV_nsigmadxy_[1]->Fill(mevent->muon_dxybs[idx] / mevent->muon_dxyerr[idx], w);  
+            //of course can't use these for leptons not found in the vertex... have to get the track somehow 
+            // h_lepdau_outSV_missdist_[1]->Fill(aux.muvtxtip[lepidx_invtx], w);
+            // h_lepdau_outSV_missdisterr_[1]->Fill(aux.muvtxtiperr[lepidx_invtx], w);   
+            // h_lepdau_outSV_missdistsig_[1]->Fill(aux.muvtxtipsig[lepidx_invtx], w);
+            h_lepdau_outSV_iso_[1]->Fill(mevent->muon_iso[idx], w);
+          }
+        }
+      }
+    }
+    if (!sv_exists) {
+      if (genmatchedlep[i].first == "electron") h_lepdau_novtx_[0]->Fill(lep_exists, w);
+      if (genmatchedlep[i].first == "muon") h_lepdau_novtx_[1]->Fill(lep_exists, w);
+    }
   }
 
   if (nsv >= 2) {
@@ -2098,7 +1842,14 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
+    unsigned int nlep = aux.nleptons;
+    const math::XYZPoint pv2sv(aux.x-mevent->pvx, aux.y-mevent->pvy,aux.z-mevent->pvz);
+
     std::set<int> sv_jetasso;
+    unsigned int njettrack = 0;
+    std::vector<std::set<int>> sv_bjetasso(3);
+    std::vector<unsigned int> nbtrack = {0,0,0};
+
     for (int i = 0; i < ntracks; ++i) {
 	    double match_threshold = 1.3;
 	    int jet_index = 255;
@@ -2113,10 +1864,46 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	    }
 	    if (jet_index != 255) {
         sv_jetasso.insert((int) jet_index);
+        ++njettrack;
+        for(int ibdisc=0; ibdisc<3; ++ibdisc){
+          if (mevent->is_btagged(jet_index, ibdisc)){
+            sv_bjetasso[ibdisc].insert((int) jet_index);
+            ++nbtrack[ibdisc];
+          }
+        }
 	    }
     }
+
+
     h_sv_ntk_njet->Fill(ntracks, sv_jetasso.size(), w);
+    h_sv_ntkfromjets->Fill(njettrack, w);
+
+    //math::XYZVector pv2sv;
+    //pv2sv.SetXYZ(aux.x-mevent->pvx, aux.y-mevent->pvy,aux.z-mevent->pvz);
+    for(int ibdisc=0; ibdisc<3; ++ibdisc){
+      h_sv_nbtags[ibdisc]->Fill(sv_bjetasso[ibdisc].size(), w);
+      h_sv_nbtks[ibdisc]->Fill(nbtrack[ibdisc], w);
+      h_sv_nlep_nbtks[ibdisc]->Fill(nbtrack[ibdisc] + nlep, w); //TOFIX
+      h_sv_nallbtags->Fill(sv_bjetasso[0].size(), sv_bjetasso[1].size(), sv_bjetasso[2].size(), w);
+      h_sv_nallbtks->Fill(nbtrack[0], nbtrack[1], nbtrack[2], w);
+
+      double mindphi_svbjet = 999;
+      double mindr_svbjet = 999;
+      for(auto &ib:sv_bjetasso[ibdisc]){
+        double idphi = fabs(reco::deltaPhi(pv2sv.phi(),mevent->nth_jet_phi(ib)));
+        double idr = reco::deltaR(pv2sv.eta(), pv2sv.phi(), mevent->nth_jet_eta(ib), mevent->nth_jet_phi(ib));
+        if(idr<mindr_svbjet){
+          mindr_svbjet = idr;
+          mindphi_svbjet = idphi;
+        }
+      }
+      if((mindr_svbjet!=999)&&(mindphi_svbjet!=999)){
+        h_sv_mindeltaphi_svbjet[ibdisc]->Fill(mindphi_svbjet, w);
+        h_sv_mindeltar_sv_bjet[ibdisc]->Fill(mindr_svbjet, w);
+      }
+    }
   } 
 }
 
 DEFINE_FWK_MODULE(MFVVertexHistos);
+

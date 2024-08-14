@@ -162,7 +162,7 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
         h_scalefactor[kind][1]->Fill(0.452033+0.000974984*x+-4.12462e-07*x*x+9.68473/x, *w);
         h_scalefactor[kind][2]->Fill(1.17135+321.802/(pow(x,1.5))+-70.4986/x, *w);
       }
-    }
+    }  
 #else
 #error bad year
 #endif

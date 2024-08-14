@@ -16,6 +16,7 @@ parser.add_argument('--show-progress', type=int, default=10,
                     help='Print how far along we are processing the histograms: if this is 10 (default), a line is printed for every 1/10 chunk. Disable with value <= 0.')
 parser.add_argument('--only-n-first', type=int, default=-1,
                     help='Only do the first ONLY_N_FIRST histograms (default: do all).')
+parser.add_argument('--only-select', nargs='+', default=[], help='Do only a select # of histograms')
 parser.add_argument('--raise-on-incompatibility', action='store_true',
                     help='If histograms are not comparable (e.g. different binning), raise an exception if True, else skip that one (default).')
 parser.add_argument('--per-page', type=int, default=100,
@@ -155,5 +156,6 @@ compare_hists(ps,
               sort_names = options.sort_names,
               show_progress = options.show_progress,
               only_n_first = options.only_n_first,
+              only_select = options.only_select,
               raise_on_incompatibility = options.raise_on_incompatibility,
               **lambda_kwargs)
