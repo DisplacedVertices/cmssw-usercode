@@ -3,7 +3,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.event_filter = 'jets only novtx'
+settings.mode = 'jets only novtx'
 
 version = settings.version + 'v3'
 

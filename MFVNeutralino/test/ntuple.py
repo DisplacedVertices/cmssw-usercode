@@ -14,12 +14,12 @@ settings.keep_all = False #FIXME
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
-    #settings.event_filter = 'dilepton only' # for new trigger studies
-    #settings.event_filter = 'leptons only' # for new trigger studies
-    #settings.event_filter = 'low HT online track test' # for new trigger studies
+    #settings.mode = 'dilepton only' # for new trigger studies
+    #settings.mode = 'leptons only' # for new trigger studies
+    #settings.mode = 'low HT online track test' # for new trigger studies
     settings.mode = 'bjets OR displaced dijet' # for new trigger studies
 elif use_MET_triggers :
-    #settings.event_filter = 'met only'
+    #settings.mode = 'met only'
     settings.mode = 'met only'
     #settings.mode = 'met AND iso muons'
 elif use_Muon_triggers :

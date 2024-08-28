@@ -4,11 +4,11 @@ settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
 if use_btag_triggers :
-    settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+  settings.mode = 'bjets OR displaced dijet' # for new trigger studies
 elif use_MET_triggers :
-  settings.event_filter = 'met only novtx'
+  settings.mode = 'met only novtx'
 else:
-  settings.event_filter = 'jets only novtx'
+  settings.mode = 'jets only novtx'
 
 version = settings.version + 'v2'
 

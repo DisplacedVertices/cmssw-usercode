@@ -338,7 +338,7 @@ def miniaod_ntuple_process(settings):
     mods = [
         (prepare_vis,    settings.prepare_vis),
         (run_n_tk_seeds, settings.run_n_tk_seeds),
-        (event_filter,    [settings.event_filter, settings.randpars_filter]),
+        (event_filter,    [settings.mode, settings.randpars_filter]),
         #(event_filter,   settings.event_filter),
         (minitree_only,  settings.minitree_only),
         ]

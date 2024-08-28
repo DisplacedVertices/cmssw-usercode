@@ -6,9 +6,9 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = False
 settings.is_miniaod = True
-#settings.event_filter= 'electrons only novtx'
-settings.event_filter = 'muons only novtx'
-#settings.event_filter = 'bjets OR displaced dijet novtx'
+#settings.mode= 'electrons only novtx'
+settings.mode = 'muons only novtx'
+#settings.mode = 'bjets OR displaced dijet novtx'
 
 version = settings.version + 'v8' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
 
@@ -38,10 +38,10 @@ cfgs = named_product(njets = [2], #FIXME
 process = ntuple_process(settings)
 #tfileservice(process, '/uscms/home/pkotamni/nobackup/crabdirs/movedtree.root')
 tfileservice(process, 'movedtree.root')
-#max_events(process, 100)
+max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/data/Run2016B/BTagCSV/MINIAOD/21Feb2020_ver2_UL2016_HIPM-v1/240000/FEBA5DAA-3D1A-384D-91EB-A10EF4E504F5.root')
-#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
 #input_files(process, '/store/mc/RunIISummer20UL16MiniAODAPVv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2540000/00AF8175-C641-344B-8777-F62041FD6308.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/01DA55E6-2A8C-AE48-B2C4-A3DC37E2052D.root')

@@ -5,9 +5,9 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-#settings.event_filter = 'electrons only novtx'
-settings.event_filter = 'muons only novtx' #FIXME miss leading because there is no process.mfvEventFilterSequence applied nor signals_no_event_filter_modifier  
-#settings.event_filter = 'bjets OR displaced dijet novtx'
+#settings.mode = 'electrons only novtx'
+settings.mode = 'muons only novtx' #FIXME miss leading because there is no process.mfvEventFilterSequence applied nor signals_no_event_filter_modifier  
+#settings.mode = 'bjets OR displaced dijet novtx'
 version = settings.version + 'v6'
 
 process = ntuple_process(settings)

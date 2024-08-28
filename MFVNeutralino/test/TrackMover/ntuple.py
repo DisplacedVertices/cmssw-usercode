@@ -6,9 +6,9 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = False
 settings.is_miniaod = True
-#settings.event_filter= 'electrons only novtx'
-settings.event_filter = 'muons only novtx'
-#settings.event_filter = 'bjets OR displaced dijet novtx'
+#settings.mode= 'electrons only novtx'
+settings.mode = 'muons only novtx'
+#settings.mode = 'bjets OR displaced dijet novtx'
 
 version = settings.version + 'v8' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
 
