@@ -245,6 +245,15 @@ mfv_stopbbarbbar_samples_20161 = [
     MCSample('mfv_stopbbarbbar_tau001000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',    25000),
     MCSample('mfv_stopbbarbbar_tau010000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   15000),
     MCSample('mfv_stopbbarbbar_tau030000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   22000),
+]
+
+"""
+mfv_stopbbarbbar_samples_20161 = [
+    MCSample('mfv_stopbbarbbar_tau000100um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v3/MINIAODSIM',  100000),
+    MCSample('mfv_stopbbarbbar_tau000300um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-300um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v3/MINIAODSIM',  99000),
+    MCSample('mfv_stopbbarbbar_tau001000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',    25000),
+    MCSample('mfv_stopbbarbbar_tau010000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   15000),
+    MCSample('mfv_stopbbarbbar_tau030000um_M0200_20161', '/StopStopbarTo2Bbar2B_M-200_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   22000),
     MCSample('mfv_stopbbarbbar_tau000100um_M0300_20161', '/StopStopbarTo2Bbar2B_M-300_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v3/MINIAODSIM',  100000),
     MCSample('mfv_stopbbarbbar_tau000300um_M0300_20161', '/StopStopbarTo2Bbar2B_M-300_CTau-300um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',  99000),
     MCSample('mfv_stopbbarbbar_tau001000um_M0300_20161', '/StopStopbarTo2Bbar2B_M-300_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',    25000),
@@ -281,8 +290,9 @@ mfv_stopbbarbbar_samples_20161 = [
     MCSample('mfv_stopbbarbbar_tau010000um_M3000_20161', '/StopStopbarTo2Bbar2B_M-3000_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v3/MINIAODSIM',   7000),
     MCSample('mfv_stopbbarbbar_tau030000um_M3000_20161', '/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   10000),
 ]
+"""
 
-mfv_selected_stopbbarbbar_samples_20161 = [mfv_stopbbarbbar_samples_20161[3], mfv_stopbbarbbar_samples_20161[22]] 
+#mfv_selected_stopbbarbbar_samples_20161 = [mfv_stopbbarbbar_samples_20161[3], mfv_stopbbarbbar_samples_20161[22]] 
 
 mfv_stoplb_samples_20161 = [
     MCSample('mfv_stoplb_tau000100um_M1000_20161', '/DisplacedSUSY_stopToLBottom_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 98890),
@@ -468,12 +478,19 @@ WminusHToSSTodddd_samples_20161 = [
 ]
 
 ggHToSSTodddd_samples_20161 = [ 
+    MCSample('ggHToSSTodddd_tau1mm_M15_20161',     '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   263860),
+    MCSample('ggHToSSTodddd_tau10mm_M15_20161',    '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  260828),
+
+    MCSample('ggHToSSTodddd_tau1mm_M40_20161',     '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   266923),
+    MCSample('ggHToSSTodddd_tau10mm_M40_20161',    '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  266923),
+    
     MCSample('ggHToSSTodddd_tau1mm_M55_20161',     '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   256935),
-    #MCSample('ggHToSSTodddd_tau10mm_M55_20161',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  270736),
-    #MCSample('ggHToSSTodddd_tau100mm_M55_20161',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 268570),
+    MCSample('ggHToSSTodddd_tau10mm_M55_20161',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  270736),
 ]
 
-all_signal_samples_20161 = mfv_selected_signal_samples_20161 + mfv_selected_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161  
+#all_signal_samples_20161 = mfv_selected_signal_samples_20161 + mfv_selected_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161  
+all_signal_samples_20161 =  mfv_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161 
+#all_signal_samples_20161 = ggHToSSTodddd_samples_20161
 #all_signal_samples_20161 = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161
 #all_signal_samples_20161 = mfv_stoplb_samples_20161 + mfv_stopld_samples_20161
 
@@ -626,6 +643,16 @@ mfv_stopdbardbar_samples_20162 = [
 
 mfv_selected_stopdbardbar_samples_20162 = [mfv_stopdbardbar_samples_20162[21], mfv_stopdbardbar_samples_20162[22]] 
 
+
+mfv_stopbbarbbar_samples_20162 = [
+    MCSample('mfv_stopbbarbbar_tau000100um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 100000),
+    MCSample('mfv_stopbbarbbar_tau000300um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-300um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 99000),
+    MCSample('mfv_stopbbarbbar_tau001000um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 25000),
+    MCSample('mfv_stopbbarbbar_tau010000um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 15000),
+    MCSample('mfv_stopbbarbbar_tau030000um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM', 22000),
+]
+
+"""
 mfv_stopbbarbbar_samples_20162 = [
     MCSample('mfv_stopbbarbbar_tau000100um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 100000),
     MCSample('mfv_stopbbarbbar_tau000300um_M0200_20162', '/StopStopbarTo2Bbar2B_M-200_CTau-300um_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 99000),
@@ -668,8 +695,8 @@ mfv_stopbbarbbar_samples_20162 = [
     MCSample('mfv_stopbbarbbar_tau010000um_M3000_20162', '/StopStopbarTo2Bbar2B_M-3000_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM', 7000),
     MCSample('mfv_stopbbarbbar_tau030000um_M3000_20162', '/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 10000),
 ]
-
-mfv_selected_stopbbarbbar_samples_20162 = [mfv_stopbbarbbar_samples_20162[21], mfv_stopbbarbbar_samples_20162[22]] 
+"""
+#mfv_selected_stopbbarbbar_samples_20162 = [mfv_stopbbarbbar_samples_20162[21], mfv_stopbbarbbar_samples_20162[22]] 
 
 mfv_stoplb_samples_20162 = [
     MCSample('mfv_stoplb_tau000100um_M1000_20162', '/DisplacedSUSY_stopToLBottom_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 99539),
@@ -855,13 +882,20 @@ WminusHToSSTodddd_samples_20162 = [
 ]
 
 ggHToSSTodddd_samples_20162 = [ 
+    MCSample('ggHToSSTodddd_tau1mm_M15_20162',     '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',   256657),
+    MCSample('ggHToSSTodddd_tau10mm_M15_20162',    '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  262636),
+
+    MCSample('ggHToSSTodddd_tau1mm_M40_20162',     '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',   259829),
+    MCSample('ggHToSSTodddd_tau10mm_M40_20162',    '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  264528),
+    
     MCSample('ggHToSSTodddd_tau1mm_M55_20162',     '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',   271240),
-    #MCSample('ggHToSSTodddd_tau10mm_M55_20162',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  259184),
-    #MCSample('ggHToSSTodddd_tau100mm_M55_20162',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM', 261360),
+    MCSample('ggHToSSTodddd_tau10mm_M55_20162',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  259184),
 ]
 
 #all_signal_samples_20162 = mfv_selected_signal_samples_20162 + mfv_selected_stopdbardbar_samples_20162 + mfv_selected_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 
-all_signal_samples_20162 = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162
+#all_signal_samples_20162 = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162
+all_signal_samples_20162 =  mfv_stopdbardbar_samples_20162 + mfv_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 
+#all_signal_samples_20162 = ggHToSSTodddd_samples_20162 
 #all_signal_samples_20162 = mfv_stoplb_samples_20162 + mfv_stopld_samples_20162 
 #all_signal_samples_20162 = mfv_stoplb_samples_20162 + mfv_stopld_samples_20162 
 
@@ -928,7 +962,6 @@ bjet_samples_2017 = [
     ]
 
 leptonic_samples_2017 = [
-    MCSample('wjetstolnu_amcatnlo_2017','/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734, nice='NLO W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=6.735e4),
     MCSample('wjetstolnu_0j_2017','/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 169421340, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=52.78e3),
     MCSample('wjetstolnu_1j_2017','/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 180015088, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=8.832e3),
     MCSample('wjetstolnu_2j_2017','/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 96032711, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=3.276e3),
@@ -1353,30 +1386,24 @@ WminusHToSSTodddd_samples_2017 = [
 ]
 
 ggHToSSTodddd_samples_2017 = [
-    #MCSample('ggHToSSTodddd_tau1000mm_M15_2017', '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 164515),
-    #MCSample('ggHToSSTodddd_tau100mm_M15_2017',  '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 160691),
-    #MCSample('ggHToSSTodddd_tau10mm_M15_2017',   '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 202418),
-    #MCSample('ggHToSSTodddd_tau1mm_M15_2017',    '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 170288),
-    #MCSample('ggHToSSTodddd_tau1000mm_M40_2017', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 200772),
-    #MCSample('ggHToSSTodddd_tau100mm_M40_2017',  '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 178325),
-    #MCSample('ggHToSSTodddd_tau10mm_M40_2017',   '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 191158),
-    #MCSample('ggHToSSTodddd_tau1mm_M40_2017',    '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 176899),
-    #MCSample('ggHToSSTodddd_tau1000mm_M55_2017', '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 233111),
-    #MCSample('ggHToSSTodddd_tau100mm_M55_2017',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 186454),
-    #MCSample('ggHToSSTodddd_tau10mm_M55_2017',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 171704),
-    MCSample('ggHToSSTodddd_tau1mm_M55_2017',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 186554),
+    MCSample('ggHToSSTodddd_tau10mm_M15_2017',   '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 503907),
+    MCSample('ggHToSSTodddd_tau1mm_M15_2017',    '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 519864),
+    
+    MCSample('ggHToSSTodddd_tau10mm_M40_2017',   '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 522525),
+    MCSample('ggHToSSTodddd_tau1mm_M40_2017',    '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 549677),
+    
+    MCSample('ggHToSSTodddd_tau10mm_M55_2017',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 525699),
+    MCSample('ggHToSSTodddd_tau1mm_M55_2017',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 529403),
 
-]
-
-ggHToSSTo4l_samples_2017 = [
-    MCSample('ggHToSSTo4l_tau1mm_M350_2017', '/ggH_HToSSTo4l_lowctau_MH-800_MS-350_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 49643),
 ]
 
 
 #all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + mfv_stoplb_samples_2017 + mfv_stopld_samples_2017 + HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017 + mfv_splitSUSY_samples_2017
 #all_signal_samples_2017 = mfv_stoplb_samples_2017 + mfv_stopld_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 
 #all_signal_samples_2017 = mfv_selected_signal_samples_2017 + mfv_selected_stopdbardbar_samples_2017 + mfv_selected_stopbbarbbar_samples_2017+ ggHToSSTodddd_samples_2017  
-all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017Mu + WplusHToSSTodddd_samples_2017Ele + WplusHToSSTodddd_samples_2017Lep + WminusHToSSTodddd_samples_2017 
+#all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017Mu + WplusHToSSTodddd_samples_2017Ele + WplusHToSSTodddd_samples_2017Lep + WminusHToSSTodddd_samples_2017 
+all_signal_samples_2017 =  mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + mfv_signal_samples_2017 
+#all_signal_samples_2017 = ggHToSSTodddd_samples_2017  
 #all_signal_samples_2017 = WplusHToSSTodddd_samples_2017 
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
@@ -1421,14 +1448,12 @@ ttbar_samples_2018 = [
     MCSample('ttbar_2018',            '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',            306142112, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=7.572e+02),
     #MCSample('ttbar_lep_2018',            '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM',             146010000, nice='t#bar{t}',                                 color=4,   syst_frac=0.15, xsec=88.29),
     #MCSample('ttbar_semilep_2018', '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',             478982000, nice='t#bar{t}',                                 color=4,   syst_frac=0.15, xsec=365.34),
-    MCSample('ttbar_had_2018',         '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM',             343248000, nice='t#bar{t}',                                 color=4,   syst_frac=0.15, xsec=377.96),
+    #MCSample('ttbar_had_2018',         '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM',             343248000, nice='t#bar{t}',                                 color=4,   syst_frac=0.15, xsec=377.96),
 ]
 
 bjet_samples_2018 = []
 
 leptonic_samples_2018 = [
-    MCSample('wjetstolnu_2018',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM',          82442496, nice='$W + jets #rightarrow l#nu$', color=  9, syst_frac=0.10, xsec=5.294e4),
-    MCSample('wjetstolnu_ext_2018',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v2/MINIAODSIM',     79648036, nice='$W + jets #rightarrow l#nu$', color=  9, syst_frac=0.10, xsec=5.294e4),
     MCSample('wjetstolnu_0j_2018',    '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',      172138190, nice='$W + jets #rightarrow l#nu$', color=  9, syst_frac=0.10, xsec=52.780e3),   
     MCSample('wjetstolnu_1j_2018',    '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM',      184564696, nice='$W + jets #rightarrow l#nu$', color=  9, syst_frac=0.10, xsec=8.832e3),   
     MCSample('wjetstolnu_2j_2018',    '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',      94925903, nice='$W + jets #rightarrow l#nu$', color=  9, syst_frac=0.10, xsec=3.276e3),   
@@ -1795,68 +1820,79 @@ WminusHToSSTodddd_samples_2018 = [
 ]
 
 ggHToSSTodddd_samples_2018 = [
+    MCSample('ggHToSSTodddd_tau1mm_M15_2018',   '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',   510875),
+    MCSample('ggHToSSTodddd_tau10mm_M15_2018',  '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',  519316),
+
+    MCSample('ggHToSSTodddd_tau1mm_M40_2018',   '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',   518465),
+    MCSample('ggHToSSTodddd_tau10mm_M40_2018',  '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',  517608),
+
     MCSample('ggHToSSTodddd_tau1mm_M55_2018',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',   546940),
-    #MCSample('ggHToSSTodddd_tau10mm_M55_2018',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',  525760),
-    #MCSample('ggHToSSTodddd_tau100mm_M55_2018', '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM', 506379),
+    MCSample('ggHToSSTodddd_tau10mm_M55_2018',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',  525760),
+  
 ]
 
 #all_signal_samples_2018 = mfv_splitSUSY_samples_2018
 #all_signal_samples_2018 = mfv_stoplb_samples_2018 + mfv_stopld_samples_2018
 #all_signal_samples_2018 =  mfv_selected_signal_samples_2018 + mfv_selected_stopdbardbar_samples_2018 + mfv_selected_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018  
-all_signal_samples_2018 = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 
+all_signal_samples_2018 =  mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018  
+#all_signal_samples_2018 = ggHToSSTodddd_samples_2018  
+#all_signal_samples_2018 = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 
 ########
 # data
 ########
 
 BTagCSV_data_samples_20161 = [
-    DataSample('BTagCSV20161B', '/BTagCSV/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('BTagCSV20161C', '/BTagCSV/Run2016C-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('BTagCSV20161D', '/BTagCSV/Run2016D-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('BTagCSV20161F', '/BTagCSV/Run2016F-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
+    #DataSample('BTagCSV20161B1', '/BTagCSV/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1/MINIAOD'), #FIXME not included in TM ntupling
+    DataSample('BTagCSV20161B', '/BTagCSV/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('BTagCSV20161C', '/BTagCSV/Run2016C-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('BTagCSV20161D', '/BTagCSV/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('BTagCSV20161E', '/BTagCSV/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('BTagCSV20161F', '/BTagCSV/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
 ]
 
 DisplacedJet_data_samples_20161 = [
-    DataSample('DisplacedJet20161B', '/DisplacedJet/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('DisplacedJet20161C', '/DisplacedJet/Run2016C-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('DisplacedJet20161D', '/DisplacedJet/Run2016D-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('DisplacedJet20161E', '/DisplacedJet/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-    DataSample('DisplacedJet20161F', '/DisplacedJet/Run2016F-21Feb2020_UL2016_HIPM-v1/MINIAOD'),
-]
+    #DataSample('DisplacedJet20161B1', '/DisplacedJet/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1/MINIAOD'), #FIXME not included in TM ntupling
+    DataSample('DisplacedJet20161B', '/DisplacedJet/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('DisplacedJet20161C', '/DisplacedJet/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('DisplacedJet20161D', '/DisplacedJet/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('DisplacedJet20161E', '/DisplacedJet/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('DisplacedJet20161F', '/DisplacedJet/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
+    ]
 
 Lepton_data_samples_20161 = [
-    #DataSample('SingleMuon20161B1', '/SingleMuon/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #FIXME failed TM ntupling
+    #DataSample('SingleMuon20161B1', '/SingleMuon/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #FIXME not included in TM ntupling
     DataSample('SingleMuon20161B', '/SingleMuon/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161C',  '/SingleMuon/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161D',  '/SingleMuon/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161E',  '/SingleMuon/Run2016E-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161F',  '/SingleMuon/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161B1', '/SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161B2', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161E',  '/SingleElectron/Run2016E-HIPM_UL2016_MiniAODv2-v5/MINIAOD'),
-    # DataSample('SingleElectron20161F',  '/SingleElectron/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    #DataSample('SingleElectron20161B1', '/SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #FIXME not included in TM ntupling
+    DataSample('SingleElectron20161B', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161E',  '/SingleElectron/Run2016E-HIPM_UL2016_MiniAODv2-v5/MINIAOD'),
+    DataSample('SingleElectron20161F',  '/SingleElectron/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
 BTagCSV_data_samples_20162 = [
-    DataSample('BTagCSV2016F', '/BTagCSV/Run2016F-21Feb2020_UL2016-v1/MINIAOD'),
-    DataSample('BTagCSV2016G', '/BTagCSV/Run2016G-21Feb2020_UL2016-v1/MINIAOD'),
-    DataSample('BTagCSV2016H', '/BTagCSV/Run2016H-21Feb2020_UL2016-v1/MINIAOD'),
+    DataSample('BTagCSV20162F', '/BTagCSV/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'), 
+    DataSample('BTagCSV20162G', '/BTagCSV/Run2016G-UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('BTagCSV20162H', '/BTagCSV/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
 DisplacedJet_data_samples_20162 = [
-    DataSample('DisplacedJet2016F', '/DisplacedJet/Run2016F-21Feb2020_UL2016-v1/MINIAOD'),
-    DataSample('DisplacedJet2016G', '/DisplacedJet/Run2016G-21Feb2020_UL2016-v1/MINIAOD'),
-    DataSample('DisplacedJet2016H', '/DisplacedJet/Run2016H-21Feb2020_UL2016-v1/MINIAOD'),
+    DataSample('DisplacedJet20162F', '/DisplacedJet/Run2016F-UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('DisplacedJet20162G', '/DisplacedJet/Run2016G-UL2016_MiniAODv2-v1/MINIAOD'),
+    DataSample('DisplacedJet20162H', '/DisplacedJet/Run2016H-UL2016_MiniAODv2-v1/MINIAOD'),
 ]
 
 Lepton_data_samples_20162 = [
     DataSample('SingleMuon20162F', '/SingleMuon/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162G', '/SingleMuon/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162H', '/SingleMuon/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162F', '/SingleElectron/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162G', '/SingleElectron/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162H', '/SingleElectron/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20162F', '/SingleElectron/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20162G', '/SingleElectron/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20162H', '/SingleElectron/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
 #auxiliary_data_samples_2017 = [                                                       # in dataset      in json          int lumi avail (/fb)
@@ -1870,26 +1906,7 @@ Lepton_data_samples_20162 = [
 #FIXME: may need to reorganize how data is loaded for different cases
 JetHT_data_samples_2017 = []
 
-#Lepton_data_samples_2017 = [
-#    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
-#    ] Alec commented and replaced with below
-
-
 BTagCSV_data_samples_2017 = [
-    #DataSample('BTagCSV2017B', '/BTagCSV/Run2017B-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('BTagCSV2017C', '/BTagCSV/Run2017C-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('BTagCSV2017D', '/BTagCSV/Run2017D-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('BTagCSV2017E', '/BTagCSV/Run2017E-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('BTagCSV2017F', '/BTagCSV/Run2017F-09Aug2019_UL2017-v1/MINIAOD'),
     DataSample('BTagCSV2017B', '/BTagCSV/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('BTagCSV2017C', '/BTagCSV/Run2017C-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('BTagCSV2017D', '/BTagCSV/Run2017D-UL2017_MiniAODv2-v1/MINIAOD'),
@@ -1898,10 +1915,7 @@ BTagCSV_data_samples_2017 = [
     ]
 
 DisplacedJet_data_samples_2017 = [
-    #DataSample('DisplacedJet2017C', '/DisplacedJet/Run2017C-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('DisplacedJet2017D', '/DisplacedJet/Run2017D-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('DisplacedJet2017E', '/DisplacedJet/Run2017E-09Aug2019_UL2017-v1/MINIAOD'),
-    #DataSample('DisplacedJet2017F', '/DisplacedJet/Run2017F-09Aug2019_UL2017-v1/MINIAOD'),
+    #DataSample('DisplacedJet2017B' missing on DAS   
     DataSample('DisplacedJet2017C', '/DisplacedJet/Run2017C-UL2017_MiniAODv2-v2/MINIAOD'),
     DataSample('DisplacedJet2017D', '/DisplacedJet/Run2017D-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('DisplacedJet2017E', '/DisplacedJet/Run2017E-UL2017_MiniAODv2-v1/MINIAOD'),
@@ -1909,33 +1923,17 @@ DisplacedJet_data_samples_2017 = [
     ]
 
 Lepton_data_samples_2017 = [
-    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-UL2017_MiniAODv2_GT36-v2/MINIAOD'),
-    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-UL2017_MiniAODv2_GT36-v2/MINIAOD'),
-    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-UL2017_MiniAODv2_GT36-v2/MINIAOD'),
-    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-UL2017_MiniAODv2_GT36-v2/MINIAOD'),
-    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-UL2017_MiniAODv2_GT36-v2/MINIAOD'),
+    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-UL2017_MiniAODv2_GT36-v2/MINIAOD'), #FIXME not supposed to be GT36
+    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-UL2017_MiniAODv2_GT36-v2/MINIAOD'), #FIXME not supposed to be GT36
+    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-UL2017_MiniAODv2_GT36-v2/MINIAOD'), #FIXME not supposed to be GT36
+    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-UL2017_MiniAODv2_GT36-v2/MINIAOD'), #FIXME not supposed to be GT36
+    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-UL2017_MiniAODv2_GT36-v2/MINIAOD'), #FIXME not supposed to be GT36
     DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-UL2017_MiniAODv2-v1/MINIAOD'),
     ]    
-
-#auxiliary_data_samples_2017 = [
-#    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-09Aug2019_UL2017-v1/AOD'),
-#    ]   Alec commented and replaced with below 
-
-#singleelectron_data_samples_2017 = [
-#    DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
-#] Alec commented and replaced with below
 
 singleelectron_data_samples_2017 = [
     DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
@@ -1954,41 +1952,20 @@ singleelectron_data_samples_2017 = [
 #]
 
 #FIXME: may need to reorganize how data is loaded for different cases
-#JetHT_data_samples_2018 = [  #Alec commented from here
-#    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-09Aug2019_UL2017-v1/AOD'),
-#    DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
-#] #Alec to here
+JetHT_data_samples_2018 = [
+    DataSample('JetHT2018A', '/JetHT/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018B', '/JetHT/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018C', '/JetHT/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018D', '/JetHT/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+] 
 
-# Lepton_data_samples_2018 = [
-#     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v5/AOD'),
-#     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-12Nov2019_UL2018-v3/AOD'),
-#     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-12Nov2019_UL2018-v3/AOD'),
-#     DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-12Nov2019_UL2018-v8/AOD'),
-#     DataSample('EGamma2018A', '/EGamma/Run2018A-12Nov2019_UL2018-v2/AOD'),
-#     DataSample('EGamma2018B', '/EGamma/Run2018B-12Nov2019_UL2018-v2/AOD'),
-#     DataSample('EGamma2018C', '/EGamma/Run2018C-12Nov2019_UL2018-v2/AOD'),
-#     DataSample('EGamma2018D', '/EGamma/Run2018D-12Nov2019_UL2018-v8/AOD'),
-# ]
-
-BTagCSV_data_samples_2018 = [
-    DataSample('BTagCSV2018A', '/BTagCSV/Run2018A-15Feb2022_UL2018-v2/MINIAOD'),
-    DataSample('BTagCSV2018B', '/BTagCSV/Run2018B-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('BTagCSV2018C', '/BTagCSV/Run2018C-15Feb2022_UL2018-v1/MINIAOD'),
-    ]
+BTagCSV_data_samples_2018 = JetHT_data_samples_2018
 
 DisplacedJet_data_samples_2018 = [
-    DataSample('DisplacedJet2018A', '/DisplacedJet/Run2018A-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018B', '/DisplacedJet/Run2018B-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018C', '/DisplacedJet/Run2018C-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-15Feb2022_UL2018-v1/MINIAOD'),
+    DataSample('DisplacedJet2018A', '/DisplacedJet/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018B', '/DisplacedJet/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018C', '/DisplacedJet/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
     ]
 
 Lepton_data_samples_2018 = [
@@ -1996,10 +1973,10 @@ Lepton_data_samples_2018 = [
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-UL2018_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-UL2018_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-UL2018_MiniAODv2-v3/MINIAOD'),
-    # DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
+    DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
 ]
 
 egamma_data_samples_2018 = [
@@ -2072,7 +2049,6 @@ __all__ = [
     'ggHToSSTodddd_samples_20162',
     #'HToSSTobbbb_samples_2017',
     'ggHToSSTodddd_samples_2017',
-    'ggHToSSTo4l_samples_2017',
     'ZHToSSTodddd_samples_2017',
     'WplusHToSSTodddd_samples_2017',
     'WplusHToSSTodddd_samples_2017Mu',
@@ -2106,7 +2082,7 @@ __all__ = [
     'BTagCSV_data_samples_2018',
     'DisplacedJet_data_samples_2018',
     'Lepton_data_samples_2018',
-    #'JetHT_data_samples_2018',
+    'JetHT_data_samples_2018',
     #'auxiliary_data_samples_2018',
     #'egamma_data_samples_2018',
 
@@ -2280,25 +2256,37 @@ for x in ZHToSSTodddd_tau100um_M15_20161, ZHToSSTodddd_tau300um_M15_20161, ZHToS
 for x in WplusHToSSTodddd_tau100um_M55_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau3mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017, WplusHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau100um_M55_2018, WplusHToSSTodddd_tau300um_M55_2018, WplusHToSSTodddd_tau1mm_M55_2018, WplusHToSSTodddd_tau3mm_M55_2018, WplusHToSSTodddd_tau10mm_M55_2018, WplusHToSSTodddd_tau30mm_M55_2018:
     x.add_dataset("ntupleonnormdzulv30bm_noef")
 
-for x in ttbar_20161, ttbar_had_20161, ww_20161, zz_20161, wz_20161, BTagCSV20161B, BTagCSV20161D, BTagCSV20161F, DisplacedJet20161B:
-    x.add_dataset("trackmoveronnormdzulv30bmofftossv8")
+wjetstolnu_2j_2017.add_dataset("ntupleonnormdzulv30metm")
+
+for x in BTagCSV2017B, BTagCSV2017C, BTagCSV2017D, BTagCSV2017E, BTagCSV2017F, DisplacedJet2017C, DisplacedJet2017D, DisplacedJet2017E, DisplacedJet2017F, JetHT2018A, JetHT2018B, JetHT2018C, JetHT2018D, DisplacedJet2018A, DisplacedJet2018B, DisplacedJet2018C, DisplacedJet2018D:
+    x.add_dataset("ntupleonnormdzulv30bm")
 
 
-for x in wjetstolnu_0j_20161, wjetstolnu_1j_20161, wjetstolnu_2j_20161, dyjetstollM10_20161, dyjetstollM50_20161, ttbar_20161, ww_20161, zz_20161, wz_20161, wjetstolnu_0j_20162, wjetstolnu_1j_20162, wjetstolnu_2j_20162, dyjetstollM10_20162, dyjetstollM50_20162, ttbar_20162, ww_20162, zz_20162, wz_20162, ttbar_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, ttbar_2018, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018, SingleMuon20161B, SingleMuon20161C, SingleMuon20161D, SingleMuon20161E, SingleMuon20161F, SingleMuon20162F, SingleMuon20162G, SingleMuon20162H, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017F, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D:
-    x.add_dataset("trackmover0p03onnormdzulv30lepmumv8")
+for x in ttbar_20161, ttbar_had_20161, ww_20161, zz_20161, wz_20161, ttbar_20162, ttbar_had_20162, ww_20162, zz_20162, wz_20162, ttbar_2017, ww_2017, zz_2017, wz_2017, ttbar_2018, ww_2018, wz_2018, zz_2018, BTagCSV20161B, BTagCSV20161C, BTagCSV20161D, BTagCSV20161E, BTagCSV20161F, DisplacedJet20161B, DisplacedJet20161C, DisplacedJet20161D, DisplacedJet20161E, DisplacedJet20161F, BTagCSV20162F, BTagCSV20162G, BTagCSV20162H, DisplacedJet20162F, DisplacedJet20162G, DisplacedJet20162H, BTagCSV2017B, BTagCSV2017C, BTagCSV2017D, BTagCSV2017E, BTagCSV2017F, DisplacedJet2017C, DisplacedJet2017D, DisplacedJet2017E, JetHT2018A, JetHT2018B, JetHT2018C, JetHT2018D, DisplacedJet2018A, DisplacedJet2018B, DisplacedJet2018C, DisplacedJet2018D:
+    x.add_dataset("trackmoveronnormdzulv30bmofftosspreselv8")
 
-"""
 for x in wjetstolnu_0j_20161, wjetstolnu_1j_20161, wjetstolnu_2j_20161, dyjetstollM10_20161, dyjetstollM50_20161, ww_20161, zz_20161, wz_20161, wjetstolnu_0j_20162, wjetstolnu_1j_20162, wjetstolnu_2j_20162, dyjetstollM10_20162, dyjetstollM50_20162, ww_20162, zz_20162, wz_20162, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018, SingleMuon20161B, SingleMuon20161C, SingleMuon20161D, SingleMuon20161E, SingleMuon20161F, SingleMuon20162F, SingleMuon20162G, SingleMuon20162H, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D:
     x.add_dataset("trackmoveronnormdzulv30lepmumv8")
-"""
+
+
+for x in ggHToSSTodddd_tau1mm_M15_20161, ggHToSSTodddd_tau1mm_M40_20161, mfv_neu_tau001000um_M0300_2017, mfv_stopdbardbar_tau001000um_M0300_2017, mfv_stopbbarbbar_tau001000um_M0300_2017, ggHToSSTodddd_tau1mm_M55_2017:
+    x.add_dataset("ntupleonnormdzulv30bm_noef")
+
+for x in qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept015_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, qcdmupt15_2018, qcdempt015_2018, qcdempt020_2018, qcdempt030_2018, qcdempt050_2018, qcdempt080_2018, qcdempt120_2018, qcdempt170_2018, qcdbctoept015_2018, qcdbctoept020_2018, qcdbctoept030_2018, qcdbctoept080_2018, qcdbctoept170_2018, qcdbctoept250_2018, qcdempt300_2018, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, EGamma2018A, EGamma2018B, EGamma2018C, EGamma2018D:
+    x.add_dataset("ntupleonnormdzulv30lepm")
+
 for x in ZHToSSTodddd_tau100um_M15_20161, ZHToSSTodddd_tau300um_M15_20161, ZHToSSTodddd_tau1mm_M15_20161, ZHToSSTodddd_tau3mm_M15_20161, ZHToSSTodddd_tau10mm_M15_20161, ZHToSSTodddd_tau30mm_M15_20161, ZHToSSTodddd_tau100um_M40_20161, ZHToSSTodddd_tau300um_M40_20161, ZHToSSTodddd_tau1mm_M40_20161, ZHToSSTodddd_tau3mm_M40_20161, ZHToSSTodddd_tau10mm_M40_20161, ZHToSSTodddd_tau30mm_M40_20161, ZHToSSTodddd_tau100um_M55_20161, ZHToSSTodddd_tau300um_M55_20161, ZHToSSTodddd_tau1mm_M55_20161, ZHToSSTodddd_tau3mm_M55_20161, ZHToSSTodddd_tau10mm_M55_20161, ZHToSSTodddd_tau30mm_M55_20161, WplusHToSSTodddd_tau100um_M15_20161, WplusHToSSTodddd_tau300um_M15_20161, WplusHToSSTodddd_tau1mm_M15_20161, WplusHToSSTodddd_tau3mm_M15_20161, WplusHToSSTodddd_tau10mm_M15_20161, WplusHToSSTodddd_tau30mm_M15_20161, WplusHToSSTodddd_tau100um_M40_20161, WplusHToSSTodddd_tau300um_M40_20161, WplusHToSSTodddd_tau1mm_M40_20161, WplusHToSSTodddd_tau3mm_M40_20161, WplusHToSSTodddd_tau10mm_M40_20161, WplusHToSSTodddd_tau30mm_M40_20161, WplusHToSSTodddd_tau100um_M55_20161, WplusHToSSTodddd_tau300um_M55_20161, WplusHToSSTodddd_tau1mm_M55_20161, WplusHToSSTodddd_tau3mm_M55_20161, WplusHToSSTodddd_tau10mm_M55_20161, WplusHToSSTodddd_tau30mm_M55_20161, WminusHToSSTodddd_tau100um_M15_20161, WminusHToSSTodddd_tau300um_M15_20161, WminusHToSSTodddd_tau1mm_M15_20161, WminusHToSSTodddd_tau3mm_M15_20161, WminusHToSSTodddd_tau10mm_M15_20161, WminusHToSSTodddd_tau30mm_M15_20161, WminusHToSSTodddd_tau100um_M40_20161, WminusHToSSTodddd_tau300um_M40_20161, WminusHToSSTodddd_tau1mm_M40_20161, WminusHToSSTodddd_tau3mm_M40_20161, WminusHToSSTodddd_tau10mm_M40_20161, WminusHToSSTodddd_tau30mm_M40_20161, WminusHToSSTodddd_tau100um_M55_20161, WminusHToSSTodddd_tau300um_M55_20161, WminusHToSSTodddd_tau1mm_M55_20161, WminusHToSSTodddd_tau3mm_M55_20161, WminusHToSSTodddd_tau10mm_M55_20161, WminusHToSSTodddd_tau30mm_M55_20161, ZHToSSTodddd_tau100um_M15_20162, ZHToSSTodddd_tau300um_M15_20162, ZHToSSTodddd_tau1mm_M15_20162, ZHToSSTodddd_tau3mm_M15_20162, ZHToSSTodddd_tau10mm_M15_20162, ZHToSSTodddd_tau30mm_M15_20162, ZHToSSTodddd_tau100um_M40_20162, ZHToSSTodddd_tau300um_M40_20162, ZHToSSTodddd_tau1mm_M40_20162, ZHToSSTodddd_tau3mm_M40_20162, ZHToSSTodddd_tau10mm_M40_20162, ZHToSSTodddd_tau30mm_M40_20162, ZHToSSTodddd_tau100um_M55_20162, ZHToSSTodddd_tau300um_M55_20162, ZHToSSTodddd_tau1mm_M55_20162, ZHToSSTodddd_tau3mm_M55_20162, ZHToSSTodddd_tau10mm_M55_20162, ZHToSSTodddd_tau30mm_M55_20162, WplusHToSSTodddd_tau100um_M15_20162, WplusHToSSTodddd_tau300um_M15_20162, WplusHToSSTodddd_tau1mm_M15_20162, WplusHToSSTodddd_tau3mm_M15_20162, WplusHToSSTodddd_tau10mm_M15_20162, WplusHToSSTodddd_tau30mm_M15_20162, WplusHToSSTodddd_tau100um_M40_20162, WplusHToSSTodddd_tau300um_M40_20162, WplusHToSSTodddd_tau1mm_M40_20162, WplusHToSSTodddd_tau3mm_M40_20162, WplusHToSSTodddd_tau10mm_M40_20162, WplusHToSSTodddd_tau30mm_M40_20162, WplusHToSSTodddd_tau100um_M55_20162, WplusHToSSTodddd_tau300um_M55_20162, WplusHToSSTodddd_tau1mm_M55_20162, WplusHToSSTodddd_tau3mm_M55_20162, WplusHToSSTodddd_tau10mm_M55_20162, WplusHToSSTodddd_tau30mm_M55_20162, WminusHToSSTodddd_tau100um_M15_20162, WminusHToSSTodddd_tau300um_M15_20162, WminusHToSSTodddd_tau1mm_M15_20162, WminusHToSSTodddd_tau3mm_M15_20162, WminusHToSSTodddd_tau10mm_M15_20162, WminusHToSSTodddd_tau100um_M40_20162, WminusHToSSTodddd_tau300um_M40_20162, WminusHToSSTodddd_tau1mm_M40_20162, WminusHToSSTodddd_tau3mm_M40_20162, WminusHToSSTodddd_tau10mm_M40_20162, WminusHToSSTodddd_tau30mm_M40_20162, WminusHToSSTodddd_tau100um_M55_20162, WminusHToSSTodddd_tau300um_M55_20162, WminusHToSSTodddd_tau1mm_M55_20162, WminusHToSSTodddd_tau3mm_M55_20162, WminusHToSSTodddd_tau10mm_M55_20162, WminusHToSSTodddd_tau30mm_M55_20162, ZHToSSTodddd_tau300um_M15_2017, ZHToSSTodddd_tau1mm_M15_2017, ZHToSSTodddd_tau3mm_M15_2017, ZHToSSTodddd_tau10mm_M15_2017, ZHToSSTodddd_tau30mm_M15_2017, ZHToSSTodddd_tau100um_M40_2017, ZHToSSTodddd_tau300um_M40_2017, ZHToSSTodddd_tau1mm_M40_2017, ZHToSSTodddd_tau3mm_M40_2017, ZHToSSTodddd_tau10mm_M40_2017, ZHToSSTodddd_tau30mm_M40_2017, ZHToSSTodddd_tau100um_M55_2017, ZHToSSTodddd_tau300um_M55_2017, ZHToSSTodddd_tau1mm_M55_2017, ZHToSSTodddd_tau3mm_M55_2017, ZHToSSTodddd_tau10mm_M55_2017, ZHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau100um_M15_2017, WplusHToSSTodddd_tau300um_M15_2017, WplusHToSSTodddd_tau1mm_M15_2017, WplusHToSSTodddd_tau3mm_M15_2017, WplusHToSSTodddd_tau30mm_M15_2017, WplusHToSSTodddd_tau100um_M40_2017, WplusHToSSTodddd_tau300um_M40_2017, WplusHToSSTodddd_tau1mm_M40_2017, WplusHToSSTodddd_tau3mm_M40_2017, WplusHToSSTodddd_tau10mm_M40_2017, WplusHToSSTodddd_tau30mm_M40_2017, WplusHToSSTodddd_tau100um_M55_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau3mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017, WplusHToSSTodddd_tau30mm_M55_2017, WminusHToSSTodddd_tau100um_M15_2017, WminusHToSSTodddd_tau300um_M15_2017, WminusHToSSTodddd_tau1mm_M15_2017, WminusHToSSTodddd_tau3mm_M15_2017, WminusHToSSTodddd_tau10mm_M15_2017, WminusHToSSTodddd_tau30mm_M15_2017, WminusHToSSTodddd_tau100um_M40_2017, WminusHToSSTodddd_tau300um_M40_2017, WminusHToSSTodddd_tau1mm_M40_2017, WminusHToSSTodddd_tau3mm_M40_2017, WminusHToSSTodddd_tau10mm_M40_2017, WminusHToSSTodddd_tau30mm_M40_2017, WminusHToSSTodddd_tau100um_M55_2017, WminusHToSSTodddd_tau300um_M55_2017, WminusHToSSTodddd_tau1mm_M55_2017, WminusHToSSTodddd_tau3mm_M55_2017, WminusHToSSTodddd_tau10mm_M55_2017, WminusHToSSTodddd_tau30mm_M55_2017, ZHToSSTodddd_tau100um_M15_2018, ZHToSSTodddd_tau300um_M15_2018, ZHToSSTodddd_tau1mm_M15_2018, ZHToSSTodddd_tau3mm_M15_2018, ZHToSSTodddd_tau10mm_M15_2018, ZHToSSTodddd_tau30mm_M15_2018, ZHToSSTodddd_tau100um_M40_2018, ZHToSSTodddd_tau300um_M40_2018, ZHToSSTodddd_tau1mm_M40_2018, ZHToSSTodddd_tau3mm_M40_2018, ZHToSSTodddd_tau10mm_M40_2018, ZHToSSTodddd_tau30mm_M40_2018, ZHToSSTodddd_tau100um_M55_2018, ZHToSSTodddd_tau300um_M55_2018, ZHToSSTodddd_tau1mm_M55_2018, ZHToSSTodddd_tau3mm_M55_2018, ZHToSSTodddd_tau10mm_M55_2018, ZHToSSTodddd_tau30mm_M55_2018, WplusHToSSTodddd_tau100um_M15_2018, WplusHToSSTodddd_tau300um_M15_2018, WplusHToSSTodddd_tau1mm_M15_2018, WplusHToSSTodddd_tau3mm_M15_2018, WplusHToSSTodddd_tau10mm_M15_2018, WplusHToSSTodddd_tau30mm_M15_2018, WplusHToSSTodddd_tau100um_M40_2018, WplusHToSSTodddd_tau300um_M40_2018, WplusHToSSTodddd_tau3mm_M40_2018, WplusHToSSTodddd_tau10mm_M40_2018, WplusHToSSTodddd_tau30mm_M40_2018, WplusHToSSTodddd_tau100um_M55_2018, WplusHToSSTodddd_tau300um_M55_2018, WplusHToSSTodddd_tau1mm_M55_2018, WplusHToSSTodddd_tau3mm_M55_2018, WplusHToSSTodddd_tau10mm_M55_2018, WplusHToSSTodddd_tau30mm_M55_2018, WminusHToSSTodddd_tau100um_M15_2018, WminusHToSSTodddd_tau300um_M15_2018, WminusHToSSTodddd_tau1mm_M15_2018, WminusHToSSTodddd_tau3mm_M15_2018, WminusHToSSTodddd_tau10mm_M15_2018, WminusHToSSTodddd_tau30mm_M15_2018, WminusHToSSTodddd_tau100um_M40_2018, WminusHToSSTodddd_tau1mm_M40_2018, WminusHToSSTodddd_tau3mm_M40_2018, WminusHToSSTodddd_tau10mm_M40_2018, WminusHToSSTodddd_tau30mm_M40_2018, WminusHToSSTodddd_tau100um_M55_2018, WminusHToSSTodddd_tau300um_M55_2018, WminusHToSSTodddd_tau1mm_M55_2018, WminusHToSSTodddd_tau3mm_M55_2018, WminusHToSSTodddd_tau10mm_M55_2018, WminusHToSSTodddd_tau30mm_M55_2018:
-    if "tau1mm_M55_2017" in x.name:
+    if "tau300um_M15_2017" in x.name:
         x.add_dataset("trackmovermctruthonnormdzulv30lepmumv6")
 
 #for x in mfv_stopdbardbar_tau001000um_M0800_20161, mfv_stopbbarbbar_tau001000um_M0800_20161:
 #   x.add_dataset("trackmovermctruthonnormdzulv30bmv6")
-for x in mfv_stopbbarbbar_tau001000um_M0200_20161, ggHToSSTodddd_tau1mm_M55_20161:
-  x.add_dataset("trackmovermctruthonnormdzulv30bmv6")
+
+ggHToSSTodddd_tau10mm_M40_2017.add_dataset('trackmovermctruthonnormdzulv30bmpreselv6', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-TrackMoverMCTruthOnnormdzULV30Bmpreselv6_2017-528cbafdbbf43bb8c7dbce017c417cd3/USER', 13269)
+for x in ggHToSSTodddd_tau1mm_M15_20161, ggHToSSTodddd_tau10mm_M15_20161, ggHToSSTodddd_tau1mm_M40_20161, ggHToSSTodddd_tau10mm_M40_20161, ggHToSSTodddd_tau1mm_M55_20161, ggHToSSTodddd_tau10mm_M55_20161, ggHToSSTodddd_tau1mm_M15_20162, ggHToSSTodddd_tau10mm_M15_20162, ggHToSSTodddd_tau1mm_M40_20162, ggHToSSTodddd_tau10mm_M40_20162, ggHToSSTodddd_tau1mm_M55_20162, ggHToSSTodddd_tau10mm_M55_20162, ggHToSSTodddd_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau1mm_M40_2017, ggHToSSTodddd_tau10mm_M55_2017, ggHToSSTodddd_tau1mm_M55_2017, ggHToSSTodddd_tau1mm_M15_2018, ggHToSSTodddd_tau10mm_M15_2018, ggHToSSTodddd_tau1mm_M40_2018, ggHToSSTodddd_tau10mm_M40_2018, ggHToSSTodddd_tau1mm_M55_2018, ggHToSSTodddd_tau10mm_M55_2018:
+    if "M40" in x.name:
+        x.add_dataset("trackmovermctruthonnormdzulv30bmpreselv6")
+
 
 
 #for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017:
@@ -2312,11 +2300,10 @@ SingleElectron2017B.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-F
 SingleElectron2017C.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-e4d56933c86918c3bd148722113778ad/USER', -1)
 SingleElectron2017E.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-b263ccec0b85cece65a88cc4bcb47b85/USER', -1)
 SingleElectron2017F.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-618b1b5f1913656e40f0cfb572514b20/USER', -1)
-for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, ttbar_2017, wjetstolnu_amcatnlo_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D:
+for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, ttbar_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D:
     x.add_dataset("ntuple_K0_DYmuontrig")
 
 ttbar_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-0b62fe2c2e68572d7b19020908d49d6d/USER', -1)
-wjetstolnu_amcatnlo_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-60cc39a06694799dea9f2d0159f6f14f/USER', -1)
 dyjetstollM10_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-99411c72ade5979f99b481f27dd2ba8e/USER', -1)
 dyjetstollM50_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-a9976aaa8cda96912597725368bdee78/USER', -1)
 ww_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-6cd7d064e8348c4bfe63bac0035e610a/USER', -1)
@@ -2343,7 +2330,7 @@ SingleElectron2017B.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefi
 SingleElectron2017C.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017E.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017F.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-for x in qcdmupt15_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_amcatnlo_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleElectron2017D:                                                    # ^   wjetstolnu_2017,   Alec removed
+for x in qcdmupt15_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleElectron2017D:                                                    # ^   wjetstolnu_2017,   Alec removed
     x.add_dataset("trackmoverulv30lepelemv7")
 
 """
@@ -2399,7 +2386,6 @@ qcdempt300_2018.add_dataset('ntupleulv9lepm', '/QCD_Pt-300toInf_EMEnriched_TuneC
 #ttbar_semilep_2018.add_dataset('ntupleulv9lepm', '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_2018-bf891447412321d36949f8c9ada687fd/USER', 47008700)
 #ttbar_had_2018.add_dataset('ntupleulv9lepm', '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_2018-a0b0736c0dbc753a3e3d166ec880a1f1/USER', 93981)
 
-wjetstolnu_2018.add_dataset('ntupleulv9lepm', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV9Lepm_2018-0821f8ca1009fd8745a2ee05397979d5/USER', 77257)
 dyjetstollM10_2018.add_dataset('ntupleulv9lepm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV9Lepm_2018-f69fb0daea531bb34fe7b3b1fbb05f40/USER', 1707)
 dyjetstollM50_2018.add_dataset('ntupleulv9lepm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV9Lepm_2018-caab6aed847e3a2a3f77c9777139026f/USER', 243774)
 ww_2018.add_dataset('ntupleulv9lepm', '/WW_TuneCP5_13TeV-pythia8/awarden-NtupleULV9Lepm_2018-f924a3b2bd27945aeba0f6439bbdc149/USER', 33539)
@@ -2508,7 +2494,7 @@ mfv_stopld_tau030000um_M1800_2018.add_dataset('ntupleulv9lepm', '/DisplacedSUSY_
 
 #ttbar_lep_2018.add_dataset('ntupleulv9lepm_wgen', '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_WGen_2018-1a1f79d40f6b7126d1571e12d51e9079/USER', 23971511)
 #ttbar_semilep_2018.add_dataset('ntupleulv9lepm_wgen', '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_WGen_2018-06f4ccf7f9e99c1dac78d05f90f8be5a/USER', 46976261)
-ttbar_had_2018.add_dataset('ntupleulv9lepm_wgen', '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_WGen_2018-51733bae56d3b337b429fa4fdf7900e3/USER', 94370)
+#ttbar_had_2018.add_dataset('ntupleulv9lepm_wgen', '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV9Lepm_WGen_2018-51733bae56d3b337b429fa4fdf7900e3/USER', 94370)
 
 
 qcdempt015_2017.add_dataset('ntupleulv10lepm_wgen', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV10Lepm_WGen_2017-6adf86f355597a8cbd5eedaca0add5ac/USER', 0)
@@ -2655,8 +2641,6 @@ qcdempt300_2018.add_dataset('ntupleulv10lepm_wgen', '/QCD_Pt-300toInf_EMEnriched
 ttbar_lep_2018.add_dataset('ntupleulv10lepm_wgen', '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV10Lepm_WGen_2018-b1f588cbac5e905ba5cf417dfd0d2a35/USER', 5344185)
 ttbar_semilep_2018.add_dataset('ntupleulv10lepm_wgen', '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV10Lepm_WGen_2018-bd2160b6f2bf031424f844eb16332ec4/USER', 10655075)
 ttbar_had_2018.add_dataset('ntupleulv10lepm_wgen', '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV10Lepm_WGen_2018-8a587e26ecc8fa3e672eefdf17ce89ad/USER', 20455)
-wjetstolnu_2018.add_dataset('ntupleulv10lepm_wgen', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV10Lepm_WGen_2018-8d1d0e41b6052d5727c7f6571d0cfbc2/USER', 15365)
-wjetstolnu_ext_2018.add_dataset('ntupleulv10lepm_wgen', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV10Lepm_WGen_2018-4d2ff0e0a0c7201da5516dcd6193e9b8/USER', 14741)
 dyjetstollM10_2018.add_dataset('ntupleulv10lepm_wgen', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV10Lepm_WGen_2018-c1e96c5ddfa0c9a5a980983e452aa15d/USER', 1308)
 dyjetstollM50_2018.add_dataset('ntupleulv10lepm_wgen', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV10Lepm_WGen_2018-5a6c962c0a4950e690513bff4faef011/USER', 50318)
 ww_2018.add_dataset('ntupleulv10lepm_wgen', '/WW_TuneCP5_13TeV-pythia8/awarden-NtupleULV10Lepm_WGen_2018-411e74744422c54f39a3ccbd367af000/USER', 6468)
@@ -2782,8 +2766,6 @@ qcdempt300_2018.add_dataset('ntupleulv11lepm_wgen', '/QCD_Pt-300toInf_EMEnriched
 ttbar_lep_2018.add_dataset('ntupleulv11lepm_wgen', '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV11Lepm_WGen_2018-368894d6df77bd72e6069f8bbd9878b1/USER', 4950352)
 ttbar_semilep_2018.add_dataset('ntupleulv11lepm_wgen', '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV11Lepm_WGen_2018-2bcf268631be7c56a61554df42a3379f/USER', 9828694)
 ttbar_had_2018.add_dataset('ntupleulv11lepm_wgen', '/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/awarden-NtupleULV11Lepm_WGen_2018-2ea000149053cc355113943de0b039ab/USER', 18749)
-wjetstolnu_2018.add_dataset('ntupleulv11lepm_wgen', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV11Lepm_WGen_2018-85617d746c7fd561d6e94c637a6e8f2a/USER', 13696)
-wjetstolnu_ext_2018.add_dataset('ntupleulv11lepm_wgen', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV11Lepm_WGen_2018-9d1b462a9f502086b20c1023b078537e/USER', 13249)
 dyjetstollM10_2018.add_dataset('ntupleulv11lepm_wgen', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV11Lepm_WGen_2018-15d0a04347fac5a39a5011eedd31a25d/USER', 1161)
 dyjetstollM50_2018.add_dataset('ntupleulv11lepm_wgen', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV11Lepm_WGen_2018-d0edd7e2aa6308880f3b9da109ecc600/USER', 45063)
 ww_2018.add_dataset('ntupleulv11lepm_wgen', '/WW_TuneCP5_13TeV-pythia8/awarden-NtupleULV11Lepm_WGen_2018-4bf2420e1b2a690f828b26fe1ce33ee5/USER', 5782)
@@ -2974,7 +2956,6 @@ SingleElectron2017F.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile
 # ttbar_lep_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-15731f77f2342e215e6314a5992dba63/USER', -1)
 # ttbar_semilep_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-959dc482742f6915a50e02ee819e91c1/USER', -1)
 # ttbar_had_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-10d2d93e1b70fd8d058971094817c0e7/USER', -1)
-# wjetstolnu_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-2aceabd1a29ff059c229de694ded997a/USER', -1)
 # dyjetstollM10_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-fc205b4664299ead9ec4837f83ee46dd/USER', -1)
 # dyjetstollM50_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-058831422f259436c7e1079dc96a60f5/USER', -1)
 # ww_2018.add_dataset('trackingtreerulv2_lepm', '/FakeDataset/fakefile-FakePublish-7b69e4b5d4b6c7c0451b0870a5b53687/USER', -1)
@@ -3015,15 +2996,18 @@ condorable = {
         
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": Lepton_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161  
-        #"miniaod": Lepton_data_samples_20162 + BTagCSV_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162  
-        #"miniaod": Lepton_data_samples_2017 + BTagCSV_data_samples_2017 + all_signal_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 + met_samples_2017 + DisplacedJet_data_samples_2017 #+ qcd_samples_2017 
-        #"miniaod": Lepton_data_samples_2018 + BTagCSV_data_samples_2018 + all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018  
+        #"miniaod": Lepton_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161  
+        #"miniaod": Lepton_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162  
+        #"miniaod": Lepton_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2017 +  all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 + met_samples_2017 #+ qcd_samples_2017 
+        "miniaod": [ggHToSSTodddd_tau1mm_M40_20161] + Lepton_data_samples_2018 + DisplacedJet_data_samples_2018 + BTagCSV_data_samples_2018 +  all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018  
             #mfv_stoplb_tau010000um_M1000_2017, mfv_stoplb_tau000300um_M1200_2017, mfv_stoplb_tau010000um_M1200_2017, mfv_stoplb_tau001000um_M1200_2017, mfv_stoplb_tau000300um_M1600_2017, mfv_stoplb_tau001000um_M1600_2017, mfv_stoplb_tau000100um_M0300_2017, mfv_stoplb_tau000300um_M0300_2017, mfv_stoplb_tau001000um_M0300_2017, mfv_stoplb_tau001000um_M0400_2017, mfv_stoplb_tau010000um_M0600_2017, mfv_stopld_tau000300um_M1000_2017, mfv_stopld_tau010000um_M1000_2017, mfv_stopld_tau010000um_M1200_2017, mfv_stopld_tau001000um_M1400_2017, mfv_stopld_tau000300um_M1600_2017, mfv_stopld_tau010000um_M0200_2017, mfv_stopld_tau000300um_M0300_2017, mfv_stopld_tau001000um_M0400_2017, mfv_stopld_tau000300um_M0600_2017, mfv_stopld_tau010000um_M0600_2017, mfv_stopld_tau001000um_M0600_2017, mfv_stopld_tau010000um_M0800_2017, mfv_stoplb_tau010000um_M1200_2018, mfv_stoplb_tau001000um_M1200_2018, mfv_stoplb_tau010000um_M1400_2018, mfv_stoplb_tau001000um_M1400_2018, mfv_stoplb_tau010000um_M1600_2018, mfv_stoplb_tau001000um_M1600_2018, mfv_stoplb_tau001000um_M0200_2018, mfv_stoplb_tau010000um_M0300_2018, mfv_stoplb_tau010000um_M0400_2018, mfv_stoplb_tau001000um_M0400_2018, mfv_stoplb_tau001000um_M0600_2018, mfv_stoplb_tau000300um_M0800_2018, mfv_stoplb_tau001000um_M0800_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000300um_M1200_2018, mfv_stopld_tau000100um_M1400_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau010000um_M1600_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau001000um_M0200_2018, mfv_stopld_tau001000um_M0300_2018, mfv_stopld_tau000300um_M0400_2018, mfv_stopld_tau001000um_M0600_2018],
         },
     "T2_US_Wisconsin": {
        # "miniaod": mfv_stopld_samples_2018 + [mfv_stopld_tau010000um_M0400_2018],
        # "miniaod": [mfv_stopld_tau010000um_M0400_2018],
+        },
+    "T2_US_MIT": {
+      #"miniaod": all_signal_samples_2017 + all_signal_samples_2018
         },
     "T2_US_Purdue": {
         },

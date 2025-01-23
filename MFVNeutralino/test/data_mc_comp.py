@@ -6,23 +6,35 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 
-year = 'run2'
-version = 'ULV11'
-root_file_dir = '/uscms_data/d3/shogan/crab_dirs/Histos_FixWP_ULV11Bm_BkgOops_May17'
+#year = 'run2'
+#version = 'ULV11'
+#root_file_dir = '/uscms_data/d3/shogan/crab_dirs/Histos_FixWP_ULV11Bm_BkgOops_May17'
+
+year = '2017'
+version = 'OnnormdzULV30'
+root_file_dir = '~/nobackup/crabdirs/NtupleOnnormdzULV30Lepm' 
 
 #year = '2017p8'
 #version = 'V27m'
 #root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV27m'
 
 set_style()
-ps = plot_saver(plot_dir('data_mc_comp_%s_%s' % (year, version)), pdf=True, log=True)
+ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/Leptondata_mc_comp_%s_%s' % (year, version)), pdf=True, log=True)
+
 
 qcd_samples = Samples.qcd_samples_2017[:-1]
-ttbar_samples = Samples.ttbar_samples_2017
-#signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
-signal_sample = Samples.mfv_stopdbardbar_tau001000um_M0300_2017
-data_samples = [] # Samples.data_samples_2017
-background_samples = ttbar_samples + qcd_samples
+qcdlep_samples = Samples.qcd_lep_samples_2017[14:-1]
+qcdmupt5_samples = Samples.qcd_lep_samples_2017[1:13]
+ttbar_samples = Samples.ttbar_samples_2017[0:1]
+wjetstolnu_samples = Samples.leptonic_samples_2017[:3] 
+dyjets_samples = Samples.leptonic_samples_2017[3:-1] 
+diboson_samples = Samples.diboson_samples_2017
+#signal_sample = [Samples.mfv_neu_tau001000um_M0300_2017, Samples.mfv_stopdbardbar_tau001000um_M0300_2017, Samples.mfv_stopbbarbbar_tau001000um_M0300_2017, Samples.ggHToSSTodddd_tau1mm_M55_2017]
+signal_sample = [Samples.ZHToSSTodddd_tau1mm_M55_2017, Samples.WplusHToSSTodddd_tau1mm_M55_2017, Samples.WminusHToSSTodddd_tau1mm_M55_2017]
+data_samples = Samples.Lepton_data_samples_2017
+#background_samples = wjetstolnu_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
+background_samples = wjetstolnu_samples + qcdmupt5_samples 
+#background_samples = ttbar_samples 
 lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 lumi_nice = ac.int_lumi_nice_2017
 
@@ -53,21 +65,43 @@ if year == 'run2':
     lumi = ac.int_lumi_run2
     lumi_nice = ac.int_lumi_nice_run2
 
-for s in qcd_samples:
-    s.join_info = True, 'Multijet events', ROOT.kBlue-9
+#for s in qcd_samples:
+#    s.join_info = True, 'Multijet events', ROOT.kBlue-9
 for s in ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
+for s in qcdlep_samples:
+    s.join_info = True, 'Multijet events,EM enriched', ROOT.kBlue-9
+for s in qcdmupt5_samples:
+    s.join_info = True, 'Multijet events, #mu p_{T} > 5 GeV', ROOT.kBlue-7
+for s in wjetstolnu_samples:
+    s.join_info = True, 'W + jets #rightarrow l#nu', ROOT.kViolet+6
+for s in dyjets_samples:
+    s.join_info = True, 'DY + jets #rightarrow ll', ROOT.kPink+6
+for s in diboson_samples:
+    s.join_info = True, 'Diboson', ROOT.kRed
 
-signal_samples = [signal_sample]
-signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
-signal_sample.color = 8
+
+signal_samples = signal_sample
+#signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
+signal_sample[0].nice_name = 'Z(#rightarrow #mu/e #bar{#mu}/#bar{e}) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[0].nice_name = '#tilde{N} #rightarrow tbs: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
+signal_sample[0].color = ROOT.kYellow + 2
+signal_sample[1].nice_name = 'Wplus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[1].nice_name = '#tilde{t} #rightarrow #bar{d}#bar{d}: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
+signal_sample[1].color = ROOT.kGreen + 2
+signal_sample[2].nice_name = 'Wminus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[2].nice_name = '#tilde{t} #rightarrow #bar{b}#bar{b}: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
+signal_sample[2].color = ROOT.kGreen -3
+
+#signal_sample[3].nice_name = ' ggH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[3].color = ROOT.kAzure+10
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = signal_samples,
             data_samples = [],
             plot_saver = ps,
-            file_path = os.path.join(root_file_dir, '%(name)s.root'),
+            file_path = os.path.join(root_file_dir,'%(name)s.root'),
             int_lumi = lumi,
             int_lumi_nice = lumi_nice,
             canvas_top_margin = 0.08,
@@ -216,46 +250,82 @@ C = partial(data_mc_comparison,
 #  histogram_path = 'mfvEventHistosPreSel/h_pvrho',
 #  )
 #
+#C('presel_nlep',
+#  histogram_path = 'mfvEventHistosPreSel/h_nleptons',
+#  )
+
+
 #C('presel_nseedtracks',
 #  histogram_path = 'mfvEventHistosPreSel/h_n_vertex_seed_tracks',
 #  y_range = (1,1e7)
 #  )
 #
-#C('presel_seedtrack_npxlayers',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
-#  y_range = (1,1e8),
-#  )
-#
-#C('presel_seedtrack_nstlayers',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_nstlayers',
-#  y_range = (1,1e8),
-#  )
-#
-#C('presel_seedtrack_chi2dof',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_chi2dof',
-#  y_range = (1,1e8),
-#  )
-#
-#C('presel_seedtrack_pt',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_pt',
-#  y_range = (1,1e8),
-#  )
-#
-#C('presel_seedtrack_eta',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_eta',
-#  y_range = (1,6e6),
-#  )
-#
-#C('presel_seedtrack_phi',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_phi',
-#  y_range = (1,6e6),
-#  )
-#
-#C('presel_seedtrack_dxy',
-#  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_dxy',
-#  y_range = (1,1e6),
-#  )
-#
+
+C('vertexerhistos_nm1_seedtrack_nsigmadxybs',
+  histogram_path = 'mfvVertexTracks/h_seed_nm1_sigmadxybs',
+  x_title = 'N#sigma dxybs',
+  )
+
+C('vertexerhistos_nm1_seedtrack_pt',
+  histogram_path = 'mfvVertexTracks/h_seed_nm1_pt',
+  x_title = 'p_{t} (GeV)',
+  )
+
+C('vertexerhistos_nm1_seedtrack_npxlayers',
+  histogram_path = 'mfvVertexTracks/h_seed_nm1_npxlayers',
+  x_title = 'N pixel-layers',
+  )
+
+C('vertexerhistos_nm1_seedtrack_nstlayers',
+  histogram_path = 'mfvVertexTracks/h_seed_nm1_nstlayers',
+  x_title = 'N strip-layers',
+  )
+C('vertexerhistos_n_all_tracks',
+  histogram_path = 'mfvVertexTracks/h_n_all_tracks',
+  x_title = 'Number of all tracks',
+  y_title = 'Events',
+  )
+C('vertexerhistos_n_seed_tracks',
+  histogram_path = 'mfvVertexTracks/h_n_seed_tracks',
+  x_title = 'Number of seed tracks',
+  y_title = 'Events',
+  )
+"""
+C('presel_seedtrack_npxlayers',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
+  #y_range = (1,1e8),
+  )
+
+C('presel_seedtrack_nstlayers',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_nstlayers',
+  #y_range = (1,1e8),
+  )
+
+C('presel_seedtrack_chi2dof',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_chi2dof',
+  #y_range = (1,1e8),
+  )
+
+C('presel_seedtrack_pt',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_pt',
+  #y_range = (1,1e8),
+  )
+
+C('presel_seedtrack_eta',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_eta',
+  #y_range = (1,6e6),
+  )
+
+C('presel_seedtrack_phi',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_phi',
+  #y_range = (1,6e6),
+  )
+
+C('presel_seedtrack_dxy',
+  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_dxy',
+  #y_range = (1,1e6),
+  )
+
 #C('presel_seedtrack_dz',
 #  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_dz',
 #  y_range = (1,1e6),
@@ -291,7 +361,7 @@ C('onevtx_dbv',
   rebin = 4,
   cut_line = ((0.01, 0, 0.01, 2.25e6), 2, 5, 1),
   )
-
+"""
 #C('nsv_3track',
 #  histogram_path = 'Ntk3mfvVertexHistosPreSel/h_nsv',
 #  x_title = 'Number of 3-track vertices',
@@ -332,7 +402,6 @@ C('onevtx_dbv',
 #  y_title = 'Events/200 #mum',
 #  y_range = (1e-2, 10),
 #  )
-
 if year == '2018':
     C('track_pt',
       histogram_path = 'TrackerMapper/h_nm1_seed_tracks_pt',

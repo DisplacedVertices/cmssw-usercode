@@ -12,7 +12,7 @@ from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int
 if not os.environ.has_key('SCRAM_ARCH') or not os.environ.has_key('CMSSW_VERSION'):
     raise EnvironmentError('CMSSW environment not set?')
 
-#Alec added: export X509_CERT_DIR=/cvmfs/grid.cern.ch/etc/grid-security/certificates/ 11 lines below
+#Alec added export X509_CERT_DIR=/cvmfs/grid.cern.ch/etc/grid-security/certificates/
 class CondorSubmitter:
     sh_template = '''#!/bin/bash
 
@@ -450,8 +450,8 @@ def get(i): return _l[i]
         cwd = os.getcwd()
         os.chdir(working_dir)
         try:
-            #submit_out, submit_ret = popen('condor_submit cs_submit.jdl', return_exit_code=True) #Alec changed 'condor_submit < cs_submit.jdl' to how it appears now
-            submit_out, submit_ret = popen('ssh `uname -n` "export X509_USER_PROXY=%s; cd %s; condor_submit < cs_submit.jdl"' % (os.environ['X509_USER_PROXY'], working_dir), return_exit_code=True)
+            submit_out, submit_ret = popen('condor_submit cs_submit.jdl', return_exit_code=True) #Alec changed 'condor_submit < cs_submit.jdl' to how it appears now
+            #submit_out, submit_ret = popen('ssh `uname -n` "export X509_USER_PROXY=%s; cd %s; condor_submit < cs_submit.jdl"' % (os.environ['X509_USER_PROXY'], working_dir), return_exit_code=True)
             ok = False
             cluster = None
             schedd = None

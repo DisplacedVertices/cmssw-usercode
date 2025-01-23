@@ -89,14 +89,12 @@ def scaledTOC(sig_num, sig_den, data_curve, mc_curve):
             s_curve.SetBinError(b, bincontent_err*scale)
     return s_curve
     
-def cutZero(original, max_n):
-    ### OBSOLETE ###
-    curve = original.Clone()
-    for b in range(0,max_n):
-        curve.SetBinContent(b, 0)
-        curve.SetBinError(b, 0)
-    return curve
-
+def cleanFluc(original):
+    hist = original.Clone()
+    #for b in range(6,hist.GetNbinsX()-1):
+    #  if ((hist.GetBinContent(b) > hist.GetBinContent(b+1) or hist.GetBinContent(b) < hist.GetBinContent(b-1) ) or (hist.GetBinContent(b) < hist.GetBinContent(b+1) or hist.GetBinContent(b) > hist.GetBinContent(b-1) )):
+    hist.SetBinContent(8, (hist.GetBinContent(7)+hist.GetBinContent(9))/2)
+    return hist
 #############################################################################################
 
 
@@ -243,16 +241,16 @@ def calcTocShiftUncert(low, cent, hi):
 
 # Initialize stuff:
 
-year = '2017p8'
+years = ['20161p2', '2017p8']
 doShift  = True
 reweight = True
 #toc_shift = 0.0   # How much to move the turn-on curve by
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['15'] 
-mass = '15'
-ctaus       = [ '1000', '3000', '10000', '30000'] #['1000', '3000', '30000'] 
+masses = ['55'] 
+mass = '55'
+ctaus       = ['1000', '10000'] #[ '100', '300', '1000', '3000', '10000', '30000'] #['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
 # Start actually doing stuff
@@ -261,11 +259,16 @@ uncertArray = []
 all_stat_uncerts = {}
 all_overlap_uncerts = {}
 
-list_eff = []
-list_ctau = [ 1.0, 3.0, 10.0, 30.0]
-list_err = []
-
-for ctau in ctaus:
+list_eff = [2000.0]
+list_eff_2 = [2000.0]
+list_ctau = [0.1, 1.0, 10.0] #[ 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+list_ctau = np.log10(list_ctau)
+list_err = [0.0]
+list_err_2 = [0.0]
+list_relerr = [2000.0]
+list_relerr_2 = [2000.0]
+for year in years:  
+  for ctau in ctaus:
     possible_eta = { "Low" : 0, "Mix" : 0, "High": 0 }
     eff_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
     err_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
@@ -293,7 +296,7 @@ for ctau in ctaus:
         stat_uncerts = 0.0
         overlap_uncerts = 0.0
         eff_psd_dvv = 0.0
-        eff_dvv = 0.000000000000000001
+        eff_dvv = 0.000000000000000000000000001
         err_psd_dvv = 0.0
         err_dvv = 0.0
         frac_vetoodvv = 0.0
@@ -308,24 +311,20 @@ for ctau in ctaus:
                 dat_str = ''
 
                 if not reweight:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root" % (eta, year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root" % (eta, year)
+                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/background_batgpresel_%s.root" % (eta, year)
+                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/BTagDispl%s.root" % (eta, year)
                 else:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/background_leptonpresel_%s.root" % (eta, int(ctau), int(mass), year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/SingleMuon%s.root" % (eta, int(ctau), int(mass), year)
+                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta, int(ctau), int(mass), year)
+                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta, int(ctau), int(mass), year)
                 tm_sim  = ROOT.TFile(sim_str)
                 tm_dat  = ROOT.TFile(dat_str)
                 
                 
                 dat_den = tm_dat.Get('all_closeseedtks_den')
-                #dat_den = cutZero(dat_den, 5)
                 sim_den = tm_sim.Get('all_closeseedtks_den')
-                #sim_den = cutZero(sim_den, 5)
-
+                
                 dat_num = tm_dat.Get('all_closeseedtks_num')
-                #dat_num = cutZero(dat_num, 5)
                 sim_num = tm_sim.Get('all_closeseedtks_num')
-                #sim_num = cutZero(sim_num, 5)
                 sim_curve = sim_num.Clone()
                 sim_den = sim_den.Clone()
                 sim_curve.Divide(sim_curve, sim_den, 1, 1, "B")
@@ -335,7 +334,14 @@ for ctau in ctaus:
                 dat_den = dat_den.Clone()
                 dat_curve.Divide(dat_curve, dat_den, 1, 1, "B")
 
-                signal  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str(int(ctau)/1000)+'mm_M'+ mass +'_'+ year +'.root')
+                str_ctau = ''
+                if (int(ctau) > 500):
+                   str_ctau = str(int(ctau)/1000)+'mm'
+                else:
+                   str_ctau = str(ctau)+'um'
+
+                print(ctau, str_ctau)
+                signal  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
                 
                 sig_dist = signal.Get('nocuts_closeseedtks_den')
                 sig_denom = sig_dist.Clone()
@@ -344,7 +350,7 @@ for ctau in ctaus:
                 #psd_dist = ROOT.TH1D("psd_dist", "M"+mass+"ctau"+ctau+"um", 80, 0, 80)
                 sig_curve.Divide(sig_curve, sig_denom, 1, 1, "B")
                 
-                signal_non  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str(int(ctau)/1000)+'mm_M'+ mass +'_'+ year +'.root')  
+                signal_non  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
                 
                 signon_dist = signal_non.Get('nocuts_closeseedtks_den')
                 non_denom = signon_dist.Clone() 
@@ -352,7 +358,7 @@ for ctau in ctaus:
                 signon_curve = non_aaaaa.Clone()
                 signon_curve.Divide(signon_curve, non_denom, 1, 1, "B")
                 
-                signal_vetopdvv  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str(int(ctau)/1000)+'mm_M'+ mass +'_'+ year +'.root')  
+                signal_vetopdvv  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
                 
                 sigovp_dist = signal_vetopdvv.Get('nocuts_closeseedtks_den')
                 ovp_denom = sigovp_dist.Clone() 
@@ -372,13 +378,13 @@ for ctau in ctaus:
                   
                     sig_dvv_curvedist = shiftDIST(sig_dvv_curve, 0, 0.0)  
                     sig_dvv_norm = sig_dvv_denom.Clone()
-                    sig_dvv_norm.Scale(1/sig_dvv_norm.Integral())
+                    sig_dvv_norm.Scale(1/(sig_dvv_norm.Integral()+0.00000000000000001))
                     sig_dvv_curvedist.Multiply(sig_dvv_norm)
                     eff_dvv += sig_dvv_curvedist.Integral()
                    
                     sig_psd_dvv_curvedist = shiftDIST(sig_psd_dvv_curve,-4, 0.0) 
                     sig_psd_dvv_norm = sig_psd_dvv_denom.Clone()
-                    sig_psd_dvv_norm.Scale(1/sig_psd_dvv_norm.Integral())
+                    sig_psd_dvv_norm.Scale(1/(sig_psd_dvv_norm.Integral()+0.00000000000000001))
                     sig_psd_dvv_curvedist.Multiply(sig_psd_dvv_norm)
                     eff_psd_dvv = sig_psd_dvv_curvedist.Integral()
                     err_psd_dvv = 0.0 #FIXME assessRatioEffPropagateUncerts(shiftDIST(sig_psd_dvv_denom,-4,0.0),shiftDIST(sig_psd_dvv_num,-4,0.0))
@@ -487,11 +493,11 @@ for ctau in ctaus:
                     psd_emu_curve = shiftDIST(signon_curve, shift_int_emu, shift_emu_fr)
                 
                 
-                possible_sig = sig_dist.Integral()
-                possible_signon = signon_dist.Integral()
-                possible_sigovp = sigovp_dist.Integral()
-                possible_psd = psd_dist.Integral()
-                possible_psd_emu = psd_emu_dist.Integral()
+                possible_sig = sig_dist.Integral() + 0.000000000000000000000000001
+                possible_signon = signon_dist.Integral() +0.000000000000000000000000001
+                possible_sigovp = sigovp_dist.Integral() +0.000000000000000000000000001
+                possible_psd = psd_dist.Integral() +0.000000000000000000000000001
+                possible_psd_emu = psd_emu_dist.Integral() +0.000000000000000000000000001
                 
                 pre_sig_dist = sig_dist.Clone()
                 pre_signon_dist = signon_dist.Clone()
@@ -513,12 +519,20 @@ for ctau in ctaus:
                 pass_psd_emu = psd_emu_dist.Integral()
                 
                 possible_eta[eta] = possible_signon+possible_sigovp
+                """
                 eff_sig = (pass_signon+pass_sigovp)/(possible_signon+possible_sigovp)
                 eff_signon = pass_signon/possible_signon
                 eff_sigovp = pass_sigovp/possible_sigovp
                 eff_psd = (pass_psd/possible_psd)
                 eff_psd_emu = (pass_psd_emu/possible_psd_emu)
                 eff_eta[eta] = eff_sig 
+                """
+                eff_sig = 0.0000000000001 + (pass_signon+pass_sigovp)/(possible_signon+possible_sigovp)
+                eff_signon = 0.0000000000001 + (pass_signon/possible_signon)
+                eff_sigovp = 0.0000000000001 + (pass_sigovp/possible_sigovp)
+                eff_psd = 0.0000000000001 + (pass_psd/possible_psd)
+                eff_psd_emu = 0.0000000000001 + (pass_psd_emu/possible_psd_emu)
+                eff_eta[eta] = 0.0000000000001 + eff_sig 
 
                 err_sig = 0.0 #FIXME assessSignalEffUncerts(pre_sig_dist, sig_dist)#assessRatioEffPropagateUncerts(pre_sig_dist, sig_dist) #FIXME NOW
                 err_signon = 0.0 #FIXME assessSignalEffUncerts(pre_signon_dist, signon_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
@@ -570,14 +584,14 @@ for ctau in ctaus:
         #print("Probe how well TM MC emulating signal MC \n")
         for i in range(1,len(psd_methods)):
             if (i == 3):
-               emulate_unc +=  (-100*DiffeffArray_emu[i-1]/effArray_emu[0])**2
+               emulate_unc +=  (none_tmmc_integral-effArray_emu[0])*100/none_tmmc_integral#FIXME (-100*DiffeffArray_emu[i-1]/effArray_emu[0])**2
                stat_unc = (-100*DifferrArray_emu[i-1]/effArray_emu[0])**2 
             #print("%s pseudo emulating eff %.2f +/- %.2f \t pseudo emulating eff - novp. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i],100*effArray_emu[i], 100*errArray_emu[i], 100*DiffeffArray_emu[i-1], 100*DifferrArray_emu[i-1], -100*DiffeffArray_emu[i-1]/effArray_emu[0], -100*DifferrArray_emu[i-1]/effArray_emu[0]))
         #print("Probe overlapped LLPs \n")
 
         iso_tot_unc = np.sqrt(dataMC_unc + stat_unc + emulate_unc) 
 
-        dvv_unc = np.sqrt((100*(1-(eff_psd_dvv/eff_dvv)))**2 + (dataMC_unc) + emulate_unc) #FIXME
+        dvv_unc = np.sqrt((100*(1-(eff_psd_dvv/eff_dvv)))**2 + (dataMC_unc) + (emulate_unc)) #FIXME
         #print("pseudo slide dvv eff %.2f +/- %.2f \t pseudo slide dvv eff - dvv eff %.2f \t 1-ratio %.2f \n" % (100*eff_psd_dvv, 100*err_psd_dvv, 100*(eff_psd_dvv-eff_dvv), 100*(1-(eff_psd_dvv/eff_dvv))))
 
         #print("\n")
@@ -608,46 +622,55 @@ for ctau in ctaus:
     print( " Weighted #eta 1-vtx Eff. : %.2f %%" %(tot_eff_mass_tau*100))
     print( " Weighted #eta 1-vtx Rel.Unc. : %.2f %%" %(np.sqrt(tot_err_mass_tau)))
     print( " Weighted #eta 1-vtx Abs.Unc. : %.2f %%" %(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau)))
-    list_eff.append(tot_eff_mass_tau*100)
-    list_err.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
-
-ps = plot_saver(plot_dir('TM_Results_Dec6'), size=(800,600), pdf=True, log=False)
+    if year=='20161p2':
+      list_eff.append(tot_eff_mass_tau*100)
+      list_err.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
+      list_relerr.append(np.sqrt(tot_err_mass_tau))
+    else:
+      list_eff_2.append(tot_eff_mass_tau*100)
+      list_err_2.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
+      list_relerr_2.append(np.sqrt(tot_err_mass_tau))
+ps = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
 canvas = ps.c
 canvas.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
 x = array('d', np.asarray(list_ctau))
 y = array('d', np.asarray(list_eff))
-ex = array('d', [0.0, 0.0, 0.0, 0.0])
+ex = array('d', [0.0, 0.0, 0.0])
 ey = array('d', np.asarray(list_err))
 
+y2 = array('d', np.asarray(list_eff_2))
+ey2 = array('d', np.asarray(list_err_2))
 # Create a TGraphErrors object
 gr = ROOT.TGraphErrors(len(x), x, y, ex, ey)
+gr2 = ROOT.TGraphErrors(len(x), x, y2, ex, ey2)
 
 # Set graph attributes
-gr.SetTitle("VH->SS 2017-2018 with LLP of 15 GeV")
 gr.SetMarkerColor(ROOT.kBlue)
 gr.SetMarkerStyle(20)
-gr.SetLineColor(ROOT.kRed)
+gr.SetLineColor(ROOT.kBlue)
 gr.GetYaxis().SetRangeUser(0.0, 100.0)
 gr.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay")
 # Draw the graph
 gr.Draw("AP")
+gr2.SetMarkerColor(ROOT.kRed)
+gr2.SetMarkerStyle(20)
+gr2.SetLineColor(ROOT.kRed)
+gr2.GetYaxis().SetRangeUser(0.0, 100.0)
+gr2.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay")
+gr2.Draw("P")
+#canvas.SetLogx()
 
+gr.SetTitle("pre(post)-VFP 2016");
+gr2.SetTitle("2017+2018");
+ROOT.gPad.BuildLegend(0.42,0.795,0.70,0.935,"","p");
+gr.SetTitle("ggH->SS with LLP of "+str(mass)+" GeV")
 xax = gr.GetXaxis()
 
 for i in range(len(list_ctau)):
     bin_ind = xax.FindBin(list_ctau[i])
-    xax.SetBinLabel(bin_ind, str(list_ctau[i])+" mm ")
+    xax.SetBinLabel(bin_ind, str(math.pow(10,list_ctau[i]))+" mm ")
     xax.ChangeLabel(bin_ind, 30.0)
-    # Label for the upper Y error
-    #t1 = ROOT.TLatex(list_ctau[i], list_eff[i] + list_err[i], f"{list_eff[i] + list_err[i]:.2f}")
-    #t1.SetTextSize(0.02)
-    #t1.Draw()
-
-    # Label for the lower Y error
-    #t2 = ROOT.TLatex(list_ctau[i], list_eff[i] - list_err[i], f"{list_eff[i] - list_err[i]:.2f}")
-    #t2.SetTextSize(0.02)
-    #t2.Draw()
 
 
 p = ROOT.TPaveText(0.013, 0.080, 0.105, 0.120, "brNDC")
@@ -662,4 +685,57 @@ p.Draw()
 ROOT.gPad.Modified()
 ROOT.gPad.Update()
 canvas.Update()
-ps.save('vhss_15GeV_mmCtau_2017p8')
+ps.save('gghss_'+str(mass)+'GeV_mmCtau')
+
+
+ps2 = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
+canvas2 = ps2.c
+canvas2.SetBottomMargin(0.15)
+# Create arrays for x, y, x errors, and y errors
+relerr_y1 = array('d', np.asarray(list_relerr))
+relerr_y2 = array('d', np.asarray(list_relerr_2))
+# Create a TGraphErrors object
+gr = ROOT.TGraph(len(x), x, relerr_y1)
+gr2 = ROOT.TGraph(len(x), x, relerr_y2)
+
+# Set graph attributes
+gr.SetMarkerColor(ROOT.kBlue)
+gr.SetMarkerStyle(20)
+gr.SetLineColor(ROOT.kBlue)
+gr.GetYaxis().SetRangeUser(0.0, 100.0)
+gr.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency")
+# Draw the graph
+gr.Draw("AP")
+gr2.SetMarkerColor(ROOT.kRed)
+gr2.SetMarkerStyle(20)
+gr2.SetLineColor(ROOT.kRed)
+gr2.GetYaxis().SetRangeUser(0.0, 100.0)
+gr2.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency")
+gr2.Draw("P")
+#canvas.SetLogx()
+
+gr.SetTitle("pre(post)-VFP 2016");
+gr2.SetTitle("2017+2018");
+ROOT.gPad.BuildLegend(0.42,0.795,0.70,0.935,"","p");
+gr.SetTitle("ggH->SS with LLP of "+str(mass)+" GeV")
+xax = gr.GetXaxis()
+
+for i in range(len(list_ctau)):
+    bin_ind = xax.FindBin(list_ctau[i])
+    xax.SetBinLabel(bin_ind, str(math.pow(10,list_ctau[i]))+" mm ")
+    xax.ChangeLabel(bin_ind, 30.0)
+
+
+p = ROOT.TPaveText(0.013, 0.080, 0.105, 0.120, "brNDC")
+p.SetFillColor(ROOT.kWhite)
+p.SetTextFont(42)
+p.SetTextAlign(12)
+p.AddText("c#tau")
+p.SetTextSize(0.04)
+p.SetBorderSize(0)
+p.Draw()
+# Update the canvas
+ROOT.gPad.Modified()
+ROOT.gPad.Update()
+canvas2.Update()
+ps2.save('gghss_'+str(mass)+'GeV_mmCtau_relerr')

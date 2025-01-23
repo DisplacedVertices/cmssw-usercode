@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6", "trackmovermctruthonnormdzulv30lepmumv6", "all_signal = True")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6", "trackmovermctruthonnormdzulv30bmpreselv6", "all_signal = True")
     ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.00), "min distance between LSP decays to use event") //FIXME 0.02
     ;
 
@@ -447,8 +447,6 @@ int main(int argc, char** argv) {
     double sump_0 = 0;
     double sump_1 = 0;
     double miscp = 0;
-    double sumpreco_0 = 0;
-    double sumpreco_1 = 0;
     double maxeta_0 = 0.0;
     double maxeta_1 = 0.0;
     //double qrk0_mingendxy = 100.0;
@@ -506,7 +504,7 @@ int main(int argc, char** argv) {
       const double lspcostheta = ((gen.p4(0).X()*gen.p4(1).X()) + (gen.p4(0).Y()*gen.p4(1).Y()) + (gen.p4(0).Z()*gen.p4(1).Z()))/(gen.p4(0).P()*gen.p4(1).P());
       const double lspdist3symmath = 2*sin(lspdr/2)*movedist3;
 
-      if ( dvv < 0.1 ) //FIXME
+      if ( dvv < 0.25 ) //FIXME
         continue; 
 
       // Second part of preselection: only look at move vectors
@@ -635,6 +633,11 @@ int main(int argc, char** argv) {
         }
 
 
+         for (int j = 0, je = jets.n(); j < je; ++j) {
+                   std::cout<< "ntrack : " << (int)jets.ntracks(j)<<std::endl;
+         }
+
+
         // Last hidden part of the preselection: skip events where
         // daughter doesn't match to a jet or both match to the same
         // jet // JMTBAD how many are we skipping?
@@ -644,11 +647,11 @@ int main(int argc, char** argv) {
         quark_p4_1 = gen.p4(quark_assoc[1]);
 
 
-        //if (closest_jets[0] == -1 || closest_jets[1] == -1 || closest_jets[0] == closest_jets[1])
+        //if (closest_jets[0] == -1 || closest_jets[1] == -1 || closest_jets[0] == closest_jets[1]) //FIXME
         //   continue;
 
-        if (nselmuons < 1)
-          continue;
+        //if (nselmuons < 1)
+        //  continue;
 
 
         const std::vector<int> jet0_tracks = tks.tks_for_jet(closest_jets[0]);
@@ -675,22 +678,11 @@ int main(int argc, char** argv) {
         jet1trk_idx = {};
         movedseedinvtxtrk_idx = {};
         movedseedoutvtxtrk_idx = {};
-        sumpreco_0 = 0;
-        sumpreco_1 = 0;
-        for (int j = 0; j < tks.n(); ++j) {
-          const TLorentzVector jp4 = tks.p4(j);
-          auto jit0 = std::find(jet0_tracks.begin(), jet0_tracks.end(), j);
-          if ( tks.pass_sel(j) && jit0 != jet0_tracks.end()){ 
-            sumpreco_0 += tks.p(j);
-          }
-          auto jit1 = std::find(jet1_tracks.begin(), jet1_tracks.end(), j);
-          if ( tks.pass_sel(j) && jit1 != jet1_tracks.end()){ 
-            sumpreco_1 += tks.p(j);
-          }
 
-        }  
         for (int j = 0; j < tks.n(); ++j) {
           const TLorentzVector jp4 = tks.p4(j);
+          //auto jit0 = std::find(jet0_tracks.begin(), jet0_tracks.end(), j);
+          //if ( tks.pass_sel(j) && jit0 != jet0_tracks.end()){ //FIXME 
           if ( tks.pass_sel(j) && jp4.DeltaR(quark_p4_0) < 0.4 ){ //FIXME 
             auto mt = std::find(minijettrk_idx.begin(), minijettrk_idx.end(), j);
             if (mt != minijettrk_idx.end()) continue;
@@ -709,7 +701,9 @@ int main(int argc, char** argv) {
               n_movedseedtks0++;
             }
           }
-          if ( tks.pass_sel(j) && jp4.DeltaR(quark_p4_1) < 0.4){ //FIXME 
+          //auto jit1 = std::find(jet1_tracks.begin(), jet1_tracks.end(), j);
+          //if (tks.pass_sel(j) && jit1 != jet1_tracks.end()){ //FIXME 
+          if ( tks.pass_sel(j) && jp4.DeltaR(quark_p4_1) < 0.4 ){ //FIXME 
             auto mt = std::find(minijettrk_idx.begin(), minijettrk_idx.end(), j);
             if (mt != minijettrk_idx.end()) continue;
             double jet1_gennsigmadz = tks.dz(j, gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp))/tks.err_dz(j);
@@ -737,8 +731,8 @@ int main(int argc, char** argv) {
         jet_p4_1 = minijet_p4_1;
         jet_eta_0 = minijet_p4_0.Eta();
         jet_eta_1 = minijet_p4_1.Eta();
-        jet_ntks_0 = minijet_ntk_0;
-        jet_ntks_1 = minijet_ntk_1;
+        jet_ntks_0 =  minijet_ntk_0;
+        jet_ntks_1 =  minijet_ntk_1;
 
         miscclosetrk_idx = {}; //FIXME
         closeseedtrk_idx = {};
