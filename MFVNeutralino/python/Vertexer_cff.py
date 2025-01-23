@@ -17,7 +17,7 @@ mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
 
 mfvVertexSequenceBare = cms.Sequence(
-    #mfvGenParticles * 
+    mfvGenParticles * 
     jmtRescaledTracks *
     mfvVertexTracks *
     mfvVertices
@@ -25,7 +25,6 @@ mfvVertexSequenceBare = cms.Sequence(
 
 mfvVertexSequence = cms.Sequence(
     mfvVertexSequenceBare *
-    mfvGenParticles * 
     mfvVerticesAuxTmp *
     mfvSelectedVerticesTmp *
     mfvVerticesToJets *
