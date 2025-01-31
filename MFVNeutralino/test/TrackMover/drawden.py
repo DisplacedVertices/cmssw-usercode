@@ -62,7 +62,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
            if var in name:
              Isnametoplot = True
              break
-        if not Isnametoplot or name.startswith('h_') or 'th' in name or 'min' in name or '2vtx' in name or 'ind' in name or 'which' in name or '6tk' in name:
+        if not Isnametoplot or name.startswith('h_') or 'th' in name or 'min' in name or '2vtx' in name or 'ind' in name or 'which' in name or '6tk' in name or '5tk' in name or '4tk' in name:
            continue
         if 'llp_sump' in name:
             obj.Rebin(10)
@@ -170,6 +170,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             ROOT.gStyle.SetOptStat("iouRMen") 
 
             mc.SetName("REWEIGHTED TM MC")
+            #mc.SetName("ggH 1mm 55GeV")
             mc.ClearUnderflowAndOverflow()
             mc.SetLineWidth(3)
             mc.SetMarkerColor(ROOT.kRed)
@@ -177,7 +178,8 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc.SetFillColor(ROOT.kRed)
             mc.Scale(1.0/mc.Integral())
 
-            mc2.SetName("REWEIGHTED TM data")
+            mc2.SetName("REWEIGTED TM data")
+            #mc2.SetName("ggH 1mm 40GeV")
             mc2.ClearUnderflowAndOverflow()
             mc2.SetLineWidth(3)
             mc2.SetMarkerColor(ROOT.kBlack)
@@ -185,7 +187,9 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc2.SetFillColor(ROOT.kBlack)
             mc2.Scale(1.0/mc2.Integral())
 
-            mc3.SetName("V(HSS4d) 1mm 55GeV MC")
+            mc3.SetName("gg(HSS4d) 1mm 15GeV MC")
+            #mc3.SetName("Stop(dbardbar) 1mm 200GeV MC")
+            #mc3.SetName("ggH 1mm 15GeV")
             mc3.ClearUnderflowAndOverflow()
             mc3.SetLineWidth(3)
             mc3.SetMarkerColor(ROOT.kBlue)
@@ -193,15 +197,16 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc3.SetFillColor(ROOT.kBlue)
             mc3.Scale(1.0/mc3.Integral())
             
-            mc4.SetName("V(HSS4d) 1mm 55GeV MC")
+            #mc4.SetName("Z(HSS4d) 1mm 55GeV MC")
+            mc4.SetName("V(HSS4d) 1mm 15GeV MC 2017+2018")
             mc4.ClearUnderflowAndOverflow()
             mc4.SetLineWidth(3)
-            mc4.SetMarkerColor(ROOT.kBlue)
-            mc4.SetLineColor(ROOT.kBlue)
-            mc4.SetFillColor(ROOT.kBlue)
+            mc4.SetMarkerColor(ROOT.kRed)
+            mc4.SetLineColor(ROOT.kRed)
+            mc4.SetFillColor(ROOT.kRed)
             mc4.Scale(1.0/mc4.Integral())
 
-            mc5.SetName("REWEIGHTED TM MC")
+            mc5.SetName("gg(HSS4d) 1mm 55GeV MC")
             mc5.ClearUnderflowAndOverflow()
             mc5.SetLineWidth(3)
             mc5.SetMarkerColor(ROOT.kMagenta)
@@ -209,7 +214,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc5.SetFillColor(ROOT.kMagenta)
             mc5.Scale(1.0/mc5.Integral())
 
-            mc6.SetName("REWEIGHTED TM data")
+            mc6.SetName("Stop(bbarbbar) 1mm 200GeV MC")
             mc6.ClearUnderflowAndOverflow()
             mc6.SetLineWidth(3)
             mc6.SetMarkerColor(ROOT.kAzure+8)
@@ -219,7 +224,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             
             x_range = None
             y_range = None
-            hist_objs = [mc3, mc, mc2] 
+            hist_objs = [mc, mc2, mc3,] 
             statbox_size = (0.20,0.15)
             if name.endswith('_den'): #FIXME
                 for g in tot:
@@ -232,6 +237,10 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
                 x_range = (0,0.04)
             if "closeseed" in name:
                 x_range = (0,45.0)
+            for i in range(2,mc.GetNbinsX()):
+                mc.SetBinError(i, mc.GetBinContent(i)*1.23)
+            for i in range(2,mc2.GetNbinsX()):
+                mc2.SetBinError(i, mc2.GetBinContent(i)*1.23)
             ratios_plot(name,
                         hist_objs,
                         plot_saver=ps,

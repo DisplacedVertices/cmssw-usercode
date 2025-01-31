@@ -76,10 +76,25 @@ def cmd_hadd_data():
             continue
 
         have = []
-        year_eras = [
+        if ds == 'DisplacedJet':
+            year_eras = [
             #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
-            ('20162', 'FGH'),  
-            #('2017', 'BCDF'), #HERE BCDEF
+            #('20162', 'FGH'),  
+            ('2017', 'CDE'), 
+            #('2018', 'ABCD'),
+            ]
+        elif ds == 'SingleMuon': 
+            year_eras = [
+            #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
+            #('20162', 'FGH'),  
+            ('2017', 'CDEF'), #B 
+            #('2018', 'ABCD'),
+            ]
+        else:
+            year_eras = [
+            #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
+            #('20162', 'FGH'),  
+            ('2017', 'BCDEF'), 
             #('2018', 'ABCD'),
             ]
 
@@ -144,22 +159,22 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
             x = []
             if not trigeff:
                 x = []
-                #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] #15 30 50 170 300
-                #x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] #20 170 
+                x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170,300]] #15 
+                x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]  
         elif bkg_tag == 'qcdmupt5':
             x = [] 
             if not trigeff:
                 x = []
-                #x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  #50
-                #x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]  #800 
-                #x += ['qcdpt1000mupt5']
+                x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  
+                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]   
+                x += ['qcdpt1000mupt5']
         else:
             x = ['ww', 'wz', 'zz',] # 'ttbar'] 
     elif _btagpresel:
         #x = ['qcdht%04i' % x for x in [100, 200, 300, 500, 700, 1000, 1500, 2000]]
         #x = ['qcdht%04i' % x for x in [500, 700, 1000, 1500, 2000]]
         x = []
-        x += ['ttbar',]
+        x += ['ww','wz', 'zz', 'ttbar',]
     elif _metpresel:
         x = ['ttbar', 'wjetstolnu']
         x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
@@ -224,6 +239,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
+        
         for bkg_tag in ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
@@ -247,12 +263,13 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
             if ok:
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
          
-        #cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
-        #cmd = 'hadd.py background_leptonpresel_20161.root wjetstolnu_leptonpresel_20161.root dyjets_leptonpresel_20161.root others_leptonpresel_20161.root'
-        #cmd = 'hadd.py background_leptonpresel_20162.root wjetstolnu_leptonpresel_20162.root dyjets_leptonpresel_20162.root others_leptonpresel_20162.root'
-        #cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root others_leptonpresel_2017.root'
-        cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root others_leptonpresel_%s.root' % (year, year, year, year)
-        print cmd
+        if _leptonpresel: 
+          #cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root others_leptonpresel_%s.root' % (year, year, year, year)
+          cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root qcdmupt5_leptonpresel_%s.root qcd_leptonpresel_%s.root others_leptonpresel_%s.root' % (year, year, year, year, year, year)
+          print cmd
+        else:
+          cmd = 'hadd.py background_btagpresel_%s.root others_btagpresel_%s.root' % (year, year)
+          print cmd
         os.system(cmd)
     #only work for 2017 data now
     #if ok:
@@ -313,7 +330,7 @@ def cmd_effsprint(year_to_use=2017):
 def cmd_histos():
     #cmd_report_data()
     cmd_hadd_data()
-    #cmd_merge_background()
+    cmd_merge_background()
     #cmd_effsprint()
 
 def cmd_presel():

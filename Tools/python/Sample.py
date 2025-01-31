@@ -328,7 +328,7 @@ class SamplesRegistry:
             return sorted(a)
 
     def add(self, s):
-        assert not self.d_samples.has_key(s.name)
+        # FIXME assert not self.d_samples.has_key(s.name)
         self.d_samples[s.name] = s
 
     def add_list(self, name, l):

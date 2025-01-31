@@ -1018,9 +1018,12 @@ int main(int argc, char** argv) {
     }
     */
 
-    if (nselmuons < 1)
-       NR_loop_cont(w);
+    //if (nselmuons < 1)
+    //   NR_loop_cont(w);
 
+    if (w < 0.0 || w > 10.0)
+       NR_loop_cont(w);
+    
     if ( fabs(jet_dr) < 0.4 )
        NR_loop_cont(w); 
 

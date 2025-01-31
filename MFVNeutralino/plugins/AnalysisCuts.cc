@@ -593,9 +593,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
 bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig, const edm::EventSetup& setup) {
   if(require_trigbit and !mevent->pass_hlt(trig)) return false;
 
-  edm::ESHandle<JetCorrectorParametersCollection> jet_corr;
-  setup.get<JetCorrectionsRecord>().get("AK4PF", jet_corr);
-  JetCorrectionUncertainty jec_unc((*jet_corr)["Uncertainty"]);
+  //edm::ESHandle<JetCorrectorParametersCollection> jet_corr;
+  //setup.get<JetCorrectionsRecord>().get("AK4PF", jet_corr);
+  //JetCorrectionUncertainty jec_unc((*jet_corr)["Uncertainty"]);
 
   // Container for JER/JES-corrected jet pT's
   std::vector<float> jet_pt_checks;
@@ -625,6 +625,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     float cj_aeta = fabs(mevent->calo_jet_eta[ic]);
 
     // Do this loop if we want to study correction for JER
+    /*
     if (study_jer) {
         float cj_E  = mevent->calo_jet_energy[ic];
         float closest_pf_dR = 9.9;
@@ -648,7 +649,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         if (    jes_jer_var_up) { cj_pt *= (1 + jec_unc.getUncertainty(true)); }
         if (not jes_jer_var_up) { cj_pt *= (1 - jec_unc.getUncertainty(false)); }
     }
-
+    */
     if (cj_pt > 30.0 and cj_aeta < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
 
     // Don't do the following CPU-intensive for loop if it's not a relevant jet
@@ -663,7 +664,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   for(int j0 = 0; j0 < njets; j0++) {
     float rand_y = distribution(rng);
     float pf_pt = mevent->jet_pt[j0];
-
+    /*
     if (study_jer) {
         pf_pt = jmt::UncertTools::jer_pt_alt(mevent->jet_gen_energy[j0], mevent->jet_p4(j0), jes_jer_var_up);
     }
@@ -674,7 +675,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         if (    jes_jer_var_up) { pf_pt *= (1 + jec_unc.getUncertainty(true)); }
         if (not jes_jer_var_up) { pf_pt *= (1 - jec_unc.getUncertainty(false)); }
     }
-
+    */
     jet_pt_checks.push_back(pf_pt);
 
     if (pf_pt > 75.0 and fabs(mevent->jet_eta[j0]) < 2.0) {

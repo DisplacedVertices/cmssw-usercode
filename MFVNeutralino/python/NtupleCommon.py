@@ -20,7 +20,7 @@ elif use_Muon_triggers :
     ntuple_version_ += "LepMu"
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
-ntuple_version_use = ntuple_version_ + 'm_noef'
+ntuple_version_use = ntuple_version_ + 'm' #_noef' #FIXME only used for signal MC
 dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):

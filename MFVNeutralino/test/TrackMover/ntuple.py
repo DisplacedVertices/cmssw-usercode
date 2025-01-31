@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.general import named_product
 from JMTucker.MFVNeutralino.NtupleCommon import *
 
@@ -9,8 +9,7 @@ settings.is_miniaod = True
 #settings.event_filter= 'electrons only novtx'
 #settings.event_filter = 'muons only novtx'
 settings.event_filter = 'bjets OR displaced dijet novtx'
-
-version = settings.version + 'offtossv8' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
+version = settings.version + 'offtosspreselv8' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -50,11 +49,14 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/data/Run2017B/SingleMuon/MINIAOD/09Aug2019_UL2017-v1/50000/D086C8A4-780B-7B49-85FF-AD8892AB2F1F.root')
 #input_files(process, '/store/data/Run2016D/SingleMuon/MINIAOD/HIPM_UL2016_MiniAODv2-v2/120000/A229E024-341D-6243-A3B9-8C1BED78C181.root')
 #input_files(process, '/store/data/Run2016C/SingleMuon/MINIAOD/HIPM_UL2016_MiniAODv2-v2/70000/510A870F-710D-B347-8F4A-E0460D6A5BD8.root')
+#input_files(process, '/store/data/Run2016F/SingleMuon/MINIAOD/UL2016_MiniAODv2-v2/70000/060F0B51-FCEF-F343-890C-3043A4B268C2.root')
 #input_files(process, '/store/mc/RunIISummer20UL16MiniAODAPVv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/280000/CADD920F-488D-2B47-9E9C-C78699A5F1A6.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/01DA55E6-2A8C-AE48-B2C4-A3DC37E2052D.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/10063082-9BA1-D14B-A04D-EDA3288D079A.root')
+#input_files(process, '/store/mc/RunIISummer20UL16MiniAODAPVv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/30000/5D204270-1610-3B4E-9DE0-06039AD6DFA3.root')
+#input_files(process, '/store/data/Run2016F/BTagCSV/MINIAOD/UL2016_MiniAODv2-v2/2510000/091D5628-6B48-2143-AA21-DF98C5FB2702.root')
 cmssw_from_argv(process)
 
 ####
@@ -64,11 +66,15 @@ remove_output_module(process)
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
 from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
+from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
+from JMTucker.MFVNeutralino.WeightProducer_cfi import *
+from JMTucker.MFVNeutralino.VertexSelector_cfi import *
 jmtTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
 process.mfvEvent.vertex_seed_tracks_src = ''
 process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
+process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices* process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats)
@@ -134,10 +140,8 @@ for icfg, cfg in enumerate(cfgs):
                           min_track_sigmadxy = 0,
                           min_track_rescaled_sigmadxy = cfg.nsigmadxy,
                           )
-
-    for x in 'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
+    for x in  'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
        getattr(process, x + ex).track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
-
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           jmtNtupleFiller_pset(settings.is_miniaod),
                           sel_tracks_src = cms.InputTag('mfvVertexTracks' + ex, 'all'),
@@ -149,21 +153,26 @@ for icfg, cfg in enumerate(cfgs):
                           nbjets_req = cms.uint32(cfg.nbjets),
                           for_mctruth = cms.bool(False),
                           )
-
     setattr(process, tracks_name, tracks)
     setattr(process, tree_name, tree)
-    process.p *= tree
 
+    mfvAnalysisCutsPreSelEvtFilt = mfvAnalysisCuts.clone(min_nvertex=0)
+    setattr(process, 'mfvSelectedVerticesTight', mfvSelectedVerticesTight)
+    setattr(process, 'mfvAnalysisCutsPreSelEvtFilt', mfvAnalysisCutsPreSelEvtFilt)
+    process.p *= mfvSelectedVerticesTight 
+    process.p *= mfvAnalysisCutsPreSelEvtFilt
+    process.p *= tree
+ 
 ReferencedTagsTaskAdder(process)('p')
 random_service(process, random_dict)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=True, ttbar=False, diboson=True, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
+    #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=True, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
     #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True, BTagCSV_data=False, DisplacedJet_data=False)
     
-    samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=True)
+    samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True)
     #samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
     #samples = [getattr(Samples, 'qcdht2000_2017')]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
