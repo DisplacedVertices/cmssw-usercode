@@ -3,24 +3,24 @@ from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 do_bquark = False
-is_mc = True
-only_10pc = False
-year = 'run2'
-version = 'ULV11'
+is_mc = False
+only_10pc = True
+year = '2017'
+version = 'ULV30Lepm'
 set_style()
-ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=True, log=False)
+ps = plot_saver(plot_dir('closure_data_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=True, log=False)
 
-fns = ['/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
+fns = ['~/crabdirs/2v_from_jets_data_lep/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_data_lep/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_data_lep/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_data_lep/2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
        ]
 
 # for overlaying the btag-based template
-fns_btag = ['/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            '/uscms/homes/s/shogan/public/2v_from_jets/2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version)
+fns_btag = ['~/crabdirs/2v_from_jets/2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version)
             ]
 
 ntk = []
@@ -44,9 +44,8 @@ def scale_and_draw_template(template, twovtxhist, sumdbvc, color) :
     template.SetLineColor(color)
     template.SetLineWidth(2)
 
-    twovtxerr = ROOT.Double(0)
+    twovtxerr = ROOT.Double(0.0)
     twovtx = twovtxhist.IntegralAndError(0, twovtxhist.GetNbinsX(), twovtxerr)
-
     if twovtx > 0:
         template.Scale(twovtx/template.Integral())
     else:
@@ -139,15 +138,15 @@ def get_bin_integral_and_stat_uncert(hist):
     bin1 = bin1_err = bin2 = bin2_err = bin3 = bin3_err = 0.
 
     if 'c1v' not in hist.GetName():
-        bin1, bin1_err = get_integral(hist, xhi=0.04, include_last_bin=False)
-        bin2, bin2_err = get_integral(hist, xlo=0.04, xhi=0.07, include_last_bin=False)
-        bin3, bin3_err = get_integral(hist, xlo=0.07, xhi=0.4, include_last_bin=False)
+        bin1, bin1_err = get_integral(hist, xhi=0.08, include_last_bin=False)
+        bin2, bin2_err = get_integral(hist, xlo=0.08, xhi=0.16, include_last_bin=False)
+        bin3, bin3_err = get_integral(hist, xlo=0.16, xhi=0.4, include_last_bin=False)
     else:
-        bin1 = get_integral(hist, 0., 0.04, integral_only=True, include_last_bin=False)
+        bin1 = get_integral(hist, 0., 0.08, integral_only=True, include_last_bin=False)
         bin1_err = bin1 * ebin[0]
-        bin2 = get_integral(hist, 0.04, 0.07, integral_only=True, include_last_bin=False)
+        bin2 = get_integral(hist, 0.08, 0.16, integral_only=True, include_last_bin=False)
         bin2_err = bin2 * ebin[1]
-        bin3 = get_integral(hist, 0.07, 0.4, integral_only=True, include_last_bin=False)
+        bin3 = get_integral(hist, 0.16, 0.4, integral_only=True, include_last_bin=False)
         bin3_err = bin3 * ebin[2]
     return [(bin1, bin1_err), (bin2, bin2_err), (bin3, bin3_err)]
 
@@ -186,7 +185,6 @@ for i, ntracks in enumerate(ntk):
 
     twovtx_total, twovtx_total_err = get_integral(twovtx)
     twovtx_bins = get_bin_integral_and_stat_uncert(twovtx)
-
     con_total, con_total_err = get_integral(constructed)
     con_bins = get_bin_integral_and_stat_uncert(constructed)
 
@@ -203,11 +201,10 @@ for i, ntracks in enumerate(ntk):
     except:
         pval = 1
     
-
     print '%s-track' % ntk[i]
-    print '  two-vertex events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % twovtx
-    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % con
-    print '  sumdBV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % twovtx_norm
-    print ' sumdBVC normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % con_norm
-    print ' . sumdBV / sumdBVC:                    0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % rat
-    print '            p-value:                                                                               700-40000 um: %6.4f' % pval
+    print '  two-vertex events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-40000 um: %6.2f +/- %5.2f' % twovtx
+    print ' constructed events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-40000 um: %6.2f +/- %5.2f' % con
+    print '  sumdBV normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-40000 um: %6.3f +/- %5.3f' % twovtx_norm
+    print ' sumdBVC normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-40000 um: %6.3f +/- %5.3f' % con_norm
+    print ' . sumdBV / sumdBVC:                    0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-40000 um: %6.2f +/- %5.2f' % rat
+    print '            p-value:                                                                               1600-40000 um: %6.4f' % pval
