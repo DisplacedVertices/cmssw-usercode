@@ -161,7 +161,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   // final studies, we'll need to make sure ALL ntuples/minitrees finish, and then
   // update some of the weights
   if (false){
-	  if (use_20161) {
+       if (p.is_mc()) {
+          if (use_20161) {
 	    samples.push_back("qcdht0300_20161");    weights.push_back(140.4);
 	    samples.push_back("qcdht0500_20161");    weights.push_back(10.5);
 	    samples.push_back("qcdht0700_20161");    weights.push_back(3.13);
@@ -199,8 +200,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	    samples.push_back("qcdht2000_2018");    weights.push_back(0.23);
 	    samples.push_back("ttbar_2018");        weights.push_back(0.32); //weights.push_back(0.16);
 	  }
-
-	  if (not p.is_mc()) {
+       }
+       else {
 	    if (use_2017) {
 	      samples.push_back("JetHT2017B");                      weights.push_back(1);
 	      samples.push_back("JetHT2017C");                      weights.push_back(1);
@@ -214,47 +215,48 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	      samples.push_back("JetHT2018C");                      weights.push_back(1);
 	      samples.push_back("JetHT2018D");                      weights.push_back(1);
 	    }
-          }
+        }
 
   }
   else {
-
-	  if (use_2017) { 
+	  if (p.is_mc()) {
+	    if (use_2017) { 
 		samples.push_back("dyjetstollM10_2017");    weights.push_back(15.45);
 		samples.push_back("qcdbctoept170_2017");    weights.push_back(5.57);
-		//samples.push_back("qcdempt120_2017");    weights.push_back(300.25);
+		samples.push_back("qcdempt120_2017");    weights.push_back(300.25);
 		samples.push_back("qcdpt170mupt5_2017");    weights.push_back(6.18);
 		samples.push_back("qcdpt600mupt5_2017");    weights.push_back(0.02);
 		samples.push_back("ww_2017");    weights.push_back(0.21);
 		samples.push_back("dyjetstollM50_2017");    weights.push_back(2.18);
 		samples.push_back("qcdbctoept250_2017");    weights.push_back(1.47);
-		//samples.push_back("qcdempt170_2017");    weights.push_back(183.50);
-		//samples.push_back("qcdpt20mupt5_2017");    weights.push_back(1827.01);
+		samples.push_back("qcdempt170_2017");    weights.push_back(183.50);
+		samples.push_back("qcdpt20mupt5_2017");    weights.push_back(1827.01);
 		samples.push_back("qcdpt800mupt5_2017");    weights.push_back(0.00);
 		samples.push_back("wz_2017");    weights.push_back(0.16);
-		//samples.push_back("qcdbctoept015_2017");    weights.push_back(589.79);
-		//samples.push_back("qcdempt020_2017");    weights.push_back(14035.33);
+		samples.push_back("qcdbctoept015_2017");    weights.push_back(589.79);
+		samples.push_back("qcdempt020_2017");    weights.push_back(14035.33);
 		samples.push_back("qcdempt300_2017");    weights.push_back(20.24);
 		samples.push_back("qcdpt300mupt5_2017");    weights.push_back(0.43);
 		samples.push_back("qcdpt80mupt5_2017");    weights.push_back(84.36);
 		samples.push_back("zz_2017");    weights.push_back(0.18);
-		//samples.push_back("qcdbctoept020_2017");    weights.push_back(1142.48);
-		//samples.push_back("qcdempt030_2017");    weights.push_back(29803.79);
+		samples.push_back("qcdbctoept020_2017");    weights.push_back(1142.48);
+		samples.push_back("qcdempt030_2017");    weights.push_back(29803.79);
 		samples.push_back("qcdpt1000mupt5_2017");    weights.push_back(0.00);
-		//samples.push_back("qcdpt30mupt5_2017");    weights.push_back(1347.09);
+		samples.push_back("qcdpt30mupt5_2017");    weights.push_back(1347.09);
 		samples.push_back("wjetstolnu_0j_2017");    weights.push_back(12.65);
-		//samples.push_back("qcdbctoept030_2017");    weights.push_back(1058.97);
-		//samples.push_back("qcdempt050_2017");    weights.push_back(7906.91);
+		samples.push_back("qcdbctoept030_2017");    weights.push_back(1058.97);
+		samples.push_back("qcdempt050_2017");    weights.push_back(7906.91);
 		samples.push_back("qcdpt120mupt5_2017");    weights.push_back(33.29);
 		samples.push_back("qcdpt470mupt5_2017");    weights.push_back(0.06);
 		samples.push_back("wjetstolnu_1j_2017");    weights.push_back(2.00);
 		samples.push_back("qcdbctoept080_2017");    weights.push_back(101.06);
-		//samples.push_back("qcdempt080_2017");    weights.push_back(4664.42);
-		//samples.push_back("qcdpt15mupt5_2017");    weights.push_back(18680.12);
-		//samples.push_back("qcdpt50mupt5_2017");    weights.push_back(412.17);
+		samples.push_back("qcdempt080_2017");    weights.push_back(4664.42);
+		samples.push_back("qcdpt15mupt5_2017");    weights.push_back(18680.12);
+		samples.push_back("qcdpt50mupt5_2017");    weights.push_back(412.17);
 		samples.push_back("wjetstolnu_2j_2017");    weights.push_back(1.41);
+            }
           }
-	  if (not p.is_mc()) {
+	  else {
 	    if (use_2017) {
 	      samples.push_back("SingleElectron2017B");    weights.push_back(1);
               samples.push_back("SingleElectron2017D");    weights.push_back(1);
@@ -755,6 +757,7 @@ int main(int argc, const char* argv[]) {
 
  
   // This for loop runs over simulated background 
+  /*
   for (const char* year : {"2017",} ) {// {"20162", "2017", "2018", "2017p8", "run2"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
@@ -778,20 +781,20 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.min_npu(37).max_npu(255),            TString::Format("2v_from_jets_%s_%dtrack_npu37to255_%s.root", year, ntracks, version));
     }
   }
-  
+  */ 
     // This for loop runs over real data
-//  for (const char* year : {"2017", "2018", "2017p8"}) {
-//    for (int ntracks : {3, 4, 5, 7, 8, 9}) {
-//      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-//      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
-//      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
-//      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
+  for (const char* year : {"2017",}){ // "2018", "2017p8"}) {
+    for (int ntracks : {3, 4, 5, 7,}){ // 8, 9}) {
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
+      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_nobtags_%s.root", year, ntracks, version));
-//    }
-//  }
+    }
+  }
 
   // For use in bquark_fraction.py
   std::ofstream outfile;
