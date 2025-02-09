@@ -17,8 +17,8 @@ class Params(object):
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
-        self.years = '2017', '2018'
-        #self.years = '20161', '20162', '2017', '2018'
+        #self.years = '2017', '2018'
+        self.years = '20161', '20162', '2017', '2018'
         self.nyears = len(self.years)
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_20161, ac.scaled_int_lumi_20162, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
@@ -52,10 +52,10 @@ def name2kind(name):
     return name.split('_tau')[0]
 def name2tau(name):
     _nameok(name)
-    #if not 'ggH' in name:
-    #    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
-    if not 'VH' in name:
+    if not 'ggH' in name:
         return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    #if not 'VH' in name:
+    #    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
     else:
         return int(name.split('_tau')[1].split('mm_')[0])
 def name2mass(name):
@@ -114,13 +114,17 @@ class sample_iterator(object):
 ####
 
 def make_bkg(f):
-    # the first 3 sets of values override what's in 2v_from_jets
+    # the first 4 sets of values override what's in 2v_from_jets
     #          20161    20162     2017     2018
     observed = (0,0,0), (0,0,0), (0,0,0), (0,0,0)
-    bkg_n1v  = 864, 951, 548, 1168
-    bkg_n2v  = 0.051, 0.058, 0.041, 0.136 # this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    #bkg_n1v  = 864, 951, 548, 1168 #Shaun
+    #bkg_n1v  = 999, 999, 1337, 475 #lep
+    bkg_n1v  = 999, 999, 889, 877 #bjet
+    #bkg_n2v  = 0.051, 0.058, 0.041, 0.136 # Shaun this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    #bkg_n2v  = 999, 999, 0.003, 0.004 # lep this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    bkg_n2v  = 999, 999, 0.037, 0.006 # bjet this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
     # but bkg_c1v is checked against what's in 2v_from_jets
-    bkg_c1v = (0.509, 0.374, 0.117), (0.709, 0.257, 0.034), (0.650, 0.313, 0.037)
+    # FIXME not used bkg_c1v = (0.509, 0.374, 0.117), (0.709, 0.257, 0.034), (0.650, 0.313, 0.037)
 
     bkg_uncert = [(1.25, 1.25, 1.69), (1.25, 1.25, 1.69), (1.16, 1.30, 1.51), (1.19, 1.30, 1.91)] # combine lnN convention
 
@@ -137,8 +141,8 @@ def make_bkg(f):
 
     def bkg_fn(year, which='default'):
         #return '/uscms/home/shogan/public/2v_from_jets/2v_from_jets_%s_5track_btags_ULV11.root' % year
-        #return '~/crabdirs/2v_from_jets_bjet/2v_from_jets_%s_5track_btags_ULV11.root' % year
-        return '~/crabdirs/2v_from_jets_lep/2v_from_jets_%s_5track_btags_ULV30Lepm.root' % year
+        return '~/crabdirs/2v_from_jets_bjet/2v_from_jets_%s_5track_default_ULV11.root' % year 
+        #return '~/crabdirs/2v_from_jets_lep/2v_from_jets_%s_5track_default_ULV30Lepm.root' % year 
     
     def bkg_f(year, which='default', _c={}):
         k = year, which
@@ -508,8 +512,8 @@ def make_signals_2017p8(f, name_list):
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = ''
     #trees = '/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
-    #trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
-    trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTreeOnnormdzULV30Lepm/*tau*.root'
+    trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
+    #trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTreeOnnormdzULV30Lepm/*tau*.root'
     title = []
     sigs = {}
 
@@ -962,8 +966,8 @@ if __name__ == '__main__':
     elif 'iter' in sys.argv:
         include_all  = 'include_all' in sys.argv
         include_2016 = 'include_2016' in sys.argv
-        #years =  ('2017','2018')
-        years = ('20161', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
+        years =  ('2017','2018')
+        #years = ('20161', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
         samples = sample_iterator(ROOT.TFile('limitsinput.root'),
                                   require_years=years,
                                   test='test_batch' in sys.argv,

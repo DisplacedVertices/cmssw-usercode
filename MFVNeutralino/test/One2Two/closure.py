@@ -6,28 +6,31 @@ do_bquark = False
 is_mc = True
 only_10pc = False
 year = '2017p8'
-#version = 'ULV11'
-version = 'ULV30Lepm'
+version = 'ULV11'
+#version = 'ULV30Lepm'
 set_style()
-ps = plot_saver(plot_dir('closure_mc_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(900,700), root=True, log=False)
+ps = plot_saver(plot_dir('closure_mc_v2_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(900,700), root=True, log=False)
 
-#predictnorms = [1867.0+2451.0, 130.0+144.0, 9.0+1.5] #bjet
-#predictnormerrs = [841.0, 55.0,2.9] #bjet
+#predictnorms = [1867.0+2451.0, 130.0+144.0, 9.0+1.5] #bjet : HW's tables
+#predictnormerrs = [841.0, 55.0,2.9] #bjet : HW's tables
+
+predictnorms = [253.0+2378.0, 999.0, 1.0+9.0] #bjet  : Shaun's incomplete input
+predictnormerrs = [87.0, 999.0, 0.37] #bjet : Shuan's incomplete input
 
 
-predictnorms = [726.9+251.1, 68.8+21.6, 1.6+0.5] #lepton
-predictnormerrs = [603.9, 58.4,1.4] #lepton
+#predictnorms = [726.9+251.1, 68.8+21.6, 1.6+0.5] #lepton
+#predictnormerrs = [603.9, 58.4,1.4] #lepton
 
 
-fns = ['~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+fns = ['~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       #'~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
        #'~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
        ]
 
 # for overlaying the btag-based template
 fns_btag = ['~/crabdirs/2v_from_jets/2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            #'~/crabdirs/2v_from_jets/2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
             '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
             #'~/crabdirs/2v_from_jets/2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version)
             ]
@@ -63,9 +66,6 @@ def scale_and_draw_template(closure, template, twovtxhist, sumdbvc, color) :
     global predictnorm
     global predictnormerr 
 
-    print(" predicted norm  ", predictnorm)
-    print(" predicted norm err ", predictnormerr)
-    
     template.SetStats(0)
     template.SetLineColor(color)
     template.SetLineWidth(2)

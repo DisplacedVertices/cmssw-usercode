@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_lepton_templates_2017p8_diff_xsecs'), size=(900,700), log=True, pdf=True, pdf_log=True)
+ps = plot_saver(plot_dir('pretty_bjet_templates_v2_2017p8_diff_xsecs'), size=(900,700), log=True, pdf=True, pdf_log=True)
 
 hide_overlap_with_x_axis = True
 
@@ -19,13 +19,13 @@ combiner = SignalEfficiencyCombiner()
 # 9.5 at 300 microns, 3.0 at 1mm, 2.5 at 10mm
 
 which = [
-    #('mfv_neu_tau001000um_M0400', '#tilde{N} #rightarrow tbs; M-400GeV c#tau-1.0mm', ROOT.kYellow + 2, 2, 9.5), 
-    #('mfv_stopdbardbar_tau001000um_M0200', '#tilde{t} #rightarrow #bar{d}#bar{d}; M-200GeV c#tau-1.0mm', ROOT.kGreen+2, 5, 3.0), 
-    #('mfv_stopdbardbar_tau000300um_M0400', '#tilde{t} #rightarrow #bar{d}#bar{d}; M-400GeV c#tau-0.3 mm',  ROOT.kGreen-3, 7, 2.5),
-    #('ggHToSSTodddd_tau1mm_M55', 'ggH #rightarrow SS; M-55GeV c#tau-1.0mm',  ROOT.kAzure+10, 9, 5.5),
+    ('mfv_neu_tau001000um_M0400', '#tilde{N} #rightarrow tbs; M-400GeV c#tau-1.0mm', ROOT.kYellow + 2, 2, 9.5), 
+    ('mfv_stopdbardbar_tau001000um_M0200', '#tilde{t} #rightarrow #bar{d}#bar{d}; M-200GeV c#tau-1.0mm', ROOT.kGreen+2, 5, 3.0), 
+    ('mfv_stopdbardbar_tau000300um_M0400', '#tilde{t} #rightarrow #bar{d}#bar{d}; M-400GeV c#tau-0.3 mm',  ROOT.kGreen-3, 7, 2.5),
+    ('ggHToSSTodddd_tau1mm_M55', 'ggH #rightarrow SS; M-55GeV c#tau-1.0mm',  ROOT.kAzure+10, 9, 5.5),
    
-    ('VHToSSTodddd_tau1mm_M55', 'W/ZH #rightarrow SS; M-55GeV c#tau-1.0mm', ROOT.kYellow + 2, 2, 9.5),
-    ('VHToSSTodddd_tau10mm_M55', 'W/ZH #rightarrow SS; M-55GeV c#tau-10.0mm', ROOT.kGreen+2, 5, 3.0),
+    #('VHToSSTodddd_tau1mm_M55', 'W/ZH #rightarrow SS; M-55GeV c#tau-1.0mm', ROOT.kYellow + 2, 2, 9.5),
+    #('VHToSSTodddd_tau10mm_M55', 'W/ZH #rightarrow SS; M-55GeV c#tau-10.0mm', ROOT.kGreen+2, 5, 3.0),
     ]
 
 
@@ -195,7 +195,7 @@ yoffset = 0.008
 leg1 = ROOT.TLegend(0.350+xoffset, 0.805+yoffset, 0.859+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Background template', 'F')
 leg2 = ROOT.TLegend(0.350+xoffset, 0.748+yoffset, 0.859+xoffset, 0.815+yoffset)
-leg2.AddEntry(0, '#kern[-0.22]{Lepton signals}', '')
+leg2.AddEntry(0, '#kern[-0.22]{B-jet/Displ-jet signals}', '')
 leg3 = ROOT.TLegend(0.350+xoffset, 0.612+yoffset, 0.859+xoffset, 0.745+yoffset)
 legs = leg1, leg2, leg3
 
