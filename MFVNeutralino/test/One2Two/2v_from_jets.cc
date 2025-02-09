@@ -74,10 +74,10 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters()
     : ibkg_begin_(-999),
       ibkg_end_(-999),
-      is_mc_(false),
-      only_10pc_(true),
+      is_mc_(true),
+      only_10pc_(false),
       inject_signal_(false),
-      year_("2017"), //2017p8
+      year_("2017p8"), //2017p8
       ntracks_(5),
       bquarks_(-1),
       btags_(-1),
@@ -138,7 +138,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    //file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeFullBkgStatsULV11Bm";
+    //file_path = "/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTree_FixWP_ULV11Bm";
     file_path = "/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTreeOnnormdzULV30Lepm";
   } else if (p.only_10pc()) {
     //file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
@@ -152,7 +152,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   std::cout << "The year is: " << p.year() << std::endl;
 
-  bool use_20161 = p.year() == "20161" or p.year() == "20162"   or p.year() == "run2";
+  bool use_20161 = p.year() == "20161" or p.year() == "20161"   or p.year() == "run2";
   bool use_20162 = p.year() == "20162" or p.year() == "20162"   or p.year() == "run2";
   bool  use_2017 = p.year() == "2017"  or p.year() == "2017p8" or p.year() == "run2";
   bool  use_2018 = p.year() == "2018"  or p.year() == "2017p8" or p.year() == "run2";
@@ -221,52 +221,81 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   else {
 	  if (p.is_mc()) {
 	    if (use_2017) { 
-		samples.push_back("dyjetstollM10_2017");    weights.push_back(15.45);
+	        samples.push_back("ttbar_2017");            weights.push_back(0.15);
+                samples.push_back("dyjetstollM10_2017");    weights.push_back(15.45);
 		samples.push_back("qcdbctoept170_2017");    weights.push_back(5.57);
-		samples.push_back("qcdempt120_2017");    weights.push_back(300.25);
+		samples.push_back("qcdempt120_2017");       weights.push_back(300.25);
 		samples.push_back("qcdpt170mupt5_2017");    weights.push_back(6.18);
 		samples.push_back("qcdpt600mupt5_2017");    weights.push_back(0.02);
-		samples.push_back("ww_2017");    weights.push_back(0.21);
+		samples.push_back("ww_2017");               weights.push_back(0.21);
 		samples.push_back("dyjetstollM50_2017");    weights.push_back(2.18);
 		samples.push_back("qcdbctoept250_2017");    weights.push_back(1.47);
-		samples.push_back("qcdempt170_2017");    weights.push_back(183.50);
-		samples.push_back("qcdpt20mupt5_2017");    weights.push_back(1827.01);
+		samples.push_back("qcdempt170_2017");       weights.push_back(183.50);
+		samples.push_back("qcdpt20mupt5_2017");     weights.push_back(1827.01);
 		samples.push_back("qcdpt800mupt5_2017");    weights.push_back(0.00);
-		samples.push_back("wz_2017");    weights.push_back(0.16);
+		samples.push_back("wz_2017");               weights.push_back(0.16);
 		samples.push_back("qcdbctoept015_2017");    weights.push_back(589.79);
-		samples.push_back("qcdempt020_2017");    weights.push_back(14035.33);
-		samples.push_back("qcdempt300_2017");    weights.push_back(20.24);
+		samples.push_back("qcdempt020_2017");       weights.push_back(14035.33);
+		samples.push_back("qcdempt300_2017");       weights.push_back(20.24);
 		samples.push_back("qcdpt300mupt5_2017");    weights.push_back(0.43);
-		samples.push_back("qcdpt80mupt5_2017");    weights.push_back(84.36);
-		samples.push_back("zz_2017");    weights.push_back(0.18);
+		samples.push_back("qcdpt80mupt5_2017");     weights.push_back(84.36);
+		samples.push_back("zz_2017");               weights.push_back(0.18);
 		samples.push_back("qcdbctoept020_2017");    weights.push_back(1142.48);
-		samples.push_back("qcdempt030_2017");    weights.push_back(29803.79);
-		samples.push_back("qcdpt1000mupt5_2017");    weights.push_back(0.00);
-		samples.push_back("qcdpt30mupt5_2017");    weights.push_back(1347.09);
+		samples.push_back("qcdempt030_2017");       weights.push_back(29803.79);
+		samples.push_back("qcdpt1000mupt5_2017");   weights.push_back(0.00);
+		samples.push_back("qcdpt30mupt5_2017");     weights.push_back(1347.09);
 		samples.push_back("wjetstolnu_0j_2017");    weights.push_back(12.65);
 		samples.push_back("qcdbctoept030_2017");    weights.push_back(1058.97);
-		samples.push_back("qcdempt050_2017");    weights.push_back(7906.91);
+		samples.push_back("qcdempt050_2017");       weights.push_back(7906.91);
 		samples.push_back("qcdpt120mupt5_2017");    weights.push_back(33.29);
 		samples.push_back("qcdpt470mupt5_2017");    weights.push_back(0.06);
 		samples.push_back("wjetstolnu_1j_2017");    weights.push_back(2.00);
 		samples.push_back("qcdbctoept080_2017");    weights.push_back(101.06);
-		samples.push_back("qcdempt080_2017");    weights.push_back(4664.42);
-		samples.push_back("qcdpt15mupt5_2017");    weights.push_back(18680.12);
-		samples.push_back("qcdpt50mupt5_2017");    weights.push_back(412.17);
+		samples.push_back("qcdempt080_2017");       weights.push_back(4664.42);
+		samples.push_back("qcdpt15mupt5_2017");     weights.push_back(18680.12);
+		samples.push_back("qcdpt50mupt5_2017");     weights.push_back(412.17);
 		samples.push_back("wjetstolnu_2j_2017");    weights.push_back(1.41);
             }
+	    if (use_2018) {
+		
+		samples.push_back("ttbar_2018");    weights.push_back(0.16);
+		samples.push_back("qcdmupt15_2018");    weights.push_back(1089.56);
+		samples.push_back("qcdempt015_2018");    weights.push_back(13836.45);
+		samples.push_back("qcdempt020_2018");    weights.push_back(20392.99);
+		samples.push_back("qcdempt030_2018");    weights.push_back(46444.82);
+		samples.push_back("qcdempt050_2018");    weights.push_back(11273.78);
+		samples.push_back("qcdempt080_2018");    weights.push_back(2316.50);
+		samples.push_back("qcdempt120_2018");    weights.push_back(410.66);
+		samples.push_back("qcdempt170_2018");    weights.push_back(267.03);
+		samples.push_back("qcdbctoept015_2018");    weights.push_back(671.48);
+		samples.push_back("qcdbctoept020_2018");    weights.push_back(1709.18);
+		samples.push_back("qcdbctoept030_2018");    weights.push_back(1912.59);
+		samples.push_back("qcdbctoept080_2018");    weights.push_back(141.47);
+		samples.push_back("qcdbctoept170_2018");    weights.push_back(9.93);
+		samples.push_back("qcdbctoept250_2018");    weights.push_back(7.42);
+		samples.push_back("qcdempt300_2018");    weights.push_back(29.73);
+		samples.push_back("wjetstolnu_0j_2018");    weights.push_back(20.75);
+		samples.push_back("wjetstolnu_1j_2018");    weights.push_back(4.62);
+		samples.push_back("wjetstolnu_2j_2018");    weights.push_back(2.07);
+		samples.push_back("dyjetstollM10_2018");    weights.push_back(11.84);
+		samples.push_back("dyjetstollM50_2018");    weights.push_back(3.56);
+		samples.push_back("ww_2018");    weights.push_back(0.54);
+		samples.push_back("wz_2018");    weights.push_back(1.35);
+		samples.push_back("zz_2018");    weights.push_back(0.21);
+
+            }  
           }
 	  else {
 	    if (use_2017) {
 	      samples.push_back("SingleElectron2017B");    weights.push_back(1);
               samples.push_back("SingleElectron2017D");    weights.push_back(1);
               samples.push_back("SingleElectron2017F");    weights.push_back(1);
-              samples.push_back("SingleMuon2017D");   weights.push_back(1);
-              samples.push_back("SingleMuon2017F");   weights.push_back(1);
-              samples.push_back("SingleElectron2017C");  weights.push_back(1);
-              samples.push_back("SingleElectron2017E");  weights.push_back(1);
-              samples.push_back("SingleMuon2017C");   weights.push_back(1);
-              samples.push_back("SingleMuon2017E");   weights.push_back(1);
+              samples.push_back("SingleMuon2017D");        weights.push_back(1);
+              samples.push_back("SingleMuon2017F");        weights.push_back(1);
+              samples.push_back("SingleElectron2017C");    weights.push_back(1);
+              samples.push_back("SingleElectron2017E");    weights.push_back(1);
+              samples.push_back("SingleMuon2017C");        weights.push_back(1);
+              samples.push_back("SingleMuon2017E");        weights.push_back(1);
 	    }
           }
 
@@ -752,13 +781,13 @@ int main(int argc, const char* argv[]) {
   }
 
   // production version
-  const char* version = "ULV30Lepm";//"ULV11";
-
+  const char* version = "ULV30Lepm";
+  //const char* version = "ULV11";
 
  
   // This for loop runs over simulated background 
-  /*
-  for (const char* year : {"2017",} ) {// {"20162", "2017", "2018", "2017p8", "run2"}) {
+  
+  for (const char* year : {"2017", "2018", "2017p8"}) { //{"20161", "20162", "2017", "2018", "2017p8", "run2"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
 
@@ -781,8 +810,9 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.min_npu(37).max_npu(255),            TString::Format("2v_from_jets_%s_%dtrack_npu37to255_%s.root", year, ntracks, version));
     }
   }
-  */ 
-    // This for loop runs over real data
+    
+  // This for loop runs over real data
+  /*
   for (const char* year : {"2017",}){ // "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7,}){ // 8, 9}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
@@ -795,7 +825,7 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.btags(0).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_nobtags_%s.root", year, ntracks, version));
     }
   }
-
+  */
   // For use in bquark_fraction.py
   std::ofstream outfile;
   outfile.open("cb_vals/cb_vals.csv");

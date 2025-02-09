@@ -43,7 +43,7 @@ class SignalEfficiencyCombiner:
                     r[y] = h
             return r
                 
-    def __init__(self, years=['2016APV','2016','2017','2018']):
+    def __init__(self, years=['2017','2018']): #FIXME [20161, 20162]
         self.years = sorted(str(y) for y in years)
         self.nyears = len(self.years)
 

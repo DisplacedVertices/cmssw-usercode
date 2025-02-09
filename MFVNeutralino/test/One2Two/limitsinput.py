@@ -17,8 +17,8 @@ class Params(object):
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
-        #self.years = '2017', '2018'
-        self.years = '2016APV', '2016', '2017', '2018'
+        self.years = '2017', '2018'
+        #self.years = '20161', '20162', '2017', '2018'
         self.nyears = len(self.years)
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_20161, ac.scaled_int_lumi_20162, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
@@ -46,13 +46,15 @@ def details2name(kind, tau, mass):
     # same convention as scanpack: tau float:mm, mass int:GeV
     return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 def _nameok(name):
-    assert (name.count('_tau') == 1 and name.count('um_') == 1 and name.count('_M') == 1) or ('ggH' in name)
+    assert (name.count('_tau') == 1 and name.count('um_') == 1 and name.count('_M') == 1) or ('ggH' or 'VH' in name)
 def name2kind(name):
     _nameok(name)
     return name.split('_tau')[0]
 def name2tau(name):
     _nameok(name)
-    if not 'ggH' in name:
+    #if not 'ggH' in name:
+    #    return int(name.split('_tau')[1].split('um_')[0]) / 1000.
+    if not 'VH' in name:
         return int(name.split('_tau')[1].split('um_')[0]) / 1000.
     else:
         return int(name.split('_tau')[1].split('mm_')[0])
@@ -113,7 +115,7 @@ class sample_iterator(object):
 
 def make_bkg(f):
     # the first 3 sets of values override what's in 2v_from_jets
-    #          2016APV    2016     2017     2018
+    #          20161    20162     2017     2018
     observed = (0,0,0), (0,0,0), (0,0,0), (0,0,0)
     bkg_n1v  = 864, 951, 548, 1168
     bkg_n2v  = 0.051, 0.058, 0.041, 0.136 # this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
@@ -122,18 +124,22 @@ def make_bkg(f):
 
     bkg_uncert = [(1.25, 1.25, 1.69), (1.25, 1.25, 1.69), (1.16, 1.30, 1.51), (1.19, 1.30, 1.91)] # combine lnN convention
 
+    """
+    FIXME
     import statmodel
     bkg_uncert_stat = [statmodel.ebins['data100pc_%s_5track' % year] for year in gp.years]
     for y in xrange(gp.nyears):
         bkg_uncert[y] = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert[y], bkg_uncert_stat[y])] # JMTBAD use proper gmN?
-
-    #                         2016APV                 2016                    2017                   2018
+    """
+    #                         20161                 20162                    2017                   2018
     bkg_stat_uncert = [(1.071, 1.128, 1.465), (1.071, 1.128, 1.465), (1.173, 1.216, 1.454), (1.217, 1.238, 1.586)] # stat errors uncorrelated
     bkg_syst_uncert = [(0.758, 1.218, 1.542), (0.758, 1.218, 1.542), (0.743, 1.338, 1.389), (0.766, 1.315, 1.760)] # syst error anti-correlated
 
     def bkg_fn(year, which='default'):
-        return '/uscms/home/shogan/public/2v_from_jets/2v_from_jets_%s_5track_btags_ULV11.root' % year
-
+        #return '/uscms/home/shogan/public/2v_from_jets/2v_from_jets_%s_5track_btags_ULV11.root' % year
+        #return '~/crabdirs/2v_from_jets_bjet/2v_from_jets_%s_5track_btags_ULV11.root' % year
+        return '~/crabdirs/2v_from_jets_lep/2v_from_jets_%s_5track_btags_ULV30Lepm.root' % year
+    
     def bkg_f(year, which='default', _c={}):
         k = year, which
         if not _c.has_key(k):
@@ -236,10 +242,10 @@ def sig_uncert_alphas(name_year):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
-    if year == '2016' or year == '2016APV':
+    if year == '20162' or year == '20161':
         year = '2017'
 
-    if kind.startswith('ggH') or kind.startswith('mfv_stopbbarbbar'):
+    if kind.startswith('ggH') or kind.startswith('VH') or kind.startswith('mfv_stopbbarbbar'):
         kind = 'mfv_stopdbardbar'
 
     fcns = {
@@ -449,9 +455,9 @@ def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
                                         (1.835, 1.17, 0.667, 0.249, 0.23),
                                         (1.182, 0.838, 0.507, 0.174, 0.159), ), }, }
 
-    if kind.startswith('ggH') or kind.startswith('mfv_stopbbarbbar'):
+    if kind.startswith('ggH') or kind.startswith('VH') or kind.startswith('mfv_stopbbarbbar'):
         kind = 'mfv_stopdbardbar'
-    if year == '2016' or year == '2016APV':
+    if year == '20162' or year == '20161':
         year = '2017'
     vtm = trackmover[kind][year]
 
@@ -501,7 +507,9 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = ''
-    trees = '/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
+    #trees = '/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
+    #trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
+    trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTreeOnnormdzULV30Lepm/*tau*.root'
     title = []
     sigs = {}
 
@@ -595,7 +603,7 @@ def make():
     warning()
 
     #print(gp.fn)
-    assert not os.path.exists(gp.fn)
+    #assert not os.path.exists(gp.fn)
     ROOT.TH1.AddDirectory(0)
     f = ROOT.TFile(gp.fn, 'recreate')
 
@@ -604,7 +612,7 @@ def make():
     name_list = {}
     #make_signals_2015p6(f, name_list)
     make_signals_2017p8(f, name_list)
-    #print(name_list)
+    print(name_list)
 
     title = name_list.pop('title')
     isamples = sorted([s.isample for s in name_list.itervalues()], reverse=True)
@@ -954,7 +962,8 @@ if __name__ == '__main__':
     elif 'iter' in sys.argv:
         include_all  = 'include_all' in sys.argv
         include_2016 = 'include_2016' in sys.argv
-        years = ('2016APV', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
+        #years =  ('2017','2018')
+        years = ('20161', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
         samples = sample_iterator(ROOT.TFile('limitsinput.root'),
                                   require_years=years,
                                   test='test_batch' in sys.argv,
