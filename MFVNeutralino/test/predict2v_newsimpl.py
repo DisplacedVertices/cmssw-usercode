@@ -4,8 +4,10 @@ import pandas as pd
 
 #presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm' #FIXME 
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm'  #FIXME
+#presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm' #FIXME 
+#sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm'  #FIXME
+presel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
+sel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
 #presel_path = '/uscms_data/d3/shogan/crab_dirs/PreselHistosFixUL18V1Bm'
 #sel_path = '/uscms_data/d3/shogan/crab_dirs/HistosULV1Bm_moreSB_tightVtx'
 data = bool_from_argv('data')
@@ -93,6 +95,7 @@ sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed)
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    
     n1v  *= sel_scale
     en1v *= sel_scale
     n2v  *= sel_scale
@@ -145,7 +148,6 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     sum2_erest += (en2v/alpha)**2
     sum_n2v += n2v
     sum2_en2v += (en2v**2) 
-
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))

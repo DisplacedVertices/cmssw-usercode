@@ -87,7 +87,7 @@ def cmd_hadd_data():
             year_eras = [
             #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
             #('20162', 'FGH'),  
-            ('2017', 'CDEF'), #B 
+            ('2017', 'BCDEF'), #B 
             #('2018', 'ABCD'),
             ]
         else:
@@ -169,7 +169,7 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
                 x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]   
                 x += ['qcdpt1000mupt5']
         else:
-            x = ['ww', 'wz', 'zz',] # 'ttbar'] 
+            x = ['ww', 'wz', 'zz', 'ttbar'] 
     elif _btagpresel:
         #x = ['qcdht%04i' % x for x in [100, 200, 300, 500, 700, 1000, 1500, 2000]]
         #x = ['qcdht%04i' % x for x in [500, 700, 1000, 1500, 2000]]
@@ -240,7 +240,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
         year = int(year_s[1:])
         print 'scaling to', year, scale
         
-        for bkg_tag in ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+        for bkg_tag in ['others', 'wjetstolnu', 'dyjets', 'qcd', 'qcdmupt5']:
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
@@ -329,7 +329,7 @@ def cmd_effsprint(year_to_use=2017):
 
 def cmd_histos():
     #cmd_report_data()
-    cmd_hadd_data()
+    #cmd_hadd_data()
     cmd_merge_background()
     #cmd_effsprint()
 

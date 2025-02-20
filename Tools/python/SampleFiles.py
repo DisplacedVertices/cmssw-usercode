@@ -1227,6 +1227,7 @@ _add_ds("ntupleonrelaxdzulv30lepmum", {
 
 
 _add_ds("ntupleonnormdzulv30bm", {
+'mfv_neu_tau001000um_M0400_2017': _fromnum1("/store/user/pekotamn/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_2017/250205_203053", 7),
 'ttbar_2017': _fromnum1("/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Bm_2017/250118_214831", 60),
 'BTagCSV2017B': _fromnum0("/store/group/lpclonglived/pkotamni/BTagCSV/NtupleOnnormdzULV30Bm_2017/250121_163928", 3),
 'BTagCSV2017C': (34, ['/store/group/lpclonglived/pkotamni/BTagCSV/NtupleOnnormdzULV30Bm_2017/250121_163929/0000/ntuple_%i.root' % i for i in chain(xrange(33), [34])]),
@@ -1247,13 +1248,14 @@ _add_ds("ntupleonnormdzulv30bm", {
 'DisplacedJet2018D': _fromnum0("/store/group/lpclonglived/pkotamni/DisplacedJet/NtupleOnnormdzULV30Bm_2018/250121_164635", 19),
 })
 
-
 _add_ds("ntupleonnormdzulv30bm_noef", {
-#'ggHToSSTodddd_tau1mm_M15_20161': _fromnum0("/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504", 36),
-'ggHToSSTodddd_tau1mm_M15_20161': (35, ['/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504/0000/ntuple_%i.root' % i for i in chain(xrange(18), xrange(19,36))]),
+'ggHToSSTodddd_tau1mm_M15_20161': _fromnum0("/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504", 36),
 'ggHToSSTodddd_tau1mm_M40_20161': _fromnum0("/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131807", 35),
 'mfv_neu_tau001000um_M0300_2017': _fromnum0("/store/group/lpclonglived/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250118_135440", 6),
+'mfv_neu_tau001000um_M0400_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250205_135555", 2),
+'mfv_stopdbardbar_tau001000um_M0200_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-200_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250205_135434", 7),
 'mfv_stopdbardbar_tau001000um_M0300_2017': _fromnum0("/store/group/lpclonglived/pkotamni/StopStopbarTo2Dbar2D_M-300_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250118_135402", 7),
+'mfv_stopdbardbar_tau000300um_M0400_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-400_CTau-300um_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250205_135514", 10),
 'mfv_stopbbarbbar_tau001000um_M0300_2017': (1, ['/store/group/lpclonglived/pkotamni/StopStopbarTo2Bbar2B_M-300_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250118_135421/0000/ntuple_0.root']),
 'ggHToSSTodddd_tau1mm_M55_2017': _fromnum0("/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_2017/250118_135240", 71),
 })
@@ -1307,8 +1309,65 @@ _add_ds("ntupleonnormdzulv30metm", {
 })
         
 
+_add_ds("ntuple20161ulv30_bkglepm", {
+'qcdempt015_20161': _fromnum1("/store/user/aduquett/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_183409", 32),
+'qcdmupt15_20161': _fromnum1("/store/user/aduquett/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_183440", 13),
+'qcdempt020_20161': _fromnum1("/store/user/aduquett/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_183723", 8),
+'qcdempt030_20161': _fromnum1("/store/user/aduquett/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_183752", 8),
+'qcdempt050_20161': (1, ['/store/user/aduquett/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_183822/0000/ntuple_1.root']),
+'qcdempt080_20161': _fromnum1("/store/user/aduquett/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_184102", 9),
+'qcdempt120_20161': _fromnum1("/store/user/aduquett/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_184551", 10),
+'qcdempt170_20161': (1, ['/store/user/aduquett/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_184833/0000/ntuple_1.root']),
+'qcdempt300_20161': _fromnum1("/store/user/aduquett/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_184907", 6),
+'qcdbctoept020_20161': _fromnum1("/store/user/aduquett/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_185158", 11),
+'qcdbctoept030_20161': _fromnum1("/store/user/aduquett/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_185441", 11),
+'qcdbctoept080_20161': _fromnum1("/store/user/aduquett/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_185511", 13),
+'qcdbctoept170_20161': _fromnum1("/store/user/aduquett/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190003", 12),
+'qcdbctoept250_20161': _fromnum1("/store/user/aduquett/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190034", 15),
+'wjetstolnu_0j_20161': _fromnum1("/store/user/aduquett/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190109", 166),
+'wjetstolnu_1j_20161': _fromnum1("/store/user/aduquett/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190139", 181),
+'wjetstolnu_2j_20161': _fromnum1("/store/user/aduquett/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190209", 100),
+'dyjetstollM10_20161': _fromnum1("/store/user/aduquett/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_190449", 23),
+'dyjetstollM50_20161': _fromnum1("/store/user/aduquett/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_191404", 103),
+'ttbar_20161': _fromnum1("/store/user/aduquett/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20161ULV30_bkgLepm_20161/250212_142944", 141),
+'ttbar_had_20161': _fromnum1("/store/user/aduquett/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/Ntuple20161ULV30_bkgLepm_20161/250205_232821", 160),
+'ww_20161': _fromnum1("/store/user/aduquett/WW_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_191645", 22),
+'zz_20161': _fromnum1("/store/user/aduquett/ZZ_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_191715", 5),
+'wz_20161': _fromnum1("/store/user/aduquett/WZ_TuneCP5_13TeV-pythia8/Ntuple20161ULV30_bkgLepm_20161/250129_192418", 13),
+})
+
+
+_add_ds("ntuple20162ulv30_bkglepm", {
+'qcdempt015_20162': _fromnum1("/store/user/aduquett/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162045", 16),
+'qcdmupt15_20162': _fromnum1("/store/user/aduquett/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162119", 11),
+'qcdempt020_20162': _fromnum1("/store/user/aduquett/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162150", 11),
+'qcdempt030_20162': _fromnum1("/store/user/aduquett/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162222", 4),
+'qcdempt050_20162': _fromnum1("/store/user/aduquett/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162253", 7),
+'qcdempt080_20162': _fromnum1("/store/user/aduquett/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162323", 8),
+'qcdempt120_20162': _fromnum1("/store/user/aduquett/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162354", 6),
+'qcdempt170_20162': _fromnum1("/store/user/aduquett/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162635", 3),
+'qcdempt300_20162': _fromnum1("/store/user/aduquett/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162706", 5),
+'qcdbctoept020_20162': _fromnum1("/store/user/aduquett/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_162947", 14),
+'qcdbctoept030_20162': _fromnum1("/store/user/aduquett/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163018", 23),
+'qcdbctoept080_20162': _fromnum1("/store/user/aduquett/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163048", 16),
+'qcdbctoept170_20162': _fromnum1("/store/user/aduquett/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163119", 16),
+'qcdbctoept250_20162': _fromnum1("/store/user/aduquett/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163402", 16),
+'wjetstolnu_0j_20162': _fromnum1("/store/user/aduquett/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163854", 188),
+'wjetstolnu_1j_20162': _fromnum1("/store/user/aduquett/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163926", 196),
+'wjetstolnu_2j_20162': (115, ['/store/user/aduquett/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_163956/0000/ntuple_%i.root' % i for i in chain(xrange(1,110), xrange(111,117))]),
+'dyjetstollM10_20162': _fromnum1("/store/user/aduquett/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_164703", 31),
+'dyjetstollM50_20162': _fromnum1("/store/user/aduquett/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_164946", 95),
+'ttbar_20162': _fromnum1("/store/user/aduquett/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple20162ULV30_bkgLepm_20162/250212_145049", 208),
+'ttbar_had_20162': _fromnum1("/store/user/aduquett/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/Ntuple20162ULV30_bkgLepm_20162/250205_230029", 252),
+'ww_20162': _fromnum1("/store/user/aduquett/WW_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_165018", 26),
+'zz_20162': _fromnum1("/store/user/aduquett/ZZ_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_165306", 11),
+'wz_20162': _fromnum1("/store/user/aduquett/WZ_TuneCP5_13TeV-pythia8/Ntuple20162ULV30_bkgLepm_20162/250129_165403", 15),
+})
+
+
 
 _add_ds("ntupleonnormdzulv30lepm", {
+'ttbar_2017': (59, ['/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2017/250205_205504/0000/ntuple_%i.root' % i for i in chain(xrange(1,18), xrange(19,61))]),
 'qcdpt15mupt5_2017': (7, ['/store/group/lpclonglived/pkotamni/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200037/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(6,10))]),
 'qcdpt20mupt5_2017': (56, ['/store/group/lpclonglived/pkotamni/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200038/0000/ntuple_%i.root' % i for i in chain(xrange(36), xrange(41,47), xrange(48,53), xrange(54,59), xrange(61,65))]),
 'qcdpt30mupt5_2017': (76, ['/store/group/lpclonglived/pkotamni/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200039/0000/ntuple_%i.root' % i for i in chain(xrange(2), xrange(5,13), xrange(15,21), xrange(23,25), xrange(26,45), xrange(47,72), xrange(75,79), xrange(85,88), xrange(102,108), [73])]),
@@ -1343,6 +1402,7 @@ _add_ds("ntupleonnormdzulv30lepm", {
 'ww_2017': _fromnum1("/store/group/lpclonglived/pkotamni/WW_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200109", 19),
 'zz_2017': _fromnum0("/store/group/lpclonglived/pkotamni/ZZ_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200110", 4),
 'wz_2017': (9, ['/store/group/lpclonglived/pkotamni/WZ_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200111/0000/ntuple_%i.root' % i for i in chain(xrange(2,10), [0])]),
+'ttbar_2018': (149, ['/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2018/250205_205739/0000/ntuple_%i.root' % i for i in chain(xrange(1,6), xrange(9,19), xrange(23,26), xrange(27,45), xrange(46,157), [7, 21])]),
 'qcdmupt15_2018': (18, ['/store/group/lpclonglived/pkotamni/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2018/250105_115504/0000/ntuple_%i.root' % i for i in chain(xrange(2), xrange(8,14), xrange(15,23), [5, 24])]),
 'qcdempt015_2018': (8, ['/store/group/lpclonglived/pkotamni/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2018/250105_115505/0000/ntuple_%i.root' % i for i in chain(xrange(3,7), xrange(8,11), [1])]),
 'qcdempt020_2018': _fromnum0("/store/group/lpclonglived/pkotamni/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30Lepm_2018/250105_115506", 16),

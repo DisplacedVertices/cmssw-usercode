@@ -33,8 +33,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_Lepton_triggers :
         #samples = [getattr(Samples, 'ZHToSSTodddd_tau1mm_M40_2018')] 
-        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')] 
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, diboson=True, Lepton_data=True)
+        samples = [getattr(Samples, 'ttbar_2018')] 
+        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, diboson=True, Lepton_data=True)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     elif use_Muon_triggers :
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep = False, leptonic=False, met=False, diboson=False)

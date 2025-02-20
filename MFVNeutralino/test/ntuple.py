@@ -4,7 +4,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 from JMTucker.Tools.Year import year
 
 settings = NtupleSettings()
-settings.is_mc = True
+settings.is_mc = True #FIXME
 settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
@@ -14,10 +14,8 @@ settings.keep_all = False #FIXME True for _NoEF only for signal MC
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
-    #settings.event_filter = 'dilepton only' # for new trigger studies
-    #settings.event_filter = 'leptons only' # for new trigger studies
-    #settings.event_filter = 'low HT online track test' # for new trigger studies
     settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+    #settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # for new trigger studies
 elif use_MET_triggers :
     settings.event_filter = 'met only'
 elif use_Lepton_triggers :
@@ -42,7 +40,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/8ABE7321-B876-E248-951A-02BA0140B498.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/056FAB59-F395-374B-BB32-E4A70D6C65BA.root')
-#max_events(process, 100)
+max_events(process, 200)
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/WplsuH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
@@ -54,6 +52,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/260000/00F00BE5-0C38-D047-88F7-D8EC2FCDDDFA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTHTo2C_TTTo2L2Nu_M-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/2540000/036644E2-9F05-8D41-8CD4-885679962D80.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/100000/3B05C6F7-7877-BD43-8F5F-E29283865170.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_SingleLeptFromT_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2430000/00351BB6-B311-8F40-B684-A1C7A375AF71.root')
 cmssw_from_argv(process)
 
 
@@ -62,23 +61,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-       #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True)
-       #samples = Samples.DisplacedJet_data_samples_2017 + Samples.qcd_samples_2017
-       samples = [getattr(Samples, 'ggHToSSTodddd_tau1mm_M40_20161')]
+       samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
+       #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
     elif use_MET_triggers :
        samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
     elif use_Lepton_triggers :
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, diboson=True, Lepton_data=False)
-        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, diboson=False, Lepton_data=True) #set settings.is_mc to False
+        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
+        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=True, diboson=False, Lepton_data=True) #set settings.is_mc to False
     elif use_Muon_triggers :
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
-        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
-        #samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')] 
-        #samples = [getattr(Samples, 'mfv_stoplb_tau001000um_M0400_2017')] 
     elif use_Electron_triggers :
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
     else :
-        #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
         samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
