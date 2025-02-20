@@ -14,8 +14,8 @@ settings.keep_all = False #FIXME True for _NoEF only for signal MC
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
-    settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
-    #settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # for new trigger studies
+    #settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # for new trigger studies
 elif use_MET_triggers :
     settings.event_filter = 'met only'
 elif use_Lepton_triggers :

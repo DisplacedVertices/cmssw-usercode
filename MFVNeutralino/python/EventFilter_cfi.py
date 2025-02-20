@@ -20,7 +20,9 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
                               veto_bjet_triggers = cms.bool(False),
                               bjet_triggers_to_veto = cms.vstring('HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v',
-                                                             'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v'),
+                                                             'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v',
+                                                             #'HLT_HT430_DisplacedDijet40_DisplacedTrack_v',
+                                                             #'HLT_HT650_DisplacedDijet60_Inclusive_v'),
                                                              #'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v',
                                                              #'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v',
                                                              #'HLT_QuadJet45_TripleBTagCSV_p087_v',
@@ -28,14 +30,14 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                                                              #'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v'),
                               veto_lepton_triggers = cms.bool(False),
                               lepton_triggers_to_veto = cms.vstring(
-                                                              'HLT_IsoMu27_v*', 
-                                                              'HLT_IsoMu24_v*',
-                                                              'HLT_Mu50_v*',
-                                                              'HLT_Ele27_WPTight_Gsf_v*', 
-                                                              'HLT_Ele35_WPTight_Gsf_v*', 
-                                                              'HLT_Ele32_WPTight_Gsf_v*', 
-                                                              'HLT_Ele115_CaloIdVT_GsfTrkIdT_v*',
-                                                              'HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*',
+                                                              'HLT_IsoMu27_v', 
+                                                              'HLT_IsoMu24_v',
+                                                              'HLT_Mu50_v',
+                                                              'HLT_Ele27_WPTight_Gsf_v', 
+                                                              'HLT_Ele35_WPTight_Gsf_v', 
+                                                              'HLT_Ele32_WPTight_Gsf_v', 
+                                                              'HLT_Ele115_CaloIdVT_GsfTrkIdT_v',
+                                                              'HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v',
                                                              ),
                               electron_effective_areas = cms.FileInPath('RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt'),
                               parse_randpars = cms.bool(False), 
@@ -53,7 +55,7 @@ mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_elec
 mfvEventFilterDileptonOnly = mfvEventFilter.clone(mode = 'dilepton only', min_electron_pt = cms.double(20), min_muon_pt = cms.double(20), min_nleptons = cms.int32(2))
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(200))
-mfvEventFilterBjetsORDisplacedDijetVetoLeptonHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto leptons and HT', min_ht = cms.double(200), min_nleptons = cms.int32(0), veto_lepton_triggers = cms.bool(True))
+mfvEventFilterBjetsORDisplacedDijetVetoLeptonHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto leptons and HT', min_ht = cms.double(200), min_nleptons = cms.int32(1), veto_lepton_triggers = cms.bool(True))
 mfvEventFilterBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterMETOnly = mfvEventFilter.clone(mode = 'MET only', min_ht = cms.double(-1))
 mfvEventFilterDisplacedDijetVetoBjets = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(200), min_nleptons = cms.int32(0), veto_bjet_triggers = cms.bool(True))
