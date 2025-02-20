@@ -90,6 +90,10 @@ def effs(fn):
    
     ngen = f.Get('mfvWeight/h_sums').GetBinContent(1) 
 
+    #weight = 137.1*1000*(0.063168 + 0.30885)/ngen #VH 
+    weight = 137.1*(1.0)/ngen #RPV 
+    #weight = 137.1*1000*(52.0)*0.1/ngen #ggH
+
     n1v3numall, n1v3numall_unweighted = get_n('mfvMiniTreeNtk3',2,2)
     n1v4numall, n1v4numall_unweighted = get_n('mfvMiniTreeNtk4',2,2)
     n1v5numall, n1v5numall_unweighted = get_n('mfvMiniTree',2,2)
@@ -119,12 +123,6 @@ def effs(fn):
     err_tot_n1v4 += n1v4numall * (weight**2)
     err_tot_n1v5 += n1v5numall * (weight**2)
     
-    #weight = 137.1*1000*(0.063168 + 0.30885)/ngen #VH 
-    weight = 137.1*(1.0)/ngen #RPV 
-    #weight = 137.1*1000*(52.0)*0.1/ngen #ggH
-    
-    print("ngen :",ngen)
-    print("raw yield :", 137.1*(1.0))
     if csv:
         #print '%s & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)
         print '%s & $%0.1f\pm%0.1f$ & $%0.2f\pm%0.2f$ & $%0.2f\pm%0.2f$ & $%0.2f\pm%0.2f$ & $%0.2f\pm%0.2f$ & $%0.2f\pm%0.2f$ & $%0.2f\pm%0.2f$' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)

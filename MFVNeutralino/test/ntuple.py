@@ -40,7 +40,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/8ABE7321-B876-E248-951A-02BA0140B498.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/056FAB59-F395-374B-BB32-E4A70D6C65BA.root')
-max_events(process, 200)
+#max_events(process, 200)
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/WplsuH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
@@ -52,7 +52,7 @@ max_events(process, 200)
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/260000/00F00BE5-0C38-D047-88F7-D8EC2FCDDDFA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTHTo2C_TTTo2L2Nu_M-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/2540000/036644E2-9F05-8D41-8CD4-885679962D80.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/100000/3B05C6F7-7877-BD43-8F5F-E29283865170.root')
-input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_SingleLeptFromT_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2430000/00351BB6-B311-8F40-B684-A1C7A375AF71.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_SingleLeptFromT_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2430000/00351BB6-B311-8F40-B684-A1C7A375AF71.root')
 cmssw_from_argv(process)
 
 
