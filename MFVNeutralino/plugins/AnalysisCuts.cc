@@ -63,6 +63,7 @@ private:
   const bool dijet_agnostic;
   const bool bjet_agnostic;
   const bool bjet_veto;
+  const bool leptonht_veto;
   const bool study_jer;
   const bool study_jes;
   const bool jes_jer_var_up;
@@ -138,6 +139,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     dijet_agnostic(cfg.getParameter<bool>("dijet_agnostic")),
     bjet_agnostic(cfg.getParameter<bool>("bjet_agnostic")),
     bjet_veto(cfg.getParameter<bool>("bjet_veto")),
+    leptonht_veto(cfg.getParameter<bool>("leptonht_veto")),
     study_jer(cfg.getParameter<bool>("study_jer")),
     study_jes(cfg.getParameter<bool>("study_jes")),
     jes_jer_var_up(cfg.getParameter<bool>("jes_jer_var_up")),
@@ -318,6 +320,29 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
 
             if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, setup)) return false;
             if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, setup)) return false;
+
+
+            if (leptonht_veto){
+              
+              // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
+              if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
+
+              bool pass_lep_events = false; 
+              for(size_t trig : mfv::MuonTriggers){
+                if(satisfiesLepTrigger(mevent, trig, setup)) { 
+                  pass_lep_events = true;
+                  break;
+                }
+              }
+              
+              for(size_t trig : mfv::ElectronTriggers){
+                if(satisfiesLepTrigger(mevent, trig, setup)) { 
+                  pass_lep_events = true;
+                  break;
+                 }
+              }
+              if (pass_lep_events) return false;
+            }
 
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 

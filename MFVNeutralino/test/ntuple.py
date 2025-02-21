@@ -14,7 +14,8 @@ settings.keep_all = False #FIXME True for _NoEF only for signal MC
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
-    #settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+    settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+if use_btag_vetoLepHT_triggers :
     settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # for new trigger studies
 elif use_MET_triggers :
     settings.event_filter = 'met only'
@@ -61,6 +62,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
+       samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
+       #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
+    elif use_btag_vetoLepHT_triggers :
        samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
        #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
     elif use_MET_triggers :

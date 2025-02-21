@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_btag_vetoLepHT_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
 
 if use_btag_triggers:
+  apply_presel = cms.int32(6)  
+elif use_btag_vetoLepHT_triggers:
   apply_presel = cms.int32(6)  
 elif use_MET_triggers:
   apply_presel = cms.int32(5)
@@ -29,6 +31,7 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                dijet_agnostic      = cms.bool(False),
                                bjet_agnostic       = cms.bool(False),
                                bjet_veto           = cms.bool(False),
+                               leptonht_veto       = cms.bool(True) if  use_btag_vetoLepHT_triggers else cms.bool(False),
                                study_jer           = cms.bool(False),
                                study_jes           = cms.bool(False),
                                jes_jer_var_up      = cms.bool(False), # Only used if study_jer or study_jes is true. True = var_up, False = var_down

@@ -2,7 +2,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_btag_vetoLepHT_triggers 
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #input_files(process, '/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504/0000/ntuple_0.root')
 #input_files(process, '/store/group/lpclonglived/pkotamni/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200106/0000/ntuple_0.root')
@@ -131,7 +131,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
-        samples = [getattr(Samples, 'ttbar_2018')]
+        samples = [getattr(Samples, 'mfv_neu_tau001000um_M0400_2017', 'mfv_stopbbarbbar_tau001000um_M0300_2017')]
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+    elif  use_btag_vetoLepHT_triggers:
+        samples = pick_samples(dataset, qcd=True, data = False, all_signal = False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)

@@ -117,7 +117,7 @@ def effs(fn):
         numvtx = -1
     ngen = f.Get('mfvWeight/h_sums').GetBinContent(1) 
     #weight = 40.6*1000*(0.063168 + 0.30885)/ngen
-    weight = 137.1*(1.0)/ngen
+    #weight = 137.1*(1.0)/ngen
 
     tot_ngen += ngen
     tot_sum += numall * weight
@@ -196,8 +196,8 @@ if not fns:
     #fns = [os.path.join(dir, sn + '.root') for sn in ' WminusHToSSTodddd_tau1mm_M55 WplusHToSSTodddd_tau1mm_M55 ZHToSSTodddd_tau1mm_M55'.split()]
     #fns = [os.path.join(dir, sn + '.root') for sn in ' wjetstolnu_2j_2017 '.split()]
     #fns = [os.path.join(dir, sn + '.root') for sn in ' VHToSSTodddd_tau1mm_M55_2017 VHToSSTodddd_tau10mm_M55_2017 '.split()]
-    fns = [os.path.join(dir, sn + '.root') for sn in ' mfv_neu_tau001000um_M0400_2017 '.split()]
-    #fns = [os.path.join(dir, sn + '_2017.root') for sn in ' qcdpt15mupt5 qcdpt20mupt5 qcdpt30mupt5 qcdpt50mupt5 qcdpt80mupt5 qcdpt120mupt5 qcdpt170mupt5 qcdpt300mupt5 qcdpt470mupt5 qcdpt470mupt5 qcdpt1000mupt5 qcdpt600mupt5 qcdpt800mupt5 qcdempt020 qcdempt030 qcdempt050 qcdempt080 qcdempt120 qcdempt170 qcdempt300 qcdbctoept015 qcdbctoept020 qcdbctoept030 qcdbctoept170 qcdbctoept250 ww wz zz dyjetstollM10 dyjetstollM50 wjetstolnu_0j wjetstolnu_2j '.split()]
+    #fns = [os.path.join(dir, sn + '.root') for sn in ' mfv_neu_tau001000um_M0400_2017 '.split()]
+    fns = [os.path.join(dir, sn + '_2017.root') for sn in ' ttbar qcdpt15mupt5 qcdpt20mupt5 qcdpt30mupt5 qcdpt50mupt5 qcdpt80mupt5 qcdpt120mupt5 qcdpt170mupt5 qcdpt300mupt5 qcdpt470mupt5 qcdpt470mupt5 qcdpt1000mupt5 qcdpt600mupt5 qcdpt800mupt5 qcdempt020 qcdempt030 qcdempt050 qcdempt080 qcdempt120 qcdempt170 qcdempt300 qcdbctoept015 qcdbctoept020 qcdbctoept030 qcdbctoept170 qcdbctoept250 ww wz zz dyjetstollM10 dyjetstollM50 wjetstolnu_0j wjetstolnu_1j wjetstolnu_2j '.split()]
     #fns = [os.path.join(dir, sn + '.root') for sn in ' ttbar_2018 qcdmupt15_2018 qcdempt015_2018 qcdempt020_2018 qcdempt030_2018 qcdempt050_2018 qcdempt080_2018 qcdempt120_2018 qcdempt170_2018 qcdbctoept015_2018 qcdbctoept020_2018 qcdbctoept030_2018 qcdbctoept080_2018 qcdbctoept170_2018 qcdbctoept250_2018 qcdempt300_2018 wjetstolnu_0j_2018 wjetstolnu_1j_2018 wjetstolnu_2j_2018 dyjetstollM10_2018 dyjetstollM50_2018 ww_2018 wz_2018 zz_2018 SingleMuon2018A SingleMuon2018B SingleMuon2018C SingleMuon2018D EGamma2018A EGamma2018B EGamma2018C EGamma2018D '.split()] 
     fns = [fn for fn in fns if os.path.isfile(fn)]
     nosort = True
@@ -209,7 +209,7 @@ if csv:
 
 for fn in fns:
     effs(fn)
-#print 'tot (numgen $%.d$) & $%d\pm%d$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$' % (tot_ngen, tot_sum, tot_var**0.5,tot_n1v3, err_tot_n1v3**0.5, tot_n2v3, err_tot_n2v3**0.5, tot_n1v4, err_tot_n1v4**0.5, tot_n2v4, err_tot_n2v4**0.5, tot_n1v5, err_tot_n1v5**0.5, tot_n2v5, err_tot_n2v5**0.5)
+print 'tot (numgen $%.d$) & $%d\pm%d$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$' % (tot_ngen, tot_sum, tot_var**0.5,tot_n1v3, err_tot_n1v3**0.5, tot_n2v3, err_tot_n2v3**0.5, tot_n1v4, err_tot_n1v4**0.5, tot_n2v4, err_tot_n2v4**0.5, tot_n1v5, err_tot_n1v5**0.5, tot_n2v5, err_tot_n2v5**0.5)
 if print_sum:
     if csv:
         print 'sum for %f/pb,,,,,%f,%f' % (int_lumi, tot_sum, tot_var**0.5)

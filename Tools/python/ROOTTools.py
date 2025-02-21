@@ -966,11 +966,11 @@ def data_mc_comparison(name,
 
     for sample in signal_samples:
         if "VHToSSTodddd_tau1mm_M55" in sample.name:
-           sample.hist.Scale(628.0*((5)*10**6)/sample.hist.Integral() + 10**-16) # ~628 W/ZH yield in run2 for 1mm 55GeV 
+           sample.hist.Scale(628.0*(10**3)/sample.hist.Integral() + 10**-16) # ~628 W/ZH yield in run2 for 1mm 55GeV 
         elif "VHToSSTodddd_tau10mm_M55" in sample.name:
-           sample.hist.Scale(893.0*((5)*10**6)/sample.hist.Integral() + 10**-16) # ~893 W/ZH yield in run2 for 10mm 55GeV
+           sample.hist.Scale(893.0*(10**3)/sample.hist.Integral() + 10**-16) # ~893 W/ZH yield in run2 for 10mm 55GeV
         elif "ggHToSSTodddd_tau1mm_M55" in sample.name:
-           sample.hist.Scale(3287*((5)*10**6)/(sample.hist.Integral() + 10**-16)) # ~3287 ggH yield in run2 for 1mm 55GeV
+           sample.hist.Scale(3287*(10**3)/(sample.hist.Integral() + 10**-16)) # ~3287 ggH yield in run2 for 1mm 55GeV
         elif "mfv_neu_tau001000um_M0400" in sample.name:
            sample.hist.Scale(36*((5)*10**6)/(sample.hist.Integral() + 10**-16)) # ~36 tbs yield in run2 for 1mm 400GeV
         elif "mfv_stopdbardbar_tau001000um_M0200" in sample.name:
