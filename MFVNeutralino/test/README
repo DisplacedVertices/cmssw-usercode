@@ -1,0 +1,24 @@
+Wrote on 03/20/2025 by Peace Kotamnives
+
+1. reweight background sample by year and by trigger channel 
+~/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/utilities_20161.py btagpresel histos 20161 &
+or 
+~/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/utilities_20161.py leptonpresel histos 20161 &
+
+Note that some FIXMEs in the scripts are subjected to change based on the existence of background processes in the directory that this command is executed. To change to 20162, 2017, or 2018, simply replace 20161 to such year, except utilities.py for 2017.
+
+2. merge background sample by processes to one (we need to do this outside utilities*.py to avoid runtime error (i.e. hadd before reweight is done) ) 
+hadd.py background_leptonpresel_20161.root qcd_leptonpresel_20161.root wjetstolnu_leptonpresel_20161.root dyjets_leptonpresel_20161.root diboson_leptonpresel_20161.root ttbar_leptonpresel_20161.root
+or 
+hadd.py background_btagpresel_20161.root qcd_btagpresel_20161.root ttbar_btagpresel_20161.root
+
+3. get a yield table of signal or background by trigger channel
+python effsprint.py ~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/ csv run2 presel integral > run2_bkg_lepton_trig_yields 
+with weight = 1.0 and fns = [os.path.join(dir, sn + '_leptonpresel_run2.root') for sn in ' qcd wjetstolnu ttbar diboson dyjets '.split()]
+or
+python effsprint.py ~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/ csv run2 presel integral > run2_vh_lepton_trig_yields
+with weight = 137.1*1000*(0.063168 + 0.30885)/ngen and fns = [os.path.join(dir, sn + '_run2.root') for sn in ' VHToSSTodddd_tau1mm_M55 VHToSSTodddd_tau10mm_M55 '.split()]
+
+
+These scripts are assumed to take histo*.root inputs but they can be adapted for minitree*.root inputs. The main issue about minitree*.root is that their histograms are not applied for event weights, unlike histo*.root inputs. 
+
