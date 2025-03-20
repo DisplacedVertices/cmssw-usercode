@@ -966,17 +966,17 @@ def data_mc_comparison(name,
 
     for sample in signal_samples:
         if "VHToSSTodddd_tau1mm_M55" in sample.name:
-           sample.hist.Scale(628.0*(10**3)/sample.hist.Integral() + 10**-16) # ~628 W/ZH yield in run2 for 1mm 55GeV 
+           sample.hist.Scale(726.0*(10**3)/sample.hist.Integral() + 10**-16) # ~726 W/ZH yield in run2 for 1mm 55GeV 
         elif "VHToSSTodddd_tau10mm_M55" in sample.name:
-           sample.hist.Scale(893.0*(10**3)/sample.hist.Integral() + 10**-16) # ~893 W/ZH yield in run2 for 10mm 55GeV
+           sample.hist.Scale(1223.0*(10**3)/sample.hist.Integral() + 10**-16) # ~1223 W/ZH yield in run2 for 10mm 55GeV
         elif "ggHToSSTodddd_tau1mm_M55" in sample.name:
-           sample.hist.Scale(3287*(10**3)/(sample.hist.Integral() + 10**-16)) # ~3287 ggH yield in run2 for 1mm 55GeV
+           sample.hist.Scale(5915*(10**3)/(sample.hist.Integral() + 10**-16)) # ~5915 ggH yield in run2 for 1mm 55GeV
         elif "mfv_neu_tau001000um_M0400" in sample.name:
-           sample.hist.Scale(36*((5)*10**6)/(sample.hist.Integral() + 10**-16)) # ~36 tbs yield in run2 for 1mm 400GeV
+           sample.hist.Scale(31.6*(10**3)/(sample.hist.Integral() + 10**-16)) # ~31.6 tbs yield in run2 for 1mm 400GeV
         elif "mfv_stopdbardbar_tau001000um_M0200" in sample.name:
-           sample.hist.Scale(12*((5)*10**6)/(sample.hist.Integral() + 10**-16)) # ~12 dd yield in run2 for 1mm 200GeV
+           sample.hist.Scale(14.5*(10**3)/(sample.hist.Integral() + 10**-16)) # ~14.5 dd yield in run2 for 1mm 200GeV
         elif "mfv_stopdbardbar_tau000300um_M0400" in sample.name:
-           sample.hist.Scale(10*((5)*10**6)/(sample.hist.Integral() + + 10**-16))  # ~10 dd yield in run2 for 0.3mm 400GeV
+           sample.hist.Scale(9.1*(10**3)/(sample.hist.Integral() + + 10**-16))  # ~9.1 dd yield in run2 for 0.3mm 400GeV
         else:
            print("missing information of this signal")
         sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))

@@ -85,8 +85,14 @@ def scaledTOC(sig_num, sig_den, data_curve, mc_curve):
               bincontent = sig_num.GetBinContent(b)/sig_den.GetBinContent(b)
               bincontent_err = math.sqrt(bincontent*(1-bincontent)/sig_den.GetBinContent(b));
 
-            s_curve.SetBinContent(b, bincontent*scale)
-            s_curve.SetBinError(b, bincontent_err*scale)
+
+            if (np.fabs(bincontent*scale) > 1.0):
+              s_curve.SetBinContent(b, bincontent)
+              s_curve.SetBinError(b, bincontent_err)
+            else:
+              s_curve.SetBinContent(b, bincontent*scale)
+              s_curve.SetBinError(b, bincontent_err*scale)
+
     return s_curve
     
 #############################################################################################
@@ -161,9 +167,10 @@ def assessSignalEffUncerts(den, num): #To report signal efficiency error from a 
     # eff is normalized to 1
     d_den = den.Clone() 
     n_num = num.Clone()
-    eff_sig = n_num.Integral()/d_den.Integral()
+    eff_sig = n_num.Integral()/(d_den.Integral()+1e-16)
     denominator = den.Integral()  
-    rat_err = round (math.sqrt(eff_sig*(1-eff_sig)/denominator), 2)  
+    eff_sig = abs(eff_sig)
+    rat_err = round (math.sqrt(eff_sig*(1-eff_sig)/(denominator+1e-16)), 2)  
 
     return rat_err
 
@@ -235,16 +242,16 @@ def calcTocShiftUncert(low, cent, hi):
 
 # Initialize stuff:
 
-years = [ '2017p8']
+years = [ '20161p2', '2017p8'] #FIXME
 doShift  = True
 reweight = True
 #toc_shift = 0.0   # How much to move the turn-on curve by
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['55'] 
-mass = '55'
-ctaus       = ['1000',] # '10000'] #[ '100', '300', '1000', '3000', '10000', '30000'] #['1000', '3000', '30000'] 
+masses = ['0200'] 
+mass = '0200'
+ctaus       = [ '000100', '000300', '001000', '010000', '030000'] #['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
 
@@ -262,14 +269,14 @@ uncertArray = []
 all_stat_uncerts = {}
 all_overlap_uncerts = {}
 
-list_eff = [2000.0]
-list_eff_2 = [2000.0]
-list_ctau = [0.1, 1.0, 10.0] #[ 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+list_eff = []
+list_eff_2 = []
+list_ctau = [ 0.1, 0.3, 1.0, 10.0, 30.0]
 list_ctau = np.log10(list_ctau)
-list_err = [0.0]
-list_err_2 = [0.0]
-list_relerr = [2000.0]
-list_relerr_2 = [2000.0]
+list_err = []
+list_err_2 = []
+list_relerr = []
+list_relerr_2 = []
 for year in years:  
   for ctau in ctaus:
     possible_eta = { "Low" : 0, "Mix" : 0, "High": 0 }
@@ -311,11 +318,16 @@ for year in years:
                 dat_str = ''
 
                 if not reweight:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root" % (eta, year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root" % (eta, year)
+                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/background_btagpresel_%s.root" % (eta,year)
+                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/BTagDispl%s.root" % (eta,year)
                 else:
-                    sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/background_leptonpresel_%s.root" % (eta, int(ctau), int(mass), year)
-                    dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/SingleMuon%s.root" % (eta, int(ctau), int(mass), year)
+                    if eta=='High':
+                       sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_StopBbarBbar_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta,int(ctau), int(mass), year)
+                       dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_StopBbarBbar_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta,int(ctau), int(mass), year)
+                    else:
+                       sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_StopBbarBbar_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta,int(ctau), int(mass), year)
+                       dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_StopBbarBbar_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta,int(ctau), int(mass), year)
+
                 tm_sim  = ROOT.TFile(sim_str)
                 tm_dat  = ROOT.TFile(dat_str)
                 
@@ -341,7 +353,7 @@ for year in years:
                    str_ctau = str(ctau)+'um'
 
                 print(ctau, str_ctau)
-                signal  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
+                signal  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau'+ctau+'um_M'+mass+'_'+ year +'.root')
                 
                 sig_dist = signal.Get('nocuts_closeseedtks_den')
                 sig_denom = sig_dist.Clone()
@@ -350,7 +362,7 @@ for year in years:
                 #psd_dist = ROOT.TH1D("psd_dist", "M"+mass+"ctau"+ctau+"um", 80, 0, 80)
                 sig_curve.Divide(sig_curve, sig_denom, 1, 1, "B")
                 
-                signal_non  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+                signal_non  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau'+ctau+'um_M'+mass+'_'+ year +'.root')  
                 
                 signon_dist = signal_non.Get('nocuts_closeseedtks_den')
                 non_denom = signon_dist.Clone() 
@@ -358,7 +370,7 @@ for year in years:
                 signon_curve = non_aaaaa.Clone()
                 signon_curve.Divide(signon_curve, non_denom, 1, 1, "B")
                 
-                signal_vetopdvv  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+                signal_vetopdvv  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau'+ctau+'um_M'+mass+'_'+ year +'.root')  
                 
                 sigovp_dist = signal_vetopdvv.Get('nocuts_dvv_den')
                 ovp_denom = sigovp_dist.Clone() 
@@ -470,10 +482,10 @@ for year in years:
                 
                 
                 #possible_sig = sig_dist.Integral() + 1e-16
-                possible_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0300), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral() + 1e-16
+                possible_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0360), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral() + 1e-16
                 possible_sigovp = sigovp_dist.Integral(sigovp_dist.FindBin(0.0), sigovp_dist.FindBin(0.0300)) + 1e-16
-                possible_ovpfail = sigovp_dist.Integral(sigovp_dist.FindBin(0.0300), sigovp_dist.FindBin(0.0360)) #20% vertex position discrepancy between data and MC leads to overlapping boundary discrepancy 
-               
+                possible_ovpfail = sigovp_dist.Integral(sigovp_dist.FindBin(0.0300), sigovp_dist.FindBin(0.0360)) + + 1e-16 #20% vertex position discrepancy between data and MC leads to overlapping boundary discrepancy 
+                possible_all = sigovp_dist.Integral() + signon_dist.Integral() + 1e-16
                 
                 possible_psd = psd_dist.Integral() + 1e-16
                 possible_psd_emu = psd_emu_dist.Integral() + 1e-16
@@ -491,22 +503,22 @@ for year in years:
                 psd_emu_dist.Multiply(psd_emu_curve)
                 
                 
-                pass_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0300), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral()
+                pass_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0360), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral()
                 pass_sigovp =  sigovp_dist.Integral(sigovp_dist.FindBin(0.0), sigovp_dist.FindBin(0.0300)) 
                 pass_psd = psd_dist.Integral()
                 pass_psd_emu = psd_emu_dist.Integral()
                 
-                possible_eta[eta] = possible_signon+possible_sigovp
+                possible_eta[eta] = possible_all
                 
-                eff_sig = 1e-16 + (pass_signon+pass_sigovp)/(possible_signon+possible_sigovp)
+                eff_sig = 1e-16 + (pass_signon+pass_sigovp)/(possible_all)
                 eff_signon = 1e-16 + (pass_signon/possible_signon)
                 eff_sigovp = 1e-16 + (pass_sigovp/possible_sigovp)
                 eff_psd = 1e-16 + (pass_psd/possible_psd)
                 eff_psd_emu = 1e-16 + (pass_psd_emu/possible_psd_emu)
                 eff_eta[eta] = 1e-16 + eff_sig 
 
-                dvv_unc = (possible_ovpfail*(eff_signon - eff_sigovp))/((possible_signon+possible_sigovp)*eff_sig) #discrepancy with respect to yield
-                ovp_unc = (possible_sigovp*(eff_sigovp - (eff_sigovp/2.0)))/((possible_signon+possible_sigovp)*eff_sig) 
+                dvv_unc = (possible_ovpfail*(eff_signon - eff_sigovp))/((possible_all)*eff_sig) #discrepancy with respect to yield
+                ovp_unc = (possible_sigovp*(eff_sigovp - (eff_sigovp/2.0)))/((possible_all)*eff_sig) 
 
                 err_signon = assessSignalEffUncerts(pre_signon_dist, signon_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
                 err_sigovp = assessSignalEffUncerts(pre_sigovp_dist, sigovp_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
@@ -523,8 +535,8 @@ for year in years:
                 if psd_method == 'none':
                     none_signon_integral = round(possible_signon,2) 
                     none_sigovp_integral = round(possible_sigovp,2) 
-                    frac_vetopdvv = possible_sigovp/(possible_sigovp+possible_signon)
-                    frac_vetoodvv = possible_signon/(possible_sigovp+possible_signon)
+                    frac_vetopdvv = possible_sigovp/(possible_all)
+                    frac_vetoodvv = possible_signon/(possible_all)
                   
                     print("Mass: %s   Ctau: %s  \n" % (mass, ctau))
                     print("1-vtx incl. Eff of total %.2f : %.2f +/- %.2f \n" % (none_signon_integral+none_sigovp_integral, 100*eff_sig, 100*err_sig))
@@ -607,13 +619,13 @@ for year in years:
       list_eff_2.append(tot_eff_mass_tau*100)
       list_err_2.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
       list_relerr_2.append(np.sqrt(tot_err_mass_tau))
-ps = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
+ps = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
 canvas = ps.c
 canvas.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
 x = array('d', np.asarray(list_ctau))
 y = array('d', np.asarray(list_eff))
-ex = array('d', [0.0, 0.0, 0.0])
+ex = array('d', [0.0, 0.0, 0.0, 0.0, 0.0])
 ey = array('d', np.asarray(list_err))
 
 y2 = array('d', np.asarray(list_eff_2))
@@ -640,8 +652,8 @@ gr2.Draw("P")
 
 gr.SetTitle("pre(post)-VFP 2016");
 gr2.SetTitle("2017+2018");
-ROOT.gPad.BuildLegend(0.42,0.795,0.70,0.935,"","p");
-gr.SetTitle("VH->SS with LLP of "+str(mass)+" GeV")
+ROOT.gPad.BuildLegend(0.42,0.295,0.70,0.435,"","p");
+gr.SetTitle("Stop->bbarbbar with LLP of "+str(mass)+" GeV")
 xax = gr.GetXaxis()
 
 for i in range(len(list_ctau)):
@@ -662,10 +674,10 @@ p.Draw()
 ROOT.gPad.Modified()
 ROOT.gPad.Update()
 canvas.Update()
-ps.save('vhss_'+str(mass)+'GeV_mmCtau')
+ps.save('stopbbarbbar_'+str(mass)+'GeV_mmCtau')
 
 
-ps2 = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
+ps2 = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
 canvas2 = ps2.c
 canvas2.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
@@ -694,7 +706,7 @@ gr2.Draw("P")
 gr.SetTitle("pre(post)-VFP 2016");
 gr2.SetTitle("2017+2018");
 ROOT.gPad.BuildLegend(0.42,0.795,0.70,0.935,"","p");
-gr.SetTitle("VH->SS with LLP of "+str(mass)+" GeV")
+gr.SetTitle("Stop->bbarbbar with LLP of "+str(mass)+" GeV")
 xax = gr.GetXaxis()
 
 for i in range(len(list_ctau)):
@@ -715,4 +727,4 @@ p.Draw()
 ROOT.gPad.Modified()
 ROOT.gPad.Update()
 canvas2.Update()
-ps2.save('vhss_'+str(mass)+'GeV_mmCtau_relerr')
+ps2.save('stopbbarbbar_'+str(mass)+'GeV_mmCtau_relerr')

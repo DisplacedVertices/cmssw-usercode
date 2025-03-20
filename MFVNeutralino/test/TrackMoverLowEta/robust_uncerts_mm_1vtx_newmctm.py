@@ -239,15 +239,15 @@ def calcTocShiftUncert(low, cent, hi):
 
 # Initialize stuff:
 
-year = '2017p8'
+year = '20161p2'
 doShift  = True
 reweight = True
 #toc_shift = 0.0   # How much to move the turn-on curve by
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['15',]
-ctaus       = ['1000',] #['1000', '3000', '30000'] 
+masses = ['40',]
+ctaus       = ['300',] #['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
 # Start actually doing stuff

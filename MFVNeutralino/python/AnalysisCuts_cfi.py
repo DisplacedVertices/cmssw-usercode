@@ -22,9 +22,9 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                                              # 6 = bjets/displaced dijet (HT agnostic)
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
                                require_bquarks  = cms.bool(False), #cms.bool(True) if use_btag_triggers else cms.bool(False),
-                               require_trigbit  = cms.bool(True) if use_btag_triggers else cms.bool(False),
+                               require_trigbit  = cms.bool(True) if use_btag_triggers or use_btag_vetoLepHT_triggers else cms.bool(False),
                                require_gen_sumdbv  = cms.bool(False),
-                               require_bjet_psel   = cms.bool(True) if use_btag_triggers else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               require_bjet_psel   = cms.bool(True) if use_btag_triggers or use_btag_vetoLepHT_triggers else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
                                require_isomu27 = cms.bool(False),
                                study_btag_sf       = cms.bool(False),
                                study_btag_sfvar    = cms.int32(0), # Only used if above bool = True. Set to +1 for up-var, -1 for dn-var, 0 for central val

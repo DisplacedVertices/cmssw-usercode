@@ -5,12 +5,12 @@ import numpy as np
 
 #presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm' #FIXME 
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm'  #FIXME
+presel_path = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/' #'/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm' #FIXME 
+sel_path = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/' #'/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm'  #FIXME
 #presel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
 #sel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
 data = bool_from_argv('data')
-year = '2017' if len(sys.argv) < 2 else sys.argv[1]
+year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
 print("variation: %s" % varname)
 

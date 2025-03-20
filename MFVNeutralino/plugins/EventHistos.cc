@@ -543,11 +543,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_nsv->Fill(nsv, w);
   h_eventid->Fill(event.id().event());
 
+  //std::cout << "event id " <<  event.id().event() << " run id " << event.id().run() << std::endl;
+
   //////////////////////////////////////////////////////////////////////////////
-  /*
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
-
+  /*
   const size_t ngenlep = mevent->gen_leptons.size();
   h_gen_leptons->Fill(ngenlep, w);
 

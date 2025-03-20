@@ -6,16 +6,15 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 
-#year = 'run2'
-#year = '2017'
-#version = 'ULV11'
-#root_file_dir = '~/nobackup/crabdirs/Histos_FixWP_ULV11Bm_BkgOops_May17'
-#root_file_dir = '/eos/uscms/store/user/pkotamni/NtupleULV11Bm_2017_ROOT/'
-
-
 year = 'run2'
-version = 'OnnormdzULV30'
-root_file_dir = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm' 
+version = 'ULV30BvetoLHTm'
+root_file_dir = '/uscms/home/pkotamni/nobackup/crabdirs/Histos_FixAnCut_OnnormdzULV30BvetoLHTm'
+#root_file_dir = '~/nobackup/crabdirs/NtupleOnnormdzULV30BvetoLHTm/'
+
+
+#year = 'run2'
+#version = 'ULV30Lepm'
+#root_file_dir = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm' 
 #root_file_dir = '/eos/uscms/store/user/pkotamni/NtupleOnnormdzULV30Lepm_ROOT/'#'~/nobackup/crabdirs/NtupleOnnormdzULV30Lepm' 
 
 #year = '2017p8'
@@ -23,8 +22,8 @@ root_file_dir = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm'
 #root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV27m'
 
 set_style()
-ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/Lepton_repsig_mc_comp_part1_%s_%s' % (year, version)), pdf=True, log=True)
-
+ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/BjetDispl_repsig_mc_comp_part1_%s_%s_FixAnCut' % (year, version)), pdf=True, log=True)
+#ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/Lepton_repsig_mc_comp_part3_%s_%s' % (year, version)), pdf=True, log=True)
 
 qcd_samples = Samples.qcd_samples_2017[:-1]
 qcdlep_samples = Samples.qcd_lep_samples_2017[14:-1]
@@ -33,12 +32,12 @@ ttbar_samples = Samples.ttbar_samples_2017[0:1]
 wjetstolnu_samples = Samples.leptonic_samples_2017[0:3]
 dyjets_samples = Samples.leptonic_samples_2017[3:-1] 
 diboson_samples = Samples.diboson_samples_2017
-#signal_sample = [Samples.mfv_neu_tau001000um_M0400_2017, Samples.mfv_stopdbardbar_tau001000um_M0200_2017, Samples.mfv_stopdbardbar_tau000300um_M0400_2017, Samples.ggHToSSTodddd_tau1mm_M55_2017]
+signal_sample = [Samples.mfv_neu_tau001000um_M0400_2017, Samples.mfv_stopdbardbar_tau001000um_M0200_2017, Samples.mfv_stopdbardbar_tau000300um_M0400_2017, Samples.ggHToSSTodddd_tau1mm_M55_2017]
 #signal_sample = [Samples.ZHToSSTodddd_tau1mm_M55_2017, Samples.WplusHToSSTodddd_tau1mm_M55_2017, Samples.WminusHToSSTodddd_tau1mm_M55_2017]
-signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_2017, Samples.VHToSSTodddd_tau10mm_M55_2017]
+#signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_2017, Samples.VHToSSTodddd_tau10mm_M55_2017]
 data_samples = [] #Samples.Lepton_data_samples_2017
-background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
-#background_samples = ttbar_samples + qcd_samples 
+#background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
+background_samples = ttbar_samples + qcd_samples 
 lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 lumi_nice = ac.int_lumi_nice_2017
 
@@ -67,16 +66,17 @@ if year == 'run2':
     wjetstolnu_samples = Samples.leptonic_samples_20161[0:3] + Samples.leptonic_samples_20162[0:3] + Samples.leptonic_samples_2017[0:3] + Samples.leptonic_samples_2018[0:3]
     dyjets_samples = Samples.leptonic_samples_20161[3:-1] + Samples.leptonic_samples_20162[3:-1] + Samples.leptonic_samples_2017[3:-1] + Samples.leptonic_samples_2018[3:-1] 
     diboson_samples = Samples.diboson_samples_20161 + Samples.diboson_samples_20162 + Samples.diboson_samples_2017 + Samples.diboson_samples_2018
+    qcd_samples = Samples.qcd_samples_20161 + Samples.qcd_samples_20162 + Samples.qcd_samples_2017 + Samples.qcd_samples_2018
+    ttbar_samples = Samples.ttbar_samples_20161 + Samples.ttbar_samples_20162 + Samples.ttbar_samples_2017 + Samples.ttbar_samples_2018
     
-    #qcd_samples = Samples.qcd_samples_20161 + Samples.qcd_samples_20162 + Samples.qcd_samples_2017[:-1] + Samples.qcd_samples_2018[2:]
-    #ttbar_samples = Samples.ttbar_samples_20161 + Samples.ttbar_samples_20162 + Samples.ttbar_samples_2017 + Samples.ttbar_samples_2018
-    #signal_sample = Samples.mfv_stopdbardbar_tau001000um_M0300_2017
+    signal_sample = [Samples.mfv_neu_tau001000um_M0400_run2, Samples.mfv_stopdbardbar_tau001000um_M0200_run2, Samples.mfv_stopdbardbar_tau000300um_M0400_run2, Samples.ggHToSSTodddd_tau1mm_M55_run2]
     #data_samples = []
-    
-    signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_run2, Samples.VHToSSTodddd_tau10mm_M55_run2]
+     
+    #signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_run2, Samples.VHToSSTodddd_tau10mm_M55_run2]
     data_samples = [] 
-    background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
-    #background_samples = qcd_samples + ttbar_samples
+    
+    #background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
+    background_samples = qcd_samples + ttbar_samples
     lumi = ac.int_lumi_run2
     lumi_nice = ac.int_lumi_nice_run2
 
@@ -99,19 +99,19 @@ for s in diboson_samples:
 signal_samples = signal_sample
 #signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
 #signal_sample[0].nice_name = 'Z(#rightarrow #mu/e #bar{#mu}/#bar{e}) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-signal_sample[0].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-#signal_sample[0].nice_name = '#tilde{N} #rightarrow tbs: #sigma = 1 fb, c#tau = 1 mm, M = 400 GeV'
+#signal_sample[0].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+signal_sample[0].nice_name = '#tilde{N} #rightarrow tbs: #sigma = 1 fb, c#tau = 1 mm, M = 400 GeV'
 signal_sample[0].color = ROOT.kYellow + 2
 #signal_sample[1].nice_name = 'Wplus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-signal_sample[1].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 10 mm, M = 55 GeV'
-#signal_sample[1].nice_name = '#tilde{t} #rightarrow #bar{d}#bar{d}: #sigma = 1 fb, c#tau = 1 mm, M = 200 GeV'
+#signal_sample[1].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 10 mm, M = 55 GeV'
+signal_sample[1].nice_name = '#tilde{t} #rightarrow #bar{d}#bar{d}: #sigma = 1 fb, c#tau = 1 mm, M = 200 GeV'
 signal_sample[1].color = ROOT.kGreen + 2
 #signal_sample[2].nice_name = 'Wminus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-#signal_sample[2].nice_name = '#tilde{t} #rightarrow #bar{b}#bar{b}: #sigma = 1 fb, c#tau = 0.3 mm, M = 400 GeV'
-#signal_sample[2].color = ROOT.kGreen -3
+signal_sample[2].nice_name = '#tilde{t} #rightarrow #bar{b}#bar{b}: #sigma = 1 fb, c#tau = 0.3 mm, M = 400 GeV'
+signal_sample[2].color = ROOT.kGreen -3
 
-#signal_sample[3].nice_name = ' ggH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-#signal_sample[3].color = ROOT.kAzure+10
+signal_sample[3].nice_name = ' ggH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+signal_sample[3].color = ROOT.kAzure+10
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -285,25 +285,30 @@ C('presel_nlep',
 C('vertexerhistos_nm1_seedtrack_nsigmadxybs',
   histogram_path = 'mfvVertexTracks/h_seed_nm1_sigmadxybs',
   y_range = (1e5, 1e16),
+  x_range = (0.0, 10.0),
   x_title = 'N#sigma(d_{xy})',
+  cut_line = ((4, 0, 4, 2.8e16), 2, 5, 1),
   )
 
 C('vertexerhistos_nm1_seedtrack_pt',
   histogram_path = 'mfvVertexTracks/h_seed_nm1_pt',
-  y_range = (1e-3, 1e16),
+  y_range = (1e-1, 1e16),
   x_title = 'p_{t} (GeV)',
+  cut_line = ((1, 0, 1, 2.8e16), 2, 5, 1),
   )
 
 C('vertexerhistos_nm1_seedtrack_npxlayers',
   histogram_path = 'mfvVertexTracks/h_seed_nm1_npxlayers',
-  y_range = (1e-3, 1e16),
+  y_range = (1e-1, 1e16),
   x_title = 'N pixel-layers',
+  cut_line = ((2, 0, 2, 2.8e16), 2, 5, 1),
   )
 
 C('vertexerhistos_nm1_seedtrack_nstlayers',
   histogram_path = 'mfvVertexTracks/h_seed_nm1_nstlayers',
-  y_range = (1e-3, 1e16),
+  y_range = (1e-1, 1e16),
   x_title = 'N strip-layers',
+  cut_line = ((6, 0, 6, 2.8e16), 2, 5, 1),
   )
 C('vertexerhistos_seedtrack_eta',
   histogram_path = 'mfvVertexTracks/h_seed_track_eta',
@@ -332,7 +337,6 @@ C('vertexerhistos_n_seed_tracks',
   y_title = 'Events',
   )
 """
-
 """
 C('presel_seedtrack_npxlayers',
   histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
@@ -381,7 +385,7 @@ C('onevtx_ntracks',
   #signal_hist_path = 'vtxHst2VNoNtracks/h_sv_all_ntracks',
   x_title = 'Number of tracks per vertex',
   y_title = 'Vertices',
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   cut_line = ((5, 0, 5, 2.3e7), 2, 5, 1),
   )
 
@@ -391,7 +395,7 @@ C('onevtx_bs2derr',
   rebin = 10,
   x_title = 'Uncertainty in d_{BV} (cm)',
   y_title = 'Vertices/5 #mum',
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   cut_line = ((0.0050, 0, 0.0050, 2.3e7), 2, 5, 1),
   )
 
@@ -401,7 +405,7 @@ C('onevtx_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 1.0),
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   rebin = 4,
   cut_line = ((0.01, 0, 0.01, 2.3e7), 2, 5, 1),
   )
@@ -411,7 +415,7 @@ C('nsv_3track',
   x_title = 'Number of 3-track vertices',
   y_title = 'Events',
   x_range = (0, 8),
-  y_range = (1e-3, 1e8),
+  y_range = (1e-1, 1e8),
   )
 
 C('nsv_4track',
@@ -419,7 +423,7 @@ C('nsv_4track',
   x_title = 'Number of 4-track vertices',
   y_title = 'Events',
   x_range = (0, 8),
-  y_range = (1e-3, 1e8),
+  y_range = (1e-1, 1e8),
   )
 
 C('nsv_5track',
@@ -427,8 +431,32 @@ C('nsv_5track',
   x_title = 'Number of 5-or-more-track vertices',
   y_title = 'Events',
   x_range = (0, 8),
-  y_range = (1e-3, 1e8),
+  y_range = (1e-1, 1e8),
   cut_line = ((2, 0, 2, 2.5e8), 2, 5, 1),
+  )
+
+C('nbtags_0_presel',
+  histogram_path = 'mfvEventHistosPreSel/h_nbtags_0',
+  x_title = 'Number of loose btagged jets',
+  y_title = 'Events',
+  x_range = (0, 10),
+  y_range = (1e-1, 1e8),
+  )
+
+C('nbtags_1_presel',
+  histogram_path = 'mfvEventHistosPreSel/h_nbtags_1',
+  x_title = 'Number of medium btagged jets',
+  y_title = 'Events',
+  x_range = (0, 10),
+  y_range = (1e-1, 1e8),
+  )
+
+C('nbtags_2_presel',
+  histogram_path = 'mfvEventHistosPreSel/h_nbtags_2',
+  x_title = 'Number of tight btagged jets',
+  y_title = 'Events',
+  x_range = (0, 10),
+  y_range = (1e-1, 1e8),
   )
 
 C('dbv_1v_3track',
@@ -437,7 +465,7 @@ C('dbv_1v_3track',
   y_title = 'Vertices/50 #mum',
   rebin = 4,
   x_range = (0, 1.0),
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   )
 
 C('dbv_1v_4track',
@@ -446,7 +474,7 @@ C('dbv_1v_4track',
   y_title = 'Vertices/50 #mum',
   rebin = 4,
   x_range = (0, 1.0),
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   )
 
 C('dbv_1v_5track',
@@ -455,9 +483,8 @@ C('dbv_1v_5track',
   y_title = 'Vertices/50 #mum',
   rebin = 4,
   x_range = (0, 1.0),
-  y_range = (1e-3, 1e7),
+  y_range = (1e-1, 1e7),
   )
-
 #
 #C('dbv',
 #  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',

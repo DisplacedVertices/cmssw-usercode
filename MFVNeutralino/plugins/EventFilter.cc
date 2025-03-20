@@ -114,16 +114,6 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (veto_lepton_triggers) {
-    for (auto trigger_to_veto : lepton_triggers_to_veto) {
-      //for (auto b_trigger_to_veto : bjet_triggers_to_veto) {
-      //  std::cout << " pass ? " << b_trigger_to_veto << helper.pass_any_version(b_trigger_to_veto) << std::endl;
-      //}
-      //std::cout << " pass ? " << trigger_to_veto << helper.pass_any_version(trigger_to_veto) << std::endl;
-        if (helper.pass_any_version(trigger_to_veto)) return false;
-    }
-  }
-
   int njets = 0;
   double ht = 0;
   for (const pat::Jet& jet : *jets)

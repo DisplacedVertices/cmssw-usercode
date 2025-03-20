@@ -4,12 +4,13 @@ from JMTucker.Tools.general import named_product
 from JMTucker.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
-settings.is_mc = False
+settings.is_mc = True
 settings.is_miniaod = True
 #settings.event_filter= 'electrons only novtx'
 #settings.event_filter = 'muons only novtx'
 settings.event_filter = 'bjets OR displaced dijet novtx'
-version = settings.version + 'offtosspreselv8' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
+#settings.event_filter = 'jets only novtx'
+version = settings.version + 'offtosspreselv10' #v8 : [2,0], v9 : [0,2], v10 : [3,2]
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -19,8 +20,8 @@ version = settings.version + 'offtosspreselv8' #v8 : [2,0], v9 : [0,2], v10 : [3
 #version = settings.version + 'ext5'
 #version = settings.version + 'ext6'
 
-cfgs = named_product(njets = [2], #FIXME
-                     nbjets = [0], #FIXME
+cfgs = named_product(njets = [3], #FIXME
+                     nbjets = [2], #FIXME
                      nsigmadxy = [4.0],
                      angle = [0.2], #[0.2], #, 0.1, 0.3],
                      )
@@ -126,7 +127,7 @@ for icfg, cfg in enumerate(cfgs):
                             muons_src = cms.InputTag('selectedPatMuons'),
                             electrons_src = cms.InputTag('selectedPatElectrons'),
                             track_ref_getter = jmtTrackRefGetter,
-                            min_jet_pt = cms.double(0), 
+                            min_jet_pt = cms.double(20.0), #FIXME 
                             min_jet_ntracks = cms.uint32(2), 
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
@@ -172,9 +173,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=True, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
     #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True, BTagCSV_data=False, DisplacedJet_data=False)
     
-    samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True)
+    #samples = pick_samples(dataset, qcd=False, JetHT_data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True)
     #samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
-    #samples = [getattr(Samples, 'qcdht2000_2017')]
+    samples = [getattr(Samples, 'ttbar_2017')]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())

@@ -152,10 +152,10 @@ int main(int argc, char** argv) {
     nd.book(k_jet1_trk_pt, "jet1_trk_pt", "; jet1-movedquality-track's pT; arb. units", 45, 0, 15);
     nd.book(k_jet0_trk_p, "jet0_trk_p", "; jet0-movedquality-track's p; arb. units", 45, 0, 15);
     nd.book(k_jet1_trk_p, "jet1_trk_p", "; jet1-movedquality-track's p; arb. units", 45, 0, 15);
-    nd.book(k_jet0_sump, "jet0_sump", "; jet0-movedquality-track's sum p; arb. units", 80, 0, 80);
-    nd.book(k_jet1_sump, "jet1_sump", "; jet1-movedquality-track's sum p; arb. units", 80, 0, 80);
+    nd.book(k_jet0_sump, "jet0_sump", "; jet0-movedquality-track's sum p; arb. units", 500, 0, 500);
+    nd.book(k_jet1_sump, "jet1_sump", "; jet1-movedquality-track's sum p; arb. units", 500, 0, 500);
     nd.book(k_jet0_maxeta_jet1_maxeta, "jet0_maxeta_jet1_maxeta", "; max(jet0-movedquality-track's Eta); max(jet1-movedquality-track's Eta)", 60, -3, 3, 60, -3, 3); 
-    nd.book(k_jet0_sump_jet1_sump, "jet0_sump_jet1_sump", "; jet0-movedquality-track's sum p; jet1-movedquality-track's sum p", 80, 0, 80, 80, 0, 80);
+    nd.book(k_jet0_sump_jet1_sump, "jet0_sump_jet1_sump", "; jet0-movedquality-track's sum p; jet1-movedquality-track's sum p", 500, 0, 500, 500, 0, 500);
     nd.book(k_closeseedtks_qrk0_dxybs, "closeseedtks_qrk0_dxybs", "; # seed tracks close to artificial vtx; quark0's dxybs", 25, 0, 25, 20, 0, 0.2);
     nd.book(k_closeseedtks_qrk1_dxybs, "closeseedtks_qrk1_dxybs", "; # seed tracks close to artificial vtx; quark1's dxybs", 25, 0, 25, 20, 0, 0.2);
     nd.book(k_jetdr_qrk0_dxybs, "jetdr_qrk0_dxybs", "; jets' #DeltaR; quark0's dxybs", 60, 0, 6, 20, 0, 0.2);
@@ -167,24 +167,24 @@ int main(int argc, char** argv) {
     nd.book(k_nmovedtks1_qrk1_dxybs, "nmovedtks1_qrk1_dxybs", "; # quality tracks in jet1 associated to artificial vtx; quark1's dxybs", 25, 0, 25, 20, 0, 0.2);
     nd.book(k_nmovedseedtks0_qrk0_dxybs, "nmovedseedtks0_qrk0_dxybs", "; # seed tracks in jet0 associated to artificial vtx; quark0's dxybs", 25, 0, 25, 20, 0, 0.2);
     nd.book(k_nmovedseedtks1_qrk1_dxybs, "nmovedseedtks1_qrk1_dxybs", "; # seed tracks in jet1 associated to artificial vtx; quark1's dxybs", 25, 0, 25, 20, 0, 0.2);
-    nd.book(k_nmovedtks0_jet0_sump, "nmovedtks0_jet0_sump", "; # quality tracks in jet0 associated to artificial vtx; jet0-movedquality-track's sum p", 25, 0, 25, 20, 0, 80);
-    nd.book(k_nmovedtks1_jet1_sump, "nmovedtks1_jet1_sump", "; # quality tracks in jet1 associated to artificial vtx; jet1-movedquality-track's sum p", 25, 0, 25, 20, 0, 80);
-    nd.book(k_nmovedseedtks0_jet0_sump, "nmovedseedtks0_jet0_sump", "; # seed tracks in jet0 associated to artificial vtx; jet0-movedquality-track's sum p", 25, 0, 25, 20, 0, 80);
-    nd.book(k_nmovedseedtks1_jet1_sump, "nmovedseedtks1_jet1_sump", "; # seed tracks in jet1 associated to artificial vtx; jet1-movedquality-track's sum p", 25, 0, 25, 20, 0, 80);
+    nd.book(k_nmovedtks0_jet0_sump, "nmovedtks0_jet0_sump", "; # quality tracks in jet0 associated to artificial vtx; jet0-movedquality-track's sum p", 25, 0, 25, 500, 0, 500);
+    nd.book(k_nmovedtks1_jet1_sump, "nmovedtks1_jet1_sump", "; # quality tracks in jet1 associated to artificial vtx; jet1-movedquality-track's sum p", 25, 0, 25, 500, 0, 500);
+    nd.book(k_nmovedseedtks0_jet0_sump, "nmovedseedtks0_jet0_sump", "; # seed tracks in jet0 associated to artificial vtx; jet0-movedquality-track's sum p", 25, 0, 25, 500, 0, 500);
+    nd.book(k_nmovedseedtks1_jet1_sump, "nmovedseedtks1_jet1_sump", "; # seed tracks in jet1 associated to artificial vtx; jet1-movedquality-track's sum p", 25, 0, 25, 500, 0, 500);
     nd.book(k_nmovedtks_movedist3, "nmovedtks_movedist3", "; # quality tracks associated to artificial vtx;  movement 3-dist", 25, 0, 25, 20, 0, 4.0);
     nd.book(k_nmovedseedtks_movedist3, "nmovedseedtks_movedist3", "; # seed tracks associated to artificial vtx;  movement 3-dist", 25, 0, 25, 20, 0, 4.0);
-    nd.book(k_llp_sump, "llp_sump", "; llp-moved-misc-quality-track's sum p", 300, 0, 300);
-    nd.book(k_llp_sump_jetdphi, "llp_sump_jetdphi", "; llp-moved-misc-quality-track's sum p;jets #DeltaPhi", 300, 0, 300, 70, -3.5, 3.5);
-    nd.book(k_llp_sump_jetdr, "llp_sump_jetdr", "; llp-movedquality-track's sum p;jets #DeltaR", 300, 0, 300, 60, 0, 6.0); 
-    nd.book(k_jet0_sump_movedist3, "jet0_sump_movedist3", "; jet0-movedquality-track's sum p;  movement 3-dist", 20, 0, 80, 20, 0, 4.0);
-    nd.book(k_jet1_sump_movedist3, "jet1_sump_movedist3", "; jet1-movedquality-track's sum p;  movement 3-dist", 20, 0, 80, 20, 0, 4.0);
-    nd.book(k_jet0_sump_qrk0_dxybs, "jet0_sump_qrk0_dxybs", "; jet0-movedquality-track's sum p;  quark0's dxybs", 20, 0, 80, 20, 0, 0.2);
-    nd.book(k_jet1_sump_qrk1_dxybs, "jet1_sump_qrk1_dxybs", "; jet1-movedquality-track's sum p;  quark1's dxybs", 20, 0, 80, 20, 0, 0.2);
-    nd.book(k_jet0_sump_jetdr, "jet0_sump_jetdr", "; jet0-movedquality-track's sum p;jets #DeltaR", 80, 0, 80, 60, 0, 6.0); 
-    nd.book(k_jet1_sump_jetdr, "jet1_sump_jetdr", "; jet1-movedquality-track's sum p;jets #DeltaR", 80, 0, 80, 60, 0, 6.0); 
+    nd.book(k_llp_sump, "llp_sump", "; llp-moved-misc-quality-track's sum p", 3000, 0, 3000);
+    nd.book(k_llp_sump_jetdphi, "llp_sump_jetdphi", "; llp-moved-misc-quality-track's sum p;jets #DeltaPhi", 3000, 0, 3000, 70, -3.5, 3.5);
+    nd.book(k_llp_sump_jetdr, "llp_sump_jetdr", "; llp-movedquality-track's sum p;jets #DeltaR", 3000, 0, 3000, 60, 0, 6.0); 
+    nd.book(k_jet0_sump_movedist3, "jet0_sump_movedist3", "; jet0-movedquality-track's sum p;  movement 3-dist", 500, 0, 500, 20, 0, 4.0);
+    nd.book(k_jet1_sump_movedist3, "jet1_sump_movedist3", "; jet1-movedquality-track's sum p;  movement 3-dist", 500, 0, 500, 20, 0, 4.0);
+    nd.book(k_jet0_sump_qrk0_dxybs, "jet0_sump_qrk0_dxybs", "; jet0-movedquality-track's sum p;  quark0's dxybs", 500, 0, 500, 20, 0, 0.2);
+    nd.book(k_jet1_sump_qrk1_dxybs, "jet1_sump_qrk1_dxybs", "; jet1-movedquality-track's sum p;  quark1's dxybs", 500, 0, 500, 20, 0, 0.2);
+    nd.book(k_jet0_sump_jetdr, "jet0_sump_jetdr", "; jet0-movedquality-track's sum p;jets #DeltaR", 500, 0, 500, 60, 0, 6.0); 
+    nd.book(k_jet1_sump_jetdr, "jet1_sump_jetdr", "; jet1-movedquality-track's sum p;jets #DeltaR", 500, 0, 500, 60, 0, 6.0); 
     nd.book(k_2logm_jetdr, "2logm_jetdr", "; log(2*sump_{tk0}*sump_{tk1}) + log(1-cos(#Delta#Theta));jets #DeltaR", 70, 0, 7, 60, 0, 6.0); 
     nd.book(k_2logm_costheta, "2logm_costheta", "; log(2*sump_{tk0}*sump_{tk1}) + log(1-cos(#Delta#Theta));jets' cos(#theta)", 70, 0, 7, 80, -1, 1); 
-    nd.book(k_jet1_sump_jet_costheta, "jet1_sump_jet_costheta", "; jet1-movedquality-track's sum p;jets' cos(#theta)", 80, 0, 80, 80, -1, 1);
+    nd.book(k_jet1_sump_jet_costheta, "jet1_sump_jet_costheta", "; jet1-movedquality-track's sum p;jets' cos(#theta)", 500, 0, 500, 80, -1, 1);
     nd.book(k_closeseed_trk_genmissdist, "closeseed_trk_genmissdist", "; close-seed-track's missdist to LLP; arb. units", 50, -0.05, 0.05);
     nd.book(k_closeseed_trk_gendz, "closeseed_trk_gendz", "; close-seed-track's dz to LLP; arb. units", 50, -0.05, 0.05);
     nd.book(k_closeseed_trk_gennsigmadz, "closeseed_trk_gennsigmadz", "; close-seed-track's gennsigmadz; arb. units", 80, -10, 10);
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
     nd.book(k_movedist3_closeseedtks, "movedist3_closeseedtks", ";movement 3-dist ;# seed tracks close to artificial vtx", 50, 0, 4.0, 25, 0, 25);
     nd.book(k_jet_costheta_closeseedtks, "jet_costheta_closeseedtks", "; jets' cos(#theta);# seed tracks close to artificial vtx", 80, -1, 1, 25, 0, 25);
     nd.book(k_jet_dr_closeseedtks, "jet_dr_closeseedtks", "; jets' #DeltaR;# seed tracks close to artificial vtx", 60, 0, 6, 25, 0, 25);
-    nd.book(k_jet1_sump_jetdphi, "jet1_sump_jetdphi", "; jet1-movedquality-track's sum p;jets #DeltaPhi", 80, 0, 80, 70, -3.5, 3.5);
+    nd.book(k_jet1_sump_jetdphi, "jet1_sump_jetdphi", "; jet1-movedquality-track's sum p;jets #DeltaPhi", 500, 0, 500, 70, -3.5, 3.5);
     nd.book(k_jet1_ntks_jetdphi, "jet1_ntks_jetdphi", "; Ntks in jet1;jets #DeltaPhi", 25, 0, 25, 70, -3.5, 3.5);
     nd.book(k_qrk0_dxybs, "qrk0_dxybs", "; quark0's dxybs; arb. units", 50, 0.0, 0.2);
     nd.book(k_qrk1_dxybs, "qrk1_dxybs", "; quark1's dxybs; arb. units", 50, 0.0, 0.2);
@@ -953,12 +953,6 @@ int main(int argc, char** argv) {
     const double jet_nseedtracks_max = std::max(jet_nseedtracks[0], jet_nseedtracks[1]);
     const double jet_nseedtracks_min = std::min(jet_nseedtracks[0], jet_nseedtracks[1]);
 
-    //presel cuts
-    //if (jet_ntk_0 < 1 || jet_ntk_1 < 1) // || jet_ntk_0 + jet_ntk_1 < 5)
-    //    NR_loop_cont(w);
-  
-    
-
     if (jet_decay_weights) {
       TFile* jet_weights_2d_move = TFile::Open(w_fn_2d_move_ar);
       TFile* jet_weights_2d_kin = TFile::Open(w_fn_2d_kin_ar);
@@ -1000,23 +994,6 @@ int main(int argc, char** argv) {
   
     const int nvtx = vs.n();
     std::vector<double> vtxs_anglemax(nvtx, 0);
-    /*
-    for (int i = 0; i < nvtx; ++i) {
-      const std::vector<int> tracks = tks.tks_for_sv(i);
-      const int ntracks = int(tracks.size());
-      assert(vs.ntracks(i) == ntracks);
-
-      for (int j = 0; j < ntracks; ++j) {
-        const TVector3 jp = tks.p3(tracks[j]);
-        for (int k = j+1; k < ntracks; ++k) {
-          const TVector3 kp = tks.p3(tracks[k]);
-          const double angle = jp.Angle(kp); // JMTBAD probably should tighten cuts on tracks used for this
-          if (angle > vtxs_anglemax[i])
-            vtxs_anglemax[i] = angle;
-        }
-      }
-    }
-    */
 
     //if (nselmuons < 1)
     //   NR_loop_cont(w);
