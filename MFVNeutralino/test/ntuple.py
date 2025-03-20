@@ -10,7 +10,7 @@ settings.is_miniaod = True
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
 settings.prepare_vis = False
-settings.keep_all = True #FIXME True for _NoEF only for signal MC 
+settings.keep_all = False
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
@@ -65,12 +65,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
        samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
        #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
     elif use_btag_vetoLepHT_triggers :
-       #samples = [getattr(Samples, 'mfv_neu_tau001000um_M0400_2017')]
-       #samples = [getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_2017')]
-       #samples = [getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_2017')]
-       samples = [getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2017')]
-       #samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
-       #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
+        #samples = [getattr(Samples, 'mfv_neu_tau001000um_M0400_2017')]
+        #samples = [getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_2017')]
+        #samples = [getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_2017')]
+        #samples = [getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2017')]
+
+        if settings.is_mc :
+            samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
+        else :
+            samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
+
     elif use_MET_triggers :
        samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
     elif use_Lepton_triggers :

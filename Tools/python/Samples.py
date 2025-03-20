@@ -90,6 +90,16 @@ def _set_signal_stuff(sample):
 # 2016 1 MC
 ########
 
+
+
+
+
+
+
+
+
+
+
 qcd_samples_20161 = [
     MCSample('qcdht0100_20161', '/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM', 73633197, nice='QCD, $100 < H_{T} < 200$ \\GeV',  color=802, syst_frac=0.20, xsec=2.366e7),
     MCSample('qcdht0200_20161', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM', 52503973, nice='QCD, $200 < H_{T} < 300$ \\GeV',  color=802, syst_frac=0.20, xsec=1.550e6),
@@ -3104,10 +3114,7 @@ condorable = {
         
         },
     "T1_US_FNAL_Disk": {
-        #"miniaod": Lepton_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161 + qcd_samples_20161
-        #"miniaod": Lepton_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162 + qcd_samples_20162 
-        "miniaod": JetHT_data_samples_2017 + Lepton_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2017 +  all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 +  qcd_samples_2017 
-        #"miniaod": Lepton_data_samples_2018 + DisplacedJet_data_samples_2018 + BTagCSV_data_samples_2018 +  all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018 + qcd_samples_2018
+        "miniaod": Lepton_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161 + Lepton_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162 + Lepton_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2017 +  all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 +  qcd_samples_2017 + Lepton_data_samples_2018 + DisplacedJet_data_samples_2018 + BTagCSV_data_samples_2018 +  all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018 + qcd_samples_20161 + qcd_samples_20162 + qcd_samples_2018
             #mfv_stoplb_tau010000um_M1000_2017, mfv_stoplb_tau000300um_M1200_2017, mfv_stoplb_tau010000um_M1200_2017, mfv_stoplb_tau001000um_M1200_2017, mfv_stoplb_tau000300um_M1600_2017, mfv_stoplb_tau001000um_M1600_2017, mfv_stoplb_tau000100um_M0300_2017, mfv_stoplb_tau000300um_M0300_2017, mfv_stoplb_tau001000um_M0300_2017, mfv_stoplb_tau001000um_M0400_2017, mfv_stoplb_tau010000um_M0600_2017, mfv_stopld_tau000300um_M1000_2017, mfv_stopld_tau010000um_M1000_2017, mfv_stopld_tau010000um_M1200_2017, mfv_stopld_tau001000um_M1400_2017, mfv_stopld_tau000300um_M1600_2017, mfv_stopld_tau010000um_M0200_2017, mfv_stopld_tau000300um_M0300_2017, mfv_stopld_tau001000um_M0400_2017, mfv_stopld_tau000300um_M0600_2017, mfv_stopld_tau010000um_M0600_2017, mfv_stopld_tau001000um_M0600_2017, mfv_stopld_tau010000um_M0800_2017, mfv_stoplb_tau010000um_M1200_2018, mfv_stoplb_tau001000um_M1200_2018, mfv_stoplb_tau010000um_M1400_2018, mfv_stoplb_tau001000um_M1400_2018, mfv_stoplb_tau010000um_M1600_2018, mfv_stoplb_tau001000um_M1600_2018, mfv_stoplb_tau001000um_M0200_2018, mfv_stoplb_tau010000um_M0300_2018, mfv_stoplb_tau010000um_M0400_2018, mfv_stoplb_tau001000um_M0400_2018, mfv_stoplb_tau001000um_M0600_2018, mfv_stoplb_tau000300um_M0800_2018, mfv_stoplb_tau001000um_M0800_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000300um_M1200_2018, mfv_stopld_tau000100um_M1400_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau010000um_M1600_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau001000um_M0200_2018, mfv_stopld_tau001000um_M0300_2018, mfv_stopld_tau000300um_M0400_2018, mfv_stopld_tau001000um_M0600_2018],
         },
     "T2_US_Wisconsin": {
