@@ -976,7 +976,7 @@ def data_mc_comparison(name,
         elif "mfv_stopdbardbar_tau001000um_M0200" in sample.name:
            sample.hist.Scale(14.5*(10**3)/(sample.hist.Integral() + 10**-16)) # ~14.5 dd yield in run2 for 1mm 200GeV
         elif "mfv_stopdbardbar_tau000300um_M0400" in sample.name:
-           sample.hist.Scale(9.1*(10**3)/(sample.hist.Integral() + + 10**-16))  # ~9.1 dd yield in run2 for 0.3mm 400GeV
+           sample.hist.Scale(9.1*(10**3)/(sample.hist.Integral() + 10**-16))  # ~9.1 dd yield in run2 for 0.3mm 400GeV
         else:
            print("missing information of this signal")
         sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))

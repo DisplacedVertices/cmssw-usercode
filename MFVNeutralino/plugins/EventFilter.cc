@@ -164,12 +164,12 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (electron.pt() > min_electron_pt && abs(electron.eta()) < 2.4) {
       bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");
-      const auto pfIso = electron.pfIsolationVariables();
-      const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-      const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
+      //const auto pfIso = electron.pfIsolationVariables();
+      //const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
+      //const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
       const bool passveto = electron.passConversionVeto();
 
-      if (isTightEl && passveto && iso < 0.10) {
+      if (isTightEl && passveto) {
   	    ++nelectrons;
       } 
     } 
@@ -189,7 +189,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet || mode == Mode::bjets_OR_displaced_dijet_veto_HT)
     return true;
   else if (mode == Mode::bjets_OR_displaced_dijet_veto_leptons_and_HT)
-    return !leptons_pass && !jets_pass;
+    return true;
   else if (mode == Mode::MET_only)
     return true;
   //these two else if's must be in this order 

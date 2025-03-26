@@ -6,15 +6,15 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 
-year = 'run2'
-version = 'ULV30BvetoLHTm'
-root_file_dir = '/uscms/home/pkotamni/nobackup/crabdirs/Histos_FixAnCut_OnnormdzULV30BvetoLHTm'
+#year = 'run2'
+#version = 'ULV30BvetoLHTm'
+#root_file_dir = '/uscms/home/pkotamni/nobackup/crabdirs/Histos_FixAnCut_OnnormdzULV30BvetoLHTm'
 #root_file_dir = '~/nobackup/crabdirs/NtupleOnnormdzULV30BvetoLHTm/'
 
 
-#year = 'run2'
-#version = 'ULV30Lepm'
-#root_file_dir = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm' 
+year = 'run2'
+version = 'ULV30Lepm'
+root_file_dir = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm' 
 #root_file_dir = '/eos/uscms/store/user/pkotamni/NtupleOnnormdzULV30Lepm_ROOT/'#'~/nobackup/crabdirs/NtupleOnnormdzULV30Lepm' 
 
 #year = '2017p8'
@@ -22,8 +22,8 @@ root_file_dir = '/uscms/home/pkotamni/nobackup/crabdirs/Histos_FixAnCut_Onnormdz
 #root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV27m'
 
 set_style()
-ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/BjetDispl_repsig_mc_comp_part1_%s_%s_FixAnCut' % (year, version)), pdf=True, log=True)
-#ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/Lepton_repsig_mc_comp_part3_%s_%s' % (year, version)), pdf=True, log=True)
+#ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/BjetDispl_repsig_mc_comp_part1_%s_%s_FixAnCut' % (year, version)), pdf=True, log=True)
+ps = plot_saver(plot_dir('/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/Lepton_repsig_mc_comp_part5_%s_%s' % (year, version)), pdf=True, log=True)
 
 qcd_samples = Samples.qcd_samples_2017[:-1]
 qcdlep_samples = Samples.qcd_lep_samples_2017[14:-1]
@@ -32,12 +32,12 @@ ttbar_samples = Samples.ttbar_samples_2017[0:1]
 wjetstolnu_samples = Samples.leptonic_samples_2017[0:3]
 dyjets_samples = Samples.leptonic_samples_2017[3:-1] 
 diboson_samples = Samples.diboson_samples_2017
-signal_sample = [Samples.mfv_neu_tau001000um_M0400_2017, Samples.mfv_stopdbardbar_tau001000um_M0200_2017, Samples.mfv_stopdbardbar_tau000300um_M0400_2017, Samples.ggHToSSTodddd_tau1mm_M55_2017]
+#signal_sample = [Samples.mfv_neu_tau001000um_M0400_2017, Samples.mfv_stopdbardbar_tau001000um_M0200_2017, Samples.mfv_stopdbardbar_tau000300um_M0400_2017, Samples.ggHToSSTodddd_tau1mm_M55_2017]
 #signal_sample = [Samples.ZHToSSTodddd_tau1mm_M55_2017, Samples.WplusHToSSTodddd_tau1mm_M55_2017, Samples.WminusHToSSTodddd_tau1mm_M55_2017]
-#signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_2017, Samples.VHToSSTodddd_tau10mm_M55_2017]
+signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_2017, Samples.VHToSSTodddd_tau10mm_M55_2017]
 data_samples = [] #Samples.Lepton_data_samples_2017
-#background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
-background_samples = ttbar_samples + qcd_samples 
+background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
+#background_samples = ttbar_samples + qcd_samples 
 lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 lumi_nice = ac.int_lumi_nice_2017
 
@@ -69,14 +69,14 @@ if year == 'run2':
     qcd_samples = Samples.qcd_samples_20161 + Samples.qcd_samples_20162 + Samples.qcd_samples_2017 + Samples.qcd_samples_2018
     ttbar_samples = Samples.ttbar_samples_20161 + Samples.ttbar_samples_20162 + Samples.ttbar_samples_2017 + Samples.ttbar_samples_2018
     
-    signal_sample = [Samples.mfv_neu_tau001000um_M0400_run2, Samples.mfv_stopdbardbar_tau001000um_M0200_run2, Samples.mfv_stopdbardbar_tau000300um_M0400_run2, Samples.ggHToSSTodddd_tau1mm_M55_run2]
+    #signal_sample = [Samples.mfv_neu_tau001000um_M0400_run2, Samples.mfv_stopdbardbar_tau001000um_M0200_run2, Samples.mfv_stopdbardbar_tau000300um_M0400_run2, Samples.ggHToSSTodddd_tau1mm_M55_run2]
     #data_samples = []
      
-    #signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_run2, Samples.VHToSSTodddd_tau10mm_M55_run2]
+    signal_sample = [Samples.VHToSSTodddd_tau1mm_M55_run2, Samples.VHToSSTodddd_tau10mm_M55_run2]
     data_samples = [] 
     
-    #background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
-    background_samples = qcd_samples + ttbar_samples
+    background_samples = wjetstolnu_samples + ttbar_samples + dyjets_samples + diboson_samples + qcdlep_samples + qcdmupt5_samples 
+    #background_samples = qcd_samples + ttbar_samples
     lumi = ac.int_lumi_run2
     lumi_nice = ac.int_lumi_nice_run2
 
@@ -99,19 +99,19 @@ for s in diboson_samples:
 signal_samples = signal_sample
 #signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 300 GeV'
 #signal_sample[0].nice_name = 'Z(#rightarrow #mu/e #bar{#mu}/#bar{e}) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-#signal_sample[0].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-signal_sample[0].nice_name = '#tilde{N} #rightarrow tbs: #sigma = 1 fb, c#tau = 1 mm, M = 400 GeV'
+signal_sample[0].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[0].nice_name = '#tilde{N} #rightarrow tbs: #sigma = 1 fb, c#tau = 1 mm, M = 400 GeV'
 signal_sample[0].color = ROOT.kYellow + 2
 #signal_sample[1].nice_name = 'Wplus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-#signal_sample[1].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 10 mm, M = 55 GeV'
-signal_sample[1].nice_name = '#tilde{t} #rightarrow #bar{d}#bar{d}: #sigma = 1 fb, c#tau = 1 mm, M = 200 GeV'
+signal_sample[1].nice_name = 'W/ZH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 10 mm, M = 55 GeV'
+#signal_sample[1].nice_name = '#tilde{t} #rightarrow #bar{d}#bar{d}: #sigma = 1 fb, c#tau = 1 mm, M = 200 GeV'
 signal_sample[1].color = ROOT.kGreen + 2
 #signal_sample[2].nice_name = 'Wminus(#rightarrow #mu/e #nu) H #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-signal_sample[2].nice_name = '#tilde{t} #rightarrow #bar{b}#bar{b}: #sigma = 1 fb, c#tau = 0.3 mm, M = 400 GeV'
-signal_sample[2].color = ROOT.kGreen -3
+#signal_sample[2].nice_name = '#tilde{t} #rightarrow #bar{b}#bar{b}: #sigma = 1 fb, c#tau = 0.3 mm, M = 400 GeV'
+#signal_sample[2].color = ROOT.kGreen -3
 
-signal_sample[3].nice_name = ' ggH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
-signal_sample[3].color = ROOT.kAzure+10
+#signal_sample[3].nice_name = ' ggH #rightarrow SS #rightarrow d#bar{d}d#bar{d}, c#tau = 1 mm, M = 55 GeV'
+#signal_sample[3].color = ROOT.kAzure+10
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -380,6 +380,7 @@ C('presel_seedtrack_dxy',
 #
 #
 #part1 starts here
+"""
 C('onevtx_ntracks',
   histogram_path   = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
   #signal_hist_path = 'vtxHst2VNoNtracks/h_sv_all_ntracks',
@@ -485,6 +486,43 @@ C('dbv_1v_5track',
   x_range = (0, 1.0),
   y_range = (1e-1, 1e7),
   )
+"""
+#part4
+C('selmu_dxybs_sr',
+  histogram_path = 'mfvEventHistosFullSel/h_selmu_dxybs',
+  x_title = '|dxybs| of med-iso muon w/ pT >= 50 GeV',
+  y_title = 'Events',
+  x_range = (0, 0.08),
+  y_range = (1e-1, 1e8),
+  cut_line = ((0.02, 0, 0.02, 2.8e8), 2, 5, 1),
+  )
+
+C('selmu_absdz_sr',
+  histogram_path = 'mfvEventHistosFullSel/h_selele_absdz',
+  x_title = '|dzpv| of med-iso muon w/ pT >= 50 GeV',
+  y_title = 'Events',
+  x_range = (0, 0.8),
+  y_range = (1e-1, 1e8),
+  cut_line = ((0.5, 0, 0.5, 2.8e8), 2, 5, 1),
+  )
+C('selele_dxybs_sr',
+  histogram_path = 'mfvEventHistosFullSel/h_selele_dxybs',
+  x_title = '|dxybs| of tight electron w/ pT >= 50 GeV',
+  y_title = 'Events',
+  x_range = (0, 0.08),
+  y_range = (1e-1, 1e8),
+  cut_line = ((0.05, 0, 0.05, 2.8e8), 2, 5, 1),
+  )
+
+C('selele_absdz_sr',
+  histogram_path = 'mfvEventHistosFullSel/h_selele_absdz',
+  x_title = '|dzpv| of tight electron w/ pT >= 50 GeV',
+  y_title = 'Events',
+  x_range = (0, 0.8),
+  y_range = (1e-1, 1e8),
+  cut_line = ((0.1, 0, 0.1, 2.8e8), 2, 5, 1),
+  )
+
 #
 #C('dbv',
 #  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
