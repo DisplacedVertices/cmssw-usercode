@@ -77,14 +77,8 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
       std::vector<double> b_error_Int_idx = {}; 
       std::vector<double> s_Int_idx = {}; 
       std::vector<double> s_error_Int_idx = {}; 
-      //std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 36, 42, 50}; 
-      //std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 8, 12, 14, 15, 16, 18, 20, 22, 24, 26, 30, 38, 50}; 
-      std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
+      std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50};  
       std::vector<int> b_y = {0, 10, 14, 16, 17, 18, 19, 20, 22, 26, 34, 50}; 
-      //std::vector<int> b_x = {1, 18}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 9, 18}; 
       
       for (int i = 0; i < b_x.size()-1; ++i){
          for (int j = 5-i; j < 8+i; ++j){
@@ -92,12 +86,10 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
               j = 0;
             double b_error_Int = 0, s_error_Int = 0;
             double b_Int = hb->IntegralAndError(b_x[i]+1,b_x[i+1],b_y[j]+1,b_y[j+1],b_error_Int, "");
-            //std::cout << "Integrate h b_x " << b_x[i] << " b_y " << b_y[j] << " Int " << b_Int << " +- " <<b_error_Int << std::endl;
             b_Int_idx.push_back(b_Int);
             b_error_Int_idx.push_back(b_error_Int);
 
             double s_Int = hs->IntegralAndError(b_x[i]+1,b_x[i+1],b_y[j]+1,b_y[j+1],s_error_Int, "");
-            //std::cout << "Integrate h b_x " << b_x[i] << " b_y " << b_y[j] << " Int " << s_Int << " +- " <<s_error_Int << std::endl;
             s_Int_idx.push_back(s_Int);
             s_error_Int_idx.push_back(s_error_Int);
          }
@@ -165,7 +157,6 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
                      
                }
            }
-           //std::cout << "Test Integrate h b_x " << exp_Int_idx << std::endl;
            ij++;
          }
       }
@@ -182,12 +173,12 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
 
 void WeightFiles2Dmove()
 {
-  std::vector<int> taus = {300}; //100, 300, 1000, 3000, 10000, 30000}; // 10000};
+  std::vector<int> taus = {1000}; //100, 300, 1000, 3000, 10000, 30000}; // 10000};
   std::vector<int> mgs = {400}; //15, 40, 55};
   const char* years[1] = {"2017p8"}; //20161p2
-  const char* etabins[3] = {"Low", "Mix", "High"};
+  const char* etabins[1] = {"Low",}; // "Mix", "High"};
   for (int j = 0; j < 1; j++){
-     for (int k = 0; k < 3; k++){
+     for (int k = 0; k < 1; k++){
        for (int& tau:taus){
         for (int& mg:mgs){
           MakeWeightPlots(0,mg,tau,etabins[k],years[j]); //data

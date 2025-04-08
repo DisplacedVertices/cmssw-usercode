@@ -2,7 +2,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_btag_vetoLepHT_triggers 
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_btag_triggers, use_btag_vetoLepHT_triggers 
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #input_files(process, '/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504/0000/ntuple_0.root')
 #input_files(process, '/store/group/lpclonglived/pkotamni/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200106/0000/ntuple_0.root')
@@ -111,42 +111,41 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             if nv == 2 and ntk == 9:
                 ana.ntracks01_0 = 5
                 ana.ntracks01_1 = 4
-            ana_name = '%sana%iVNo' % (EX1, nv) + name
+            if nv == 1 : 
+                ana_name = '%sana%iVNo' % (EX1, nv) + name
 
-            evt_hst = process.mfvEventHistos.clone()
-            evt_hst_name = '%sevtHst%iVNo' % (EX1, nv) + name
+                evt_hst = process.mfvEventHistos.clone()
+                evt_hst_name = '%sevtHst%iVNo' % (EX1, nv) + name
 
-            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
-            vtx_hst_name = '%svtxHst%iVNo' % (EX1, nv) + name
+                vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
+                vtx_hst_name = '%svtxHst%iVNo' % (EX1, nv) + name
 
-            setattr(process, vtx_name, vtx)
-            setattr(process, ana_name, ana)
-            setattr(process, evt_hst_name, evt_hst)
-            setattr(process, vtx_hst_name, vtx_hst)
-            setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
+                setattr(process, vtx_name, vtx)
+                setattr(process, ana_name, ana)
+                setattr(process, evt_hst_name, evt_hst)
+                setattr(process, vtx_hst_name, vtx_hst)
+                setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
-        samples = [getattr(Samples, 'mfv_neu_tau001000um_M0400_2017', 'mfv_stopbbarbbar_tau001000um_M0300_2017')]
+        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     elif  use_btag_vetoLepHT_triggers:
-        samples = pick_samples(dataset, qcd=True, data = False, all_signal = False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False)
+        samples = pick_samples(dataset, qcd=True, data = False, all_signal = True, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False)
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+    elif  use_Lepton_triggers:
+        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
-        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False)
-        #samples = pick_samples(dataset)
-        #samples = [getattr(Samples, 'ttbar_2017')]
-        #samples = [getattr(Samples, 'ZHToSSTodddd_tau10mm_M55_2018')]
+        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Histos_LepIPCut_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

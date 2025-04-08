@@ -320,12 +320,8 @@ for year in years:
                     sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/background_btagpresel_%s.root" % (eta, year)
                     dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/BTagDispl%s.root" % (eta, year)
                 else:
-                  if eta=='High':
                     sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta, int(ctau), int(mass), year)
                     dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta, int(ctau), int(mass), year)
-                  else:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta, int(ctau), int(mass), year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta, int(ctau), int(mass), year)
                 tm_sim  = ROOT.TFile(sim_str)
                 tm_dat  = ROOT.TFile(dat_str)
                 

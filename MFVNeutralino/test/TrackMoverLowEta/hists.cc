@@ -750,9 +750,8 @@ int main(int argc, char** argv) {
     int jet_i[2] = {-1,-1}; // keep track of the pair of jets with largest 3D angle // JMTBAD should this be largest phi?
 
     for (int i = 0, ie = jets.n(); i < ie; ++i) {
-      if (!nt.jet_moved(i)) continue;
       const auto i_p4 = jets.p4(i);
-
+      if (!nt.jet_moved(i) || move_vector.DeltaPhi(i_p4.Vect()) > M_PI/2) continue;
       ++nmovedjets;
       jet_sume += jets.energy(i);
       jet_sumntracks += jets.ntracks(i);
@@ -761,9 +760,8 @@ int main(int argc, char** argv) {
       jet_sumseedtracks += std::count_if(jet_tk_list.begin(), jet_tk_list.end(), nps);
 
       for (int j = i+1; j < ie; ++j) {
-        if (!nt.jet_moved(j)) continue;
         const auto j_p4 = jets.p4(j);
-
+        if (!nt.jet_moved(j) || move_vector.DeltaPhi(j_p4.Vect()) > M_PI/2) continue;
         const double dr = i_p4.DeltaR(j_p4);
         const double deta = i_p4.Eta() - j_p4.Eta();
         const double dphi = i_p4.DeltaPhi(j_p4);
@@ -786,6 +784,8 @@ int main(int argc, char** argv) {
       }
     }
 
+    if ( jet_i[0] == -1 || jet_i[1] == -1 || jet_i[0] == jet_i[1]) 
+       NR_loop_cont(w);
 
     const int nmovedpairs = nmovedjets*(nmovedjets-1)/2;
     jet_detaavg /= nmovedpairs;
@@ -1004,10 +1004,9 @@ int main(int argc, char** argv) {
     if ( fabs(jet_dr) < 0.4 )
        NR_loop_cont(w); 
 
-    if (fabs(jet_eta[0]) > 1.5 || fabs(jet_eta[1]) > 1.5)
+    if ( fabs(movevectoreta) > 1.5)
        NR_loop_cont(w);
-    
-
+   
 
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;

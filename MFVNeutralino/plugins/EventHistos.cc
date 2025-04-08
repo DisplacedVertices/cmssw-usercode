@@ -34,8 +34,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_ntrack_sv;
   TH1F* h_sum_ntrack_sv;
   TH1F* h_sum_noutseedtrack;
-
-
   TH1F* h_eventid;
 
   TH2F* h_gen_decay;
@@ -542,31 +540,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_w->Fill(w);
   h_nsv->Fill(nsv, w);
   h_eventid->Fill(event.id().event());
-  /*
-  if (auxes->size() > 0 ) {
-    for (int isv = 0; isv < (int) auxes->size(); ++isv) {
-       const MFVVertexAux& aux = auxes->at(isv);
-       const int ntracks = aux.ntracks();
-       if (ntracks == 3 && aux.rescale_bs2derr < 0.0050 && mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)) > 0.0100){
-          std::cout << "event id " <<  event.id().event() << " run id " << event.id().run() << " lumi  " << event.id().luminosityBlock() << std::endl;
-          std::cout << " bs2derr " << aux.rescale_bs2derr << std::endl;
-          std::cout << " dBV " << mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)) << std::endl;
-          std::cout << " dZPV " << aux.pvdz() << std::endl;
-          std::cout << " err dZPV " << aux.pvdzerr() << std::endl; 
-          if (mevent->nmuons() > 0) {
-            std::cout << " muon pt " << mevent->muon_pt[0] << std::endl; 
-            std::cout << " dPhi(SV, muon)" << reco::deltaPhi(atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z)), mevent->muon_phi[0]) << std::endl;
-          }
-          if (mevent->nelectrons() > 0){
-            std::cout << " ele pt " << mevent->electron_pt[0] << std::endl; 
-            std::cout << " dPhi(SV, ele)" << reco::deltaPhi(atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z)), mevent->electron_phi[0]) << std::endl;
-          }
-          for (int ij = 0; ij < (int) mevent->njets(20); ++ij)
-            std::cout <<  " btagged ? " << mevent->is_btagged(ij,2) << " jet " << ij << " p " << mevent->jet_energy[ij] <<  " GeV" << std::endl; 
-       }
-    }
-  }
-  */
+  
   //////////////////////////////////////////////////////////////////////////////
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);

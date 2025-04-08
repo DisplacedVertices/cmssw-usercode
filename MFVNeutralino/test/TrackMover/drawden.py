@@ -8,9 +8,7 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 
 
-
-variables = ['_vtx', '_movedist', 'movedclo', 'half', '_mv_', 'jet0_eta', 'jet1_eta', 'qrk0_dxybs', 'qrk1_dxybs', 'jet0_dxybs', 'jet1_dxybs', 'qrk0_p', 'qrk1_p', 'quark', '_sump_', 'asym', 'jet0_trk', 'jet1_trk', '_npv_', 'misc', '_dvv', 'lsp', 'lspeta', 'nvtx', 'vtxcat', 'vtxbs', 'vtxun', 'vtxeta', 'vtxdbv', 'vtxntk', 'vtxnm1', '_costheta_', '_njets_', 'miscseed', 'nseed', 'movedseedtks', 'closeseedtks', 'jet0_eta', 'jet1_eta', 'closedseed', '_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_', '_nmovedtracks_' ] 
-
+variables = ['_vtx', 'movevectoreta', '_movedist', 'movedclo', 'half', '_mv_', 'jet0_eta', 'jet1_eta', 'qrk0_dxybs', 'qrk1_dxybs', 'jet0_dxybs', 'jet1_dxybs', 'qrk0_p', 'qrk1_p', 'quark', '_sump_', 'asym', 'jet0_trk', 'jet1_trk', '_npv_', 'misc', '_dvv', 'lsp', 'lspeta', 'nvtx', 'vtxcat', 'vtxbs', 'vtxun', 'vtxeta', 'vtxdbv', 'vtxntk', 'vtxnm1', '_costheta_', '_njets_', 'miscseed', 'nseed', 'movedseedtks', 'closeseedtks', 'jet0_eta', 'jet1_eta', 'closedseed', '_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_', '_nmovedtracks_' ]
 
 def get_em(fn, scale=1., alpha=1-0.6827):
     f = ROOT.TFile.Open(fn)

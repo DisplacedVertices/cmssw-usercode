@@ -48,6 +48,13 @@ elif 'ntk3or4' in sys.argv:
 sigreg = 'sigreg' in sys.argv
 presel = 'presel' in sys.argv
 nocuts = 'nocuts' in sys.argv
+
+rpv = 'rpv' in sys.argv
+ggh = 'ggh' in sys.argv
+vh = 'vh' in sys.argv 
+bkg = 'bkg' in sys.argv
+
+
 if sum([sigreg, nvtx == 1, presel, nocuts]) > 1:
     raise ValueError("can only do one of onevtx, sigreg, presel, nocuts")
 if any([sigreg,presel,nocuts]):
@@ -56,15 +63,21 @@ if any([sigreg,presel,nocuts]):
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
+year = '99'
 if '2018' in sys.argv:
+    year = '2018'
     int_lumi = ac.int_lumi_2018 * ac.scale_factor_2018
 elif '2017' in sys.argv:
+    year = '2017'
     int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 elif '20161' in sys.argv:
+    year = '20161'
     int_lumi = ac.int_lumi_20161 * ac.scale_factor_20161
 elif '20162' in sys.argv:
+    year = '20162'
     int_lumi = ac.int_lumi_20162 * ac.scale_factor_20162
 else:
+    year = 'run2'
     int_lumi = ac.int_lumi_20161 + ac.int_lumi_20162 + ac.int_lumi_2017 + ac.int_lumi_2018 #ac.int_lumi_run2 * ac.scale_factor_run2
 
 
@@ -79,12 +92,7 @@ def effs(fn):
     den = norm_from_file(fn)
     sname = os.path.basename(fn).replace('.root','')
     sample = getattr(Samples, sname, None)
-    if sample:
-        weight = sample.xsec * int_lumi / den
-        weighted = True
-    else:
-        weight = 1.
-        weighted = False
+    
     if sigreg:
         namenumall = 'mfvEventHistosSigReg'
         namenumvtx = 'mfvVertexHistosSigReg/h_nsv'
@@ -110,10 +118,18 @@ def effs(fn):
     
     ngen = f.Get('mfvWeight/h_sums').GetBinContent(1) 
 
-    #weight = 137.1*1000*(0.063168 + 0.30885)/ngen #VH 
-    #weight = 137.1*(1.0)/ngen #RPV 
-    #weight = 137.1*1000*(52.0)*0.1/ngen #ggH
-    weight = 1.0 #for bkg scaled inputs
+    if rpv :
+        weight = 137.1*(1.0)/ngen #RPV 
+    elif ggh :
+        weight = 137.1*1000*(52.0)*0.1/ngen #ggH
+    elif vh :
+        weight = 137.1*1000*(0.063168 + 0.30885)/ngen #VH 
+    elif sample :
+        weight = sample.xsec * int_lumi / den #for unscaled bkg inputs
+        weighted = True
+    else :
+        weight = 1. #for scaled bkg inputs 
+        weighted = False
     #print(" weight : ", weight)
 
     n1v3numall, n1v3numall_unweighted = get_n('Ntk3mfvVertexHistosOnlyOneVtx')
@@ -161,8 +177,9 @@ def effs(fn):
     err_tot_n1v5 += n1v5numall * (weight**2)
     
     if csv:
-        #print '%s & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ \\\\' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)
-        print '%s & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ \\\\' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)
+        print '%s & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ \\\\' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)
+        #print '%s & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$ \\\\' % (sname, numall*weight, numall**0.5 * weight, n1v3numall*weight, n1v3numall**0.5 * weight, n2v3numall*weight, n2v3numall**0.5 * weight, n1v4numall*weight, n1v4numall**0.5 * weight, n2v4numall*weight, n2v4numall**0.5 * weight, n1v5numall*weight, n1v5numall**0.5 * weight, n2v5numall*weight, n2v5numall**0.5 * weight)
+        #print sname+" & "+"{:.2e}".format(sample.xsec)+" & %d & %.3f  \\\\"%(den, weight) 
         #print 'samples.push_back("%s");    weights.push_back(%0.2f);' % (sname, weight)
         #print '%s,%e,%f,%f,%f,%0.1f,%0.1f' % (sname, weight, den, numall, float(numall)/den, numall*weight, numall**0.5 * weight)
     else:
@@ -177,18 +194,20 @@ fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 print_sum = 'sum' in sys.argv
 if not fns:
     dir = os.path.abspath([x for x in sys.argv[1:] if os.path.isdir(x)][0])
-    #fns = [os.path.join(dir, sn + '.root') for sn in ' WminusHToSSTodddd_tau1mm_M55 WplusHToSSTodddd_tau1mm_M55 ZHToSSTodddd_tau1mm_M55'.split()]
-    #fns = [os.path.join(dir, sn + '_run2.root') for sn in ' VHToSSTodddd_tau1mm_M55 VHToSSTodddd_tau10mm_M55 '.split()]
-    #fns = [os.path.join(dir, sn + '_run2.root') for sn in ' mfv_neu_tau001000um_M0400 mfv_stopdbardbar_tau000300um_M0400 mfv_stopdbardbar_tau001000um_M0200 '.split()]
-    #fns = [os.path.join(dir, sn + '_run2.root') for sn in ' ggHToSSTodddd_tau1mm_M55 '.split()]
-    
-    fns = [os.path.join(dir, sn + '_leptonpresel_run2.root') for sn in ' qcd wjetstolnu ttbar diboson dyjets '.split()]
-    #fns = [os.path.join(dir, sn + '_scaled_run2.root') for sn in ' qcdht ttbar '.split()]
-    #fns = [os.path.join(dir, sn + '_btagpresel_run2.root') for sn in 'qcd ttbar '.split()]
-    #fns = [os.path.join(dir, sn + '_scaled_run2.root') for sn in ' dyjetstollM10 dyjetstollM50 qcdbctoept015 qcdbctoept020  qcdbctoept030  qcdbctoept080  qcdbctoept170  qcdbctoept250  qcdempt015  qcdempt020  qcdempt030  qcdempt050  qcdempt080  qcdempt120  qcdempt170  qcdempt300  qcdmupt15  ttbar  wjetstolnu_0j  wjetstolnu_1j  wjetstolnu_2j  ww  wz  zz '.split()]
-    #fns += [ os.path.join(dir, sn + '_scaled_run2.root') for sn in 'qcdpt15mupt5 qcdpt20mupt5 qcdpt30mupt5 qcdpt50mupt5 qcdpt80mupt5 qcdpt120mupt5 qcdpt170mupt5 qcdpt300mupt5 qcdpt470mupt5 qcdpt600mupt5 qcdpt800mupt5 qcdpt1000mupt5'.split()]
+    if vh :
+        fns = [os.path.join(dir, sn + '_run2.root') for sn in ' VHToSSTodddd_tau1mm_M55 VHToSSTodddd_tau10mm_M55 '.split()]
+    elif rpv : 
+        fns = [os.path.join(dir, sn + '_run2.root') for sn in ' mfv_neu_tau001000um_M0400 mfv_stopdbardbar_tau000300um_M0400 mfv_stopdbardbar_tau001000um_M0200 '.split()]
+    elif ggh :
+        fns = [os.path.join(dir, sn + '_run2.root') for sn in ' ggHToSSTodddd_tau1mm_M55 '.split()]
+    else : 
+        #fns = [os.path.join(dir, sn + '_leptonpresel_' + year + '.root') for sn in ' qcd ttbar wjetstolnu dyjets diboson '.split()]
+        #fns = [os.path.join(dir, sn + '_btagpresel_' + year + '.root') for sn in 'qcd ttbar '.split()]
+        #fns = [os.path.join(dir, sn + '_' + year + '.root') for sn in '  wjetstolnu_0j  wjetstolnu_1j  wjetstolnu_2j ww  zz  wz dyjetstollM10 dyjetstollM50  ttbar qcdmupt15  qcdempt015  qcdempt020  qcdempt030  qcdempt050  qcdempt080  qcdempt120  qcdempt170  qcdempt300  qcdbctoept015 qcdbctoept020  qcdbctoept030  qcdbctoept080  qcdbctoept170  qcdbctoept250 '.split()]
+        
+        #fns += [ os.path.join(dir, sn + '_' + year + '.root') for sn in 'qcdpt15mupt5 qcdpt20mupt5 qcdpt30mupt5 qcdpt50mupt5 qcdpt80mupt5 qcdpt120mupt5 qcdpt170mupt5 qcdpt300mupt5 qcdpt470mupt5 qcdpt600mupt5 qcdpt800mupt5 qcdpt1000mupt5'.split()]
 
-    #fns =  [os.path.join(dir, sn + '_scaled_run2.root') for sn in ' qcdht0100   qcdht0300   qcdht0700   qcdht1500   ttbar  qcdht0200   qcdht0500   qcdht1000   qcdht2000'.split()]  
+        fns =  [os.path.join(dir, sn + '_' + year + '.root') for sn in ' qcdht0100 qcdht0200 qcdht0300 qcdht0500 qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split()]  
     
     fns = [fn for fn in fns if os.path.isfile(fn)]
     nosort = True
@@ -198,6 +217,7 @@ if not nosort:
 if csv:
     print 'sample,weight,den,num,eff,weighted,err_weighted'
 
+print(year, " int_lumi ", int_lumi)
 for fn in fns:
     effs(fn)
 print 'total & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%d\pm%d$ & $%.1f\pm%.1f$ & $%.1f\pm%.1f$ & $%.2f\pm%.2f$' % ( tot_sum, tot_var**0.5,tot_n1v3, err_tot_n1v3**0.5, tot_n2v3, err_tot_n2v3**0.5, tot_n1v4, err_tot_n1v4**0.5, tot_n2v4, err_tot_n2v4**0.5, tot_n1v5, err_tot_n1v5**0.5, tot_n2v5, err_tot_n2v5**0.5)

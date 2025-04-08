@@ -3,24 +3,29 @@ from JMTucker.Tools.general import *
 import pandas as pd
 import numpy as np
 
-#presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
-#sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-presel_path = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/' #'/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm' #FIXME 
-sel_path = '~/nobackup/crabdirs/HistosOnnormdzULV30Lepm/' #'/uscms/home/pkotamni/nobackup/crabdirs/HistosOnnormdzULV30Lepm'  #FIXME
-#presel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
-#sel_path = '/eos/uscms/store/user/pkotamni/Histos_FixWP_ULV11Bm_BkgOops_May17/'
+lep = 'lep' in sys.argv
+bjet = 'bjet' in sys.argv
+
+if bjet :
+    presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/' 
+    sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/'  
+if lep :
+    presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
+    sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
 data = bool_from_argv('data')
 year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
-varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
-print("variation: %s" % varname)
-
+trigname = 'NA' if len(sys.argv) < 3 else sys.argv[2] 
+print("trig channel: %s" % trigname)
 if data:
-    fn, presel_scale = 'SingleLepton%s.root' % year, 1.
-    #fn, presel_scale = 'BTagDispl%s.root' % year, 1.
+    if bjet :
+        fn, presel_scale = 'BTagDispl%s.root' % year, 1.
+    if lep :
+        fn, presel_scale = 'SingleLepton%s.root' % year, 1.
 else:
-    fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
-    #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
-    #fn, presel_scale = 'background_%s.root' % year, 1.
+    if bjet :
+        fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
+    if lep :
+        fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
 def propagate_product(x, y, ex, ey):
     p = x * y
     e = p * ((ex / x)**2 + (ey / y)**2)**0.5
@@ -63,8 +68,6 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
     print('%smfvEventHistosFullSel/h_npu' % ntk)
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
     sum_n2v += n2v

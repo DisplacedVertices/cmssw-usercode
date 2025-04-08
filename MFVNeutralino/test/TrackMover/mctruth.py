@@ -69,11 +69,6 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=False)
-    #samples = pick_samples(dataset, all_signal='only')
-    
-    #samples = [getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_20161')] 
-    #samples = [getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0200_2018')] 
-    samples = [getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0400_2018')]
     set_splitting(samples, dataset, 'ntuple')
     ms = MetaSubmitter('TrackMoverMCTruth' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
