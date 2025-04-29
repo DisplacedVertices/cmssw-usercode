@@ -1,17 +1,14 @@
 #!/bin/bash
 
 for x in "$@"; do
-  store="poop"
   echo $x
-  ndr=$(ls $x | wc -l)
-  mydir="${x#/eos/uscms}"
-  echo $mydir
-  for i in $(seq 0 $ndr); do
-      j="000$i"
-      #nd=$(printf '%04i' $j )
-      for file in "$x/$j/"*; do
-          trimmed="${file#/eos/uscms}"
-          xrdcp root://cmseos.fnal.gov$trimmed .
-      done
-  done
+    store=$(cr od "$x" | grep /store)
+    nj=$(cr njobs "$x" | grep -v crab)
+    for i in $(seq 1 $nj); do
+        j=$((i/1000))
+        nd=$(printf '%04i' $j )
+        echo copy root://cmseos.fnal.gov/$store/$nd/output_${i}.txz to "$x"
+        xrdcp -sf root://cmseos.fnal.gov/$store/$nd/output_${i}.txz "$x"
+    done
+
 done

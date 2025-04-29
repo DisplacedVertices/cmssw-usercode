@@ -246,8 +246,8 @@ reweight = True
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['15',]
-ctaus       = ['1000',] #['1000', '3000', '30000'] 
+masses = ['40',]
+ctaus       = ['300',] #['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
 # Start actually doing stuff
@@ -295,11 +295,11 @@ for mass in masses:
                 dat_str = ''
 
                 if not reweight:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/background_btagpresel_%s.root" % (year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/BTagDispl%s.root" % (year)
+                    sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root" % (year)
+                    dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root" % (year)
                 else:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (int(ctau), int(mass), year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (int(ctau), int(mass), year)
+                    sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/background_leptonpresel_%s.root" % (int(ctau), int(mass), year)
+                    dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_LowEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/SingleMuon%s.root" % (int(ctau), int(mass), year)
                 tm_sim  = ROOT.TFile(sim_str)
                 tm_dat  = ROOT.TFile(dat_str)
                 
@@ -328,7 +328,7 @@ for mass in masses:
                 else:
                    str_ctau = str(ctau)+'um'
 
-                signal  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
+                signal  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
                 
                 sig_dist = signal.Get('nocuts_closeseedtks_den')
                 sig_denom = sig_dist.Clone()
@@ -341,7 +341,7 @@ for mass in masses:
                 sig_curve.Write()
                 fouttt.Close()
                 
-                signal_non  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+                signal_non  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_LowEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
                 
                 signon_dist = signal_non.Get('nocuts_closeseedtks_den')
                 non_denom = signon_dist.Clone() 
@@ -353,7 +353,7 @@ for mass in masses:
                 signon_curve.Write()
                 foutttt.Close()
 
-                signal_vetopdvv  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_LowEta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+                signal_vetopdvv  = ROOT.TFile('/eos/uscms/store/user/pkotamni/TrackMoverMCTruth_LEPTONMU/TrackMoverMCTruth_LowEta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
                 
                 sigovp_dist = signal_vetopdvv.Get('nocuts_closeseedtks_den')
                 ovp_denom = sigovp_dist.Clone() 

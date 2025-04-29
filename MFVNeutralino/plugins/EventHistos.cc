@@ -34,8 +34,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_ntrack_sv;
   TH1F* h_sum_ntrack_sv;
   TH1F* h_sum_noutseedtrack;
-
-
   TH1F* h_eventid;
 
   TH2F* h_gen_decay;
@@ -542,12 +540,11 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_w->Fill(w);
   h_nsv->Fill(nsv, w);
   h_eventid->Fill(event.id().event());
-
+  
   //////////////////////////////////////////////////////////////////////////////
-  /*
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
-
+  /*
   const size_t ngenlep = mevent->gen_leptons.size();
   h_gen_leptons->Fill(ngenlep, w);
 

@@ -7,7 +7,8 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-variables = ['_movedist','_ht_','_njets_', 'sump', 'trk_p', '_nmuons_', '_neles_', '_w_mT_', '_w_pT_', '_jet_asymm_','_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_','_nmovedtracks_','_dphi_sum_j_mv_', '_deta_sum_j_mv_' ] 
+variables = ['_movedist',  'miscseed', 'nseed', 'movedseedtks', '_nmovedtracks_', 'closeseed', '_ht_','_njets_', 'sump', 'trk_p', '_nmuons_', '_neles_', '_w_mT_', '_w_pT_', '_jet_asymm_','_jet_dr_','_jet_deta_','_jet_dphi_','_ntks_j0_','_ntks_j1_','_pt0_','_pt1_','_nmovedtracks_','_dphi_sum_j_mv_', '_deta_sum_j_mv_' ] 
+
 
 def get_em(fn, scale=1., alpha=1-0.6827):
     f = ROOT.TFile.Open(fn)
@@ -158,25 +159,25 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             print(name) 
             ROOT.gStyle.SetOptStat("iouRMen") #FIXME
           
-            #data.SetName("TM SingleMuon 2017")
-            data.SetName("TM BTagCSV+DisplJet 20161")
+            data.SetName("TM SingleMuon 2017p8")
+            #data.SetName("TM BTagCSV+DisplJet 20161")
             data.SetLineWidth(2)
             data.SetMarkerStyle(20)
             data.SetMarkerSize(0.8)
             data.SetLineColor(ROOT.kBlack)
     
             
-            #mc.SetName("TM MC other bkg. 2017")
-            mc.SetName("TM DisplJet 20161")
+            mc.SetName("TM MC ttbar bkg. 2017p8")
+            #mc.SetName("TM DisplJet 20161")
             mc.SetFillStyle(3001)
             mc.SetMarkerStyle(24)
             mc.SetMarkerSize(0.8)
-            mc.SetMarkerColor(8)
-            mc.SetLineColor(8)
-            mc.SetFillColor(8)
+            mc.SetMarkerColor(ROOT.kAzure+8)
+            mc.SetLineColor(ROOT.kAzure+8)
+            mc.SetFillColor(ROOT.kAzure+8)
 
-            #mc2.SetName("TM MC combined QCD-EMEnrich 2017")
-            mc2.SetName("TM MC ttbar 20161")
+            mc2.SetName("TM MC combined QCD-EMEnrich 2017p8")
+            #mc2.SetName("TM MC ttbar 20161")
             mc2.SetFillStyle(3001)
             mc2.SetMarkerStyle(24)
             mc2.SetMarkerSize(0.8)
@@ -184,8 +185,8 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc2.SetLineColor(6)
             mc2.SetFillColor(6)
             
-            #mc3.SetName("TM MC Drell-Yan 2017")
-            mc3.SetName("TM MC WW 20161")
+            mc3.SetName("TM MC Drell-Yan 2017p8")
+            #mc3.SetName("TM MC WW 20161")
             mc3.SetFillStyle(3001)
             mc3.SetMarkerStyle(24)
             mc3.SetMarkerSize(0.8)
@@ -193,8 +194,8 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc3.SetLineColor(46)
             mc3.SetFillColor(46)
 
-            #mc4.SetName("TM MC NLO (W+->lnu)+jets 2017")
-            mc4.SetName("TM MC ZZ 20161")
+            mc4.SetName("TM MC NLO (W+->lnu)+jets 2017p8")
+            #mc4.SetName("TM MC ZZ 20161")
             mc4.SetFillStyle(3001)
             mc4.SetMarkerStyle(24)
             mc4.SetMarkerSize(0.8)
@@ -203,14 +204,14 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc4.SetFillColor(2)
 
 
-            #mc5.SetName("TM MC combined QCD-MuEnrich Pt>5GeV 2017")
-            mc5.SetName("TM MC WZ 20161")
+            mc5.SetName("TM MC diboson 2017p8")
+            #mc5.SetName("TM MC WZ 20161")
             mc5.SetFillStyle(3001)
             mc5.SetMarkerStyle(24)
             mc5.SetMarkerSize(0.8)
             mc5.SetMarkerColor(2)
-            mc5.SetLineColor(65)
-            mc5.SetFillColor(65)
+            mc5.SetLineColor(ROOT.kBlue)
+            mc5.SetFillColor(ROOT.kBlue)
             
             
             signal.SetName("MC (W->lnu)H->4d 1mm 55GeV 2017")
@@ -224,13 +225,13 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             
             x_range = None
             y_range = None
-            objs = [mc2, mc3, mc4, mc5]
-            hist_objs = [data, mc2, mc3, mc4, mc5]
+            objs = [mc, mc3, mc4, mc5]
+            hist_objs = [data, mc, mc3, mc4, mc5]
             statbox_size = (0.2,0.2)
             if name.endswith('_den'):
                 for g in tot:
                     g.GetYaxis().SetTitle('# of entries')
-                objs = [mc2, mc3, mc4, mc5]
+                objs = [mc, mc3, mc4, mc5]
                 statbox_size = (0.2,0.1)
             if "bs2derr" in name:
                 x_range = (0, 0.01)

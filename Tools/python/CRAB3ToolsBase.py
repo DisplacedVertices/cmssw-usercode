@@ -183,6 +183,9 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 *******************************************************************************
 '''
 
+    if os.path.isfile(path):
+        os.chmod(path, 0600)
+
     while 1:
         pp = getpass.getpass('GRID passphrase:')
         pp2 = getpass.getpass('again:')

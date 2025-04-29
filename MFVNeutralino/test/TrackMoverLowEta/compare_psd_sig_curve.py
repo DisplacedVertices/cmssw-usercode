@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 cmssw_setup()
 
 # FIXME you can replace this with the usual stuff for putting plots into our publicweb areas and generating the html
-outputdir = "~/nobackup/crabdirs/TMLowEta_PSD_CURVE_M15_ctau1mm_20161p2_ggH_Jan22"
+outputdir = "~/nobackup/crabdirs/TMLowEta_PSD_CURVE_FIXME"
 outputdir += "/" # in case we forget it...
 os.system("mkdir -p "+outputdir)
 
@@ -29,7 +29,7 @@ none_emu_distcurve  = ROOT.TFile(filename1)
 h_none_emu_distcurve = none_emu_distcurve.Get('all_closeseedtks_num')
 h_none_emu_distcurve.SetStats(0)
 h_none_emu_distcurve.SetLineWidth(3)
-h_none_emu_distcurve.SetLineColor(ROOT.kRed)
+h_none_emu_distcurve.SetLineColor(ROOT.kBlue)
 h_none_emu_distcurve.GetYaxis().SetRangeUser(0.0,1.5)
 h_none_emu_distcurve.GetXaxis().SetRangeUser(0.0,45.0)
 h_none_emu_distcurve.Draw('L')
@@ -38,17 +38,13 @@ pseudo_distcurve  = ROOT.TFile(filename2)
 h_pseudo_distcurve = pseudo_distcurve.Get('all_closeseedtks_num')
 h_pseudo_distcurve.SetStats(0)
 h_pseudo_distcurve.SetLineWidth(3)
-h_pseudo_distcurve.SetLineColor(ROOT.kBlack)
+h_pseudo_distcurve.SetLineColor(ROOT.kViolet+1)
 h_pseudo_distcurve.GetYaxis().SetRangeUser(0.0,1.5)
 h_pseudo_distcurve.GetXaxis().SetRangeUser(0.0,45.0)
 h_pseudo_distcurve.Draw('L same')
 
 legend = ROOT.TLegend(0.28,0.195,0.880,0.435)
-
-if ("psdsig_emu" or "psdsig_none" in filename2):
-    legend.AddEntry(h_none_emu_distcurve, "signal MC TOC", "L")
-elif ("tmmc" in filename2):
-    legend.AddEntry(h_none_emu_distcurve, "TM MC TOC", "L")
+legend.AddEntry(h_none_emu_distcurve, "signal MC TOC", "L")
 if ("emu_scale_toc" in filename2):
     legend.AddEntry(h_pseudo_distcurve, "signal MC TOC scaled to TM MC/signal MC", "L")
 elif ("scale_toc" in filename2):

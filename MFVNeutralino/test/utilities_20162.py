@@ -128,7 +128,7 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
+def _background_samples(trigeff=False, year=2017, bkg_tag='ttbar'):
     if _qcdlepenrich:
         x = ['qcdmupt15']
         x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170]]
@@ -153,13 +153,16 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
                 x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  
                 x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]   
                 x += ['qcdpt1000mupt5']
+        elif bkg_tag == 'diboson':
+            x = ['ww', 'wz', 'zz',]
         else:
-            x = ['ww', 'wz', 'zz', 'ttbar'] 
+            x = ['ttbar',]  
     elif _btagpresel:
-        #x = ['qcdht%04i' % x for x in [100, 200, 300, 500, 700, 1000, 1500, 2000]]
-        #x = ['qcdht%04i' % x for x in [500, 700, 1000, 1500, 2000]]
         x = []
-        x += ['ww','wz', 'zz', 'ttbar',]
+        if bkg_tag == 'qcd':
+           x += ['qcdht%04i' % x for x in [ 100, 200, 300, 500, 700, 1000, 1500, 2000]]
+        else :
+           x += ['ttbar',]
     elif _metpresel:
         x = ['ttbar', 'wjetstolnu']
         x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
@@ -225,7 +228,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
         year = int(year_s[1:])
         print 'scaling to', year, scale
         
-        for bkg_tag in ['wjetstolnu', 'dyjets', 'others', 'qcd'] : #FIXME add qcd
+        for bkg_tag in ['qcd','wjetstolnu', 'dyjets', 'diboson', 'ttbar',]:  #FIXME 
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
@@ -247,17 +250,18 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                     ok = False
             if ok:
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
-         
-        if _leptonpresel: 
-          cmdx = 'hadd.py background_leptonpresel_noqcd_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root others_leptonpresel_%s.root' % (year, year, year, year)
-          cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root qcd_leptonpresel_%s.root others_leptonpresel_%s.root' % (year, year, year, year, year)
-          print cmdx
+        if _leptonpresel:
+          cmd = '' #FIXME run hadd outside this script to avoid runtime error
+          #cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root diboson_leptonpresel_%s.root ttbar_leptonpresel_%s.root' % (year, year, year, year, year)
+          #cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root qcd_leptonpresel_%s.root diboson_leptonpresel_%s.root ttbar_leptonpresel_%s.root ' % (year, year, year, year, year, year)
           print cmd
-          os.system(cmdx)
         else:
-          cmd = 'hadd.py background_btagpresel_%s.root others_btagpresel_%s.root' % (year, year)
+          cmd = '' #FIXME run hadd outside this script to avoid runtime error
+          #cmd = 'hadd.py background_btagpresel_%s.root ttbar_btagpresel_%s.root' % (year, year)
+          #cmd = 'hadd.py background_btagpresel_%s.root ttbar_btagpresel_%s.root qcd_btagpresel_%s.root' % (year, year, year)
           print cmd
         os.system(cmd)
+        
     #only work for 2017 data now
     #if ok:
     #    cmd = 'hadd.py background%s_2017p8.root background%s_2017.root background%s_2018.root' % (_presel_s, _presel_s, _presel_s)

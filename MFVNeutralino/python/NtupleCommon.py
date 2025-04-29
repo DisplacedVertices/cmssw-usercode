@@ -3,14 +3,17 @@ from JMTucker.Tools.Year import year
 
 ntuple_version_ = 'OnnormdzULV30'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
-use_btag_triggers = False
+use_btag_triggers = True
+use_btag_vetoLepHT_triggers = False
 use_MET_triggers = False
-use_Lepton_triggers = True
+use_Lepton_triggers = False
 use_Muon_triggers = False
 use_Electron_triggers = False
 use_DisplacedLepton_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
+elif use_btag_vetoLepHT_triggers : 
+    ntuple_version_ += "BvetoLHT" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
     lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
     ntuple_version_ += "MET"
@@ -20,7 +23,7 @@ elif use_Muon_triggers :
     ntuple_version_ += "LepMu"
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
-ntuple_version_use = ntuple_version_ + 'm' #_noef' #FIXME only used for signal MC
+ntuple_version_use = ntuple_version_ + 'm_noef' #FIXME only used for signal MC
 dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):

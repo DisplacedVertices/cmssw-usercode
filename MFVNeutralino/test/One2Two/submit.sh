@@ -113,9 +113,7 @@ cd $WD
         touch observed.root expected.root
     else
         # don't use -H AsymptoticLimits, at least don't do it for low-efficiency signals, it can lead to way too low limits
-        #cmd="combine -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 10000 datacard.txt"
-        cmd="combine --setTheHint $hint -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 10000 datacard.txt"
-
+        cmd="combine --setTheHint $hint -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
 
         if [[ $DOOBSERVED -eq 1 ]]; then
             echo "========================================================================="
@@ -134,7 +132,7 @@ cd $WD
             [[ $NOSYSTEMATICS -eq 1 ]] && touch observedS0.root
         fi
 
-        ntoys=50
+        ntoys=100
         seedbase=13068931
 
         if [[ $EXPECTED -ne 0 ]]; then

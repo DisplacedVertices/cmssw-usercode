@@ -18,9 +18,9 @@ private:
   bool filter(edm::Event&, const edm::EventSetup&) override;
   bool trigger_veto(edm::Event& event, const std::vector<std::string> trigger_list);
   struct Mode {
-    enum mode_t { either, jets_only, muons_only, electrons_only_veto_muons, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
+    enum mode_t { either, jets_only, muons_only, electrons_only_veto_muons, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_leptons_and_HT, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
     const mode_t mode;
-    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "muons only" ? muons_only : m == "electrons only veto muons" ? electrons_only_veto_muons : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
+    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_leptons_and_HT" ? bjets_OR_displaced_dijet_veto_leptons_and_HT : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "muons only" ? muons_only : m == "electrons only veto muons" ? electrons_only_veto_muons : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
     bool operator==(mode_t m) const { return mode == m; }
   };
   const Mode mode;
@@ -38,7 +38,9 @@ private:
   const double min_electron_pt;
   const int min_nleptons;
   const bool veto_bjet_triggers;
-  const std::vector<std::string> triggers_to_veto;
+  const std::vector<std::string> bjet_triggers_to_veto;
+  const bool veto_lepton_triggers;
+  const std::vector<std::string> lepton_triggers_to_veto;
   EffectiveAreas electron_effective_areas;
   const edm::EDGetTokenT<double> rho_token;
   const bool parse_randpars;
@@ -64,7 +66,9 @@ MFVEventFilter::MFVEventFilter(const edm::ParameterSet& cfg)
     min_electron_pt(cfg.getParameter<double>("min_electron_pt")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     veto_bjet_triggers(cfg.getParameter<bool>("veto_bjet_triggers")),
-    triggers_to_veto(cfg.getParameter<std::vector<std::string>>("triggers_to_veto")),
+    bjet_triggers_to_veto(cfg.getParameter<std::vector<std::string>>("bjet_triggers_to_veto")),
+    veto_lepton_triggers(cfg.getParameter<bool>("veto_lepton_triggers")),
+    lepton_triggers_to_veto(cfg.getParameter<std::vector<std::string>>("lepton_triggers_to_veto")),
     electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
     parse_randpars(cfg.getParameter<bool>("parse_randpars")),
@@ -105,7 +109,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   }
 
   if (veto_bjet_triggers) {
-    for (auto trigger_to_veto : triggers_to_veto) {
+    for (auto trigger_to_veto : bjet_triggers_to_veto) {
         if (helper.pass_any_version(trigger_to_veto)) return false;
     }
   }
@@ -160,12 +164,12 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (electron.pt() > min_electron_pt && abs(electron.eta()) < 2.4) {
       bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");
-      const auto pfIso = electron.pfIsolationVariables();
-      const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-      const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
+      //const auto pfIso = electron.pfIsolationVariables();
+      //const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
+      //const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
       const bool passveto = electron.passConversionVeto();
 
-      if (isTightEl && passveto && iso < 0.10) {
+      if (isTightEl && passveto) {
   	    ++nelectrons;
       } 
     } 
@@ -183,6 +187,8 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   else if (mode == Mode::either && jets_pass)
     return true;
   else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet || mode == Mode::bjets_OR_displaced_dijet_veto_HT)
+    return true;
+  else if (mode == Mode::bjets_OR_displaced_dijet_veto_leptons_and_HT)
     return true;
   else if (mode == Mode::MET_only)
     return true;

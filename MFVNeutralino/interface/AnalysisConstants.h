@@ -118,6 +118,21 @@ namespace mfv {
 
     const double
     scaled_int_lumi_2017p8 = scaled_int_lumi_2017 + scaled_int_lumi_2018;
+
+    //
+
+    const double
+    int_lumi_run2 = int_lumi_20161 + int_lumi_20162 + int_lumi_2017 + int_lumi_2018;
+
+    const char*
+    int_lumi_nice_run2 = "  137 fb^{-1} (13 TeV)";
+
+    const double
+    scale_factor_run2 = 1.00;
+
+    const double
+    scaled_int_lumi_run2 = scaled_int_lumi_20161 + scaled_int_lumi_20162 + scaled_int_lumi_2017 + scaled_int_lumi_2018;
+  
   }
 }
 

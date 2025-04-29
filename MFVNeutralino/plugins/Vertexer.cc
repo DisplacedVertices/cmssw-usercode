@@ -272,6 +272,8 @@ class MFVVertexer : public edm::EDProducer {
   TH1F* hs_n_at_least_5trk_output_vertices[stepEnum::N_STEPS];
   TH1F* hs_output_vertex_nm1_bsbs2ddist[stepEnum::N_STEPS];
   TH1F* hs_output_vertex_nm1_bs2derr[stepEnum::N_STEPS];
+  TH1F* hs_output_3tkvertex_nm1_bsbs2ddist[stepEnum::N_STEPS];
+  TH1F* hs_output_3tkvertex_nm1_bs2derr[stepEnum::N_STEPS];
   TH1F* hs_output_vertex_ntracks[stepEnum::N_STEPS];
   TH1F* hs_output_vertex_neletracks[stepEnum::N_STEPS];
   TH1F* hs_output_vertex_nmutracks[stepEnum::N_STEPS];
@@ -471,6 +473,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       hs_n_at_least_5trk_output_vertices[step] = fs->make<TH1F>("h_n_at_least_5trk_output_"+stepStrs[step]+"_vertices", ";# of >=5trk-vertices", 20, 0, 20);
       hs_output_vertex_nm1_bsbs2ddist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
       hs_output_vertex_nm1_bs2derr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      hs_output_3tkvertex_nm1_bsbs2ddist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_3tkvertex_nm1_bsbs2ddist", ";3tk-vtx dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      hs_output_3tkvertex_nm1_bs2derr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_3tkvertex_nm1_bs2derr", ";3tk-vtx bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
       hs_output_vertex_tkvtxdist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
       hs_output_vertex_tkvtxdisterr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
       hs_output_vertex_tkvtxdistsig[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
@@ -1618,13 +1622,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         double bs2derr = dBV_Meas1D.error();
 
         // n-1 plots of the various cuts used (ntk, dBV, bs2derr, chi2)
-        if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0025) {
+        if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_chi2->Fill(vchi2);
         }
-        if (vchi2 < 5 && dBV > 0.01 && bs2derr < 0.0025) {
+        if (vchi2 < 5 && dBV > 0.01 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_ntracks->Fill(ntracks);
         }
-        if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0025) {
+        if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist->Fill(dBV);
         }
         if (vchi2 < 5 && ntracks >= 5 && dBV > 0.01) {
@@ -1734,13 +1738,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         double bs2derr = dBV_Meas1D.error();
 
         // n-1 plots of the various cuts used (ntk, dBV, bs2derr, chi2)
-        if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0025) {
+        if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_chi2->Fill(vchi2);
         }
-        if (vchi2 < 5 && dBV > 0.01 && bs2derr < 0.0025) {
+        if (vchi2 < 5 && dBV > 0.01 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_ntracks->Fill(ntracks);
         }
-        if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0025) {
+        if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0050) {
           h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist->Fill(dBV);
         }
         if (vchi2 < 5 && ntracks >= 5 && dBV > 0.01) {
@@ -2227,15 +2231,26 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
 
     hs_output_vertex_ntracks[step]->Fill(ntracks);
 
-    if (ntracks >= 3) 
+    if (ntracks == 3) { 
       count_3trk_vertices++;
+      Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
+      double dBV = dBV_Meas1D.value();
+      double bs2derr = dBV_Meas1D.error();
+
+      if (vchi2 < 5 && bs2derr < 0.0050) {
+        hs_output_3tkvertex_nm1_bsbs2ddist[step]->Fill(dBV);
+      }
+      if (vchi2 < 5 && dBV > 0.01) {
+        hs_output_3tkvertex_nm1_bs2derr[step]->Fill(bs2derr);
+      }
+    }
     if (ntracks >= 5) {
       count_5trk_vertices++;
       Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
       double dBV = dBV_Meas1D.value();
       double bs2derr = dBV_Meas1D.error();
 
-      if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0025) {
+      if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0050) {
         hs_output_vertex_nm1_bsbs2ddist[step]->Fill(dBV);
       }
       if (vchi2 < 5 && ntracks >= 5 && dBV > 0.01) {

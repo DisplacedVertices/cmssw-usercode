@@ -178,16 +178,15 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root', fn4='signalmid.r
 
         if name.endswith('_rat') or (not name.endswith('_num') and not name.endswith('_den')):
             
-            #mc.SetName("REWEIGHTED TM MC")
-            mc.SetName("ggH 1mm 55GeV")
+            mc.SetName("REWEIGHTED TM MC")
             mc.SetMarkerSize(0.8)
             mc.SetLineWidth(3)
             mc.SetMarkerColor(ROOT.kRed)
             mc.SetLineColor(ROOT.kRed)
             mc.SetFillColor(ROOT.kRed)
             
-            #data.SetName("REWEIGHTED TM data")
-            data.SetName("ggH 1mm 40GeV")
+            data.SetName("REWEIGHTED TM data")
+            #data.SetName("Gluino/Neu 1mm 400GeV via b/displ trig")
             data.SetMarkerSize(0.8)
             data.SetLineWidth(3)
             data.SetMarkerColor(ROOT.kBlack) 
@@ -195,21 +194,22 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root', fn4='signalmid.r
             data.SetFillColor(ROOT.kBlack)
             
             #signal.SetName("V(HSS4d) 1mm 55GeV MC")
-            #signal.SetName("Stop(dbardbar) 1mm 200GeV")
-            signal.SetName("ggH 1mm 15GeV")
+            signal.SetName("Stop(dbardbar) 300um 400GeV")
+            #signal.SetName("gg(HSS4d) 1mm 55GeV")
             signal.SetMarkerSize(0.8)
             signal.SetLineWidth(3)
-            signal.SetMarkerColor(ROOT.kBlue)
-            signal.SetLineColor(ROOT.kBlue)
-            signal.SetFillColor(ROOT.kBlue)
+            signal.SetMarkerColor(ROOT.kMagenta+2)#Green+2)#Azure+8)#Yellow+2)
+            signal.SetLineColor(ROOT.kMagenta+2)#Green+2)#Azure+8)#Yellow+2)
+            signal.SetFillColor(ROOT.kMagenta+2)#Green+2)#Azure+8)#Yellow+2)
             
             #signalmid.SetName("REWEIGHTED TM data")
-            signalmid.SetName("Stopbbar 1mm 800GeV")
+            #signalmid.SetName("Stopbbar 1mm 800GeV")
+            signalmid.SetName("Gluino/Neu 1mm 400GeV via HT trig")
             signalmid.SetMarkerSize(0.8)
             signalmid.SetLineWidth(3)
-            signalmid.SetMarkerColor(ROOT.kGray+2)
-            signalmid.SetLineColor(ROOT.kGray+2)
-            signalmid.SetFillColor(ROOT.kGray+2)
+            signalmid.SetMarkerColor(ROOT.kRed-3)#Gray+2)
+            signalmid.SetLineColor(ROOT.kRed-3)#Gray+2)
+            signalmid.SetFillColor(ROOT.kRed-3)#Gray+2)
 
             #signalnon.SetName("REWEIGHTED TM data")
             signalnon.SetName("Stopdbar 1mm 800GeV")
@@ -226,7 +226,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root', fn4='signalmid.r
             if name.endswith('_rat'):
                 for g in both:
                     g.GetYaxis().SetTitle('efficiency')
-                objs = [(mc, 'P'),(data, 'P'),(signal,'P')]
+                objs = [(mc, 'P'), (data, 'P'),(signal,'P')]
                 y_range = (0, 1.05)
             if 'bs2derr' in name:
                 x_range = (0, 0.01)
@@ -241,7 +241,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', fn3='signal.root', fn4='signalmid.r
                         plot_saver=ps,
                         x_range=x_range,
                         y_range=y_range,
-                        res_y_range=(0.4,1.6),
+                        res_y_range=(0.7,1.3),
                         res_y_title='ratio',
                         res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False, 'allow_subset': True}, #name in ('all_jetsumntracks_rat', )},

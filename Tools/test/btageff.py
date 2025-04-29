@@ -29,12 +29,14 @@ process.JMTBTagEfficiency = cms.EDAnalyzer('JMTBTagEfficiency',
 
 process.p = cms.Path(process.JMTBTagEfficiency)
 
-if year == 2017:
-    process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(old = True)
-    process.p *= process.JMTBTagEfficiencyOld
+#if year == 2017:
+#    process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(old = True)
+#    process.p *= process.JMTBTagEfficiencyOld
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, input_is_miniaod=True, mode='low HT online track test', event_filter_jes_mult=0)
+setup_event_filter(process, input_is_miniaod=True, mode = 'leptons only', event_filter_jes_mult=0)
+#setup_event_filter(process, input_is_miniaod=True, mode = 'bjets OR displaced dijet veto leptons and HT', event_filter_jes_mult=0)
+#setup_event_filter(process, input_is_miniaod=True, mode='low HT online track test', event_filter_jes_mult=0)
 #setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
 ReferencedTagsTaskAdder(process)('p')
@@ -45,17 +47,22 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
     if year == 20161:
-        samples = Samples.qcd_samples_2016APV + Samples.ttbar_samples_2016APV
+        samples = Samples.qcd_lep_samples_20161 + Samples.ttbar_samples_20161[0:1] + Samples.leptonic_samples_20161 + Samples.diboson_samples_20161
+        #samples = Samples.qcd_samples_20161 + Samples.ttbar_samples_20161
     if year == 20162:
-        samples = Samples.qcd_samples_2016 + Samples.ttbar_samples_2016
+        samples = Samples.qcd_lep_samples_20162 + Samples.ttbar_samples_20162[0:1] + Samples.leptonic_samples_20162 + Samples.diboson_samples_20162
+        #samples = Samples.qcd_samples_20162 + Samples.ttbar_samples_20162
     if year == 2017:
-        samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
+        samples = Samples.qcd_lep_samples_2017 + Samples.ttbar_samples_2017[0:1] + Samples.leptonic_samples_2017 + Samples.diboson_samples_2017
+        #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
     elif year == 2018:
-        samples = Samples.qcd_samples_2018 + Samples.ttbar_samples_2018
+        samples = Samples.qcd_lep_samples_2018 + Samples.ttbar_samples_2018[0:1] + Samples.leptonic_samples_2018 + Samples.diboson_samples_2018
+        #samples = Samples.qcd_samples_2018 + Samples.ttbar_samples_2018
 
     set_splitting(samples, 'miniaod', 'default', default_files_per=16)
 
-    ms = MetaSubmitter('BTagEffV25mv1', dataset='miniaod')
+    ms = MetaSubmitter('BTagEffOnnormdzULV30Lepm', dataset='miniaod')
+    #ms = MetaSubmitter('BTagEffOnnormdzULV30BvetoLHTm_2017', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     ms.submit(samples)
 

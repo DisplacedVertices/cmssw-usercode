@@ -13,12 +13,14 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
   if (ctau < 1000){
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau%ium_M%02i_%s.root",etabin,ctau,mg,year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
-     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%ium_M%02i_%s.root",etabin,ctau,mg,year);
+     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
+     //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%ium_M%02i_%s.root",etabin,ctau,mg,year);
   }
   else{
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau%imm_M%02i_%s.root",etabin,ctau/1000,mg, year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
-     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%imm_M%02i_%s.root",etabin,ctau/1000,mg,year);
+     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
+     //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%imm_M%02i_%s.root",etabin,ctau/1000,mg,year);
   }
   
   TString fnb;
@@ -26,11 +28,13 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
   
   if (Is_bkg){
       //fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root",etabin, year);
-      fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/background_btagpresel_%s.root",etabin, year);
+      fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselhighptv8_20_noCorrection/background_btagpresel_%s.root", etabin, year);
+      //fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/background_btagpresel_%s.root",etabin, year);
   }
   else{
       //fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root",etabin, year);
-      fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/BTagDispl%s.root",etabin, year);
+      fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselhighptv8_20_noCorrection/BTagDispl%s.root", etabin, year);
+      //fnb.Form("~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/BTagDispl%s.root",etabin, year);
   }
 
   TFile* fs = TFile::Open(fns, "read");
@@ -45,13 +49,15 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
   
   if (Is_bkg){
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_lepton_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
-     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopb_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
-     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_ggh_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
+     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopb_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopd_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_ggh_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
   }
   else { 
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_lepton_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
-     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopb_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
-     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_ggh_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
+     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopb_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopd_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_ggh_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
   }
   std::cout << "Getting weights from: " << std::endl;
   std::cout << fns << std::endl;
@@ -71,14 +77,8 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
       std::vector<double> b_error_Int_idx = {}; 
       std::vector<double> s_Int_idx = {}; 
       std::vector<double> s_error_Int_idx = {}; 
-      //std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 36, 42, 50}; 
-      //std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 8, 12, 14, 15, 16, 18, 20, 22, 24, 26, 30, 38, 50}; 
-      std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
+      std::vector<int> b_x = {16, 18, 20, 22, 24, 26, 30, 38, 50};  
       std::vector<int> b_y = {0, 10, 14, 16, 17, 18, 19, 20, 22, 26, 34, 50}; 
-      //std::vector<int> b_x = {1, 18}; //{19, 21, 23, 25, 27, 29, 31, 50}; 
-      //std::vector<int> b_y = {0, 9, 18}; 
       
       for (int i = 0; i < b_x.size()-1; ++i){
          for (int j = 5-i; j < 8+i; ++j){
@@ -86,12 +86,10 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
               j = 0;
             double b_error_Int = 0, s_error_Int = 0;
             double b_Int = hb->IntegralAndError(b_x[i]+1,b_x[i+1],b_y[j]+1,b_y[j+1],b_error_Int, "");
-            //std::cout << "Integrate h b_x " << b_x[i] << " b_y " << b_y[j] << " Int " << b_Int << " +- " <<b_error_Int << std::endl;
             b_Int_idx.push_back(b_Int);
             b_error_Int_idx.push_back(b_error_Int);
 
             double s_Int = hs->IntegralAndError(b_x[i]+1,b_x[i+1],b_y[j]+1,b_y[j+1],s_error_Int, "");
-            //std::cout << "Integrate h b_x " << b_x[i] << " b_y " << b_y[j] << " Int " << s_Int << " +- " <<s_error_Int << std::endl;
             s_Int_idx.push_back(s_Int);
             s_error_Int_idx.push_back(s_error_Int);
          }
@@ -159,7 +157,6 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
                      
                }
            }
-           //std::cout << "Test Integrate h b_x " << exp_Int_idx << std::endl;
            ij++;
          }
       }
@@ -176,16 +173,16 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
 
 void WeightFiles2Dmove()
 {
-  std::vector<int> taus = {1000, 10000};
-  std::vector<int> mgs = {40};
-  const char* years[2] = {"20161p2", "2017p8"};
+  std::vector<int> taus = {100, 300, 1000, 10000, 30000}; // 10000};
+  std::vector<int> mgs = {200,400,800}; //15, 40, 55};
+  const char* years[2] = {"20161p2","2017p8"}; //20161p2
   const char* etabins[3] = {"Low", "Mix", "High"};
   for (int j = 0; j < 2; j++){
      for (int k = 0; k < 3; k++){
        for (int& tau:taus){
         for (int& mg:mgs){
-          MakeWeightPlots(0,mg,tau,etabins[k],years[j]);
-          MakeWeightPlots(1,mg,tau,etabins[k],years[j]);
+          MakeWeightPlots(0,mg,tau,etabins[k],years[j]); //data
+          MakeWeightPlots(1,mg,tau,etabins[k],years[j]);  //sim
         }
        }
      }

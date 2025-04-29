@@ -6,11 +6,10 @@ import numpy as np
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-#presel_path = '/eos/user/p/pekotamn/MiniTreeOnnormdzULV30Lepm' #FIXME 
-#sel_path = '/eos/user/p/pekotamn/MiniTreeOnnormdzULV30Lepm'  #FIXME
-presel_path = '/eos/user/p/pekotamn/MiniTreeOnnormdzULV30BvetoLHTm' #FIXME 
-sel_path = '/eos/user/p/pekotamn/MiniTreeOnnormdzULV30BvetoLHTm'  #FIXME
-
+presel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm' #FIXME 
+#presel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm'
+sel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm'  #FIXME
+#sel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm'
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v

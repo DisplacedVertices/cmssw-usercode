@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 cmssw_setup()
 
 # FIXME you can replace this with the usual stuff for putting plots into our publicweb areas and generating the html
-outputdir = "~/nobackup/crabdirs/TMHighEta_PSD_DIST_M55_ctau30mm_Dec6"
+outputdir = "~/nobackup/crabdirs/TMHighEta_PSD_DISTCURVE_FIXME"
 outputdir += "/" # in case we forget it...
 os.system("mkdir -p "+outputdir)
 
@@ -30,7 +30,6 @@ h_none_emu_distcurve = none_emu_distcurve.Get('nocuts_closeseedtks_den')
 h_none_emu_distcurve.SetStats(0)
 h_none_emu_distcurve.SetLineWidth(3)
 h_none_emu_distcurve.SetLineColor(ROOT.kBlue)
-h_none_emu_distcurve.GetYaxis().SetRangeUser(-0.3,0.1)
 h_none_emu_distcurve.GetXaxis().SetRangeUser(0.0,45.0)
 h_none_emu_distcurve.Draw('L')
 
@@ -39,7 +38,6 @@ h_pseudo_distcurve = pseudo_distcurve.Get('nocuts_closeseedtks_den')
 h_pseudo_distcurve.SetStats(0)
 h_pseudo_distcurve.SetLineWidth(3)
 h_pseudo_distcurve.SetLineColor(ROOT.kViolet+1)
-h_pseudo_distcurve.GetYaxis().SetRangeUser(-0.3,0.1)
 h_pseudo_distcurve.GetXaxis().SetRangeUser(0.0,45.0)
 h_pseudo_distcurve.Draw('L same')
 

@@ -63,6 +63,7 @@ private:
   const bool dijet_agnostic;
   const bool bjet_agnostic;
   const bool bjet_veto;
+  const bool leptonht_veto;
   const bool study_jer;
   const bool study_jes;
   const bool jes_jer_var_up;
@@ -138,6 +139,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     dijet_agnostic(cfg.getParameter<bool>("dijet_agnostic")),
     bjet_agnostic(cfg.getParameter<bool>("bjet_agnostic")),
     bjet_veto(cfg.getParameter<bool>("bjet_veto")),
+    leptonht_veto(cfg.getParameter<bool>("leptonht_veto")),
     study_jer(cfg.getParameter<bool>("study_jer")),
     study_jes(cfg.getParameter<bool>("study_jes")),
     jes_jer_var_up(cfg.getParameter<bool>("jes_jer_var_up")),
@@ -216,17 +218,22 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
     if (use_mevent) {
         event.getByToken(mevent_token, mevent);
 
+        // FIXME add 2016 HT triggers 
         if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets(20) < 4))
             return false;
 
     //Lepton Trigger && offline preselection
     // if use_DisplacedLepton_triggers is True, also consider Displaced Lepton && offline preselection
     if (apply_presel == 2) {
+
+
       bool success = false;
       bool pass_muon_events = false;
       bool pass_ele_events = false;
       for(size_t trig : mfv::MuonTriggers){
-	if(satisfiesLepTrigger(mevent, trig, setup)) { 
+	if (trig == mfv::b_HLT_Mu50)
+          continue;
+        if(satisfiesLepTrigger(mevent, trig, setup)) { 
 	  success = true;
           pass_muon_events = true;
 	  break;
@@ -235,6 +242,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
       
       if (!pass_muon_events) {  
         for(size_t trig : mfv::ElectronTriggers){
+          if (trig == mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 || trig == mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT)
+            continue;
           if(satisfiesLepTrigger(mevent, trig, setup)) { 
             pass_ele_events = true;
             break;
@@ -284,6 +293,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
         if (apply_presel == 4) {
 
             // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
+            // FIXME add 2016 HT triggers 
             if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
 
             bool success = false;
@@ -319,10 +329,40 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
             if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, setup)) return false;
             if (bjet_veto and satisfiesTrigger(mevent, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, setup)) return false;
 
+
+            if (leptonht_veto){
+              
+              // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
+              // FIXME add 2016 HT triggers 
+              if( satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
+              // FIXME try offline cuts only for now
+              if( (int(MFVNEUTRALINO_YEAR) == 20161 || int(MFVNEUTRALINO_YEAR) == 20162) && (mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4)  ) return false;
+
+              bool pass_lep_events = false; 
+              for(size_t trig : mfv::MuonTriggers){
+                if (trig == mfv::b_HLT_Mu50)
+                  continue;
+                if(satisfiesLepTrigger(mevent, trig, setup)) { 
+                  pass_lep_events = true;
+                  break;
+                }
+              }
+              
+              for(size_t trig : mfv::ElectronTriggers){
+                if (trig == mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 || trig == mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT)
+                  continue;
+                if(satisfiesLepTrigger(mevent, trig, setup)) { 
+                  pass_lep_events = true;
+                  break;
+                 }
+              }
+              if (pass_lep_events) return false;
+            }
+
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-                // remain agnostic to the HT1050 trigger
-                if (trig == mfv::b_HLT_PFHT1050) continue;
+                // remain agnostic to the HT1050/HT900/HT800 trigger - FIXME 
+                if (trig == mfv::b_HLT_PFHT1050 ) continue;
                 if (trigbit_tostudy < 999 and int(trig) != trigbit_tostudy) continue;
 
                 if (bjet_agnostic and trig == mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) continue;
@@ -355,6 +395,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
         if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
             return false;
 
+        // FIXME add 2016 HT triggers 
         if (apply_trigger == 1 && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
             return false;
 
@@ -362,6 +403,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
             bool at_least_one_trigger_passed = false;
             bool pass_muon_events = false;
             for(size_t trig : mfv::MuonTriggers){
+              if (trig == mfv::b_HLT_Mu50)
+                continue;
               if(mevent->pass_hlt(trig)) { 
                 at_least_one_trigger_passed = true;
                 pass_muon_events = true;
@@ -376,6 +419,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
               }
               else {
                 for(size_t trig : mfv::ElectronTriggers){
+                  if (trig == mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 || trig == mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT)
+                    continue;
                   if(mevent->pass_hlt(trig)) { 
                     at_least_one_trigger_passed = true;
                     break;
@@ -411,6 +456,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
             for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
                 // skip HT trigger
+                // FIXME add 2016 HT triggers 
                 if(trig == mfv::b_HLT_PFHT1050) continue;
 
                 if(mevent->pass_hlt(trig)){
@@ -733,6 +779,13 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_PFHT1050 :
         return mevent->jet_ht(40) >= 1200 && mevent->njets(20) >= 4;
 
+    //FIXME add 2016 HT triggers     
+    //case mfv::b_HLT_PFHT900 :
+    //    return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+
+    //case mfv::b_HLT_PFHT800 :
+    //    return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
         {
             if(year != 2017) return false;
@@ -833,7 +886,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
        {
             //std::cout << "\nTesting b_HLT_HT430_DisplacedDijet40_DisplacedTrack" << std::endl;
             //printf("year: %i   jet_ht_check: %f   pfjet_ngood[0]: %i  \n", year, jet_ht_check_40, pfjet_ngood[0]);
-            if(year != 2018 and year != 2017) return false;
+            if(year != 2018 && year != 2017) return false;
             if(jet_ht_check_40 < 557 || pfjet_ngood[0] < 2) return false;
 
             passed_kinematics = true;
@@ -844,7 +897,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
        {
             //std::cout << "\nTesting b_HLT_HT650_DisplacedDijet60_Inclusive" << std::endl;
             //printf("year: %i   jet_ht_check: %f   pfjet_ngood[1]: %i  \n", year, jet_ht_check_40, pfjet_ngood[1]);
-            if(year != 2018 and year != 2017) return false;
+            if(year != 2018 && year != 2017) return false;
             if(jet_ht_check_40 < 846 || pfjet_ngood[1] < 2) return false;
             //if(jet_ht_check_40 < 750 || pfjet_ngood[1] < 2) return false;
 
@@ -856,7 +909,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         // Start 2016 bjet and displaced dijet triggers here
     case mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
        {
-            if(year != 20161 and year != 20162) return false;
+            if(year != 20161 && year != 20162) return false;
             if(jet_ht_check_40 < 470 || njets < 2 || pfjet_ngood[1] < -2 || jet_ht_check_30 < -2) return false; // Can delete the pfjet_ngood part... it's a dummy thing for now
 
             for(int j0 = 0; j0 < njets; ++j0){
@@ -871,7 +924,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
        }
     case mfv::b_HLT_HT650_DisplacedDijet80_Inclusive :
        {
-            if(year != 20161 and year != 20162) return false;
+            if(year != 20161 && year != 20162) return false;
             if(jet_ht_check_40 < 800 || njets < 2) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
@@ -886,7 +939,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
        }
     case mfv::b_HLT_QuadJet45_TripleBTagCSV_p087 :
        {
-            if(year != 20161 and year != 20162) return false;
+            if(year != 20161 && year != 20162) return false;
             if(njets < 4) return false;
             if(sel_btags < 3) return false;
 
@@ -913,7 +966,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoubleJet90_Double30_TripleBTagCSV_p087 :
        {
-            if(year != 20161 and year != 20162) return false;
+            if(year != 20161 && year != 20162) return false;
             if(njets < 4) return false;
             if(sel_btags < 3) return false;
 
@@ -939,7 +992,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6 :
         {
-            if(year != 20161 and year != 20162) return false;
+            if(year != 20161 && year != 20162) return false;
             if(sel_btags_hard < 2) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
@@ -973,6 +1026,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
 //splitting up the satisfieslep trigger into muon/ele trigger 
 bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t trig, const edm::EventSetup& setup) { 
+  
   if(!mevent->pass_hlt(trig)) return false;
 
   int year = int(MFVNEUTRALINO_YEAR);
@@ -987,15 +1041,16 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
   switch(trig){
   case mfv::b_HLT_Ele27_WPTight_Gsf : //for 2016
     {
-    if (year != 20161 || year !=20162) return false;
+    if (year != 20161 && year !=20162) return false;
     for(int ie =0; ie < nelectrons; ++ie){
       if (mevent->electron_pt[ie] < 30) continue; //for 2016
       if (mevent->electron_ID[ie][3] == 1) {
-        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-          if (mevent->electron_iso[ie] < 0.10) {
+          double ele_absdxybs = fabs(mevent->electron_dxybs[ie]);
+          double ele_absdz = fabs(mevent->electron_dz[ie]);  
+          bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
+          if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
             passed_kinematics = true;
-          } 
-        }
+          }
       }
     }
     return passed_kinematics;
@@ -1006,11 +1061,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
     for(int ie =0; ie < nelectrons; ++ie){
       if (mevent->electron_pt[ie] < 38) continue; //for 2017
       if (mevent->electron_ID[ie][3] == 1) {
-        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-          if (mevent->electron_iso[ie] < 0.10) {
+          double ele_absdxybs = fabs(mevent->electron_dxybs[ie]);
+          double ele_absdz = fabs(mevent->electron_dz[ie]);  
+          bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
+          if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
             passed_kinematics = true;
-          } 
-        }
+          }
       }
     }
     return passed_kinematics;
@@ -1021,11 +1077,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
       for(int ie =0; ie < nelectrons; ++ie){
         if (mevent->electron_pt[ie] < 35) continue; //for 2018
 	      if (mevent->electron_ID[ie][3] == 1) {
-	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	          if (mevent->electron_iso[ie] < 0.10) {
-	            passed_kinematics = true;
-	          } 
-	        }
+                double ele_absdxybs = fabs(mevent->electron_dxybs[ie]);
+                double ele_absdz = fabs(mevent->electron_dz[ie]);  
+                bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
+                if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
+                  passed_kinematics = true;
+                }
 	      }
       }
       return passed_kinematics;
@@ -1033,13 +1090,18 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
                     
   case mfv::b_HLT_IsoMu27 : //for 2016,2017
     {
-    if (year != 2016 || year != 2017) return false;
+    if (year != 20161 && year != 20162 && year != 2017) return false;
     for(int im =0; im < nmuons; ++im) {
       if (mevent->muon_pt[im] < 30) continue; //for 2016,2017
       if (mevent->muon_ID[im][1] == 1) {
         if (abs(mevent->muon_eta[im]) < 2.4) {
           if (mevent->muon_iso[im] < 0.15) {
-            passed_kinematics = true;
+            double muon_absdxybs = fabs(mevent->muon_dxybs[im]);
+            double muon_absdz = fabs(mevent->muon_dz[im]);
+            bool muon_IP_cut = muon_absdxybs < 0.02 && muon_absdz < 0.5;
+            if (muon_IP_cut){
+              passed_kinematics = true;
+            }
           }
         }
       }
@@ -1054,7 +1116,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
 	      if (mevent->muon_ID[im][1] == 1) {
 	        if (abs(mevent->muon_eta[im]) < 2.4) {
 	          if (mevent->muon_iso[im] < 0.15) {
-	            passed_kinematics = true;
+                    double muon_absdxybs = fabs(mevent->muon_dxybs[im]);
+                    double muon_absdz = fabs(mevent->muon_dz[im]);
+                    bool muon_IP_cut = muon_absdxybs < 0.02 && muon_absdz < 0.5;
+                    if (muon_IP_cut){
+                      passed_kinematics = true;
+                    }
 	          }
 	        }
 	      }
@@ -1069,7 +1136,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
 	      if (mevent->muon_ID[im][1] == 1) {
 	        if (abs(mevent->muon_eta[im]) < 2.4) {
 	          if (mevent->muon_iso[im] < 0.15) {
-	            passed_kinematics = true;
+                    double muon_absdxybs = fabs(mevent->muon_dxybs[im]);
+                    double muon_absdz = fabs(mevent->muon_dz[im]);
+                    bool muon_IP_cut = muon_absdxybs < 0.02 && muon_absdz < 0.5;
+                    if (muon_IP_cut){
+                      passed_kinematics = true;
+                    }
 	          }
 	        }
 	      }
@@ -1082,11 +1154,12 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
       for(int ie =0; ie < nelectrons; ++ie){
 	      if (mevent->electron_pt[ie] < 120) continue;
 	      if (mevent->electron_ID[ie][3] == 1) {
-	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	          if (mevent->electron_iso[ie] < 0.10) {
-	            passed_kinematics = true;
-	          }
-	        }
+                double ele_absdxybs = fabs(mevent->electron_dxybs[ie]);
+                double ele_absdz = fabs(mevent->electron_dz[ie]);  
+                bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
+                if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
+                  passed_kinematics = true;
+                }
 	      }
       }
       return passed_kinematics;
@@ -1097,13 +1170,14 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
       for(int ie =0; ie < nelectrons; ++ie){
 	      if (mevent->electron_pt[ie] < 55) continue;
 	      if (mevent->electron_ID[ie][3] == 1) {
-	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	          if (mevent->electron_iso[ie] < 0.10) {
-	            for(int j0=0; j0 < njets; ++j0){
-		            if (!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
-		            passed_kinematics = true;
-	            }
-	          }
+                double ele_absdxybs = fabs(mevent->electron_dxybs[ie]);
+                double ele_absdz = fabs(mevent->electron_dz[ie]);  
+                bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
+                if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
+                  for(int j0=0; j0 < njets; ++j0){
+                          if (!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
+                          passed_kinematics = true;
+                  }
 	        }
 	      }
       }
@@ -1134,20 +1208,18 @@ bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size
       if (mevent->electron_pt[ie] < 45) continue;
       if (mevent->electron_ID[ie][3] == 1) {
         if (abs(mevent->electron_eta[ie]) < 2.4) { 
-          if (mevent->electron_iso[ie] < 0.10) {
-            for(int im=0; im < nmuons; ++im){
-              if (mevent->muon_pt[im] < 45) continue;
-                if (mevent->muon_ID[im][1] == 1) {
-                  if (abs(mevent->muon_eta[im]) < 2.4) {
-                    if (mevent->muon_iso[im] < 0.15) {
-                      passed_kinematics = true;
-                    }
+          for(int im=0; im < nmuons; ++im){
+            if (mevent->muon_pt[im] < 45) continue;
+              if (mevent->muon_ID[im][1] == 1) {
+                if (abs(mevent->muon_eta[im]) < 2.4) {
+                  if (mevent->muon_iso[im] < 0.15) {
+                    passed_kinematics = true;
                   }
                 }
               }
             }
           }
-  	    }
+  	}
       }
       return passed_kinematics;
     }
@@ -1158,9 +1230,7 @@ bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size
   	    if (mevent->electron_pt[ie] < 75) continue;
         if (mevent->electron_ID[ie][3] == 1) {
           if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            if (mevent->electron_iso[ie] < 0.10) {
-              pass_ele +=1;
-            }
+            pass_ele +=1;
           }
         }
       }
@@ -1174,9 +1244,7 @@ bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size
   	    if (mevent->electron_pt[ie] < 75) continue;
         if (mevent->electron_ID[ie][3] == 1) {
           if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            if (mevent->electron_iso[ie] < 0.10) {
-              pass_ele +=1;
-            }
+            pass_ele +=1;
           }
         }
       }

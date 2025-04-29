@@ -85,16 +85,15 @@ def scaledTOC(sig_num, sig_den, data_curve, mc_curve):
               bincontent = sig_num.GetBinContent(b)/sig_den.GetBinContent(b)
               bincontent_err = math.sqrt(bincontent*(1-bincontent)/sig_den.GetBinContent(b));
 
-            s_curve.SetBinContent(b, bincontent*scale)
-            s_curve.SetBinError(b, bincontent_err*scale)
+            if (np.fabs(bincontent*scale) > 1.0):
+              s_curve.SetBinContent(b, bincontent)
+              s_curve.SetBinError(b, bincontent_err)
+            else:
+              s_curve.SetBinContent(b, bincontent*scale)
+              s_curve.SetBinError(b, bincontent_err*scale)
+
     return s_curve
     
-def cleanFluc(original):
-    hist = original.Clone()
-    #for b in range(6,hist.GetNbinsX()-1):
-    #  if ((hist.GetBinContent(b) > hist.GetBinContent(b+1) or hist.GetBinContent(b) < hist.GetBinContent(b-1) ) or (hist.GetBinContent(b) < hist.GetBinContent(b+1) or hist.GetBinContent(b) > hist.GetBinContent(b-1) )):
-    hist.SetBinContent(8, (hist.GetBinContent(7)+hist.GetBinContent(9))/2)
-    return hist
 #############################################################################################
 
 
@@ -167,9 +166,10 @@ def assessSignalEffUncerts(den, num): #To report signal efficiency error from a 
     # eff is normalized to 1
     d_den = den.Clone() 
     n_num = num.Clone()
-    eff_sig = n_num.Integral()/d_den.Integral()
+    eff_sig = n_num.Integral()/(d_den.Integral()+1e-16)
     denominator = den.Integral()  
-    rat_err = round (math.sqrt(eff_sig*(1-eff_sig)/denominator), 2)  
+    eff_sig = abs(eff_sig)
+    rat_err = round (math.sqrt(eff_sig*(1-eff_sig)/(denominator+1e-16)), 2)  
 
     return rat_err
 
@@ -241,7 +241,7 @@ def calcTocShiftUncert(low, cent, hi):
 
 # Initialize stuff:
 
-years = ['20161p2', '2017p8']
+years = [ '20161p2', '2017p8'] #FIXME
 doShift  = True
 reweight = True
 #toc_shift = 0.0   # How much to move the turn-on curve by
@@ -250,8 +250,17 @@ reweight = True
 
 masses = ['55'] 
 mass = '55'
-ctaus       = ['1000', '10000'] #[ '100', '300', '1000', '3000', '10000', '30000'] #['1000', '3000', '30000'] 
+ctaus       = [ '1000', '10000', ]  
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
+
+
+# need to include LLP decays that are below TOC dVV flat curve but are affected by a geometric effect of a daughter quark's dxybs. We applied the cut before studying this. The overlapping region is universaly accepted to be < 300um (based on split-vertex merging)
+if mass == '40':
+  dvvcut = 0.25
+elif mass == '15':
+  dvvcut = 0.5
+else:
+  dvvcut = 0.1
 
 # Start actually doing stuff
 
@@ -259,14 +268,14 @@ uncertArray = []
 all_stat_uncerts = {}
 all_overlap_uncerts = {}
 
-list_eff = [2000.0]
-list_eff_2 = [2000.0]
-list_ctau = [0.1, 1.0, 10.0] #[ 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+list_eff = [2000]
+list_eff_2 = [2000]
+list_ctau = [ 0.1, 1.0, 10.0,]
 list_ctau = np.log10(list_ctau)
 list_err = [0.0]
 list_err_2 = [0.0]
-list_relerr = [2000.0]
-list_relerr_2 = [2000.0]
+list_relerr = [2000]
+list_relerr_2 = [2000]
 for year in years:  
   for ctau in ctaus:
     possible_eta = { "Low" : 0, "Mix" : 0, "High": 0 }
@@ -295,27 +304,24 @@ for year in years:
         err_none_tmmc_eff = 0.0
         stat_uncerts = 0.0
         overlap_uncerts = 0.0
-        eff_psd_dvv = 0.0
-        eff_dvv = 0.000000000000000000000000001
-        err_psd_dvv = 0.0
-        err_dvv = 0.0
         frac_vetoodvv = 0.0
         frac_vetopdvv = 0.0
         dataMC_unc = 0.0
         stat_unc = 0.0
         emulate_unc = 0.0
         dvv_unc = 0.0
+        ovp_unc = 0.0
         for psd_method in psd_methods:
                 
                 sim_str = ''
                 dat_str = ''
 
                 if not reweight:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/background_batgpresel_%s.root" % (eta, year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_noCorrection/BTagDispl%s.root" % (eta, year)
+                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/background_btagpresel_%s.root" % (eta, year)
+                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_20_noCorrection/BTagDispl%s.root" % (eta, year)
                 else:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta, int(ctau), int(mass), year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta, int(ctau), int(mass), year)
+                    sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/background_btagpresel_%s.root" % (eta, int(ctau), int(mass), year)
+                    dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_B/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30bmofftosspreselv8_ggH_20_tau%06ium_M%i_2DCorrection/BTagDispl%s.root" % (eta, int(ctau), int(mass), year)
                 tm_sim  = ROOT.TFile(sim_str)
                 tm_dat  = ROOT.TFile(dat_str)
                 
@@ -341,7 +347,7 @@ for year in years:
                    str_ctau = str(ctau)+'um'
 
                 print(ctau, str_ctau)
-                signal  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
+                signal  = ROOT.TFile('/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
                 
                 sig_dist = signal.Get('nocuts_closeseedtks_den')
                 sig_denom = sig_dist.Clone()
@@ -349,8 +355,8 @@ for year in years:
                 sig_curve = sig_aaaaa.Clone()
                 #psd_dist = ROOT.TH1D("psd_dist", "M"+mass+"ctau"+ctau+"um", 80, 0, 80)
                 sig_curve.Divide(sig_curve, sig_denom, 1, 1, "B")
-                
-                signal_non  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+
+                signal_non  = ROOT.TFile('/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
                 
                 signon_dist = signal_non.Get('nocuts_closeseedtks_den')
                 non_denom = signon_dist.Clone() 
@@ -358,37 +364,13 @@ for year in years:
                 signon_curve = non_aaaaa.Clone()
                 signon_curve.Divide(signon_curve, non_denom, 1, 1, "B")
                 
-                signal_vetopdvv  = ROOT.TFile('~/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')  
+                signal_vetopdvv  = ROOT.TFile('/uscms/home/pkotamni/nobackup/crabdirs/TrackMoverMCTruth_'+eta+'Eta_LowdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau'+str_ctau+'_M'+ mass +'_'+ year +'.root')
                 
-                sigovp_dist = signal_vetopdvv.Get('nocuts_closeseedtks_den')
+                sigovp_dist = signal_vetopdvv.Get('nocuts_dvv_den')
                 ovp_denom = sigovp_dist.Clone() 
-                ovp_aaaaa = signal_vetopdvv.Get('all_closeseedtks_num')
+                ovp_aaaaa = signal_vetopdvv.Get('all_dvv_num')
                 sigovp_curve = ovp_aaaaa.Clone()
                 sigovp_curve.Divide(sigovp_curve, ovp_denom, 1, 1, "B")
-
-                if psd_method == 'none':
-
-                    sig_dvv_denom = signal_vetopdvv.Get('all_dvv_den')
-                    sig_dvv_num = signal_vetopdvv.Get('all_dvv_num')
-                    sig_dvv_curve = signal_vetopdvv.Get('all_dvv_num')
-                    sig_dvv_curve.Divide(sig_dvv_curve, sig_dvv_denom, 1, 1, "B")
-                    sig_psd_dvv_denom = sig_dvv_denom.Clone() 
-                    sig_psd_dvv_num = sig_dvv_num.Clone() 
-                    sig_psd_dvv_curve = sig_dvv_curve.Clone() 
-                  
-                    sig_dvv_curvedist = shiftDIST(sig_dvv_curve, 0, 0.0)  
-                    sig_dvv_norm = sig_dvv_denom.Clone()
-                    sig_dvv_norm.Scale(1/(sig_dvv_norm.Integral()+0.00000000000000001))
-                    sig_dvv_curvedist.Multiply(sig_dvv_norm)
-                    eff_dvv += sig_dvv_curvedist.Integral()
-                   
-                    sig_psd_dvv_curvedist = shiftDIST(sig_psd_dvv_curve,-4, 0.0) 
-                    sig_psd_dvv_norm = sig_psd_dvv_denom.Clone()
-                    sig_psd_dvv_norm.Scale(1/(sig_psd_dvv_norm.Integral()+0.00000000000000001))
-                    sig_psd_dvv_curvedist.Multiply(sig_psd_dvv_norm)
-                    eff_psd_dvv = sig_psd_dvv_curvedist.Integral()
-                    err_psd_dvv = 0.0 #FIXME assessRatioEffPropagateUncerts(shiftDIST(sig_psd_dvv_denom,-4,0.0),shiftDIST(sig_psd_dvv_num,-4,0.0))
-                    
 
                 # Calculate the scale factors
                 scale_factors = dat_den.Clone()
@@ -493,52 +475,51 @@ for year in years:
                     psd_emu_curve = shiftDIST(signon_curve, shift_int_emu, shift_emu_fr)
                 
                 
-                possible_sig = sig_dist.Integral() + 0.000000000000000000000000001
-                possible_signon = signon_dist.Integral() +0.000000000000000000000000001
-                possible_sigovp = sigovp_dist.Integral() +0.000000000000000000000000001
-                possible_psd = psd_dist.Integral() +0.000000000000000000000000001
-                possible_psd_emu = psd_emu_dist.Integral() +0.000000000000000000000000001
-                
-                pre_sig_dist = sig_dist.Clone()
+                #possible_sig = sig_dist.Integral() + 1e-16
+                possible_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0360), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral() + 1e-16
+                possible_sigovp = sigovp_dist.Integral(sigovp_dist.FindBin(0.0), sigovp_dist.FindBin(0.0300)) + 1e-16
+                possible_ovpfail = sigovp_dist.Integral(sigovp_dist.FindBin(0.0300), sigovp_dist.FindBin(0.0360)) + + 1e-16 #20% vertex position discrepancy between data and MC leads to overlapping boundary discrepancy 
+                possible_all = sigovp_dist.Integral() + signon_dist.Integral() + 1e-16
+
+                possible_psd = psd_dist.Integral() + 1e-16
+                possible_psd_emu = psd_emu_dist.Integral() + 1e-16
+               
+                #pre_sig_dist = sig_dist.Clone()
                 pre_signon_dist = signon_dist.Clone()
                 pre_sigovp_dist = sigovp_dist.Clone()
                 pre_psd_dist = psd_dist.Clone()
                 pre_psd_emu_dist = psd_emu_dist.Clone()
                 
-                sig_dist.Multiply(sig_curve)
+                #sig_dist.Multiply(sig_curve)
                 signon_dist.Multiply(signon_curve)
                 sigovp_dist.Multiply(sigovp_curve)
                 psd_dist.Multiply(psd_curve)
                 psd_emu_dist.Multiply(psd_emu_curve)
                 
                 
-                pass_sig = sig_dist.Integral()
-                pass_signon = signon_dist.Integral()
-                pass_sigovp = sigovp_dist.Integral()
+                pass_signon = sigovp_dist.Integral(sigovp_dist.FindBin(0.0360), sigovp_dist.FindBin(dvvcut)) + signon_dist.Integral()
+                pass_sigovp =  sigovp_dist.Integral(sigovp_dist.FindBin(0.0), sigovp_dist.FindBin(0.0300)) 
                 pass_psd = psd_dist.Integral()
                 pass_psd_emu = psd_emu_dist.Integral()
                 
-                possible_eta[eta] = possible_signon+possible_sigovp
-                """
-                eff_sig = (pass_signon+pass_sigovp)/(possible_signon+possible_sigovp)
-                eff_signon = pass_signon/possible_signon
-                eff_sigovp = pass_sigovp/possible_sigovp
-                eff_psd = (pass_psd/possible_psd)
-                eff_psd_emu = (pass_psd_emu/possible_psd_emu)
-                eff_eta[eta] = eff_sig 
-                """
-                eff_sig = 0.0000000000001 + (pass_signon+pass_sigovp)/(possible_signon+possible_sigovp)
-                eff_signon = 0.0000000000001 + (pass_signon/possible_signon)
-                eff_sigovp = 0.0000000000001 + (pass_sigovp/possible_sigovp)
-                eff_psd = 0.0000000000001 + (pass_psd/possible_psd)
-                eff_psd_emu = 0.0000000000001 + (pass_psd_emu/possible_psd_emu)
-                eff_eta[eta] = 0.0000000000001 + eff_sig 
+                possible_eta[eta] = possible_all
+                
+                eff_sig = 1e-16 + (pass_signon+pass_sigovp)/(possible_all)
+                eff_signon = 1e-16 + (pass_signon/possible_signon)
+                eff_sigovp = 1e-16 + (pass_sigovp/possible_sigovp)
+                eff_psd = 1e-16 + (pass_psd/possible_psd)
+                eff_psd_emu = 1e-16 + (pass_psd_emu/possible_psd_emu)
+                eff_eta[eta] = 1e-16 + eff_sig 
 
-                err_sig = 0.0 #FIXME assessSignalEffUncerts(pre_sig_dist, sig_dist)#assessRatioEffPropagateUncerts(pre_sig_dist, sig_dist) #FIXME NOW
-                err_signon = 0.0 #FIXME assessSignalEffUncerts(pre_signon_dist, signon_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
-                err_sigovp = 0.0 #FIXME assessSignalEffUncerts(pre_sigovp_dist, sigovp_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
-                err_psd =   0.0 #FIXME assessRatioEffPropagateUncerts(pre_psd_dist, psd_dist)
-                err_psd_emu = 0.0 #FIXME  assessRatioEffPropagateUncerts(pre_psd_emu_dist, psd_emu_dist)
+                dvv_unc = (possible_ovpfail*(eff_signon - eff_sigovp))/((possible_all)*eff_sig) #discrepancy with respect to yield
+                ovp_unc = (possible_sigovp*(eff_sigovp - (eff_sigovp/2.0)))/((possible_all)*eff_sig) 
+
+                err_signon = assessSignalEffUncerts(pre_signon_dist, signon_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
+                err_sigovp = assessSignalEffUncerts(pre_sigovp_dist, sigovp_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
+                err_sig = np.sqrt((err_signon/eff_signon)**2 +  (err_sigovp/eff_sigovp)**2)
+                
+                err_psd = assessRatioEffPropagateUncerts(pre_psd_dist, psd_dist)
+                err_psd_emu = assessRatioEffPropagateUncerts(pre_psd_emu_dist, psd_emu_dist)
                 
                 effArray.append(eff_psd)
                 errArray.append(err_psd)
@@ -546,17 +527,15 @@ for year in years:
                 errArray_emu.append(err_psd_emu)
 
                 if psd_method == 'none':
-                    none_sig_integral = round(possible_sig,2)
                     none_signon_integral = round(possible_signon,2) 
                     none_sigovp_integral = round(possible_sigovp,2) 
-                    frac_vetopdvv = possible_sigovp/(possible_sigovp+possible_signon)
-                    frac_vetoodvv = possible_signon/(possible_sigovp+possible_signon)
+                    frac_vetopdvv = possible_sigovp/(possible_all)
+                    frac_vetoodvv = possible_signon/(possible_all)
                   
                     print("Mass: %s   Ctau: %s  \n" % (mass, ctau))
-                    #print("1-vtx incl. Eff of total %.2f : %.2f +/- %.2f \n" % (none_signon_integral+none_sigovp_integral, 100*eff_sig, 100*err_sig))
-                    #print("1-vtx novp Eff of total %.2f : %.2f +/- %.2f (frac. %.2f) \n" % (none_signon_integral, 100*eff_signon, 100*err_signon, 100*frac_vetoodvv))
-                    #print("1-vtx ovp Eff of total %.2f : %.2f +/- %.2f (frac. %.2f) \n" % (none_sigovp_integral, 100*eff_sigovp, 100*err_sigovp, 100*frac_vetopdvv))
-                    #stat_uncerts = assessRatioEffUncerts(eff_psd, err_psd, eff_sig, err_sig)
+                    print("1-vtx incl. Eff of total %.2f : %.2f +/- %.2f \n" % (none_signon_integral+none_sigovp_integral, 100*eff_sig, 100*err_sig))
+                    print("1-vtx novp Eff of total %.2f : %.2f +/- %.2f (frac. %.2f) \n" % (none_signon_integral, 100*eff_signon, 100*err_signon, 100*frac_vetoodvv))
+                    print("1-vtx ovp Eff of total %.2f : %.2f +/- %.2f (frac. %.2f) \n" % (none_sigovp_integral, 100*eff_sigovp, 100*err_sigovp, 100*frac_vetopdvv))
                     #overlap_uncerts = round (100*overlap_right_unc,2)
                     es0 = ROOT.Double(0) 
                     is0 = dat_den.IntegralAndError(0,200,es0)
@@ -571,7 +550,7 @@ for year in years:
 
                 else:
                     DiffeffArray.append(eff_psd - effArray[0])
-                    DifferrArray.append(assessCorrelatedDiffEffUncerts(eff_psd, effArray[0], none_sig_integral))
+                    DifferrArray.append(assessCorrelatedDiffEffUncerts(eff_psd, effArray[0], none_signon_integral))
                     DiffeffArray_emu.append(eff_psd_emu - effArray_emu[0])
                     DifferrArray_emu.append(assessCorrelatedDiffEffUncerts(eff_psd_emu, effArray_emu[0], none_signon_integral))
 
@@ -580,27 +559,31 @@ for year in years:
         for i in range(1,len(psd_methods)):
             if (i == 1 or i==3):
                dataMC_unc +=  (-100*DiffeffArray[i-1]/effArray[0])**2
-            #print("%s pseudo eff %.2f +/- %.2f \t pseudo eff - incl. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i], 100*effArray[i], 100*errArray[i], 100*DiffeffArray[i-1], 100*DifferrArray[i-1], -100*DiffeffArray[i-1]/effArray[0], -100*DifferrArray[i-1]/effArray[0]))
+               print("%s pseudo eff %.2f +/- %.2f \t pseudo eff - incl. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i], 100*effArray[i], 100*errArray[i], 100*DiffeffArray[i-1], 100*DifferrArray[i-1], -100*DiffeffArray[i-1]/effArray[0], -100*DifferrArray[i-1]/effArray[0]))
         #print("Probe how well TM MC emulating signal MC \n")
         for i in range(1,len(psd_methods)):
             if (i == 3):
-               emulate_unc +=  (none_tmmc_integral-effArray_emu[0])*100/none_tmmc_integral#FIXME (-100*DiffeffArray_emu[i-1]/effArray_emu[0])**2
+               emulate_unc += (-100*DiffeffArray_emu[i-1]/effArray_emu[0])**2
                stat_unc = (-100*DifferrArray_emu[i-1]/effArray_emu[0])**2 
-            #print("%s pseudo emulating eff %.2f +/- %.2f \t pseudo emulating eff - novp. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i],100*effArray_emu[i], 100*errArray_emu[i], 100*DiffeffArray_emu[i-1], 100*DifferrArray_emu[i-1], -100*DiffeffArray_emu[i-1]/effArray_emu[0], -100*DifferrArray_emu[i-1]/effArray_emu[0]))
+               print("%s pseudo emulating eff %.2f +/- %.2f \t pseudo emulating eff - novp. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i],100*effArray_emu[i], 100*errArray_emu[i], 100*DiffeffArray_emu[i-1], 100*DifferrArray_emu[i-1], -100*DiffeffArray_emu[i-1]/effArray_emu[0], -100*DifferrArray_emu[i-1]/effArray_emu[0]))
         #print("Probe overlapped LLPs \n")
 
         iso_tot_unc = np.sqrt(dataMC_unc + stat_unc + emulate_unc) 
 
-        dvv_unc = np.sqrt((100*(1-(eff_psd_dvv/eff_dvv)))**2 + (dataMC_unc) + (emulate_unc)) #FIXME
         #print("pseudo slide dvv eff %.2f +/- %.2f \t pseudo slide dvv eff - dvv eff %.2f \t 1-ratio %.2f \n" % (100*eff_psd_dvv, 100*err_psd_dvv, 100*(eff_psd_dvv-eff_dvv), 100*(1-(eff_psd_dvv/eff_dvv))))
 
         #print("\n")
         print( " Isolated-LLP Unc. : %.2f Data-to-MC Unc +/- %2.f Stat. Unc +/- %.2f Emulate Unc. %% or %.2f %%" % (np.sqrt(dataMC_unc), np.sqrt(stat_unc), np.sqrt(emulate_unc), iso_tot_unc))
-        print( " Overlapped-LLP Unc. : %.2f %% " %dvv_unc)
-
+        print( " Mid Overlapped-LLP Unc. : %.2f %% " % np.sqrt((dvv_unc*100)**2))
+        print( " Real Overlapped-LLP Unc. : %.2f %% " % np.sqrt((ovp_unc*100)**2))
+        print( " Two Overlapped-LLP Unc. : %.2f %% " % np.sqrt((ovp_unc*100)**2 + (dvv_unc*100)**2))
+        
         #print("\n")
-     
-        tot_err = np.sqrt((frac_vetopdvv*(dvv_unc**2)) + (frac_vetoodvv*(iso_tot_unc**2)))
+    
+        dvv_unc = dvv_unc*100 #FIXME
+        ovp_unc = ovp_unc*100 #FIXME
+
+        tot_err = np.sqrt(ovp_unc**2 + dvv_unc**2 + iso_tot_unc**2)
         #print( " Weighted Iso. & Ovp. LLP Unc. : %.2f %%" %(tot_err))
         err_eta[eta] = tot_err 
         #print(eta, " 1-vtx err. ", tot_err)
@@ -630,7 +613,7 @@ for year in years:
       list_eff_2.append(tot_eff_mass_tau*100)
       list_err_2.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
       list_relerr_2.append(np.sqrt(tot_err_mass_tau))
-ps = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
+ps = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
 canvas = ps.c
 canvas.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
@@ -688,7 +671,7 @@ canvas.Update()
 ps.save('gghss_'+str(mass)+'GeV_mmCtau')
 
 
-ps2 = plot_saver(plot_dir('TM_Results_Jan22'), size=(700,600), pdf=True, log=False)
+ps2 = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
 canvas2 = ps2.c
 canvas2.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors

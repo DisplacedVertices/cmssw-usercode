@@ -3,6 +3,7 @@
 import os
 from sys import argv, exit
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv, crab_get_output_dir, crab_print_requestcache
+from JMTucker.Tools.CRAB3ToolsSh import crab_get_njobs_from_log
 from JMTucker.Tools import colors
 
 dirs = crab_dirs_from_argv()
@@ -65,6 +66,8 @@ cmds = {
         "simple_cmd('grep \"Output dataset:\" %s/crab.log | tail -1')",
     'web':
         "simple_cmd('grep \"Task URL to use for HELP\" %s/crab.log | tail -n 1 | sed s/.\*http/http/')",
+    'njobs':
+        "simple_fcn(crab_get_njobs_from_log)",
     }
 
 def help():

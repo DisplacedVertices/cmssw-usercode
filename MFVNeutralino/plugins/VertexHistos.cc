@@ -846,7 +846,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_caloht_trigcomb->Fill(caloht, 0., w);
     h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 0., w);
 
-    if (this_year == 2016) {
+    if (this_year == 20161 || this_year == 20162) {
       for (int jt=20; jt<22; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-19)+0.1, w);   //     bin #2 (x-val = 1.1)
