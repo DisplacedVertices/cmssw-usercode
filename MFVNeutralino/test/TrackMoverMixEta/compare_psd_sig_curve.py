@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 cmssw_setup()
 
 # FIXME you can replace this with the usual stuff for putting plots into our publicweb areas and generating the html
-outputdir = "~/nobackup/crabdirs/TMMixEta_PSD_CURVE"
+outputdir = "~/nobackup/crabdirs/TMMixEta_PSD_CURVE_FIXME"
 outputdir += "/" # in case we forget it...
 os.system("mkdir -p "+outputdir)
 
@@ -43,7 +43,7 @@ h_pseudo_distcurve.GetYaxis().SetRangeUser(0.0,1.5)
 h_pseudo_distcurve.GetXaxis().SetRangeUser(0.0,45.0)
 h_pseudo_distcurve.Draw('L same')
 
-legend = ROOT.TLegend(0.28,0.295,0.880,0.535)
+legend = ROOT.TLegend(0.28,0.195,0.880,0.435)
 legend.AddEntry(h_none_emu_distcurve, "signal MC TOC", "L")
 if ("emu_scale_toc" in filename2):
     legend.AddEntry(h_pseudo_distcurve, "signal MC TOC scaled to TM MC/signal MC", "L")
@@ -53,15 +53,17 @@ elif ("emu_slide_toc" in filename2):
     legend.AddEntry(h_pseudo_distcurve, "signal MC TOC slided by 65% bin difference of signal MC to TM MC", "L")
 elif ("slide_toc" in filename2):
     legend.AddEntry(h_pseudo_distcurve, "signal MC TOC slided by 65% bin difference of TM MC to TM data", "L")
+else:
+    legend.AddEntry(h_pseudo_distcurve, "TM data TOC", "L")
 legend.Draw()
 #gPad->BuildLegend(0.48,0.295,0.880,0.535,"","l");
 w = ROOT.TLatex()
 w.SetNDC()
 if ("emulation" in fileoutname):
-    w.DrawLatex(.3, .85, " signal MC with quarks' |#eta| < 1.5 or |#eta| > 1.5")
+    w.DrawLatex(.3, .85, " signal MC with quarks' mixed |#eta|")
     w.DrawLatex(.3, .80, " LLP 3D-separation > 1mm")
 else:
-    w.DrawLatex(.3, .85, " signal MC with quarks' |#eta| < 1.5 or |#eta| > 1.5")
+    w.DrawLatex(.3, .85, " signal MC with quarks' mixed |#eta|")
 c1.Print (outputdir+fileoutname+".png")
 
 

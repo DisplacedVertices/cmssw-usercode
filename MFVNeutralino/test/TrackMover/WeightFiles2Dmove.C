@@ -13,13 +13,13 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
   if (ctau < 1000){
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau%ium_M%02i_%s.root",etabin,ctau,mg,year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
-     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopdbardbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
+     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%ium_M%02i_%s.root",etabin,ctau,mg,year);
   }
   else{
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30lepmumv6/VHToSSTodddd_tau%imm_M%02i_%s.root",etabin,ctau/1000,mg, year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
-     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopdbardbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
+     fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6/mfv_stopbbarbbar_tau%06ium_M%04i_%s.root",etabin,ctau,mg, year);
      //fns.Form("~/nobackup/crabdirs/TrackMoverMCTruth_%sEta_HighdVV_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselv6/ggHToSSTodddd_tau%imm_M%02i_%s.root",etabin,ctau/1000,mg,year);
   }
   
@@ -49,14 +49,14 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
   
   if (Is_bkg){
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_lepton_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
-     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopb_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
-     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopd_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopb_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_stopd_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_sim_ggh_histos/reweight_%seta_move_sim_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
   }
   else { 
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_lepton_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
-     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopb_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
-     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopd_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopb_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
+     //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_stopd_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%04i_%s_2D.root", low_etabin, ctau, mg, year);
      //fnout.Form("~/nobackup/crabdirs/TM_2D_move_weight_dat_ggh_histos/reweight_%seta_move_dat_vetodr_tau%06ium_M%02i_%s_2D.root", low_etabin, ctau, mg, year);
   }
   std::cout << "Getting weights from: " << std::endl;
@@ -173,12 +173,12 @@ void MakeWeightPlots(bool Is_bkg, int mg, int ctau, const char* etabin, const ch
 
 void WeightFiles2Dmove()
 {
-  std::vector<int> taus = {1000}; //100, 300, 1000, 3000, 10000, 30000}; // 10000};
-  std::vector<int> mgs = {400}; //15, 40, 55};
-  const char* years[1] = {"2017p8"}; //20161p2
-  const char* etabins[1] = {"Low",}; // "Mix", "High"};
-  for (int j = 0; j < 1; j++){
-     for (int k = 0; k < 1; k++){
+  std::vector<int> taus = {100, 300, 1000, 10000, 30000}; // 10000};
+  std::vector<int> mgs = {200,400,800}; //15, 40, 55};
+  const char* years[2] = {"20161p2","2017p8"}; //20161p2
+  const char* etabins[3] = {"Low", "Mix", "High"};
+  for (int j = 0; j < 2; j++){
+     for (int k = 0; k < 3; k++){
        for (int& tau:taus){
         for (int& mg:mgs){
           MakeWeightPlots(0,mg,tau,etabins[k],years[j]); //data

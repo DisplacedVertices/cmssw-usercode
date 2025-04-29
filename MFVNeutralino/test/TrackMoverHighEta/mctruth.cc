@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_HighMoveVecEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetBySameDecayMiniJetHistsOnnormdzUlv30bmpreselv6", "trackmovermctruthonnormdzulv30bmpreselv6", "all_signal = True")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_HighEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6", "trackmovermctruthonnormdzulv30bmpreselv6", "all_signal = True")
     ;
 
   if (!nr.parse_options(argc, argv)) return 1;
@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
     nd.book(k_jet1_trk_dxy, "jet1_trk_dxy", "; jet1-movedquality-track's dxybs; arb. units", 50, -0.5, 0.5);
     nd.book(k_jet0_trk_nsigmadxy, "jet0_trk_nsigmadxy", "; jet0-movedquality-track's nsigmadxybs; arb. units", 160, -20, 20);
     nd.book(k_jet1_trk_nsigmadxy, "jet1_trk_nsigmadxy", "; jet1-movedquality-track's nsigmadxybs; arb. units", 160, -20, 20);
-    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 30, 0, 30); 
+    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 30, 0, 30);
     nd.book(k_dphi_sum_j_mv, "dphi_sum_j_mv", ";abs #Delta #phi between jet0+jet1 and move vec;events/bin", 63, 0, M_PI);
     nd.book(k_deta_sum_j_mv, "deta_sum_j_mv", ";abs #Delta #eta between jet0+jet1 and move vec;events/bin", 25, 0, 4);
     nd.book(k_dphi_sum_q_mv, "dphi_sum_q_mv", ";abs #Delta #phi between jet0+jet1 and move vec;events/bin", 63, 0, M_PI);
@@ -465,9 +465,9 @@ int main(int argc, char** argv) {
 
     TLorentzVector minijet_p4_0;
     TLorentzVector minijet_p4_1;
-    TLorentzVector jet_p4_0;
-    TLorentzVector jet_p4_1;
-    
+
+    TLorentzVector quark_p4_0;
+    TLorentzVector quark_p4_1;
     std::vector<int> minijettrk_idx;
 
     const TVector3 lspdecay0(gen.decay(0, bs).x() - pvs.x(0), gen.decay(0, bs).y() - pvs.y(0), gen.decay(0, bs).z() - pvs.z(0));  // JMTBAD BS BS
@@ -501,7 +501,7 @@ int main(int argc, char** argv) {
       // First part of the preselection: our offline jet requirements
       // plus require the lsps to be far enough apart that they don't
       // interfere with each other in reconstruction
-      if ( dvv < 0.0360 && lspdphi < 0.5 ) //FIXME
+      if ( (dvv < 0.0360 && lspdphi < 0.5) ) //FIXME
         continue; 
 
       // Second part of preselection: only look at move vectors
@@ -614,47 +614,6 @@ int main(int argc, char** argv) {
           zee_p4 = tmpz_p4;
         }
 
-        int nmovedjets = 0;
-        double jet_sume = 0;
-        double jet_dravg = 0, jet_detaavg = 0, jet_dphiavg = 0;
-        double jet_drmax = 0, jet_detamax = 0, jet_dphimax = 0;
-        double jet_a3dmax = 0;
-        int jet_i[2] = {-1,-1}; // keep track of the pair of jets with largest 3D angle // JMTBAD should this be largest phi?
-
-        for (int i = 0, ie = jets.n(); i < ie; ++i) {
-          const auto i_p4 = jets.p4(i);
-          if ( fabs(i_p4.DeltaPhi(lsp_p4)) > M_PI/2 ) continue;
-          ++nmovedjets;
-          jet_sume += jets.energy(i);
-
-          const std::vector<int> jet_tk_list = tks.tks_for_jet(i);
-
-          for (int j = i+1; j < ie; ++j) {
-            const auto j_p4 = jets.p4(j);
-            if ( fabs(j_p4.DeltaPhi(lsp_p4)) > M_PI/2 ) continue;
-            const double ij_dr = i_p4.DeltaR(j_p4);
-            const double ij_deta = i_p4.Eta() - j_p4.Eta();
-            const double ij_dphi = i_p4.DeltaPhi(j_p4);
-            jet_dravg += ij_dr;
-            jet_detaavg += ij_deta; // JMTBAD should these be fabs'd
-            jet_dphiavg += ij_dphi;
-            if (ij_dr > jet_drmax)
-              jet_drmax = ij_dr;
-            if (fabs(ij_deta) > fabs(jet_detamax))
-              jet_detamax = ij_deta;
-            if (fabs(ij_dphi) > fabs(jet_dphimax))
-              jet_dphimax = ij_dphi;
-
-            const double a3d = i_p4.Angle(j_p4.Vect());
-            if (a3d > jet_a3dmax) {
-              jet_a3dmax = a3d;
-              jet_i[0] = i;
-              jet_i[1] = j;
-            }
-          }
-        }
-
-        /*
         // Match decay daughters to the closest (by dR) reconstructed jet
         std::vector<int> closest_jets(2,-1), quark_assoc(2,-1);
         int s = 2+ilsp*2, swapem = gen.pt(s) < gen.pt(s+1); // toward making the jet assoc'd to the higher (lower) pT quark be "jet0" ("jet1")
@@ -676,19 +635,15 @@ int main(int argc, char** argv) {
         // jet // JMTBAD how many are we skipping?
         TLorentzVector jet_p4_0;
         TLorentzVector jet_p4_1;
-        jet_p4_0 = gen.p4(quark_assoc[0]);
-        jet_p4_1 = gen.p4(quark_assoc[1]);
+        quark_p4_0 = gen.p4(quark_assoc[0]);
+        quark_p4_1 = gen.p4(quark_assoc[1]);
 
 
         if (closest_jets[0] == -1 || closest_jets[1] == -1 || closest_jets[0] == closest_jets[1]) 
            continue;
-        */
 
-        if ( jet_i[0] == -1 || jet_i[1] == -1 || jet_i[0] == jet_i[1]) 
-           continue;
-
-        const std::vector<int> jet0_tracks = tks.tks_for_jet(jet_i[0]);
-        const std::vector<int> jet1_tracks = tks.tks_for_jet(jet_i[1]);
+        const std::vector<int> jet0_tracks = tks.tks_for_jet(closest_jets[0]);
+        const std::vector<int> jet1_tracks = tks.tks_for_jet(closest_jets[1]);
         int minijet_ntk_0 = 0;
         int minijet_ntk_1 = 0;
         n_movedseedtks = 0;
@@ -824,25 +779,25 @@ int main(int argc, char** argv) {
 
         jet_pt_0  = jet_p4_0.Pt();
         jet_pt_1  = jet_p4_1.Pt();
-        jet_dr_minjq0 = jet_p4_0.DeltaR(jet_p4_0);
-        jet_dr_minjq1 = jet_p4_1.DeltaR(jet_p4_1);
-        jet_dr        = jet_p4_0.DeltaR(jet_p4_1);
+        jet_dr_minjq0 = jet_p4_0.DeltaR(quark_p4_0);
+        jet_dr_minjq1 = jet_p4_1.DeltaR(quark_p4_1);
+        jet_dr        = quark_p4_0.DeltaR(quark_p4_1);
         jet_costheta = ((jet_p4_0.X()*jet_p4_1.X()) + (jet_p4_0.Y()*jet_p4_1.Y()) + (jet_p4_0.Z()*jet_p4_1.Z()))/(jet_p4_0.P()*jet_p4_1.P()); 
-        jet_dphi =  jet_p4_0.DeltaPhi(jet_p4_1); //jet_p4_0.DeltaPhi(jet_p4_1);
+        jet_dphi =  quark_p4_0.DeltaPhi(quark_p4_1); //jet_p4_0.DeltaPhi(jet_p4_1);
         jet_aj    = (jet_pt_0 - jet_pt_1) / (jet_pt_0 + jet_pt_1);
-        jet_deta = fabs(jet_p4_0.Eta() - jet_p4_1.Eta()); //fabs(jet_eta_0 - jet_eta_1);
+        jet_deta = fabs(quark_p4_0.Eta() - quark_p4_1.Eta()); //fabs(jet_eta_0 - jet_eta_1);
         jet_dphi_max = jet_p4_0.DeltaPhi(jet_p4_1);
         jet_deta_max = jet_eta_0 - jet_eta_1; // JMTBAD fabs?
-        qrk_dphi_max = jet_p4_0.DeltaPhi(jet_p4_1);
+        qrk_dphi_max = quark_p4_0.DeltaPhi(quark_p4_1);
         jet_mv_dphi_0  = lsp_p4.DeltaPhi(jet_p4_0);
         jet_mv_dphi_1  = lsp_p4.DeltaPhi(jet_p4_1);
         jet_mv_dphi_sum = lsp_p4.DeltaPhi(jet_p4_0 + jet_p4_1);
-        qrk_mv_dphi_0  = lsp_p4.DeltaPhi(jet_p4_0);
-        qrk_mv_dphi_1  = lsp_p4.DeltaPhi(jet_p4_1);
-        qrk_mv_dphi_sum = lsp_p4.DeltaPhi(jet_p4_0 + jet_p4_1);
-        qrkp_0 = jet_p4_0.P();
-        qrkp_1 = jet_p4_1.P();
-        qrk_costheta = ((jet_p4_0.X()*jet_p4_1.X()) + (jet_p4_0.Y()*jet_p4_1.Y()) + (jet_p4_0.Z()*jet_p4_1.Z()))/(jet_p4_0.P()*jet_p4_1.P()); 
+        qrk_mv_dphi_0  = lsp_p4.DeltaPhi(quark_p4_0);
+        qrk_mv_dphi_1  = lsp_p4.DeltaPhi(quark_p4_1);
+        qrk_mv_dphi_sum = lsp_p4.DeltaPhi(quark_p4_0 + quark_p4_1);
+        qrkp_0 = quark_p4_0.P();
+        qrkp_1 = quark_p4_1.P();
+        qrk_costheta = ((quark_p4_0.X()*quark_p4_1.X()) + (quark_p4_0.Y()*quark_p4_1.Y()) + (quark_p4_0.Z()*quark_p4_1.Z()))/(quark_p4_0.P()*quark_p4_1.P()); 
         jet_mv_deta_0  = fabs(jet_eta_0 - lsp_p4.Eta());
         jet_mv_deta_1  = fabs(jet_eta_1 - lsp_p4.Eta());
         jet_mv_deta_sum = fabs((jet_p4_0 + jet_p4_1).Eta() - lsp_p4.Eta());
@@ -881,22 +836,23 @@ int main(int argc, char** argv) {
 
         }
 
-        if (fabs(jet_p4_0.Eta()) > 2.5 || fabs(jet_p4_1.Eta()) > 2.5)
+        if (fabs(quark_p4_0.Eta()) > 2.5 || fabs(quark_p4_1.Eta()) > 2.5)
           continue;
 
         if ( fabs(jet_dr) < 0.4 )
           continue;
 
 
-        if ( fabs(lsp_p4.Eta()) < 1.5)
+        //High-Eta
+        if (fabs(quark_p4_0.Eta()) < 1.5 || fabs(quark_p4_1.Eta()) < 1.5)
           continue;
 
 
         //std::cout << " run: " << nr.nt().base().run() << std::endl << " lumi: " << nr.nt().base().lumi() << " event: " << nr.nt().base().event() << std::endl;
         //std::cout << " jet0: " << closest_jets[0] << " jet1: " << closest_jets[1] << std::endl;
 
-        //std::cout << " quark0" << " eta " << jet_p4_0.Eta() << " p " << jet_p4_0.P() << " ntk0 " << jet_ntks_0 << std::endl;
-        //std::cout << " quark1" << " eta " << jet_p4_1.Eta() << " p " << jet_p4_1.P() << " ntk1 " << jet_ntks_1 << std::endl;
+        //std::cout << " quark0" << " eta " << quark_p4_0.Eta() << " p " << quark_p4_0.P() << " ntk0 " << jet_ntks_0 << std::endl;
+        //std::cout << " quark1" << " eta " << quark_p4_1.Eta() << " p " << quark_p4_1.P() << " ntk1 " << jet_ntks_1 << std::endl;
 
       }
 
@@ -1063,8 +1019,8 @@ int main(int argc, char** argv) {
           const double jet0_gennsigmadz = tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp))/tks.err_dz(jet0trk_idx[j]);
           const double jet0_gennsigmamissdist = tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp))/tks.err_dxy(jet0trk_idx[j]);  
           nd.den(k_jet0_trk_gennsigma, sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));
-          nd.den(k_jet0_trk_dr_gennsigma, jp4.DeltaR(jet_p4_0), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
-          nd.den(k_jet0_trk_dr_genmissdist, jp4.DeltaR(jet_p4_0), tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.den(k_jet0_trk_dr_gendz, jp4.DeltaR(jet_p4_0), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
+          nd.den(k_jet0_trk_dr_gennsigma, jp4.DeltaR(quark_p4_0), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
+          nd.den(k_jet0_trk_dr_genmissdist, jp4.DeltaR(quark_p4_0), tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.den(k_jet0_trk_dr_gendz, jp4.DeltaR(quark_p4_0), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.den(k_jet0_trk_eta_gennsigma, tks.eta(jet0trk_idx[j]), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
           nd.den(k_jet0_trk_eta_gendz, tks.eta(jet0trk_idx[j]), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.den(k_jet0_trk_gennsigmamissdist, jet0_gennsigmamissdist);
@@ -1088,7 +1044,7 @@ int main(int argc, char** argv) {
           if (itin != movedseedinvtxtrk_idx.end()){
             nd.den(k_movedseedinvtx_trk_whichjet, tks.which_jet(jet0trk_idx[j]));
             nd.den(k_movedseedinvtx_trk_dsz, tks.dsz(jet0trk_idx[j], pvs.x(0) + bs.x(pvs.z(0)), pvs.y(0) + bs.y(pvs.z(0)), pvs.z(0)));
-            nd.den(k_movedseedinvtx_trk_dr, jp4.DeltaR(jet_p4_0));
+            nd.den(k_movedseedinvtx_trk_dr, jp4.DeltaR(quark_p4_0));
             nd.den(k_movedseedinvtx_trk_p, tks.p(jet0trk_idx[j]));
             nd.den(k_movedseedinvtx_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
             nd.den(k_movedseedinvtx_trk_eta, tks.eta(jet0trk_idx[j]));
@@ -1099,7 +1055,7 @@ int main(int argc, char** argv) {
           }
           auto itout = std::find(movedseedoutvtxtrk_idx.begin(),  movedseedoutvtxtrk_idx.end(), jet0trk_idx[j]);
           if (itout != movedseedoutvtxtrk_idx.end()){
-            nd.den(k_movedseedoutvtx_trk_dr, jp4.DeltaR(jet_p4_0));
+            nd.den(k_movedseedoutvtx_trk_dr, jp4.DeltaR(quark_p4_0));
             nd.den(k_movedseedoutvtx_trk_p, tks.p(jet0trk_idx[j]));
             nd.den(k_movedseedoutvtx_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
             nd.den(k_movedseedoutvtx_trk_eta, tks.eta(jet0trk_idx[j]));
@@ -1142,8 +1098,8 @@ int main(int argc, char** argv) {
         nd.den(k_lspdist3_movedist2, lspdist3, movedist2); 
         nd.den(k_lspdist3_qrk0_dxybs, lspdist3, qrk0_dxybs); 
         nd.den(k_lspdist3_qrk1_dxybs, lspdist3, qrk1_dxybs); 
-        //nd.den(k_qrk0_phi_genqrk0_phi, qrk0_phi, jet_p4_0.Phi()); 
-        //nd.den(k_qrk1_phi_genqrk1_phi, qrk1_phi, jet_p4_1.Phi()); 
+        //nd.den(k_qrk0_phi_genqrk0_phi, qrk0_phi, quark_p4_0.Phi()); 
+        //nd.den(k_qrk1_phi_genqrk1_phi, qrk1_phi, quark_p4_1.Phi()); 
         for (size_t j = 0; j < jet1trk_idx.size(); ++j){
           const TLorentzVector jp4 = tks.p4(jet1trk_idx[j]);
           nd.den(k_jet1_trk_dr, jp4.DeltaR(minijet_p4_1));
@@ -1165,8 +1121,8 @@ int main(int argc, char** argv) {
           const double jet1_gennsigmadz = tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp))/tks.err_dz(jet1trk_idx[j]);
           const double jet1_gennsigmamissdist = tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp))/tks.err_dxy(jet1trk_idx[j]);  
           nd.den(k_jet1_trk_gennsigma, sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));
-          nd.den(k_jet1_trk_dr_gennsigma, jp4.DeltaR(jet_p4_1), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
-          nd.den(k_jet1_trk_dr_genmissdist, jp4.DeltaR(jet_p4_1), tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.den(k_jet1_trk_dr_gendz, jp4.DeltaR(jet_p4_1), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
+          nd.den(k_jet1_trk_dr_gennsigma, jp4.DeltaR(quark_p4_1), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
+          nd.den(k_jet1_trk_dr_genmissdist, jp4.DeltaR(quark_p4_1), tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.den(k_jet1_trk_dr_gendz, jp4.DeltaR(quark_p4_1), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.den(k_jet1_trk_eta_gennsigma, tks.eta(jet1trk_idx[j]), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
           nd.den(k_jet1_trk_eta_gendz, tks.eta(jet1trk_idx[j]), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.den(k_jet1_trk_gennsigmamissdist, jet1_gennsigmamissdist);
@@ -1183,7 +1139,7 @@ int main(int argc, char** argv) {
           if (itin != movedseedinvtxtrk_idx.end()){
             nd.den(k_movedseedinvtx_trk_whichjet, tks.which_jet(jet1trk_idx[j]));
             nd.den(k_movedseedinvtx_trk_dsz, tks.dsz(jet1trk_idx[j], pvs.x(0) + bs.x(pvs.z(0)), pvs.y(0) + bs.y(pvs.z(0)), pvs.z(0)));
-            nd.den(k_movedseedinvtx_trk_dr, jp4.DeltaR(jet_p4_1));
+            nd.den(k_movedseedinvtx_trk_dr, jp4.DeltaR(quark_p4_1));
             nd.den(k_movedseedinvtx_trk_p, tks.p(jet1trk_idx[j]));
             nd.den(k_movedseedinvtx_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
             nd.den(k_movedseedinvtx_trk_eta, tks.eta(jet1trk_idx[j]));
@@ -1194,7 +1150,7 @@ int main(int argc, char** argv) {
           }
           auto itout = std::find(movedseedoutvtxtrk_idx.begin(),  movedseedoutvtxtrk_idx.end(), jet1trk_idx[j]);
           if (itout != movedseedoutvtxtrk_idx.end()){
-            nd.den(k_movedseedoutvtx_trk_dr, jp4.DeltaR(jet_p4_1));
+            nd.den(k_movedseedoutvtx_trk_dr, jp4.DeltaR(quark_p4_1));
             nd.den(k_movedseedoutvtx_trk_p, tks.p(jet1trk_idx[j]));
             nd.den(k_movedseedoutvtx_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
             nd.den(k_movedseedoutvtx_trk_eta, tks.eta(jet1trk_idx[j]));
@@ -1451,8 +1407,8 @@ int main(int argc, char** argv) {
           const double jet0_gennsigmadz = tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp))/tks.err_dz(jet0trk_idx[j]);
           const double jet0_gennsigmamissdist = tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp))/tks.err_dxy(jet0trk_idx[j]);  
           nd.num(k_jet0_trk_gennsigma, sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));
-          nd.num(k_jet0_trk_dr_gennsigma, jp4.DeltaR(jet_p4_0), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
-          nd.num(k_jet0_trk_dr_genmissdist, jp4.DeltaR(jet_p4_0), tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.num(k_jet0_trk_dr_gendz, jp4.DeltaR(jet_p4_0), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
+          nd.num(k_jet0_trk_dr_gennsigma, jp4.DeltaR(quark_p4_0), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
+          nd.num(k_jet0_trk_dr_genmissdist, jp4.DeltaR(quark_p4_0), tks.dxy(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.num(k_jet0_trk_dr_gendz, jp4.DeltaR(quark_p4_0), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.num(k_jet0_trk_eta_gennsigma, tks.eta(jet0trk_idx[j]), sqrt((jet0_gennsigmamissdist*jet0_gennsigmamissdist) + (jet0_gennsigmadz*jet0_gennsigmadz)));   
           nd.num(k_jet0_trk_eta_gendz, tks.eta(jet0trk_idx[j]), tks.dz(jet0trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.num(k_jet0_trk_gennsigmamissdist, jet0_gennsigmamissdist);
@@ -1476,7 +1432,7 @@ int main(int argc, char** argv) {
           if (itin != movedseedinvtxtrk_idx.end()){
             nd.num(k_movedseedinvtx_trk_whichjet, tks.which_jet(jet0trk_idx[j]));
             nd.num(k_movedseedinvtx_trk_dsz, tks.dsz(jet0trk_idx[j], pvs.x(0) + bs.x(pvs.z(0)), pvs.y(0) + bs.y(pvs.z(0)), pvs.z(0)));
-            nd.num(k_movedseedinvtx_trk_dr, jp4.DeltaR(jet_p4_0));
+            nd.num(k_movedseedinvtx_trk_dr, jp4.DeltaR(quark_p4_0));
             nd.num(k_movedseedinvtx_trk_p, tks.p(jet0trk_idx[j]));
             nd.num(k_movedseedinvtx_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
             nd.num(k_movedseedinvtx_trk_eta, tks.eta(jet0trk_idx[j]));
@@ -1487,7 +1443,7 @@ int main(int argc, char** argv) {
           }
           auto itout = std::find(movedseedoutvtxtrk_idx.begin(),  movedseedoutvtxtrk_idx.end(), jet0trk_idx[j]);
           if (itout != movedseedoutvtxtrk_idx.end()){
-            nd.num(k_movedseedoutvtx_trk_dr, jp4.DeltaR(jet_p4_0));
+            nd.num(k_movedseedoutvtx_trk_dr, jp4.DeltaR(quark_p4_0));
             nd.num(k_movedseedoutvtx_trk_p, tks.p(jet0trk_idx[j]));
             nd.num(k_movedseedoutvtx_trk_dz, tks.dzpv(jet0trk_idx[j], pvs));
             nd.num(k_movedseedoutvtx_trk_eta, tks.eta(jet0trk_idx[j]));
@@ -1530,8 +1486,8 @@ int main(int argc, char** argv) {
         nd.num(k_lspdist3_movedist2, lspdist3, movedist2); 
         nd.num(k_lspdist3_qrk0_dxybs, lspdist3, qrk0_dxybs); 
         nd.num(k_lspdist3_qrk1_dxybs, lspdist3, qrk1_dxybs); 
-        //nd.num(k_qrk0_phi_genqrk0_phi, qrk0_phi, jet_p4_0.Phi()); 
-        //nd.num(k_qrk1_phi_genqrk1_phi, qrk1_phi, jet_p4_1.Phi()); 
+        //nd.num(k_qrk0_phi_genqrk0_phi, qrk0_phi, quark_p4_0.Phi()); 
+        //nd.num(k_qrk1_phi_genqrk1_phi, qrk1_phi, quark_p4_1.Phi()); 
         for (size_t j = 0; j < jet1trk_idx.size(); ++j){
           const TLorentzVector jp4 = tks.p4(jet1trk_idx[j]);
           nd.num(k_jet1_trk_dr, jp4.DeltaR(minijet_p4_1));
@@ -1553,8 +1509,8 @@ int main(int argc, char** argv) {
           const double jet1_gennsigmadz = tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp))/tks.err_dz(jet1trk_idx[j]);
           const double jet1_gennsigmamissdist = tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp))/tks.err_dxy(jet1trk_idx[j]);  
           nd.num(k_jet1_trk_gennsigma, sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));
-          nd.num(k_jet1_trk_dr_gennsigma, jp4.DeltaR(jet_p4_1), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
-          nd.num(k_jet1_trk_dr_genmissdist, jp4.DeltaR(jet_p4_1), tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.num(k_jet1_trk_dr_gendz, jp4.DeltaR(jet_p4_1), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
+          nd.num(k_jet1_trk_dr_gennsigma, jp4.DeltaR(quark_p4_1), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
+          nd.num(k_jet1_trk_dr_genmissdist, jp4.DeltaR(quark_p4_1), tks.dxy(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp)));            nd.num(k_jet1_trk_dr_gendz, jp4.DeltaR(quark_p4_1), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.num(k_jet1_trk_eta_gennsigma, tks.eta(jet1trk_idx[j]), sqrt((jet1_gennsigmamissdist*jet1_gennsigmamissdist) + (jet1_gennsigmadz*jet1_gennsigmadz)));   
           nd.num(k_jet1_trk_eta_gendz, tks.eta(jet1trk_idx[j]), tks.dz(jet1trk_idx[j], gen.decay_x(ilsp), gen.decay_y(ilsp), gen.decay_z(ilsp)));   
           nd.num(k_jet1_trk_gennsigmamissdist, jet1_gennsigmamissdist);
@@ -1571,7 +1527,7 @@ int main(int argc, char** argv) {
           if (itin != movedseedinvtxtrk_idx.end()){
             nd.num(k_movedseedinvtx_trk_whichjet, tks.which_jet(jet1trk_idx[j]));
             nd.num(k_movedseedinvtx_trk_dsz, tks.dsz(jet1trk_idx[j], pvs.x(0) + bs.x(pvs.z(0)), pvs.y(0) + bs.y(pvs.z(0)), pvs.z(0)));
-            nd.num(k_movedseedinvtx_trk_dr, jp4.DeltaR(jet_p4_1));
+            nd.num(k_movedseedinvtx_trk_dr, jp4.DeltaR(quark_p4_1));
             nd.num(k_movedseedinvtx_trk_p, tks.p(jet1trk_idx[j]));
             nd.num(k_movedseedinvtx_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
             nd.num(k_movedseedinvtx_trk_eta, tks.eta(jet1trk_idx[j]));
@@ -1582,7 +1538,7 @@ int main(int argc, char** argv) {
           }
           auto itout = std::find(movedseedoutvtxtrk_idx.begin(),  movedseedoutvtxtrk_idx.end(), jet1trk_idx[j]);
           if (itout != movedseedoutvtxtrk_idx.end()){
-            nd.num(k_movedseedoutvtx_trk_dr, jp4.DeltaR(jet_p4_1));
+            nd.num(k_movedseedoutvtx_trk_dr, jp4.DeltaR(quark_p4_1));
             nd.num(k_movedseedoutvtx_trk_p, tks.p(jet1trk_idx[j]));
             nd.num(k_movedseedoutvtx_trk_dz, tks.dzpv(jet1trk_idx[j], pvs));
             nd.num(k_movedseedoutvtx_trk_eta, tks.eta(jet1trk_idx[j]));

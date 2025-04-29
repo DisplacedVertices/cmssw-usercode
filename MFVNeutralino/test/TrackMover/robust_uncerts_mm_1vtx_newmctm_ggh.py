@@ -248,8 +248,8 @@ reweight = True
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['40'] 
-mass = '40'
+masses = ['55'] 
+mass = '55'
 ctaus       = [ '1000', '10000', ]  
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 

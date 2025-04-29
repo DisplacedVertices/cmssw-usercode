@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_MixEta_LowdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6", "trackmovermctruthonnormdzulv30bmpreselv6", "all_signal = True")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruth_MixEta_HighdVV0p36_NoPreSelRelaxBSPVetodR0p4VetoMissLLPVetoTrkJetByMiniJetHistsOnnormdzUlv30bmpreselhighptv6", "trackmovermctruthonnormdzulv30bmpreselv6", "all_signal = True")
     ;
 
   if (!nr.parse_options(argc, argv)) return 1;
@@ -501,7 +501,7 @@ int main(int argc, char** argv) {
       // First part of the preselection: our offline jet requirements
       // plus require the lsps to be far enough apart that they don't
       // interfere with each other in reconstruction
-      if ( !(dvv < 0.0360 && lspdphi < 0.5) ) //FIXME
+      if ( (dvv < 0.0360 && lspdphi < 0.5) ) //FIXME
         continue; 
 
       // Second part of preselection: only look at move vectors

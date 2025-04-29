@@ -199,7 +199,7 @@ if not fns:
     elif rpv : 
         fns = [os.path.join(dir, sn + '_run2.root') for sn in ' mfv_neu_tau001000um_M0400 mfv_stopdbardbar_tau000300um_M0400 mfv_stopdbardbar_tau001000um_M0200 '.split()]
     elif ggh :
-        fns = [os.path.join(dir, sn + '_run2.root') for sn in ' ggHToSSTodddd_tau1mm_M55 '.split()]
+        fns = [os.path.join(dir, sn + '_run2.root') for sn in ' ggHToSSTodddd_tau1mm_M55 ggHToSSTodddd_tau10mm_M55 ggHToSSTodddd_tau10mm_M15 '.split()]
     else : 
         #fns = [os.path.join(dir, sn + '_leptonpresel_' + year + '.root') for sn in ' qcd ttbar wjetstolnu dyjets diboson '.split()]
         #fns = [os.path.join(dir, sn + '_btagpresel_' + year + '.root') for sn in 'qcd ttbar '.split()]

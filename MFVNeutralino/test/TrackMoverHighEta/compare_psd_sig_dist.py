@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 cmssw_setup()
 
 # FIXME you can replace this with the usual stuff for putting plots into our publicweb areas and generating the html
-outputdir = "~/nobackup/crabdirs/TMHighEta_PSD_DIST_M55_ctau30mm_Dec6"
+outputdir = "~/nobackup/crabdirs/TMHighEta_PSD_DIST_FIXME"
 outputdir += "/" # in case we forget it...
 os.system("mkdir -p "+outputdir)
 

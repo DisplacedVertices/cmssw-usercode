@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 cmssw_setup()
 
 # FIXME you can replace this with the usual stuff for putting plots into our publicweb areas and generating the html
-outputdir = "~/nobackup/crabdirs/TMMixEta_PSD_DISTCURVE"
+outputdir = "~/nobackup/crabdirs/TMMixEta_PSD_DISTCURVE_FIXME"
 outputdir += "/" # in case we forget it...
 os.system("mkdir -p "+outputdir)
 
@@ -56,10 +56,10 @@ legend.Draw()
 w = ROOT.TLatex()
 w.SetNDC()
 if ("emulation" in fileoutname):
-    w.DrawLatex(.3, .85, " signal MC with quarks' |#eta| < 1.5 or |#eta| > 1.5")
+    w.DrawLatex(.3, .85, " signal MC with quarks' mixed |#eta|")
     w.DrawLatex(.3, .80, " LLP 3D-separation > 1mm")
 else:
-    w.DrawLatex(.3, .85, " signal MC with quarks' |#eta| < 1.5 or |#eta| > 1.5")
+    w.DrawLatex(.3, .85, " signal MC with quarks' mixed |#eta|")
 c1.Print (outputdir+fileoutname+".png")
 
 
