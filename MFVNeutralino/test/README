@@ -79,6 +79,16 @@ stop :
     Step 3 : use robust_uncerts_mm_1vtx_newmctm_stop_dd(bb).py or robust_uncerts_mm_1vtx_newmctm_stop_hightpt.py (for one stop->dd for now)
 
 
+For current studies as of 04/28/2025 
+- all ntuple files including TM ntuples are explained and identified in SampleFiles.py 
+- histograms for deriving yields are in 
+    - LPC : /uscms/home/pkotamni/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm(_noef) for Run2 displacement triggers  
+    - LPC : /uscms/home/pkotamni/Histos_LepIPCut_OnnormdzULV30Lepm(_noef/) for Run2 lepton triggers 
+- minitress for more studies are in 
+    - LXPLUS : /eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm for Run2 displacement triggers
+    - LXPLUS : /eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm for Run2 lepton triggers 
+
+
 
 
 
