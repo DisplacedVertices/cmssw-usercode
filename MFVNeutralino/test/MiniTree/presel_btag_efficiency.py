@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 import sys
 
 year = sys.argv[1]
-version = 'V25m'
+version = 'OnnormdzULV30Lepm'
 
 if len(sys.argv) > 2 :
   syst_var_str = str(sys.argv[2])
@@ -11,8 +11,8 @@ if len(sys.argv) > 2 :
 else :
   syst_var_str = 'nom'
 
-f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEff%sv1/background_%s.root' % (version, year) )
-f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year))
+f_btageff = ROOT.TFile('/eos/user/p/pekotamn/BTagEff%sv1/background_%s.root' % (version, year) )
+f_presel = ROOT.TFile('/eos/user/p/pekotamn/PreselHistos%s/background_%s.root' % (version, year))
 
 def njets(hname):
   h = f_btageff.Get(hname)
@@ -73,7 +73,7 @@ def btag_eff_per_event_from_btag_eff_per_jet(event_flavor, effb, effc, effl):
 
 def btag_eff_per_event(event_flavor, bdisc):
   (firstxbin,lastxbin) = (3,3) if event_flavor == 'bquarks' else (1,2)
-  h = f_presel.Get('mfvEventHistosJetPreSel/h_nbtags_v_bquark_code_%s' % bdisc).ProjectionY('h_nbtags', firstxbin, lastxbin)
+  h = f_presel.Get('mfvEventHistosPreSel/h_nbtags_v_bquark_code_%s' % bdisc).ProjectionY('h_nbtags', firstxbin, lastxbin)
   return h.Integral(2,4)/h.Integral(1,4)
 
 # Convenient inputs for bquark_fraction.py
@@ -85,7 +85,7 @@ effl, sfl = btag_eff_per_jet('light', bdisc), scale_factor('light', bdisc)
 event_eff = btag_eff_per_event_from_btag_eff_per_jet('bjets', effb*sfb, effc*sfc, effl*sfl)
 event_fakerate = btag_eff_per_event_from_btag_eff_per_jet('nobjets', effb*sfb, effc*sfc, effl*sfl)
 
-h_nbtags_tight = f_presel.Get('mfvEventHistosJetPreSel/h_nbtags_2')
+h_nbtags_tight = f_presel.Get('mfvEventHistosPreSel/h_nbtags_2')
 ft = h_nbtags_tight.Integral(2,11) / h_nbtags_tight.Integral(1,11)
 
 # for the .csv file

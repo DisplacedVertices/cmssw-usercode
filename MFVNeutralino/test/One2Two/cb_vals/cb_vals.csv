@@ -1,9 +1,9 @@
 variant,cb_val
-data_2017_3trk_cb,0.420024
-data_2017_3trk_cbbar,0.470236
-data_2017_4trk_cb,0.454166
-data_2017_4trk_cbbar,0.504654
-data_2017_5trk_cb,0.581721
-data_2017_5trk_cbbar,0.616630
-data_2017_7trk_cb,0.437254
-data_2017_7trk_cbbar,0.488732
+run2_3trk_cb,0.370011
+run2_3trk_cbbar,0.394718
+run2_4trk_cb,0.360582
+run2_4trk_cbbar,0.382508
+run2_5trk_cb,0.394480
+run2_5trk_cbbar,0.251147
+run2_7trk_cb,0.365395
+run2_7trk_cbbar,0.388149

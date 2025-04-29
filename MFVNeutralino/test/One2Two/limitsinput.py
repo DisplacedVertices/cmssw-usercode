@@ -17,7 +17,6 @@ class Params(object):
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
-        #self.years = '2017', '2018'
         self.years = '20161', '20162', '2017', '2018'
         self.nyears = len(self.years)
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
@@ -51,7 +50,8 @@ def name2kind(name):
     _nameok(name)
     return name.split('_tau')[0]
 def name2tau(name):
-    _nameok(name)
+    _nameok(name) 
+    #FIXME
     if not 'ggH' in name:
         return int(name.split('_tau')[1].split('um_')[0]) / 1000.
     #if not 'VH' in name:
@@ -116,15 +116,18 @@ class sample_iterator(object):
 def make_bkg(f):
     # the first 4 sets of values override what's in 2v_from_jets
     #          20161    20162     2017     2018
-    observed = (0,0,0), (0,0,0), (0,0,0), (0,0,0)
-    #bkg_n1v  = 864, 951, 548, 1168 #Shaun
-    #bkg_n1v  = 999, 999, 1337, 475 #lep
-    bkg_n1v  = 999, 999, 889, 877 #bjet
-    #bkg_n2v  = 0.051, 0.058, 0.041, 0.136 # Shaun this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
-    #bkg_n2v  = 999, 999, 0.003, 0.004 # lep this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
-    bkg_n2v  = 999, 999, 0.037, 0.006 # bjet this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    # FIXME 
+    observed = (0,0,0), (0,0,0), (0,0,0), (0,0,0) #bjet
+    #observed = (0,0,0), (0,0,0), (0,0,0), (0,0,0) #lep
+    
+    #bkg_n1v  = 52.19, 77.35, 442.23, 694.77 #lep
+    bkg_n1v  = 1004.1395, 434.13558, 187.79967, 276.98182 #bjet
+    
+    #bkg_n2v  = 0.0, 0.012, 0.002, 0.034 # lep this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    bkg_n2v  = 0.258, 0.062, 0.078, 0.122 # bjet this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    
     # but bkg_c1v is checked against what's in 2v_from_jets
-    # FIXME not used bkg_c1v = (0.509, 0.374, 0.117), (0.709, 0.257, 0.034), (0.650, 0.313, 0.037)
+    # not used bkg_c1v = (0.509, 0.374, 0.117), (0.709, 0.257, 0.034), (0.650, 0.313, 0.037)
 
     bkg_uncert = [(1.25, 1.25, 1.69), (1.25, 1.25, 1.69), (1.16, 1.30, 1.51), (1.19, 1.30, 1.91)] # combine lnN convention
 
@@ -140,8 +143,8 @@ def make_bkg(f):
     bkg_syst_uncert = [(0.758, 1.218, 1.542), (0.758, 1.218, 1.542), (0.743, 1.338, 1.389), (0.766, 1.315, 1.760)] # syst error anti-correlated
 
     def bkg_fn(year, which='default'):
-        #return '/uscms/home/shogan/public/2v_from_jets/2v_from_jets_%s_5track_btags_ULV11.root' % year
-        return '~/crabdirs/2v_from_jets_bjet/2v_from_jets_%s_5track_default_ULV11.root' % year 
+        # FIXME
+        return '~/crabdirs/2v_from_jets_bjet/2v_from_jets_%s_5track_default_ULV30BvetoLHTm.root' % year 
         #return '~/crabdirs/2v_from_jets_lep/2v_from_jets_%s_5track_default_ULV30Lepm.root' % year 
     
     def bkg_f(year, which='default', _c={}):
@@ -511,9 +514,9 @@ def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     scanpack_list = ''
-    #trees = '/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
-    trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTree_FixWP_ULV11Bm/*tau*.root'
-    #trees = '/afs/cern.ch/user/p/pekotamn/crabdirs/MiniTreeOnnormdzULV30Lepm/*tau*.root'
+    # FIXME
+    trees = '/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/*tau*.root'
+    #trees = '/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm/*tau*.root'
     title = []
     sigs = {}
 
@@ -532,7 +535,7 @@ def make_signals_2017p8(f, name_list):
             sys.stdout.write('\rmake_signals_2017p8: %i/%i' % (isig, nsigs)); sys.stdout.flush()
 
         name, year = name_year.rsplit('_',1)
-        #if 'ggH' in name_year:  # FIXME
+        #if 'ggH' in name_year:  
         #    continue
         if name_list.has_key(name):
             s = name_list[name]
@@ -563,9 +566,27 @@ def make_signals_2017p8(f, name_list):
             t.SetAlias('limitsinput_pass', '1==1')
 
         iyear = gp.years.index(year)
-        scale = 1e-3 * gp.int_lumis[iyear] / ngen
-        data_mc_scale = sig_datamcSF_2017p8(name_year)
+       
+        sigyield = 0.0
+        
+        if "VHToSSTodddd_tau1mm_M55" in fn:
+           sigyield = 726.0 * (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~726 W/Z/ttH yield in 2017 for 1mm 55GeV
+        elif "VHToSSTodddd_tau10mm_M55" in fn:
+           sigyield = 1223.0 * (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~1223 W/Z/ttH yield in 2017 for 10mm 55GeV
+        elif "ggHToSSTodddd_tau1mm_M55" in fn:
+           sigyield = 5915.0 * (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~5915 ggH yield in 2017 for 1mm 55GeV
+        elif "mfv_neu_tau001000um_M0400" in fn:
+           sigyield = 31.6 * (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~32 tbs yield in 2017 for 1mm 400GeV
+        elif "mfv_stopdbardbar_tau001000um_M0200" in fn:
+           sigyield = 14.5 * (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~14.5 dd yield in 2017 for 1mm 200GeV
+        elif "mfv_stopdbardbar_tau000300um_M0400" in fn:
+           sigyield = 9.1 *  (gp.int_lumis[iyear]/gp.int_lumis[2]) # ~9 dd yield in 2017 for 0.3mm 400GeV
+        else:
+           print("missing information of this signal")
 
+        scale = sigyield / ngen #1e-3 * gp.int_lumis[iyear] / ngen
+        data_mc_scale = sig_datamcSF_2017p8(name_year)
+        
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 1250, 0, 2.5)
         h_sumdbv  = ROOT.TH1D(n('sumdbv'),  '', 800, 0, 8)
@@ -966,8 +987,8 @@ if __name__ == '__main__':
     elif 'iter' in sys.argv:
         include_all  = 'include_all' in sys.argv
         include_2016 = 'include_2016' in sys.argv
-        years =  ('2017','2018')
-        #years = ('20161', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
+        #years =  ('2017','2018')
+        years = ('20161', '2016', '2017', '2018') if include_all else ('2016','2017','2018') if include_2016 else ('2017','2018')
         samples = sample_iterator(ROOT.TFile('limitsinput.root'),
                                   require_years=years,
                                   test='test_batch' in sys.argv,

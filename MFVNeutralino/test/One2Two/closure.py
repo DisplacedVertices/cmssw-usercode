@@ -5,35 +5,25 @@ ROOT.TH1.AddDirectory(0)
 do_bquark = False
 is_mc = True
 only_10pc = False
-year = '2017p8'
-version = 'ULV11'
-#version = 'ULV30Lepm'
+year = 'run2'
+#FIXME 
+#version = 'ULV30BvetoLHTm'
+version = 'ULV30Lepm'
 set_style()
-ps = plot_saver(plot_dir('closure_mc_v2_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(900,700), root=True, log=False)
+ps = plot_saver(plot_dir('closure_mc_default_%s%s%s_%s_April6' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(900,700), root=True, log=False)
 
-#predictnorms = [1867.0+2451.0, 130.0+144.0, 9.0+1.5] #bjet : HW's tables
-#predictnormerrs = [841.0, 55.0,2.9] #bjet : HW's tables
+#predictnorms = [11611.529, 1580.472, 53.780, 0.528] #bjet
+#predictnormerrs = [ 951.689, 144.749, 4.418, 0.044] #bjet
 
-predictnorms = [253.0+2378.0, 999.0, 1.0+9.0] #bjet  : Shaun's incomplete input
-predictnormerrs = [87.0, 999.0, 0.37] #bjet : Shuan's incomplete input
+predictnorms = [ 1398.361, 138.600, 3.434, 0.043 ] #lepton 
+predictnormerrs = [962.527, 96.741, 2.364, 0.030 ] #lepton  
 
-
-#predictnorms = [726.9+251.1, 68.8+21.6, 1.6+0.5] #lepton
-#predictnormerrs = [603.9, 58.4,1.4] #lepton
-
-
-fns = ['~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       #'~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       '~/crabdirs/2v_from_jets_bjet/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
-       #'~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
+#FIXME
+fns = ['~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '~/crabdirs/2v_from_jets_lep/2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
        ]
-
-# for overlaying the btag-based template
-fns_btag = ['~/crabdirs/2v_from_jets/2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            #'~/crabdirs/2v_from_jets/2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            '~/crabdirs/2v_from_jets/2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
-            #'~/crabdirs/2v_from_jets/2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version)
-            ]
 
 ntk = []
 for fn in fns:
@@ -106,7 +96,7 @@ def scale_and_draw_template(closure, template, twovtxhist, sumdbvc, color) :
                 stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
             """
             #newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2.)**0.5 #Old method
-            newerr = template.GetBinContent(bin)*((( sumdbvc.GetBinError(bin)/ sumdbvc.GetBinContent(bin))**2 + (rawtemperr/rawtemp)**2 + (predictnormerr/predictnorm)**2)**0.5) # error propgation and corrected the first  
+            newerr = template.GetBinContent(bin)*((( sumdbvc.GetBinError(bin)/ (sumdbvc.GetBinContent(bin)+1e-16))**2 + (rawtemperr/(rawtemp+1e-16))**2 + (predictnormerr/predictnorm)**2)**0.5) # error propgation and corrected the first  
             template.SetBinError(bin, newerr)
     else:
         #binerr_comb = ((template_bins[0][1])**2. + (template_bins[1][1])**2 + (template_bins[2][1])**2)**0.5
@@ -186,7 +176,7 @@ def get_bin_integral_and_stat_uncert(hist, rawhist):
     
     rawbin1, rawbin1_err = get_integral(rawhist, xhi=0.08, include_last_bin=False) 
     rawbin2, rawbin2_err = get_integral(rawhist, xlo=0.08, xhi=0.16, include_last_bin=False)  
-    rawbin3, rawbin3_err = get_integral(rawhist, xlo=0.16, xhi=1.0, include_last_bin=False) 
+    rawbin3, rawbin3_err = get_integral(rawhist, xlo=0.16, xhi=2.0, include_last_bin=False) 
 
     rawbin1 += 1e-16    
     rawbin2 += 1e-16    
@@ -196,7 +186,7 @@ def get_bin_integral_and_stat_uncert(hist, rawhist):
     bin1_err = bin1*((( rawbin1_err/rawbin1)**2 + (intl_rawhisterr/intl_rawhist)**2 + (predictnormerr/predictnorm)**2)**0.5)  
     bin2 = get_integral(hist, 0.08, 0.16, integral_only=True, include_last_bin=False) 
     bin2_err = bin2*((( rawbin2_err/rawbin2)**2 + (intl_rawhisterr/intl_rawhist)**2 + (predictnormerr/predictnorm)**2)**0.5)  
-    bin3 = get_integral(hist, 0.16, 1.0, integral_only=True, include_last_bin=False)
+    bin3 = get_integral(hist, 0.16, 2.0, integral_only=True, include_last_bin=False)
     bin3_err = bin3*((( rawbin3_err/rawbin3)**2 + (intl_rawhisterr/intl_rawhist)**2 + (predictnormerr/predictnorm)**2)**0.5)  
 
     return [(bin1, bin1_err), (bin2, bin2_err), (bin3, bin3_err)]
@@ -262,9 +252,9 @@ for i, ntracks in enumerate(ntk):
         pval = 1
     
     print '%s-track' % ntk[i]
-    print '  two-vertex events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-100000 um: %6.2f +/- %5.2f' % twovtx
-    print ' constructed events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-100000 um: %6.2f +/- %5.2f' % con
-    print '  sumdBV normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-100000 um: %6.3f +/- %5.3f' % twovtx_norm
-    print ' sumdBVC normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-100000 um: %6.3f +/- %5.3f' % con_norm
-    print ' . sumdBV / sumdBVC:                    0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-100000 um: %6.2f +/- %5.2f' % rat
-    print '            p-value:                                                                               1600-100000 um: %6.4f' % pval
+    print '  two-vertex events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-200000 um: %6.2f +/- %5.2f' % twovtx
+    print ' constructed events: %7.2f +/- %5.2f, 0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-200000 um: %6.2f +/- %5.2f' % con
+    print '  sumdBV normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-200000 um: %6.3f +/- %5.3f' % twovtx_norm
+    print ' sumdBVC normalized:                    0-800 um: %7.3f +/- %5.3f, 800-1600 um: %6.3f +/- %5.3f, 1600-200000 um: %6.3f +/- %5.3f' % con_norm
+    print ' . sumdBV / sumdBVC:                    0-800 um: %7.2f +/- %5.2f, 800-1600 um: %6.2f +/- %5.2f, 1600-200000 um: %6.2f +/- %5.2f' % rat
+    print '            p-value:                                                                               1600-200000 um: %6.4f' % pval

@@ -155,7 +155,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     int ncjets_btag[NBDISC] = {0};
     int nljets_btag[NBDISC] = {0};
     for (int ijet = 0; ijet < nt.njets; ++ijet) {
-      double bdisc = nt.jet_bdisc[ijet];
+      double bdisc = nt.jet_bdisc_deepflav[ijet];
       h_jet_bdisc[i_nbquarks[i]][i_nvtx]->Fill(bdisc, w);
 
       int hadron_flavor = nt.jet_id[ijet] >> 4;

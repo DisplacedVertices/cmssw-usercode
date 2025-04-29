@@ -2,7 +2,8 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_bjet_templates_v2_2017p8_diff_xsecs'), size=(900,700), log=True, pdf=True, pdf_log=True)
+# FIXME
+ps = plot_saver(plot_dir('pretty_bjet_templates_April6_run2_diff_xsecs'), size=(900,700), log=True, pdf=True, pdf_log=True)
 
 hide_overlap_with_x_axis = True
 
@@ -17,7 +18,7 @@ combiner = SignalEfficiencyCombiner()
 
 # excluded xsec from previous analysis (Run 2, HT-triggered) is:
 # 9.5 at 300 microns, 3.0 at 1mm, 2.5 at 10mm
-
+# FIXME
 which = [
     ('mfv_neu_tau001000um_M0400', '#tilde{N} #rightarrow tbs; M-400GeV c#tau-1.0mm', ROOT.kYellow + 2, 2, 9.5), 
     ('mfv_stopdbardbar_tau001000um_M0200', '#tilde{t} #rightarrow #bar{d}#bar{d}; M-200GeV c#tau-1.0mm', ROOT.kGreen+2, 5, 3.0), 
@@ -34,14 +35,15 @@ def fmt(z, title, color, style, xsec=None, save=[]):
         name = z
         h = f.Get('h_signal_%i_sumdbv_2017' % name2isample(f, z))
         g = f.Get('h_signal_%i_sumdbv_2018' % name2isample(f, z))
-        #k = f.Get('h_signal_%i_sumdbv_20162' % name2isample(f, z))
+        k = f.Get('h_signal_%i_sumdbv_20162' % name2isample(f, z))
+        l = f.Get('h_signal_%i_sumdbv_20161' % name2isample(f, z))
         h.Add(g)
     else: # background hist
         name = title
         h = z
 
     if '#tau' in title:
-        h.Rebin(1)
+        h.Rebin(2) 
     h.Sumw2()
     h = cm2mm(h)
     h.SetStats(0)
@@ -54,32 +56,35 @@ def fmt(z, title, color, style, xsec=None, save=[]):
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleOffset(1.35)
-    move_above_into_bin(h, 9.999)
-    #move_above_into_bin(h, 3.999)
-    if title == 'bkg_20162':
-        norm = 0.061
+    move_above_into_bin(h, 19.999) 
+    if title == 'bkg_20161':
+        norm = 0.0197
+    elif title == 'bkg_20162':
+        norm = 0.0170
     elif title == 'bkg_2017': 
-        norm = 0.041
+        norm = 0.0406
     elif title == 'bkg_2018': 
-        norm = 0.107
+        norm = 0.0597
     else:
-        #rate_per_bin_20162 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['20162']
+        rate_per_bin_20161 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['20161']
+        rate_per_bin_20162 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['20162']
         rate_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']
         rate_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']
 
-        #uncert_per_bin_20162 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['20162']
+        uncert_per_bin_20161 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['20161']
+        uncert_per_bin_20162 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['20162']
         uncert_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2017']
         uncert_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2018']
 
         # just to be safe
-        #assert(len(rate_per_bin_20162) == len(uncert_per_bin_20162))
+        assert(len(rate_per_bin_20161) == len(uncert_per_bin_20161))
+        assert(len(rate_per_bin_20162) == len(uncert_per_bin_20162))
         assert(len(rate_per_bin_2017) == len(uncert_per_bin_2017))
         assert(len(rate_per_bin_2018) == len(uncert_per_bin_2018))
-        assert(len(rate_per_bin_2017) == len(rate_per_bin_2018))
-        #assert(len(rate_per_bin_20162) == len(rate_per_bin_2018))
 
         # scale rate by the xsec of interest
-        #yield_per_bin_20162 = tuple([rate*xsec for rate in rate_per_bin_2017])
+        yield_per_bin_20161 = tuple([rate*xsec for rate in rate_per_bin_20161])
+        yield_per_bin_20162 = tuple([rate*xsec for rate in rate_per_bin_20162])
         yield_per_bin_2017 = tuple([rate*xsec for rate in rate_per_bin_2017])
         yield_per_bin_2018 = tuple([rate*xsec for rate in rate_per_bin_2018])
         yield_per_bin_tot = tuple(map(lambda val17, val18 : val17 + val18, yield_per_bin_2017, yield_per_bin_2018))
@@ -87,7 +92,8 @@ def fmt(z, title, color, style, xsec=None, save=[]):
         norm = sum(yield_per_bin_tot)
 
         # turn the 1+x uncertainties into the actual abs uncertainties on the yield
-        #abs_err_per_bin_20162 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_20162, uncert_per_bin_20162))
+        abs_err_per_bin_20161 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_20161, uncert_per_bin_20161))
+        abs_err_per_bin_20162 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_20162, uncert_per_bin_20162))
         abs_err_per_bin_2017 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2017, uncert_per_bin_2017))
         abs_err_per_bin_2018 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2018, uncert_per_bin_2018))
 
@@ -100,13 +106,14 @@ def fmt(z, title, color, style, xsec=None, save=[]):
         for ibin, (val, err) in enumerate(zip(yield_per_bin_tot, abs_err_per_bin_tot)) :
             print("bin %i: %.2f \pm %.2f" % (ibin, val, round(err,2)))
 
-    h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
+    h.Scale(norm/(h.Integral(0,h.GetNbinsX()+2) + 1e-16))
     save.append(h)
     return h
 
-def print_bkg_table(h17,h18) : #FIXME
+def print_bkg_table(h161, h162, h17,h18) :
     print ""
-    #print "20162 bkg: total of %.3f events" % round(h16.Integral(0,h16.GetNbinsX()+2),3)
+    print "20161 bkg: total of %.3f events" % round(h161.Integral(0,h161.GetNbinsX()+2),3)
+    print "20162 bkg: total of %.3f events" % round(h162.Integral(0,h162.GetNbinsX()+2),3)
     print "2017 bkg: total of %.3f events" % round(h17.Integral(0,h17.GetNbinsX()+2),3)
     print "2018 bkg: total of %.3f events" % round(h18.Integral(0,h18.GetNbinsX()+2),3)
     print ""
@@ -131,13 +138,21 @@ def print_bkg_table(h17,h18) : #FIXME
     # All rel syst uncertainties taken from the combine card, with stat uncs fully uncorrelated across years
     # and syst shift fully correlated across years within a single bin.
     # Note bin 1 syst was anticorrelated with the others, hence <1 and the "1-"
-    #bin0_20162_syst_uncorr = 0.173*h16.Integral(*bin0_range)
-    #bin1_20162_syst_uncorr = 0.216*h16.Integral(*bin1_range)
-    #bin2_20162_syst_uncorr = 0.454*h16.Integral(*bin2_range)
+    bin0_20161_syst_uncorr = 0.173*h161.Integral(*bin0_range)
+    bin1_20161_syst_uncorr = 0.216*h161.Integral(*bin1_range)
+    bin2_20161_syst_uncorr = 0.454*h161.Integral(*bin2_range)
 
-    #bin0_20162_syst_corr = (1-0.743)*h16.Integral(*bin0_range)
-    #bin1_20162_syst_corr = 0.338*h16.Integral(*bin1_range)
-    #bin2_20162_syst_corr = 0.389*h16.Integral(*bin2_range)
+    bin0_20161_syst_corr = (1-0.743)*h161.Integral(*bin0_range)
+    bin1_20161_syst_corr = 0.338*h161.Integral(*bin1_range)
+    bin2_20161_syst_corr = 0.389*h161.Integral(*bin2_range)
+
+    bin0_20162_syst_uncorr = 0.173*h162.Integral(*bin0_range)
+    bin1_20162_syst_uncorr = 0.216*h162.Integral(*bin1_range)
+    bin2_20162_syst_uncorr = 0.454*h162.Integral(*bin2_range)
+
+    bin0_20162_syst_corr = (1-0.743)*h162.Integral(*bin0_range)
+    bin1_20162_syst_corr = 0.338*h162.Integral(*bin1_range)
+    bin2_20162_syst_corr = 0.389*h162.Integral(*bin2_range)
 
     bin0_2017_syst_uncorr = 0.173*h17.Integral(*bin0_range)
     bin1_2017_syst_uncorr = 0.216*h17.Integral(*bin1_range)
@@ -155,9 +170,9 @@ def print_bkg_table(h17,h18) : #FIXME
     bin1_2018_syst_corr = 0.315*h18.Integral(*bin1_range)
     bin2_2018_syst_corr = 0.760*h18.Integral(*bin2_range)
 
-    bin0_tot = h17.Integral(*bin0_range) + h18.Integral(*bin0_range) # FIXME h16.Integral(*bin0_range) + h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
-    bin1_tot = h17.Integral(*bin1_range) + h18.Integral(*bin1_range) # FIXME h16.Integral(*bin1_range) + h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
-    bin2_tot = h17.Integral(*bin2_range) + h18.Integral(*bin2_range) # FIXME #h16.Integral(*bin2_range) + h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
+    bin0_tot = h161.Integral(*bin0_range) + h162.Integral(*bin0_range) + h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
+    bin1_tot = h161.Integral(*bin1_range) + h162.Integral(*bin1_range) + h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
+    bin2_tot = h161.Integral(*bin2_range) + h162.Integral(*bin2_range) + h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
 
     bin0_syst_uncorr = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
     bin1_syst_uncorr = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
@@ -179,14 +194,15 @@ def print_bkg_table(h17,h18) : #FIXME
 
 
 hbkg2017 = fmt(f.Get('h_bkg_sumdbv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
-#hbkg20162 = fmt(f.Get('h_bkg_sumdbv_20162'), 'bkg_20162', ROOT.kBlack, ROOT.kSolid)
+hbkg20162 = fmt(f.Get('h_bkg_sumdbv_20162'), 'bkg_20162', ROOT.kBlack, ROOT.kSolid)
+hbkg20161 = fmt(f.Get('h_bkg_sumdbv_20161'), 'bkg_20161', ROOT.kBlack, ROOT.kSolid)
 hbkg2018 = fmt(f.Get('h_bkg_sumdbv_2018'), 'bkg_2018', ROOT.kBlack, ROOT.kSolid)
-#print_bkg_table(hbkg20162, hbkg2017, hbkg2018)
-print_bkg_table(hbkg2017, hbkg2018)
+print_bkg_table(hbkg20161, hbkg20162, hbkg2017, hbkg2018)
 
 hbkg = hbkg2017
 hbkg.Add(hbkg2018)
-#hbkg.Add(hbkg20162)
+hbkg.Add(hbkg20162)
+hbkg.Add(hbkg20161)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3002)
 
@@ -195,7 +211,9 @@ yoffset = 0.008
 leg1 = ROOT.TLegend(0.350+xoffset, 0.805+yoffset, 0.859+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Background template', 'F')
 leg2 = ROOT.TLegend(0.350+xoffset, 0.748+yoffset, 0.859+xoffset, 0.815+yoffset)
+#FIXME
 leg2.AddEntry(0, '#kern[-0.22]{B-jet/Displ-jet signals}', '')
+#leg2.AddEntry(0, '#kern[-0.22]{Lepton signals}', '')
 leg3 = ROOT.TLegend(0.350+xoffset, 0.612+yoffset, 0.859+xoffset, 0.745+yoffset)
 legs = leg1, leg2, leg3
 
@@ -208,7 +226,7 @@ hbkg.Draw('hist')
 #ymin = 4e-3
 ymin = 1e-3
 ymax = 600
-xmax = 10
+xmax = 20.0
 hbkg.GetXaxis().SetRangeUser(0,xmax)
 hbkg.GetYaxis().SetRangeUser(ymin,ymax)
 
@@ -250,7 +268,7 @@ def write(font, size, x, y, text):
     return w
 
 #write(61, 0.050, 0.280, 0.825, 'CMS')
-write(42, 0.050, 0.595, 0.913, '100 fb^{-1} (13 TeV)')
+write(42, 0.050, 0.595, 0.913, '137 fb^{-1} (13 TeV)')
 
 sumdbvlines = [
 #        ROOT.TLine(0.8, 0, 0.8, ymax),
