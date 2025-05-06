@@ -4,7 +4,6 @@
 import sys, os
 import numpy as np
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 

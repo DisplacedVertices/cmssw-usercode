@@ -4,6 +4,8 @@ from glob import glob
 from gzip import GzipFile
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp
+from JMTucker.Tools.Sample import sumw_from_file, nevents_from_file
+
 
 set_style()
 
@@ -287,6 +289,7 @@ def sig_uncert_alphas(name_year):
 
     return p
 
+# NOTE! This all pertains to the 2016-only paper, and is NOT needed for anything we run nowadays.
 def make_signals_2015p6(f, name_list):
     # Pull 2015+6 values from previous-format limitsinput file(s).
     # (Not all 2017+8 signal points exist in the final one for the
@@ -545,11 +548,13 @@ def make_signals_2017p8(f, name_list):
         n = lambda x: 'h_signal_%i_%s_%s'  % (s.isample, x, year)
 
         ngen = 0.
+        sumw = 0.
         t = ROOT.TChain('mfvMiniTree/t')
         for fn in fns:
-            sig_f = ROOT.TFile.Open(fn)
-            ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
-            sig_f.Close()
+            # Joey: we previously used nevents in denominator, which wasn't quite right (but maybe fine for most of our Pythia signals)
+            # Instead, let's use the sum of gen weights for this (only still computing ngen for the histogram we output--still need to see if we ever use it anywhere though... maybe for stat uncertainties in the data card)
+            ngen += nevents_from_file(fn)
+            sumw += sumw_from_file(fn)
             t.Add(fn)
 
         if year == '2017' and gp.l1eeprefiring_2017:
@@ -584,7 +589,7 @@ def make_signals_2017p8(f, name_list):
         else:
            print("missing information of this signal")
 
-        scale = sigyield / ngen #1e-3 * gp.int_lumis[iyear] / ngen
+        scale = sigyield / sumw #1e-3 * gp.int_lumis[iyear] / ngen
         data_mc_scale = sig_datamcSF_2017p8(name_year)
         
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap

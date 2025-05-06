@@ -1,6 +1,5 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools import Samples
 set_style()
 

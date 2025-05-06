@@ -5,7 +5,7 @@
 
 import sys, os
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
+from JMTucker.Tools.Sample import sumw_from_file
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
@@ -89,7 +89,7 @@ def effs(fn):
         h = f.Get('%s/h_nsv' % dir_name)
         return h.Integral(0,1000000) if integral else h.GetEntries(), h.GetEntries()
     
-    den = norm_from_file(fn)
+    den = sumw_from_file(fn)
     sname = os.path.basename(fn).replace('.root','')
     sample = getattr(Samples, sname, None)
     
@@ -116,14 +116,12 @@ def effs(fn):
 
     numall, numall_unweighted = get_n(namenumall)
     
-    ngen = f.Get('mfvWeight/h_sums').GetBinContent(1) 
-
     if rpv :
-        weight = 137.1*(1.0)/ngen #RPV 
+        weight = 137.1*(1.0)/den #RPV 
     elif ggh :
-        weight = 137.1*1000*(52.0)*0.1/ngen #ggH
+        weight = 137.1*1000*(52.0)*0.1/den #ggH
     elif vh :
-        weight = 137.1*1000*(0.063168 + 0.30885)/ngen #VH 
+        weight = 137.1*1000*(0.063168 + 0.30885)/den #VH 
     elif sample :
         weight = sample.xsec * int_lumi / den #for unscaled bkg inputs
         weighted = True

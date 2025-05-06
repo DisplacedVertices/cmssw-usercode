@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools.Year import year
 from JMTucker.Tools.general import typed_from_argv, bool_from_argv
 from JMTucker.Tools import Samples
