@@ -17,6 +17,8 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
                                require_bquarks = cms.bool(False),
+                               require_isomu27 = cms.bool(False), # Added
+                               require_ele35 = cms.bool(False), # Added
                                # to make any of the next 3 trigger cuts work, or min/max_njets/ht, you have to set apply_presel = 0 above
                                l1_bit = cms.int32(-1),
                                trigger_bit = cms.int32(-1),

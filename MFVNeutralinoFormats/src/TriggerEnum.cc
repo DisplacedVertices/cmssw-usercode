@@ -49,6 +49,7 @@ namespace mfv {
     "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v",
 
     // MET trigger
+    //"HLT_PFMET120_PFMHT120_IDTight_v",
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
 
     // Low-HT trigger to study filters requiring HLT tracks

@@ -1,0 +1,47 @@
+diff --git a/MFVNeutralino/python/NtupleCommon.py b/MFVNeutralino/python/NtupleCommon.py
+index 4363d545..04843c64 100644
+--- a/MFVNeutralino/python/NtupleCommon.py
++++ b/MFVNeutralino/python/NtupleCommon.py
+@@ -4,14 +4,13 @@ from JMTucker.Tools.Year import year
+ ntuple_version_ = 'OnnormdzULV30'
+ lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
+ use_btag_triggers = False
+-use_MET_triggers = False
+-use_Muon_triggers = True
++use_MET_triggers = True
++use_Muon_triggers = False
+ use_Electron_triggers = False
+ use_DisplacedLepton_triggers = False
+ if use_btag_triggers : 
+     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
+ elif use_MET_triggers :
+-    lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
+     ntuple_version_ += "MET"
+ elif use_Muon_triggers :
+     ntuple_version_ += "LepMu"
+@@ -163,7 +162,6 @@ def make_output_commands(process, settings):
+         'keep *_mcStat_*_*',
+         'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+         'keep MFVEvent_mfvEvent__*',
+-        'keep MFVSeedTracks_mfvSeedTracks__*',
+         ]
+ 
+     if settings.keep_gen:
+@@ -273,7 +271,6 @@ def miniaod_ntuple_process(settings):
+     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
+     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+-    process.load('JMTucker.MFVNeutralino.SeedTracks_cfi')
+     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
+ 
+     process.goodOfflinePrimaryVertices.input_is_miniaod = True
+@@ -330,8 +327,7 @@ def miniaod_ntuple_process(settings):
+                          process.jmtUnpackedCandidateTracks *
+                          process.mfvVertexSequence *
+                          process.prefiringweight *
+-                         process.mfvEvent *
+-                         process.mfvSeedTracks)
++                         process.mfvEvent)
+ 
+     output_commands = make_output_commands(process, settings)
+ 

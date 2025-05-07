@@ -6,10 +6,12 @@ do_track = False # this can onlky be used for ntuple with keep_tk=True
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 #currently : keep histos slim -> do only Loose Vertices & NoCuts, Minntk = 3, 4, 5 
 #update : Selected Loose Vertices are changed to Tight Vertices
+#input_files(process, '/uscms/home/yuqingwu/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/ntuple.root')
+#input_files(process, '/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/241210_155912/0000/ntuple_4.root')
 input_files(process, ['/store/user/yuqingw/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240707_023427/0000/ntuple_%i.root' % i for i in chain(xrange(1,17), xrange(18,47))])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
-#max_events(process,100)
+max_events(process,1000)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -36,7 +38,13 @@ process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
+process.mfvEventHistosIsoMu27 = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsIsoMu27 = process.mfvAnalysisCuts.clone(require_isomu27 = True, apply_vertex_cuts = False)
+process.pEventIsoMu27 = cms.Path(common * process.mfvAnalysisCutsIsoMu27 * process.mfvEventHistosIsoMu27)
 
+process.mfvEventHistosEle35 = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsEle35 = process.mfvAnalysisCuts.clone(require_ele35 = True, apply_vertex_cuts = False)
+process.pEventEle35 = cms.Path(common * process.mfvAnalysisCutsEle35 * process.mfvEventHistosEle35)
 
 # process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
 # process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1)
@@ -180,7 +188,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
-        samples = [getattr(Samples, 'wjetstolnu_amcatnlo_2017')]
+        #samples = [getattr(Samples, 'MET2017F')]
+	samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
+	#samples = [getattr(Samples, 'ttbar_2017')]
+	#samples = [getattr(Samples, 'qcdpt80mupt5_2017')]
+	#samples = [getattr(Samples, 'qcdempt300_2017')]
+	#samples = [getattr(Samples, 'dyjetstollM10_2017')]
+	#samples = [getattr(Samples, 'zz_2017')]
         #samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier)
     elif use_Muon_triggers :
@@ -196,7 +210,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
-    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_SingleLept_2017_10pc.json'))
+    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017.json'))
 
     cs = CondorSubmitter('Histos' + version + '_SingleLep',
                          ex = year,

@@ -7,7 +7,7 @@ jet_paths = [
 
 MET_paths = [
     #"HLT_PFMET120_PFMHT120_IDTight_v*",
-    "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*",
+    "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*", # 25-01-21_edit
     ]
 
 bjet_paths = [
@@ -42,6 +42,10 @@ lepton_paths = [
 muon_paths = [
      "HLT_IsoMu27_v*",
      "HLT_Mu50_v*"
+]
+
+muoniso_paths = [
+     "HLT_IsoMu27_v*"
 ]
 
 electron_paths = [
@@ -92,6 +96,12 @@ mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(HLTPaths = bjet_paths)
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
 mfvTriggerFilterMuonsOnly = mfvTriggerFilter.clone(HLTPaths = muon_paths)
 mfvTriggerFilterElectronsOnly = mfvTriggerFilter.clone(HLTPaths = electron_paths)
+
+mfvTriggerFilterMETANDMuons = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = MET_paths + muoniso_paths,
+        andOr = False, #AND
+        throw = False,
+        )
 
 mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = jet_paths + bjet_paths + displaced_dijet_paths,

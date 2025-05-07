@@ -99,7 +99,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode[0] or mode[1]:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode[0], rp_mode=mode[1], **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode[0], event_filter_require_vertex = False, rp_mode=mode[1], **kwargs)
         
 ########################################################################
 
@@ -133,7 +133,7 @@ class NtupleSettings(CMSSWSettings):
 
         if self.keep_all and self.event_filter:
             print 'setting event_filter to False because keep_all is True'
-            self.event_filter = False
+            self.mode = False
 
         if len(filter(None, (self.run_n_tk_seeds, self.minitree_only, self.prepare_vis))) > 1:
             raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
@@ -334,7 +334,7 @@ def miniaod_ntuple_process(settings):
     mods = [
         (prepare_vis,    settings.prepare_vis),
         (run_n_tk_seeds, settings.run_n_tk_seeds),
-        (event_filter,    [settings.event_filter, settings.randpars_filter]),
+        (event_filter,    [settings.mode, settings.randpars_filter]),
         #(event_filter,   settings.event_filter),
         (minitree_only,  settings.minitree_only),
         ]

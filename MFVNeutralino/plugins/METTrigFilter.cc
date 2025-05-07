@@ -39,7 +39,7 @@ MFVMETTrigFilter::MFVMETTrigFilter(const edm::ParameterSet& ps)
   using namespace edm;
 
   processName_ = ps.getUntrackedParameter<std::string>("processName","HLT");
-  sigTriggerName_ = ps.getUntrackedParameter<std::string>("sigTriggerName","HLT_PFMET120_PFMHT120_IDTight_v*");
+  sigTriggerName_ = ps.getUntrackedParameter<std::string>("sigTriggerName","HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*"); // 25-01-21_edit
   triggerResultsToken_ = consumes<edm::TriggerResults> (ps.getUntrackedParameter<edm::InputTag>("triggerResultsTag", edm::InputTag("TriggerResults", "", "HLT")));
   pfMetToken_ = consumes<pat::METCollection>(ps.getUntrackedParameter<edm::InputTag>("pfMetInputTag_", edm::InputTag("slimmedMETs")));
   met_thresh_ = ps.getUntrackedParameter<double>("met_thresh",150.0);

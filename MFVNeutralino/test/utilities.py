@@ -137,17 +137,22 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
             x = []
             if not trigeff:
                 x = []
-                #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] #15 30 50 170 300
+                x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] #15 30 50 170 300
                 #x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] #20 170 
         elif bkg_tag == 'qcdmupt5':
             x = [] 
             if not trigeff:
                 x = []
-                #x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  #50
-                #x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]  #800 
-                #x += ['qcdpt1000mupt5']
-        else:
-            x = ['ww', 'wz', 'zz', 'ttbar'] 
+                #x += ['qcdpt%02imupt5' % x for x in [30,50,80]]
+                x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]]  #50
+                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]]  #800 
+                x += ['qcdpt1000mupt5']
+        elif bkg_tag == 'ttbar':
+	    x = ['ttbar']
+	elif bkg_tag == 'dibosons':
+	    x = ['ww', 'wz', 'zz']
+	else:
+            x = ['ww', 'wz', 'zz'] # 'ww', 'wz', 'zz', 'ttbar' 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -209,7 +214,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
-        for bkg_tag in ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+        for bkg_tag in ['wjetstolnu', 'qcdmupt5', 'dyjets', 'ttbar', 'dibosons'] : # ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
@@ -233,7 +238,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
          
         #cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
-        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root others_leptonpresel_2017.root'
+        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root dyjets_leptonpresel_2017.root ttbar_leptonpresel_2017.root dibosons_leptonpresel_2017.root'
         print cmd
         os.system(cmd)
     #only work for 2017 data now

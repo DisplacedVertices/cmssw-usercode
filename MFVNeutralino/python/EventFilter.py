@@ -7,7 +7,7 @@ def setup_event_filter(process,
                        event_filter = False,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
-                       event_filter_require_vertex = True,
+                       event_filter_require_vertex = False,
                        rp_filter = False,
                        rp_mode = None,
                        rp_mass = -1,
@@ -23,7 +23,8 @@ def setup_event_filter(process,
         trigger_filter_name += name_ex
         event_filter_name += name_ex
         sequence_name += name_ex
-
+    print('mode ', mode) #DEBUGGING
+    # mode = 'met AND iso muons' # forcing this anyway
     if mode == 'trigger only':
         pass
     elif mode == 'trigger jets only':
@@ -58,6 +59,9 @@ def setup_event_filter(process,
         event_filter = 'leptons only'
     elif mode == 'met only':
         trigger_filter = event_filter = 'met only'
+    elif mode == 'met AND iso muons':
+        trigger_filter = 'met AND iso muons'
+        event_filter = 'met only'
     elif mode == 'HT OR bjets OR displaced dijet':
         trigger_filter = event_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'bjets OR displaced dijet veto HT':
@@ -96,6 +100,8 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMETOnly as triggerFilter
     elif trigger_filter == 'displaced dijet only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetOnly as triggerFilter
+    elif trigger_filter == 'met AND iso muons':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMETANDMuons as triggerFilter
     elif trigger_filter == 'HT OR bjets OR displaced dijet':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterHTORBjetsORDisplacedDijet as triggerFilter
     elif trigger_filter == 'bjets OR displaced dijet veto HT':
@@ -111,7 +117,7 @@ def setup_event_filter(process,
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "muons only", "electrons only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "muons only", "electrons only", "bjets only", "met only", "displaced dijet only", "met AND iso muon", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -192,4 +198,7 @@ def setup_event_filter(process,
     if hasattr(process, 'out'):
         assert not hasattr(process.out, 'SelectEvents')
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(path_name))
-        
+
+    # For debugging
+    print('trigger_filter ', trigger_filter)
+    print('event_filter ', event_filter)

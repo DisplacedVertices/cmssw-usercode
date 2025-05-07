@@ -217,13 +217,88 @@ _add_ds("miniaod", {
 # })
 
 
+# DATA - METNoMu, all ran
 _add_ds("ntupleonnormdzulv30metm", {
-'wjetstolnu_amcatnlo_2017': (45, ['/store/user/yuqingw/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240707_023427/0000/ntuple_%i.root' % i for i in chain(xrange(1,17), xrange(18,47))]),
+'MET2017B': _fromnum1("/store/user/yuqingw/MET/NtupleOnnormdzULV30METm_2017/250123_155430", 34),
+'MET2017C': _fromnum1("/store/user/yuqingw/MET/NtupleOnnormdzULV30METm_2017/250123_155915", 57),
+'MET2017D': _fromnum1("/store/user/yuqingw/MET/NtupleOnnormdzULV30METm_2017/250123_160154", 13),
+'MET2017E': _fromnum1("/store/user/yuqingw/MET/NtupleOnnormdzULV30METm_2017/250123_160432", 71),
+'MET2017F': _fromnum1("/store/user/yuqingw/MET/NtupleOnnormdzULV30METm_2017/250123_160918", 179),
 })
 
+# 0j 1j 2j samples - my run, MET, all ran
+#_add_ds("ntupleonnormdzulv30metm", {
+#'wjetstolnu_0j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250109_103406", 207),
+#'wjetstolnu_1j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250109_103428", 225),
+#'wjetstolnu_2j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250109_103448", 118),
+#})
+
+# METNoMu samples - all ran, since MET is weird
 _add_ds("ntupleonnormdzulv30metm", {
-'wjetstolnu_2j_2017': (116, ['/store/user/yuqingw/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240627_014604/0000/ntuple_%i.root' % i for i in chain(xrange(1,7), xrange(8,61), xrange(62,119))]),
+'wjetstolnu_0j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122051", 207),
+'wjetstolnu_1j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122035", 225),
+'wjetstolnu_2j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122012", 118),
 })
+
+# TTbar samples, METNoMu
+_add_ds("ntupleonnormdzulv30metm", {
+'ttbar_2017': (592, ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_153202/0000/ntuple_%i.root' % i for i in chain(xrange(132,134), xrange(573,575), [57, 93, 103, 107, 111, 116, 168, 251, 264, 266, 289, 324, 419, 437, 470, 576])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250129_093022/0000/ntuple_327.root'] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250127_135001/0000/ntuple_%i.root' % i for i in chain(xrange(57), xrange(58,93), xrange(94,103), xrange(104,107), xrange(108,111), xrange(112,116), xrange(117,132), xrange(134,152), xrange(153,168), xrange(169,251), xrange(252,264), xrange(267,289), xrange(290,324), xrange(325,327), xrange(328,419), xrange(420,437), xrange(438,470), xrange(471,499), xrange(500,573), xrange(577,593), [265, 575])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_200000/0000/ntuple_499.root']),
+})
+
+
+# Assume everything is METNoMu by default
+# Drell-Yan
+_add_ds("ntupleonnormdzulv30metm", {
+'dyjetstollM10_2017': _fromnum1("/store/user/yuqingw/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleOnnormdzULV30METm_2017/250219_162157", 100),
+'dyjetstollM50_2017': _fromnum1("/store/user/yuqingw/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleOnnormdzULV30METm_2017/250219_162833", 129),
+})
+
+# Dibosons
+_add_ds("ntupleonnormdzulv30metm", {
+'ww_2017': _fromnum1("/store/user/yuqingw/WW_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250317_153923", 26),
+'zz_2017': _fromnum1("/store/user/yuqingw/ZZ_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250317_153843", 4),
+'wz_2017': _fromnum1("/store/user/yuqingw/WZ_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250317_154438", 17),
+})
+
+# Mu-enriched QCD
+_add_ds("ntupleonnormdzulv30metm", {
+'qcdmupt15_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250216_021625", 44),
+'qcdpt15mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_163607", 12),
+'qcdpt20mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_163906", 72),
+'qcdpt30mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_164423", 117),
+'qcdpt50mupt5_2017': (75, ['/store/user/yuqingw/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_164728/0000/ntuple_%i.root' % i for i in chain(xrange(1,16), xrange(17,77))]),
+'qcdpt80mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_165445", 87),
+'qcdpt120mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_165532", 80),
+'qcdpt170mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_170330", 136),
+'qcdpt300mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_171141", 108),
+'qcdpt470mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_171700", 73),
+'qcdpt600mupt5_2017': (75, ['/store/user/yuqingw/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_172012/0000/ntuple_%i.root' % i for i in chain(xrange(1,75), [78])]),
+'qcdpt800mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_172127", 146),
+'qcdpt1000mupt5_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250217_172427", 52),
+})
+
+# EM-enriched QCD
+_add_ds("ntupleonnormdzulv30metm", {
+'qcdempt015_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_170807", 15),
+'qcdempt020_2017': _fromnum0("/store/user/yuqingwu/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_114515", 19),
+'qcdempt030_2017': _fromnum0("/store/user/yuqingwu/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_114533", 9),
+'qcdempt050_2017': _fromnum0("/store/user/yuqingwu/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_114605", 18),
+'qcdempt080_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_171120", 25),
+'qcdempt120_2017': _fromnum1("/store/user/yuqingw/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_172051", 35),
+'qcdempt170_2017': _fromnum0("/store/user/yuqingwu/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_114728", 7),
+'qcdempt300_2017': _fromnum0("/store/user/yuqingwu/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/NtupleOnnormdzULV30METm_2017/250318_114805", 5),
+})
+
+
+# MET filter, with branches for with/without IsoMu27, not all ran
+#_add_ds("ntupleonnormdzulv30metm", {
+#'wjetstolnu_amcatnlo_2017': (43, ['/store/user/yuqingwu/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240904_094147/0000/ntuple_%i.root' % i for i in chain(xrange(7), xrange(9,21), xrange(22,45), [46])]),
+#})
+
+# MET and lepton filter
+#_add_ds("ntupleonnormdzulv30metm", {
+#'wjetstolnu_amcatnlo_2017': (44, ['/store/user/yuqingwu/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240830_100833/0000/ntuple_%i.root' % i for i in chain(xrange(7), xrange(9,21), xrange(22,47))]),
+#})
 
 _add_ds("ntupleulv27lepm", {
 'qcdempt015_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV27Lepm_2017/230320_183558", 24),

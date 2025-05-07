@@ -398,7 +398,7 @@ namespace mfv {
         }
         return passed_kinematics;
       }
-      case b_HLT_PFMET120_PFMHT120_IDTight : 
+      case b_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight : // 25-01-21_edit
       {
         //if((met) < 200 || njets < 2) return false;
         if ( njets < 2 ) return false;

@@ -344,6 +344,9 @@ struct MFVEvent {
   std::vector<float> muon_lxy;
   std::vector<float> muon_l;
   std::vector<float> muon_iso;
+  std::vector<float> muon_hlt_pt;
+  std::vector<float> muon_hlt_eta;
+  std::vector<float> muon_hlt_phi;
   std::vector<float> muon_dxy;
   std::vector<float> muon_dz;
   std::vector<float> muon_dxybs;
@@ -400,6 +403,7 @@ struct MFVEvent {
   void muon_push_back(const reco::Muon& muon,
 		      const reco::Track& trk,
 		      const float iso,
+		      const std::vector<TLorentzVector>& hltmuons,
 		      const math::XYZPoint& beamspot,
 		      const math::XYZPoint& primary_vertex);
 

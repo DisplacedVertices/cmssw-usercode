@@ -8,6 +8,7 @@
 void MFVEvent::muon_push_back(const reco::Muon& muon,
 			      const reco::Track& trk,
 			      const float iso,
+			      const std::vector<TLorentzVector>& hltmuons,
 			      const math::XYZPoint& beamspot,
 			      const math::XYZPoint& primary_vertex) {
 
@@ -27,6 +28,19 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
   
   muon_iso.push_back(iso);
   
+  double hltmatchdist2 = 0.1*0.1;
+  TLorentzVector hltmatch;
+  for (auto hlt : hltmuons) {
+    const double dist2 = reco::deltaR2(muon.eta(), muon.phi(), hlt.Eta(), hlt.Phi());
+    if (dist2 < hltmatchdist2) {
+      hltmatchdist2 = dist2;
+      hltmatch = hlt;
+    }
+  }
+  muon_hlt_pt.push_back(hltmatch.Pt());
+  muon_hlt_eta.push_back(hltmatch.Eta());
+  muon_hlt_phi.push_back(hltmatch.Phi());
+
   muon_dxy.push_back(trk.dxy(primary_vertex));
   muon_dz.push_back(trk.dz(primary_vertex));
   muon_dxybs.push_back(trk.dxy(beamspot));

@@ -9,7 +9,7 @@ from JMTucker.Tools import DBS
 
 xrootd_sites = {
     'T3_US_FNALLPC': 'root://cmsxrootd.fnal.gov/', #'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd-site.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/', #'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd-site.fnal.gov/',
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
@@ -328,7 +328,7 @@ class SamplesRegistry:
             return sorted(a)
 
     def add(self, s):
-        assert not self.d_samples.has_key(s.name)
+        #assert not self.d_samples.has_key(s.name) #FIXME
         self.d_samples[s.name] = s
 
     def add_list(self, name, l):

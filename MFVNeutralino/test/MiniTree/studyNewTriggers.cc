@@ -74,7 +74,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   bool passesDisplacedDijetTrigger = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) || nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT650_DisplacedDijet60_Inclusive);
 
-  bool passesMETTrigger = pass_hlt(nt, mfv::b_HLT_PFMET120_PFMHT120_IDTight);
+  bool passesMETTrigger = pass_hlt(nt, mfv::b_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight); // 25-01-21_edit
 
   double w = nt.weight; // modify as needed before filling hists
 

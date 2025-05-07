@@ -517,6 +517,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->muon_push_back(muon,
 			     *muon.bestTrack(),
 			     iso,
+			     triggerfloats->hltmuons,
 			     beamspot->position(muon.bestTrack()->vz()),
 			     primary_vertex_position);
       
@@ -685,6 +686,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->muon_lxy.clear();
     mevent->muon_l.clear();
     mevent->muon_iso.clear();
+    mevent->muon_hlt_pt.clear();
+    mevent->muon_hlt_eta.clear();
+    mevent->muon_hlt_phi.clear();
     mevent->muon_pt_err.clear();
     mevent->muon_eta_err.clear();
     mevent->muon_phi_err.clear();

@@ -17,7 +17,6 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
-#include "RecoVertex/VertexPrimitives/interface/VertexException.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -281,29 +280,24 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
     if (rs_ttks.size() > 1) {
-      try {
-        reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
-        if (rs_sv.isValid()) {
-          const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
-          aux.rescale_chi2 = rs_sv.chi2();
-          aux.rescale_x = rs_sv.x();
-          aux.rescale_y = rs_sv.y();
-          aux.rescale_z = rs_sv.z();
-          aux.rescale_cxx = rs_sv.covariance(0,0);
-          aux.rescale_cxy = rs_sv.covariance(0,1);
-          aux.rescale_cxz = rs_sv.covariance(0,2);
-          aux.rescale_cyy = rs_sv.covariance(1,1);
-          aux.rescale_cyz = rs_sv.covariance(1,2);
-          aux.rescale_czz = rs_sv.covariance(2,2);
-          aux.rescale_bs2ddist = d.value();
-          aux.rescale_bs2derr = d.error();
-        }
-        else
-          aux.rescale_chi2 = -1;
-      } 
-      catch (const VertexException& exc) {
-        aux.rescale_chi2 = -1;
+      reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
+      if (rs_sv.isValid()) {
+        const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
+        aux.rescale_chi2 = rs_sv.chi2();
+        aux.rescale_x = rs_sv.x();
+        aux.rescale_y = rs_sv.y();
+        aux.rescale_z = rs_sv.z();
+        aux.rescale_cxx = rs_sv.covariance(0,0);
+        aux.rescale_cxy = rs_sv.covariance(0,1);
+        aux.rescale_cxz = rs_sv.covariance(0,2);
+        aux.rescale_cyy = rs_sv.covariance(1,1);
+        aux.rescale_cyz = rs_sv.covariance(1,2);
+        aux.rescale_czz = rs_sv.covariance(2,2);
+        aux.rescale_bs2ddist = d.value();
+        aux.rescale_bs2derr = d.error();
       }
+      else
+        aux.rescale_chi2 = -1;
     }
 
     if (ttks.size() > 2) {
@@ -339,29 +333,24 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             printf(" %f", ttks_nm1[j].track().pt());
         }
 
-        try {
-          reco::Vertex rf_sv(TransientVertex(kv_reco->vertex(ttks_nm1)));
-          if (rf_sv.isValid()) {
-            const auto d = distcalc_2d.distance(rf_sv, fake_bs_vtx);
-            aux.nm1_chi2[i] = rf_sv.chi2();
-            aux.nm1_x[i] = rf_sv.x();
-            aux.nm1_y[i] = rf_sv.y();
-            aux.nm1_z[i] = rf_sv.z();
-            aux.nm1_cxx[i] = rf_sv.covariance(0,0);
-            aux.nm1_cxy[i] = rf_sv.covariance(0,1);
-            aux.nm1_cxz[i] = rf_sv.covariance(0,2);
-            aux.nm1_cyy[i] = rf_sv.covariance(1,1);
-            aux.nm1_cyz[i] = rf_sv.covariance(1,2);
-            aux.nm1_czz[i] = rf_sv.covariance(2,2);
-            aux.nm1_bs2ddist[i] = d.value();
-            aux.nm1_bs2derr[i] = d.error();
-          }
+        reco::Vertex rf_sv(TransientVertex(kv_reco->vertex(ttks_nm1)));
+        if (rf_sv.isValid()) {
+          const auto d = distcalc_2d.distance(rf_sv, fake_bs_vtx);
+          aux.nm1_chi2[i] = rf_sv.chi2();
+          aux.nm1_x[i] = rf_sv.x();
+          aux.nm1_y[i] = rf_sv.y();
+          aux.nm1_z[i] = rf_sv.z();
+          aux.nm1_cxx[i] = rf_sv.covariance(0,0);
+          aux.nm1_cxy[i] = rf_sv.covariance(0,1);
+          aux.nm1_cxz[i] = rf_sv.covariance(0,2);
+          aux.nm1_cyy[i] = rf_sv.covariance(1,1);
+          aux.nm1_cyz[i] = rf_sv.covariance(1,2);
+          aux.nm1_czz[i] = rf_sv.covariance(2,2);
+          aux.nm1_bs2ddist[i] = d.value();
+          aux.nm1_bs2derr[i] = d.error();
+        }
 
-          if (verbose) printf(" -> chi2 %f x %f y %f z %f\n", aux.nm1_chi2[i], aux.nm1_x[i], aux.nm1_y[i], aux.nm1_z[i]);
-        }
-        catch (const VertexException& exc) {
-          // do nothing
-        }
+        if (verbose) printf(" -> chi2 %f x %f y %f z %f\n", aux.nm1_chi2[i], aux.nm1_x[i], aux.nm1_y[i], aux.nm1_z[i]);
       }
     }
 

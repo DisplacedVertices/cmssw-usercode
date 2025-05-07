@@ -217,7 +217,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
-            sample.files_per = d.get(sample.name, 10000)
+            sample.files_per = d.get(sample.name, 10) # was 10000
 
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
