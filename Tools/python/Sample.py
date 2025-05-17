@@ -503,7 +503,7 @@ class sums_from_file(object):
         return self._norm
 
     def sumw(self):
-        return norm_weight('sum_gen_weight_total')
+        return self.norm_weight('sum_gen_weight_total')
 
     def norm_weight(self, weight_name):
         return self._get(weight_name)
