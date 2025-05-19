@@ -189,7 +189,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         #samples = [getattr(Samples, 'MET2017F')]
-	samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
+	samples = [getattr(Samples, 'wjetstolnu_0j_2017')]
 	#samples = [getattr(Samples, 'ttbar_2017')]
 	#samples = [getattr(Samples, 'qcdpt80mupt5_2017')]
 	#samples = [getattr(Samples, 'qcdempt300_2017')]

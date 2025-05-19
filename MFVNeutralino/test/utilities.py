@@ -214,7 +214,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
-        for bkg_tag in ['wjetstolnu', 'qcdmupt5', 'dyjets', 'ttbar', 'dibosons'] : # ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+        for bkg_tag in ['wjetstolnu', 'ttbar']:#, 'qcdmupt5', 'dyjets', 'ttbar', 'dibosons'] : # ['others', 'wjetstolnu', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
             files = _background_samples(year=year, bkg_tag=bkg_tag)
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
@@ -238,7 +238,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
          
         #cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
-        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root dyjets_leptonpresel_2017.root ttbar_leptonpresel_2017.root dibosons_leptonpresel_2017.root'
+        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root ttbar_leptonpresel_2017.root' #'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root dyjets_leptonpresel_2017.root ttbar_leptonpresel_2017.root dibosons_leptonpresel_2017.root'
         print cmd
         os.system(cmd)
     #only work for 2017 data now

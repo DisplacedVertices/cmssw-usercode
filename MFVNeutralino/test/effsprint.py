@@ -5,7 +5,7 @@
 
 import sys, os
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
+from JMTucker.Tools.Sample import sumw_from_file
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
@@ -54,7 +54,7 @@ def effs(fn):
         h = f.Get('%s/h_npv' % dir_name)
         return h.Integral(0,1000000) if integral else h.GetEntries(), h.GetEntries()
 
-    den = norm_from_file(fn)
+    den = sumw_from_file(fn)
     sname = os.path.basename(fn).replace('.root','')
     sample = getattr(Samples, sname, None)
     if sample:

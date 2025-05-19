@@ -1380,13 +1380,18 @@ MET2017E.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV3
 MET2017F.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-0168e31cccc0bf6a7932df6f3ea01d88/USER', 74593982)
 
 
-wjetstolnu_0j_2017.add_dataset("ntupleonnormdzulv30metm")
-wjetstolnu_1j_2017.add_dataset("ntupleonnormdzulv30metm")
-wjetstolnu_2j_2017.add_dataset("ntupleonnormdzulv30metm")
+wjetstolnu_0j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-92edc31430d5415f5c0e88d4c972818b/USER', 24193)
+wjetstolnu_1j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-bab63f64d68e200fd687edd9403bc678/USER', 1419857)
+wjetstolnu_2j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-ca629489a27d358a8ba8fc28eca20cc3/USER', 3310613)
+# Incorrectly normalized samples below
+#wjetstolnu_0j_2017.add_dataset("ntupleonnormdzulv30metm")
+#wjetstolnu_1j_2017.add_dataset("ntupleonnormdzulv30metm")
+#wjetstolnu_2j_2017.add_dataset("ntupleonnormdzulv30metm")
 
 wjetstolnu_amcatnlo_2017.add_dataset("ntupleonnormdzulv30metm")
 
-ttbar_2017.add_dataset("ntupleonnormdzulv30metm")
+ttbar_2017.add_dataset('ntupleonnormdzulv30metm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-e2164ea374f7c79f85723d24ea5edc72/USER', 17751948)
+#ttbar_2017.add_dataset("ntupleonnormdzulv30metm")
 
 
 # Verification samples

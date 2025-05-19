@@ -40,8 +40,8 @@ max_events(process, 500)
 #input_files(process, '~/nobackup/crabdirs/WplsuH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_UL2017_MINIAOD.root')
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #set_events(process, [(1, 12002, 31167330)])
-input_files(process, '/store/mc/RunIISummer20UL17RECO/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/AODSIM/106X_mc2017_realistic_v6-v1/100000/0126B04A-DB30-A048-A7F0-179620CC68E0.root')
-#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/230000/4A367B32-847B-8A4D-A425-22021A6409FB.root')
+#input_files(process, '/store/mc/RunIISummer20UL17RECO/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/AODSIM/106X_mc2017_realistic_v6-v1/100000/0126B04A-DB30-A048-A7F0-179620CC68E0.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/230000/4A367B32-847B-8A4D-A425-22021A6409FB.root')
 #input_files(process, '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM') # ttbar debug
 cmssw_from_argv(process)
 
@@ -54,9 +54,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #     samples = pick_samples(dataset, qcd=True, ttbar=False, data=False) # no data currently; no sliced ttbar since inclusive is used
     if use_MET_triggers :
         #samples = [getattr(Samples, 'wjetstolnu_amcatnlo_2017')]
-        #samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
-        #samples = [getattr(Samples, 'ttbar_2017')]
-        samples = [getattr(Samples, 'qcdempt120_2017')]
+        #samples = [getattr(Samples, 'wjetstolnu_0j_2017')]
+        samples = [getattr(Samples, 'ttbar_2017')]
+        #samples = [getattr(Samples, 'qcdempt120_2017')]
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=True, leptonic=False, splitSUSY=False, Zvv=False, met=False, span_signal=False)
 
     # if use_Muon_triggers :

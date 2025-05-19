@@ -235,15 +235,26 @@ _add_ds("ntupleonnormdzulv30metm", {
 
 # METNoMu samples - all ran, since MET is weird
 _add_ds("ntupleonnormdzulv30metm", {
-'wjetstolnu_0j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122051", 207),
-'wjetstolnu_1j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122035", 225),
-'wjetstolnu_2j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122012", 118),
+'wjetstolnu_0j_2017': _fromnum1("/store/user/yuqingw/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250516_010844", 216),
+'wjetstolnu_1j_2017': (264, ['/store/user/yuqingw/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250516_010809/0000/ntuple_%i.root' % i for i in chain(xrange(1,60), xrange(61,266))]),
+'wjetstolnu_2j_2017': _fromnum1("/store/user/yuqingw/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250516_010725", 119),
 })
+# Wrongly normalized samples below - DELETE
+#_add_ds("ntupleonnormdzulv30metm", {
+#'wjetstolnu_0j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122051", 207),
+#'wjetstolnu_1j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122035", 225),
+#'wjetstolnu_2j_2017': _fromnum0("/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250108_122012", 118),
+#})
 
 # TTbar samples, METNoMu
 _add_ds("ntupleonnormdzulv30metm", {
-'ttbar_2017': (592, ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_153202/0000/ntuple_%i.root' % i for i in chain(xrange(132,134), xrange(573,575), [57, 93, 103, 107, 111, 116, 168, 251, 264, 266, 289, 324, 419, 437, 470, 576])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250129_093022/0000/ntuple_327.root'] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250127_135001/0000/ntuple_%i.root' % i for i in chain(xrange(57), xrange(58,93), xrange(94,103), xrange(104,107), xrange(108,111), xrange(112,116), xrange(117,132), xrange(134,152), xrange(153,168), xrange(169,251), xrange(252,264), xrange(267,289), xrange(290,324), xrange(325,327), xrange(328,419), xrange(420,437), xrange(438,470), xrange(471,499), xrange(500,573), xrange(577,593), [265, 575])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_200000/0000/ntuple_499.root']),
+'ttbar_2017': (592, ['/store/user/yuqingw/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250516_033032/0000/ntuple_%i.root' % i for i in chain(xrange(1,443), xrange(444,594))]),
 })
+
+# Wrongly normalized samples below - DELETE
+#_add_ds("ntupleonnormdzulv30metm", {
+#'ttbar_2017': (592, ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_153202/0000/ntuple_%i.root' % i for i in chain(xrange(132,134), xrange(573,575), [57, 93, 103, 107, 111, 116, 168, 251, 264, 266, 289, 324, 419, 437, 470, 576])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250129_093022/0000/ntuple_327.root'] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250127_135001/0000/ntuple_%i.root' % i for i in chain(xrange(57), xrange(58,93), xrange(94,103), xrange(104,107), xrange(108,111), xrange(112,116), xrange(117,132), xrange(134,152), xrange(153,168), xrange(169,251), xrange(252,264), xrange(267,289), xrange(290,324), xrange(325,327), xrange(328,419), xrange(420,437), xrange(438,470), xrange(471,499), xrange(500,573), xrange(577,593), [265, 575])] + ['/store/user/yuqingwu/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250128_200000/0000/ntuple_499.root']),
+#})
 
 
 # Assume everything is METNoMu by default

@@ -6,7 +6,7 @@ import re
 from JMTucker.Tools.CRAB3ToolsBase import *
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
 if crab_global_options.support_automatic_splitting:
-    from JMTucker.Tools.Sample import fn_to_sample, norm_from_file
+    from JMTucker.Tools.Sample import fn_to_sample, nevents_from_file
     from JMTucker.Tools import Samples, colors
 
 def crab_command(*args, **kwargs):
@@ -160,16 +160,16 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         result.success = hadd(new_name, files)
 
     if automatic_splitting:
-        n = norm_from_file(new_name)
+        n = nevents_from_file(new_name)
         sn, s = fn_to_sample(Samples, new_name)
         if not s:
-            print colors.yellow("\tnorm_from_file returns %r, couldn't get sample %s" % (n, sn))
+	    print colors.yellow("\tnevents_from_file returns %r, couldn't get sample %s" % (n, sn))
         else:
             no1, no2 = s.datasets['main'].nevents_orig, s.datasets['miniaod'].nevents_orig
             if n == no1 or n == no2:
-                print '\tnorm_from_file returns nevents_orig = %i' % n
+                print '\tnevents_from_file returns nevents_orig = %i' % n
             else:
-                print colors.yellow('\tnorm_from_file returns %r while %s.nevents_orig is %i (main) %i (miniaod' % (n, sn, no1, no2))
+		print colors.yellow('\tnevents_from_file returns %r while %s.nevents_orig is %i (main) %i (miniaod' % (n, sn, no1, no2))
 
     return result
 

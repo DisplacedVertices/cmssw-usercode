@@ -3,6 +3,7 @@
 import os
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
+from JMTucker.Tools.Sample import sumw_from_file
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 #mode = 'vary_pileup'
@@ -57,9 +58,8 @@ for i,root_file_dir in enumerate(root_file_dirs):
             continue
         f = ROOT.TFile(fn)
         hnum = f.Get(num_paths[i])
-        hden = f.Get('mfvWeight/h_sums')
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
-        den = hden.GetBinContent(1)
+        den = sumw_from_file(f)
         sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
         print '%26s: numerator = %8.1f, denominator = %8.1f, efficiency = %.3f (%.3f, %.3f)' % (sample.name, num, den, sample.y, sample.yl, sample.yh)
         nev.append(num)
@@ -72,9 +72,8 @@ for i,root_file_dir in enumerate(root_file_dirs):
             continue
         f = ROOT.TFile(fn)
         hnum = f.Get(num_paths[0])
-        hden = f.Get('mfvWeight/h_sums')
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
-        den = hden.GetBinContent(1)
+        den = sumw_from_file(f)
         sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
     per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)

@@ -1,7 +1,7 @@
 import gzip
 from functools import partial
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
+from JMTucker.Tools.Sample import sumw_from_file
 from JMTucker.Tools.general import to_pickle, from_pickle
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
@@ -34,7 +34,7 @@ def analyze(plots=False):
     ss = samples()
     for s in ss:
         f = ROOT.TFile.Open(s.fn)
-        s.norm = norm_from_file(f)
+        s.norm = sumw_from_file(f)
         s.w = ac.int_lumi_2018 * 1e-3 / s.norm
         t = f.Get('mfvMiniTree/t')
         hr = draw_hist_register(t, True, True)

@@ -281,6 +281,7 @@ class MCSample(Sample):
 
     @property
     def partial_weight_orig(self):
+	print "WARNING partial_weight_orig is being used: are you sure it can't be replaced with partial_weight, which handles gen-level event weights properly?"
         return self.xsec / float(self.nevents_orig) # total weight = partial_weight * integrated_luminosity in 1/pb
 
     @property
@@ -288,10 +289,13 @@ class MCSample(Sample):
         return 1./self.partial_weight_orig # units of 1/pb
 
     def nevents(self, f_or_fn):
-        return norm_from_file(f_or_fn, self.norm_path)
+        return nevents_from_file(f_or_fn, self.norm_path)
+
+    def sumw(self, f_or_fn):
+        return sumw_from_file(f_or_fn, self.norm_path)
 
     def partial_weight(self, f_or_fn):
-        return self.xsec / self.nevents(f_or_fn)
+        return self.xsec / self.sumw(f_or_fn)
 
     def int_lumi(self, f_or_fn):
         return 1./self.partial_weight(f_or_fn)
@@ -498,6 +502,9 @@ class sums_from_file(object):
             self._norm = self._get('sum_nevents_total')
         return self._norm
 
+    def sumw(self):
+        return self.norm_weight('sum_gen_weight_total')
+
     def norm_weight(self, weight_name):
         return self._get(weight_name)
 
@@ -526,6 +533,14 @@ class sums_from_file(object):
             self._nfiles = int(n)
         return self._nfiles
 
+def sumw_from_file(f_or_fn, path=None):
+    return sums_from_file(f_or_fn, path).sumw()
+
+def nevents_from_file(f_or_fn, path=None):
+    return sums_from_file(f_or_fn, path).norm()
+
+# Joey, May 2025: trying to move away from this.
+# We don't typically want to normalize to nevents, which this does.
 def norm_from_file(f_or_fn, path=None):
     return sums_from_file(f_or_fn, path).norm()
 
@@ -683,6 +698,8 @@ __all__ = [
     'SumSample',
     'SamplesRegistry',
     'anon_samples',
+    'sumw_from_file',
+    'nevents_from_file',
     'norm_from_file',
     'norm_from_file_weight',
     'merge',

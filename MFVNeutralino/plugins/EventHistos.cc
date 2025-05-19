@@ -789,7 +789,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
-  const double w = 1.0;//*weight;//const double w = 1.0;
+  const double w = *weight;//const double w = 1.0;
   h_w->Fill(w);
   h_nsv->Fill(nsv, w);
 
