@@ -39,7 +39,6 @@ private:
   const bool require_met_filters;
   const bool require_bquarks;
   const bool require_isomu27; // Added
-  const bool require_ele35; // Added
   const int l1_bit;
   const int trigger_bit;
   const int apply_trigger;
@@ -99,7 +98,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     require_isomu27(cfg.getParameter<bool>("require_isomu27")), // Added
-    require_ele35(cfg.getParameter<bool>("require_ele35")), // Added
     l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
     apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
@@ -308,9 +306,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (require_isomu27 && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
-      return false;
-
-    if (require_ele35 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf))
       return false;
 
     if (require_bquarks && mevent->gen_flavor_code != 2)

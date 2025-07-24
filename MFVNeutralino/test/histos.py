@@ -7,11 +7,11 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #currently : keep histos slim -> do only Loose Vertices & NoCuts, Minntk = 3, 4, 5 
 #update : Selected Loose Vertices are changed to Tight Vertices
 #input_files(process, '/uscms/home/yuqingwu/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/ntuple.root')
-#input_files(process, '/store/user/yuqingwu/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/241210_155912/0000/ntuple_4.root')
-input_files(process, ['/store/user/yuqingw/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240707_023427/0000/ntuple_%i.root' % i for i in chain(xrange(1,17), xrange(18,47))])
+input_files(process, 'root://cmsxrootd.fnal.gov//store/user/yuqingw/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/250516_010725/0000/ntuple_1.root')
+#input_files(process, ['/store/user/yuqingw/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30METm_2017/240707_023427/0000/ntuple_%i.root' % i for i in chain(xrange(1,17), xrange(18,47))])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
-max_events(process,1000)
+max_events(process,5000)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -189,12 +189,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         #samples = [getattr(Samples, 'MET2017F')]
-	samples = [getattr(Samples, 'wjetstolnu_0j_2017')]
+	#samples = pick_samples(dataset, both_years=False,
+        #    qcd=False, qcd_lep=True, ttbar=False, all_signal=False, data=False, Lepton_data=False, leptonic=True, bjet=False,  
+        #    splitSUSY=False, Zvv=False, met=True, diboson=True, span_signal=False)
+	#samples = pick_samples(dataset, data=True)
+    	samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
 	#samples = [getattr(Samples, 'ttbar_2017')]
-	#samples = [getattr(Samples, 'qcdpt80mupt5_2017')]
+	#samples = [getattr(Samples, 'qcdpt1000mupt5_2017')]
 	#samples = [getattr(Samples, 'qcdempt300_2017')]
-	#samples = [getattr(Samples, 'dyjetstollM10_2017')]
-	#samples = [getattr(Samples, 'zz_2017')]
+	#samples = [getattr(Samples, 'dyjetstollM50_2017')]
+	#samples = [getattr(Samples, 'ww_2017')]
         #samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier)
     elif use_Muon_triggers :

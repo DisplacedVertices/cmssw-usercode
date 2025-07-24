@@ -96,8 +96,20 @@ def _set_signal_stuff(sample):
 ########
 
 qcd_lep_samples_20161 = [
-    MCSample('qcdempt015_20161',    '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   4062805, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched',  color=801, syst_frac=0.20, xsec=1.324e6),
     MCSample('qcdmupt15_20161',     '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   8685279, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV',  color=801, syst_frac=0.20, xsec=2.39e5),
+    MCSample('qcdpt15mupt5_20161',  '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 4749558, nice='QCD, 20 GeV > #hat{p}_{T} > 15 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=2.797e6),
+    MCSample('qcdpt20mupt5_20161',  '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 31926643, nice='QCD, 30 GeV > #hat{p}_{T} > 20 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=2.518e6),
+    MCSample('qcdpt30mupt5_20161',  '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 28664840, nice='QCD, 50 GeV > #hat{p}_{T} > 30 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=1.361e6),
+    MCSample('qcdpt50mupt5_20161',  '/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19724658, nice='QCD, 80 GeV > #hat{p}_{T} > 50 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=3.778e5),
+    MCSample('qcdpt80mupt5_20161',  '/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 21978558, nice='QCD, 120 GeV > #hat{p}_{T} > 80 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=8.862e4),
+    MCSample('qcdpt120mupt5_20161',  '/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19136907, nice='QCD, 170 GeV > #hat{p}_{T} > 120 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=2.107e4),
+    MCSample('qcdpt170mupt5_20161',  '/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 37080544, nice='QCD, 300 GeV > #hat{p}_{T} > 170 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=7.019e3),
+    MCSample('qcdpt300mupt5_20161',  '/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 28238396, nice='QCD, 470 GeV > #hat{p}_{T} > 300 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=6.224e2),
+    MCSample('qcdpt470mupt5_20161',  '/QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19695298, nice='QCD, 600 GeV > #hat{p}_{T} > 470 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=58.86),
+    MCSample('qcdpt600mupt5_20161',  '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19598815, nice='QCD, 800 GeV > #hat{p}_{T} > 600 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=18.22),
+    MCSample('qcdpt800mupt5_20161',  '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 39092964, nice='QCD, 1 TeV GeV > #hat{p}_{T} > 800 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=3.25),
+    MCSample('qcdpt1000mupt5_20161',  '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 13660999, nice='QCD, #hat{p}_{T} > 1 TeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=1.085),
+    MCSample('qcdempt015_20161',    '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   4062805, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched',  color=801, syst_frac=0.20, xsec=1.324e6),
     MCSample('qcdempt020_20161',    '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',   7156441, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, EM enriched',  color=801, syst_frac=0.20, xsec=4.896e6),
     MCSample('qcdempt030_20161',    '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   4361931, nice='QCD,  30 < #hat{p}_{T} <  50 GeV, EM enriched',  color=801, syst_frac=0.20, xsec=6.447e6),
     MCSample('qcdempt050_20161',    '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',   5440758, nice='QCD,  50 < #hat{p}_{T} <  80 GeV, EM enriched',  color=801, syst_frac=0.20, xsec=1.988e6),
@@ -114,6 +126,9 @@ qcd_lep_samples_20161 = [
 
 leptonic_samples_20161 = [
     MCSample('wjetstolnu_20161',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',          74676454, nice='W + jets #rightarrow l#nu',                 color=  9, syst_frac=0.10, xsec=5.294e4),
+    MCSample('wjetstolnu_0j_20161', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 152373244, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=53.33e3),
+    MCSample('wjetstolnu_1j_20161', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 173468850, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=8.875e3),
+    MCSample('wjetstolnu_2j_20161', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 87929021, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=3.338e3),
     MCSample('dyjetstollM10_20161',    '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 25799525, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
     MCSample('dyjetstollM50_20161',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',     95170542, nice='DY + jets #rightarrow ll, M > 50 GeV',      color= 32, syst_frac=0.10, xsec=5.34e3),
 ]
@@ -124,8 +139,8 @@ met_samples_20161 = [
 
 diboson_samples_20161 = [
     MCSample('ww_20161', '/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 15859000, nice='WW', color = 9, syst_frac=0.10, xsec=75.8),
-    #MCSample('zz_20161', '/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',  1282000, nice='ZZ', color = 9, syst_frac=0.10, xsec=12.140),
-    #MCSample('wz_20161', '/WZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',  7934000, nice='WZ', color = 9, syst_frac=0.10, xsec=27.6)
+    MCSample('zz_20161', '/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',  1282000, nice='ZZ', color = 9, syst_frac=0.10, xsec=12.140),
+    MCSample('wz_20161', '/WZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',  7934000, nice='WZ', color = 9, syst_frac=0.10, xsec=27.6)
 ]
 
 mfv_stoplb_samples_20161 = [
@@ -400,7 +415,7 @@ qcd_samples_sum_2017 = [
     ]
 
 qcd_lep_samples_2017 = [
-    MCSample('qcdmupt15_2017',  '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',  17716270, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=2.39e5),
+    #MCSample('qcdmupt15_2017',  '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',  17716270, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=2.39e5),
     MCSample('qcdpt15mupt5_2017',  '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  9019841, nice='QCD, 20 GeV > #hat{p}_{T} > 15 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=2.8e6),
     MCSample('qcdpt20mupt5_2017',  '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  64634535, nice='QCD, 30 GeV > #hat{p}_{T} > 20 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=2.527e6),
     MCSample('qcdpt30mupt5_2017',  '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  58749714, nice='QCD, 50 GeV > #hat{p}_{T} > 30 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=1.367e6),
@@ -413,19 +428,19 @@ qcd_lep_samples_2017 = [
     MCSample('qcdpt600mupt5_2017',  '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 39321940, nice='QCD, 800 GeV > #hat{p}_{T} > 600 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=18.12),
     MCSample('qcdpt800mupt5_2017',  '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 78215559, nice='QCD, 1 TeV GeV > #hat{p}_{T} > 800 GeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=3.318),
     MCSample('qcdpt1000mupt5_2017',  '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 27478273, nice='QCD, #hat{p}_{T} > 1 TeV, #mu p_{T} > 5 GeV', color=801, syst_frac=0.20, xsec=1.085),
-    MCSample('qcdempt015_2017', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   7966910, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.324e6),
-    MCSample('qcdempt020_2017', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   14166147, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, EM enriched', color=801, syst_frac=0.20, xsec=4.896e6),
-    MCSample('qcdempt030_2017', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   8784542, nice='QCD,  30 < #hat{p}_{T} <  50 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.447e6),
-    MCSample('qcdempt050_2017', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   10210400, nice='QCD,  50 < #hat{p}_{T} <  80 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.988e6),
-    MCSample('qcdempt080_2017', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   9615795, nice='QCD,  80 < #hat{p}_{T} < 120 GeV, EM enriched', color=801, syst_frac=0.20, xsec=3.675e5),
-    MCSample('qcdempt120_2017', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  9904245, nice='QCD, 120 < #hat{p}_{T} < 170 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.659e4),
-    MCSample('qcdempt170_2017', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  3678200, nice='QCD, 170 < #hat{p}_{T} < 300 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.662e4),
-    MCSample('qcdempt300_2017', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  2214934, nice='QCD, #hat{p}_{T} > 300 GeV, EM enriched',       color=801, syst_frac=0.20, xsec=1104.0),
-    MCSample('qcdbctoept020_2017', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      14248556, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.038e5),
-    MCSample('qcdbctoept030_2017', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      15656025, nice='QCD,  30 < #hat{p}_{T} <  80 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.623e5),
-    MCSample('qcdbctoept080_2017', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',     3678200, nice='QCD,  80 < #hat{p}_{T} < 170 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.37e4),
-    MCSample('qcdbctoept170_2017', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',    15502839, nice='QCD, 170 < #hat{p}_{T} < 250 GeV, HF electrons', color=801, syst_frac=0.20, xsec=2.125e3),
-    MCSample('qcdbctoept250_2017', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v3/AODSIM',    16028600, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=562.5),
+    #MCSample('qcdempt015_2017', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   7966910, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.324e6),
+    #MCSample('qcdempt020_2017', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   14166147, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, EM enriched', color=801, syst_frac=0.20, xsec=4.896e6),
+    #MCSample('qcdempt030_2017', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   8784542, nice='QCD,  30 < #hat{p}_{T} <  50 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.447e6),
+    #MCSample('qcdempt050_2017', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   10210400, nice='QCD,  50 < #hat{p}_{T} <  80 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.988e6),
+    #MCSample('qcdempt080_2017', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',   9615795, nice='QCD,  80 < #hat{p}_{T} < 120 GeV, EM enriched', color=801, syst_frac=0.20, xsec=3.675e5),
+    #MCSample('qcdempt120_2017', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  9904245, nice='QCD, 120 < #hat{p}_{T} < 170 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.659e4),
+    #MCSample('qcdempt170_2017', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  3678200, nice='QCD, 170 < #hat{p}_{T} < 300 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.662e4),
+    #MCSample('qcdempt300_2017', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM',  2214934, nice='QCD, #hat{p}_{T} > 300 GeV, EM enriched',       color=801, syst_frac=0.20, xsec=1104.0),
+    #MCSample('qcdbctoept020_2017', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      14248556, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.038e5),
+    #MCSample('qcdbctoept030_2017', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      15656025, nice='QCD,  30 < #hat{p}_{T} <  80 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.623e5),
+    #MCSample('qcdbctoept080_2017', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',     3678200, nice='QCD,  80 < #hat{p}_{T} < 170 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.37e4),
+    #MCSample('qcdbctoept170_2017', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',    15502839, nice='QCD, 170 < #hat{p}_{T} < 250 GeV, HF electrons', color=801, syst_frac=0.20, xsec=2.125e3),
+    #MCSample('qcdbctoept250_2017', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v3/AODSIM',    16028600, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=562.5),
     ]
     
 # ttbar with HT slices not available for UL now
@@ -435,8 +450,8 @@ bjet_samples_2017 = [
     ]
 
 leptonic_samples_2017 = [
-    MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM', 81551529, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.294e4),
-    MCSample('wjetstolnu_amcatnlo_2017','/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734, nice='NLO W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=6.668e4),
+    #MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM', 81551529, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.294e4),
+    #MCSample('wjetstolnu_amcatnlo_2017','/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734, nice='NLO W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=6.668e4),
     MCSample('wjetstolnu_0j_2017','/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 169421340, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=52.78e3),
     MCSample('wjetstolnu_1j_2017','/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 180015088, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=8.832e3),
     MCSample('wjetstolnu_2j_2017','/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 96032711, nice='W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=3.276e3),
@@ -1190,6 +1205,31 @@ for sample in auxiliary_data_samples_2018 + egamma_data_samples_2018:
 for sample in Lepton_data_samples_2018 + data_samples_2017 + data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset)
 
+# 2016
+wjetstolnu_0j_20161.add_dataset('miniaod', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 152373244)
+wjetstolnu_1j_20161.add_dataset('miniaod', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 173468850)
+wjetstolnu_2j_20161.add_dataset('miniaod', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 87929021)
+
+ttbar_20161.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 94164991)
+dyjetstollM10_20161.add_dataset('miniaod', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 25799525)
+dyjetstollM50_20161.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 95170542)
+ww_20161.add_dataset('miniaod', '/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 15859000)
+zz_20161.add_dataset('miniaod', '/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 1282000)
+wz_20161.add_dataset('miniaod', '/WZ_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM', 7934000)
+
+qcdpt15mupt5_20161.add_dataset('miniaod', '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 4749558)
+qcdpt20mupt5_20161.add_dataset('miniaod', '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 31926643)
+qcdpt30mupt5_20161.add_dataset('miniaod', '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 28664840)
+qcdpt50mupt5_20161.add_dataset('miniaod', '/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19724658)
+qcdpt80mupt5_20161.add_dataset('miniaod', '/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 21978558)
+qcdpt120mupt5_20161.add_dataset('miniaod', '/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19136907)
+qcdpt170mupt5_20161.add_dataset('miniaod', '/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 37080544)
+qcdpt300mupt5_20161.add_dataset('miniaod', '/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 28238396)
+qcdpt470mupt5_20161.add_dataset('miniaod', '/QCD_Pt-470To6000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19695298)
+qcdpt600mupt5_20161.add_dataset('miniaod', '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 19598815)
+qcdpt800mupt5_20161.add_dataset('miniaod', '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 39092964)
+qcdpt1000mupt5_20161.add_dataset('miniaod', '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM', 13660999)
+
 
 qcdht0200_2017.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 57721120)
 qcdht0300_2017.add_dataset('miniaod', '/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',   57191140)
@@ -1200,7 +1240,7 @@ qcdht1000_2017.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV
 qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM',    7497684)
 qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  5457021)
 
-qcdmupt15_2017.add_dataset('miniaod', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 17580112)
+#qcdmupt15_2017.add_dataset('miniaod', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 17580112)
 qcdpt15mupt5_2017.add_dataset('miniaod', '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 9019841)
 qcdpt20mupt5_2017.add_dataset('miniaod', '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 64634535)
 qcdpt30mupt5_2017.add_dataset('miniaod', '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 58749714)
@@ -1213,19 +1253,19 @@ qcdpt470mupt5_2017.add_dataset('miniaod', '/QCD_Pt-470To600_MuEnrichedPt5_TuneCP
 qcdpt600mupt5_2017.add_dataset('miniaod', '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 39321940)
 qcdpt800mupt5_2017.add_dataset('miniaod', '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 78215559)
 qcdpt1000mupt5_2017.add_dataset('miniaod', '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 27478273)
-qcdempt015_2017.add_dataset('miniaod', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 7966910)
-qcdempt020_2017.add_dataset('miniaod', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 14166147)
-qcdempt030_2017.add_dataset('miniaod', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 8784542)
-qcdempt050_2017.add_dataset('miniaod', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 10210400)
-qcdempt080_2017.add_dataset('miniaod', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 9615795)
-qcdempt120_2017.add_dataset('miniaod', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 9904245)
-qcdempt170_2017.add_dataset('miniaod', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 3678200)
-qcdempt300_2017.add_dataset('miniaod', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 2214934)
-qcdbctoept020_2017.add_dataset('miniaod', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 14156589)
-qcdbctoept030_2017.add_dataset('miniaod', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15153568)
-qcdbctoept080_2017.add_dataset('miniaod', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 3678200)
-qcdbctoept170_2017.add_dataset('miniaod', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 15502839)
-qcdbctoept250_2017.add_dataset('miniaod', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v3/MINIAODSIM', 15557421)
+#qcdempt015_2017.add_dataset('miniaod', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 7966910)
+#qcdempt020_2017.add_dataset('miniaod', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 14166147)
+#qcdempt030_2017.add_dataset('miniaod', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 8784542)
+#qcdempt050_2017.add_dataset('miniaod', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 10210400)
+#qcdempt080_2017.add_dataset('miniaod', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 9615795)
+#qcdempt120_2017.add_dataset('miniaod', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 9904245)
+#qcdempt170_2017.add_dataset('miniaod', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 3678200)
+#qcdempt300_2017.add_dataset('miniaod', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 2214934)
+#qcdbctoept020_2017.add_dataset('miniaod', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 14156589)
+#qcdbctoept030_2017.add_dataset('miniaod', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15153568)
+#qcdbctoept080_2017.add_dataset('miniaod', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 3678200)
+#qcdbctoept170_2017.add_dataset('miniaod', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 15502839)
+#qcdbctoept250_2017.add_dataset('miniaod', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v3/MINIAODSIM', 15557421)
  
     
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 249133364) #FIXME ? new MiniAOD
@@ -1233,8 +1273,8 @@ ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ru
 #ttbarht0800_2017.add_dataset('miniaod', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',   40191637)
 #ttbarht1200_2017.add_dataset('miniaod', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',  13214871)
 #ttbarht2500_2017.add_dataset('miniaod', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM',    5155687)
-wjetstolnu_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 81254459)
-wjetstolnu_amcatnlo_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734)
+#wjetstolnu_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 81254459)
+#wjetstolnu_amcatnlo_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734)
 wjetstolnu_0j_2017.add_dataset('miniaod', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 169421340)
 wjetstolnu_1j_2017.add_dataset('miniaod', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 180015088)
 wjetstolnu_2j_2017.add_dataset('miniaod', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 96032711)
@@ -1373,58 +1413,49 @@ for s in all_signal_samples_2018:
 #for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
 
 # My runs
-MET2017B.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-7ae4e74c40d5c65a6123937e5f8f722f/USER', 35872812)
-MET2017C.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-6150855e8f5a4414a07fcbf3fd4a097c/USER', 70376138)
-MET2017D.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-107b1b07a46e9dd0430837dba90e45fd/USER', 6183664)
-MET2017E.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-366b636c70fed445458904aba908086a/USER', 27613418)
-MET2017F.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-0168e31cccc0bf6a7932df6f3ea01d88/USER', 74593982)
+MET2017B.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-5e50f44745ae1bf51262e3644ddeb273/USER', 35872812)
+MET2017C.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-7b73dd8331bda5fbde0dc0e455628f8a/USER', 70376138)
+MET2017D.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-1140ac94fed274e6cff9d0dfa1554840/USER', 6183664)
+MET2017E.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-bf5f82362755752574384d51cb5ee4a6/USER', 27613418)
+MET2017F.add_dataset('ntupleonnormdzulv30metm', '/MET/yuqingw-NtupleOnnormdzULV30METm_2017-0887999ccde49362b6971b576f010bc7/USER', 74593982)
 
 
 wjetstolnu_0j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-92edc31430d5415f5c0e88d4c972818b/USER', 24193)
 wjetstolnu_1j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-bab63f64d68e200fd687edd9403bc678/USER', 1419857)
 wjetstolnu_2j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-ca629489a27d358a8ba8fc28eca20cc3/USER', 3310613)
-# Incorrectly normalized samples below
-#wjetstolnu_0j_2017.add_dataset("ntupleonnormdzulv30metm")
-#wjetstolnu_1j_2017.add_dataset("ntupleonnormdzulv30metm")
-#wjetstolnu_2j_2017.add_dataset("ntupleonnormdzulv30metm")
 
-wjetstolnu_amcatnlo_2017.add_dataset("ntupleonnormdzulv30metm")
+#wjetstolnu_amcatnlo_2017.add_dataset("ntupleonnormdzulv30metm")
 
 ttbar_2017.add_dataset('ntupleonnormdzulv30metm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-e2164ea374f7c79f85723d24ea5edc72/USER', 17751948)
-#ttbar_2017.add_dataset("ntupleonnormdzulv30metm")
 
 
 # Verification samples
-dyjetstollM10_2017.add_dataset('ntupleonnormdzulv30metm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-96d1f4252cd1d75cdd140a02f496a77f/USER', 3446)
-dyjetstollM50_2017.add_dataset('ntupleonnormdzulv30metm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-b5a75871f94d091bb4d180ac34dcae07/USER', 204974)
+dyjetstollM10_2017.add_dataset('ntupleonnormdzulv30metm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-d2e6641d6fe67e78db2b7f08a6ee54e7/USER', 3446)
+dyjetstollM50_2017.add_dataset('ntupleonnormdzulv30metm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-83538ad2e3be27b0857ec19913e3acf6/USER', 204974)
 
-ww_2017.add_dataset('ntupleonnormdzulv30metm', '/WW_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-ace783ac3828cec3d6f1d4713aca3637/USER', 296833)
-zz_2017.add_dataset('ntupleonnormdzulv30metm', '/ZZ_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-136bb0e76e3cd288433f10c8c5743772/USER', 68967)
-wz_2017.add_dataset('ntupleonnormdzulv30metm', '/WZ_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-c70ad2c147bff016e048ad4cc2c0b0ba/USER', 192391)
+ww_2017.add_dataset('ntupleonnormdzulv30metm', '/WW_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-f73b2868bba1fab44dda15849739e773/USER', 296833)
+zz_2017.add_dataset('ntupleonnormdzulv30metm', '/ZZ_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-21d8f3b87d7fa048b0749d398dd262c9/USER', 68967)
+wz_2017.add_dataset('ntupleonnormdzulv30metm', '/WZ_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-4d4ddb0eaecd258581f1eeff632e076a/USER', 192391)
 
-qcdmupt15_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-6c15c35c290f25564488d80bbfc3b446/USER', 13394)
-qcdpt15mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-932a071508db143b9c86b673a4f3c2a0/USER', 34)
-qcdpt20mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-b65d904aedf2c4adfe12b29aab8c209f/USER', 242)
-qcdpt30mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-5c872c4b2bf4ca57eb6ad259c7769c38/USER', 498)
-qcdpt50mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-d649d22fbb2d6b9115d82324ba548e47/USER', 1933)
-qcdpt80mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-6af52cc9eeb9a0dc63d2e96e72a87939/USER', 17041)
-qcdpt120mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-a24015c74e9d77638b05634e9df321de/USER', 94468)
-qcdpt170mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-f1908954afbc1b79bc821b87254cb475/USER', 995650)
-qcdpt300mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-516043a1e798977c6ce7700868fd6ea5/USER', 3470140)
-qcdpt470mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-25024b4696b26824e27a94f3732f963e/USER', 4796611)
-qcdpt600mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-d453f3c3acb6436bfb8501467d52d85a/USER', 6829505)
-qcdpt800mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-50ff5213a36d8d7d0f5bc81992356e68/USER', 19658037)
-qcdpt1000mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-772e2ea04e45c2754c5e5ca6bc8c81ac/USER', 9112407)
+qcdpt15mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-e6e323acdffa473a5386aed11b39ed5a/USER', 34)
+qcdpt20mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-f71cca7bd7cb64c907def0594f69183d/USER', 242)
+qcdpt30mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-1409f8a57a9b5e81f8ad81949ff4a3a0/USER', 498)
+qcdpt50mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-92509fd6942cc26ea5a459d8f64b1573/USER', 1933)
+qcdpt80mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-6b92ea4a277b0726e263e1d333085f8e/USER', 17041)
+qcdpt120mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-42fd9f0666e2e4437e1942fb2301fd0f/USER', 91919)
+qcdpt170mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-bad81d5b2c16ac7f09076a9b15863a60/USER', 1015914)
+qcdpt300mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-071e84f82f6644863f04ec2a0cebfced/USER', 3470140)
+qcdpt470mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-7aaf903773ca5e723d9745d74a3bb1b9/USER', 4796611)
+qcdpt600mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-574f96ed26f5bc1eda33eceab9ac7f48/USER', 7038081)
+qcdpt800mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-513e25c6615f3af6c7b7c37af93a1a55/USER', 19658037)
+qcdpt1000mupt5_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-ebf3c9a0b555c41b023fafb8e9c24ea2/USER', 9112407)
 
-qcdempt015_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-a4f2974806434e61577f811467355bed/USER', 55)
-qcdempt080_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-0092ff934069879bf655e602824bc72f/USER', 806)
-qcdempt120_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-2d415ad58e01e64d71b539dfff3c1613/USER', 3918)
-for x in qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt170_2017, qcdempt300_2017:
-    x.add_dataset("ntupleonnormdzulv30metm")
+#qcdempt015_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-a4f2974806434e61577f811467355bed/USER', 55)
+#qcdempt080_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-0092ff934069879bf655e602824bc72f/USER', 806)
+#qcdempt120_2017.add_dataset('ntupleonnormdzulv30metm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-2d415ad58e01e64d71b539dfff3c1613/USER', 3918)
+#for x in qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt170_2017, qcdempt300_2017:
+#    x.add_dataset("ntupleonnormdzulv30metm") # Edit-25-07-15
 
-
-# Old run
-#wjetstolnu_2j_2017.add_dataset('ntupleonnormdzulv30metm', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/yuqingw-NtupleOnnormdzULV30METm_2017-a1658d8371e982b397ffea31008bd0e5/USER', 63089)
 
 """
 for  x in ZHToSSTodddd_tau100um_M15_2017, ZHToSSTodddd_tau300um_M15_2017, ZHToSSTodddd_tau1mm_M15_2017, ZHToSSTodddd_tau3mm_M15_2017, ZHToSSTodddd_tau10mm_M15_2017, ZHToSSTodddd_tau30mm_M15_2017, ZHToSSTodddd_tau100um_M40_2017, ZHToSSTodddd_tau300um_M40_2017, ZHToSSTodddd_tau1mm_M40_2017, ZHToSSTodddd_tau3mm_M40_2017, ZHToSSTodddd_tau10mm_M40_2017, ZHToSSTodddd_tau30mm_M40_2017, ZHToSSTodddd_tau100um_M55_2017, ZHToSSTodddd_tau300um_M55_2017, ZHToSSTodddd_tau1mm_M55_2017, ZHToSSTodddd_tau3mm_M55_2017, ZHToSSTodddd_tau10mm_M55_2017, ZHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau100um_M15_2017, WplusHToSSTodddd_tau300um_M15_2017, WplusHToSSTodddd_tau1mm_M15_2017, WplusHToSSTodddd_tau3mm_M15_2017, WplusHToSSTodddd_tau30mm_M15_2017, WplusHToSSTodddd_tau300um_M40_2017, WplusHToSSTodddd_tau1mm_M40_2017, WplusHToSSTodddd_tau3mm_M40_2017, WplusHToSSTodddd_tau30mm_M40_2017, WplusHToSSTodddd_tau100um_M55_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau3mm_M55_2017, WplusHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017, WminusHToSSTodddd_tau1mm_M15_2017, WminusHToSSTodddd_tau3mm_M15_2017, WminusHToSSTodddd_tau10mm_M15_2017, WminusHToSSTodddd_tau30mm_M15_2017, WminusHToSSTodddd_tau300um_M40_2017, WminusHToSSTodddd_tau1mm_M40_2017, WminusHToSSTodddd_tau3mm_M40_2017, WminusHToSSTodddd_tau10mm_M40_2017, WminusHToSSTodddd_tau30mm_M40_2017, WminusHToSSTodddd_tau300um_M55_2017, WminusHToSSTodddd_tau1mm_M55_2017, WminusHToSSTodddd_tau3mm_M55_2017, WminusHToSSTodddd_tau10mm_M55_2017, WminusHToSSTodddd_tau30mm_M55_2017:
@@ -1482,8 +1513,8 @@ for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017
 for x in wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F:
     x.add_dataset("trackmoveronnormdzulv30lepmumv7")
 
-for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017:
-    x.add_dataset("ntupleonnorm3p5dzulv30lepmum")
+#for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017:
+#    x.add_dataset("ntupleonnorm3p5dzulv30lepmum") # Edit-25-07-15
 
 """
 wjetstolnu_2017.add_dataset('ntupleulv30lepmum', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/pekotamn-NtupleULV30LepMum_2017-ae54ee6dfe9233646839867a026ed690/USER', 11469)
@@ -1497,8 +1528,8 @@ for x in qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2
 # #for tracking tree : cut 0
 # for x in ttbar_2017:
 #     x.add_dataset("trackingtreerulv1_lepm_cut0")
-for x in qcdempt015_2017, qcdmupt15_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
-    x.add_dataset("trackingtreerulv1_lepm_cut0")
+#for x in qcdempt015_2017, qcdmupt15_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
+#    x.add_dataset("trackingtreerulv1_lepm_cut0") # Edit-25-07-15
 
 #For tracking tree : cut 0
 # including info on leptons and lepton tracks
@@ -1510,8 +1541,8 @@ for x in dyjetstollM10_2017, dyjetstollM50_2017, SingleMuon2017B, SingleMuon2017
 #     x.add_dataset("trackingtreerulv1_lepm_wsellep")
 
 #we now have run over everything : good lepton sel tracks + tracks matched to a good lepton
-for x in qcdempt015_2017, qcdmupt15_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F:
-    x.add_dataset("trackingtreerulv1_lepm_wsellep")
+#for x in qcdempt015_2017, qcdmupt15_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F:
+#    x.add_dataset("trackingtreerulv1_lepm_wsellep") # Edit-25-07-15
 
 #for tracking tree : cut 1
 for x in dyjetstollM10_2017, dyjetstollM50_2017:
@@ -1547,20 +1578,20 @@ for x in dyjetstollM10_2017, dyjetstollM50_2017:
 #background mc vs signal (setup for both single and displaced dilepton triggers) 
 #eventfilter used for background : min njets(leptons) = 2, ele/mu pt min 5 GeV => also have required all offline selection (minus pt) uncertain if this is good 
 #also uncertain if it was a good idea to require two leptons now that I think about it... 
-qcdempt015_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-bc0c7352f55efbe738e3d4a1dcb8d840/USER', 0)
-qcdmupt15_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-a9df51e9aee3b5d7fef7efcc0999e971/USER', 73)
-qcdempt020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-9d22178f36c446a301e53b2787b785b2/USER', 0)
-qcdempt030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-a178ca314e2a8d25f80f7c5b95e39f14/USER', 0)
-qcdempt050_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-f22757d09fd5b02795235e44005765d7/USER', 0)
-qcdempt080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-840d6d79c310d64427fa167f69f2aa3a/USER', 2)
-qcdempt120_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-94a583155eac2736d63885634a5c8d42/USER', 0)
-qcdempt170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-c531f091adfd55c370b3b4c3ba52de2c/USER', 1)
-qcdempt300_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-1f714fabf363f897159cda41f173da6b/USER', 1)
-qcdbctoept020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-58791afffac543748f01e993cd164637/USER', 0)
-qcdbctoept030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-aa50353abbee571899237a2aedac3a9d/USER', 2)
-qcdbctoept080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-f1aaccdbf7b26691391a41ebcfdcff26/USER', 7)
-qcdbctoept170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-4ab0f32366d7f7e3cb9171131b21d0c1/USER', 18)
-qcdbctoept250_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-4d0c0035c1094e1fab4097c7eec38593/USER', 22)
+#qcdempt015_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-bc0c7352f55efbe738e3d4a1dcb8d840/USER', 0)
+#qcdmupt15_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-a9df51e9aee3b5d7fef7efcc0999e971/USER', 73)
+#qcdempt020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-9d22178f36c446a301e53b2787b785b2/USER', 0)
+#qcdempt030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-a178ca314e2a8d25f80f7c5b95e39f14/USER', 0)
+#qcdempt050_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-f22757d09fd5b02795235e44005765d7/USER', 0)
+#qcdempt080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-840d6d79c310d64427fa167f69f2aa3a/USER', 2)
+#qcdempt120_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-94a583155eac2736d63885634a5c8d42/USER', 0)
+#qcdempt170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-c531f091adfd55c370b3b4c3ba52de2c/USER', 1)
+#qcdempt300_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-1f714fabf363f897159cda41f173da6b/USER', 1)
+#qcdbctoept020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-58791afffac543748f01e993cd164637/USER', 0)
+#qcdbctoept030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-aa50353abbee571899237a2aedac3a9d/USER', 2)
+#qcdbctoept080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-f1aaccdbf7b26691391a41ebcfdcff26/USER', 7)
+#qcdbctoept170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-4ab0f32366d7f7e3cb9171131b21d0c1/USER', 18)
+#qcdbctoept250_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-4d0c0035c1094e1fab4097c7eec38593/USER', 22)
 dyjetstollM10_2017.add_dataset('ntupleulv1lepm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV1Lepm_2017-36cbe68276a547570757ee92cb3d3cd9/USER', 251)
 dyjetstollM50_2017.add_dataset('ntupleulv1lepm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV1Lepm_2017-947386ff5c048a7bc28a1b95a6542e0c/USER', 29868)
 ww_2017.add_dataset('ntupleulv1lepm', '/WW_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-5f5b98a91a7a4345e74b7dafd0293c08/USER', 437)
