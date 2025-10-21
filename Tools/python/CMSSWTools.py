@@ -330,6 +330,8 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
         to_add += [os.path.join(base, 'python')] # doesn't have scram_arch subdir
     to_add = [x for x in to_add if os.path.exists(x)]
 
+    to_add.append(os.path.join(src, 'RoccoR')) #when need RoccoR for muons
+
     extras = ['data']
     if include_python:
         extras.append('python')

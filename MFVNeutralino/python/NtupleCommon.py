@@ -1,12 +1,13 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'OnnormdzULV30'
+#ntuple_version_ = 'fixrecreatePeace_norevtxinef_OnnormdzULV30'
+ntuple_version_ = 'wjets_bkgtemplate'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
-use_btag_triggers = True
+use_btag_triggers = False
 use_btag_vetoLepHT_triggers = False
 use_MET_triggers = False
-use_Lepton_triggers = False
+use_Lepton_triggers = True
 use_Muon_triggers = False
 use_Electron_triggers = False
 use_DisplacedLepton_triggers = False
@@ -24,7 +25,12 @@ elif use_Muon_triggers :
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm_noef' #FIXME only used for signal MC
-dataset = 'ntuple' + ntuple_version_use.lower()
+#dataset = 'ntuple' + ntuple_version_use.lower()
+#dataset = "ntupleonnormdzulv30lepm_noef"
+#dataset = "NtuplerecreatePeacentupleOnnormdzULV30Lepm_NoEF_2018" might have implemented track inef accidentally
+#dataset = "NtupleOnnormdzULV30BvetoLHTm_NoEF_trkinef"
+#dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
+dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
@@ -326,10 +332,25 @@ def miniaod_ntuple_process(settings):
                                isData = not settings.is_mc,
                                )
 
+    # #Abby lepton corrections, EGamma scales and smearings 
+    # #https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018#SFs_for_Electrons_UL_2018 
+    if settings.year == 2017 or settings.year == 2018:  setup_era = '%i-UL'%settings.year
+    elif settings.year == 20161: setup_era = '2016preVFP-UL'
+    elif settings.year == 20162: setup_era = '2016postVFP-UL'
+
+    from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+    setupEgammaPostRecoSeq(process,
+                           runEnergyCorrections=True,
+                           runVID=False, #turn off to save CPU time by not needlessly re-running VID, if you want the Fall17V2 IDs, set this to True or remove (default is True)
+                           #eleIDModules=['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff'],
+                           #phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                           era = setup_era) #end of Abby lepton corrections
+
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
                          process.BadPFMuonFilterUpdateDz *
                          process.fullPatMetSequence *
+                         process.egammaPostRecoSeq * #Abby lepton correction
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *

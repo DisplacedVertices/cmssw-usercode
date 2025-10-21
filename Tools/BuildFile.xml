@@ -11,6 +11,7 @@
 <use name="Geometry/Records"/>
 <use name="Geometry/TrackerGeometryBuilder"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="correctionlib"/> <!-- Abby change -->
 <export>
   <lib name="1"/>
 </export>
