@@ -25,12 +25,12 @@ elif use_Muon_triggers :
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm_noef' #FIXME only used for signal MC
-#dataset = 'ntuple' + ntuple_version_use.lower()
+dataset = 'ntuple' + ntuple_version_use.lower()
 #dataset = "ntupleonnormdzulv30lepm_noef"
 #dataset = "NtuplerecreatePeacentupleOnnormdzULV30Lepm_NoEF_2018" might have implemented track inef accidentally
 #dataset = "NtupleOnnormdzULV30BvetoLHTm_NoEF_trkinef"
 #dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
-dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
+#dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
