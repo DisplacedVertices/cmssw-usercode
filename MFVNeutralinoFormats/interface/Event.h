@@ -171,6 +171,7 @@ struct MFVEvent {
 
   
 
+  
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
   bool pass_hlt(size_t i)           const { assert(i < mfv::n_hlt_paths);                                                return test_bit(pass_, i   ); }
@@ -341,7 +342,22 @@ struct MFVEvent {
   float metNoMu() const { return mag(metNoMux, metNoMuy); }
   float metNoMuphi() const { return atan2(metNoMuy, metNoMux); }
 
- // leptons 
+ // leptons
+
+  // std::vector<TLorentzVector> hlt_mu; //Abby change begin
+  // std::vector<TLorentzVector> hlt_ele;
+  void mu_hlt_push_back(const reco::Muon& muon, const std::vector<TLorentzVector>& hlt_mu);
+  void ele_hlt_push_back(const reco::GsfElectron& electron, const std::vector<TLorentzVector>& hlt_ele);
+
+  std::vector<float> mu_hlt_pt;
+  std::vector<float> mu_hlt_eta;
+  std::vector<float> mu_hlt_phi;
+  std::vector<float> mu_hlt_energy;
+  std::vector<float> ele_hlt_pt;
+  std::vector<float> ele_hlt_eta;
+  std::vector<float> ele_hlt_phi;
+  std::vector<float> ele_hlt_energy; //Abby change end
+
   std::vector<float> muon_pt;
   std::vector<float> muon_eta;
   std::vector<float> muon_phi;
@@ -361,6 +377,7 @@ struct MFVEvent {
   std::vector<float> muon_dzerr;
   std::vector<float> muon_chi2dof;
   std::vector<float> muon_minr;
+  std::vector<float> muon_q; //Abby change
 
   std::vector<float> electron_pt;
   std::vector<float> electron_eta;
@@ -380,10 +397,12 @@ struct MFVEvent {
   std::vector<float> electron_dzerr;
   std::vector<float> electron_chi2dof;
   std::vector<float> electron_minr;
-
+  std::vector<float> electron_q;
+  
 
   std::vector<float> electron_isEB;
   std::vector<float> electron_isEE;
+  std::vector<float> electron_fBrem; //Abby change
   std::vector<float> electron_sigmaIetaIeta5x5;
   std::vector<float> electron_dEtaAtVtx;
   std::vector<float> electron_dPhiAtVtx;
@@ -404,6 +423,7 @@ struct MFVEvent {
   std::vector<float> muon_PU_corr;
 
   std::vector<std::vector<int>> electron_ID;
+  std::vector<std::vector<int>> electron_noiso_ID;
   std::vector<std::vector<int>> muon_ID;
   
   

@@ -525,7 +525,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         // nl is trackerlayersWithMeasurement 
         // u is random number distributed uniformly between 0 and 1 ( gRandom->Rndm() ); 
         //double u = gRandom->Rndm();
-	double u = gRandom->Rndm(event->EventAuxiliary->event());
+	double u = gRandom->Rndm(event.id().event());
 
         for (int imu = 0; imu < mevent->nmuons(); ++imu) {
           if (mevent->muon_pt[imu] < 10.) continue;

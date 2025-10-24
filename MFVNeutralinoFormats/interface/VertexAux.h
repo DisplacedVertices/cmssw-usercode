@@ -131,6 +131,14 @@ struct MFVVertexAux {
   std::vector<float> muon_pt;
   std::vector<float> muon_eta;
   std::vector<float> muon_phi;
+  //hltmatched //Abby change begin
+  std::vector<double> mu_besthltmatchdR;
+  std::vector<float> mu_hlt_pt;
+  std::vector<float> mu_hlt_eta;
+  std::vector<float> mu_hlt_phi;
+  std::vector<float> mu_hlt_energy;
+  std::vector<bool> mu_is_hltmatched; //Abby change end
+  
   std::vector<float> muon_x;
   std::vector<float> muon_y;
   std::vector<float> muon_z;
@@ -138,6 +146,7 @@ struct MFVVertexAux {
   std::vector<float> muon_dz;
   std::vector<float> muon_dxybs;
   std::vector<float> muon_dxyerr;
+  std::vector<float> rescaled_muon_dxyerr; //Abby change
   std::vector<float> muon_dzerr;
   std::vector<float> muon_iso;
   std::vector<std::vector<int>> muon_ID;
@@ -148,6 +157,15 @@ struct MFVVertexAux {
   std::vector<float> electron_pt;
   std::vector<float> electron_eta;
   std::vector<float> electron_phi;
+
+  //hltmatched //Abby change begin
+  std::vector<double> ele_besthltmatchdR;
+  std::vector<float> ele_hlt_pt;
+  std::vector<float> ele_hlt_eta;
+  std::vector<float> ele_hlt_phi;
+  std::vector<float> ele_hlt_energy;
+  std::vector<bool> ele_is_hltmatched; //Abby change end
+  
   std::vector<float> electron_x;
   std::vector<float> electron_y;
   std::vector<float> electron_z;
@@ -155,12 +173,23 @@ struct MFVVertexAux {
   std::vector<float> electron_dz;
   std::vector<float> electron_dxybs;
   std::vector<float> electron_dxyerr;
+  std::vector<float> rescaled_electron_dxyerr; //Abby change
   std::vector<float> electron_dzerr;
   std::vector<float> electron_iso;
   std::vector<std::vector<int>> electron_ID;
+  std::vector<std::vector<int>> electron_ID_noiso; //Abby change
   std::vector<float> elevtxtip;
   std::vector<float> elevtxtiperr;
   std::vector<float> elevtxtipsig;
+
+  //selected mu/ele associated to SV : passes ID,iso,eta,pT,hltmatched and is leading lepton -> ie the lepton used for event selection  //Abby change begin
+  //easier to save these for weightproducer to derive SF 
+  std::vector<float> leading_selmu_pt; 
+  std::vector<float> leading_selmu_eta;
+  std::vector<float> leading_selmu_hlt; //which hlt trigger was fired 
+  std::vector<float> leading_selele_pt;
+  std::vector<float> leading_selele_eta;
+  std::vector<float> leading_selele_hlt; //which hlt trigger was fired //Abby change end
 
 
   TLorentzVector p4(int w=0) const {
@@ -292,6 +321,7 @@ struct MFVVertexAux {
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
   std::vector<float> track_dxy;
+  std::vector<float> track_dxy_old; //not taking into account beamspot slope //Abby change
   std::vector<float> track_dz;
   std::vector<double> track_vx;
   std::vector<double> track_vy;
@@ -626,6 +656,18 @@ struct MFVVertexAux {
     return v;
   }
 
+  std::vector<float> trackpairdpts() const { //Abby change begin
+    std::vector<float> v;
+    size_t n = ntracks();
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(std::abs(track_pt(i) - track_pt(j)));
+    return v;
+  } //Abby change end
+
   float mintrackpt() const { return _min(track_pts(), false); } // already filtered
   float maxtrackpt() const { return _max(track_pts(), false); }
 
@@ -640,6 +682,11 @@ struct MFVVertexAux {
 
   float trackptavg() const { return _avg(track_pts(), false); }
   float trackptrms() const { return _rms(track_pts(), false); }
+
+  float trackpairdptmin() const { return stats(this, trackpairdpts()).min; } //Abby change begin
+  float trackpairdptmax() const { return stats(this, trackpairdpts()).max; }
+  float trackpairdptavg() const { return stats(this, trackpairdpts()).avg; }
+  float trackpairdptrms() const { return stats(this, trackpairdpts()).rms; } //Abby change end
 
   float trackdxymin() const { return _min(track_dxy); }
   float trackdxymax() const { return _max(track_dxy); }
@@ -714,19 +761,6 @@ struct MFVVertexAux {
   float trackpairdphimax() const { return stats(this, trackpairdphis()).max; }
   float trackpairdphiavg() const { return stats(this, trackpairdphis()).avg; }
   float trackpairdphirms() const { return stats(this, trackpairdphis()).rms; }
-
-
-  // std::vector<float> sv_tracks_phi() const {
-  //   std::vector<float> v;
-  //   size_t n = ntracks();
-  //   if (n >= 2)
-  //     for (size_t i = 0, ie = n-1; i < ie; ++i)
-  //       if (use_track(i))
-  //         v.push_back(track_phi[i]);
-  //   return v;
-  // }
-
-  // float sv_tracks_phiavg() const { return stats(this, sv_tracks_phi()).avg; }
 
   std::vector<float> trackpairdrs() const {
     std::vector<float> v;
