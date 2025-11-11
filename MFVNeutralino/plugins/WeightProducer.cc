@@ -71,7 +71,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     h_gensign = fs->make<TH1D>("h_gensign", ";gen weight sign;events", 2, -1.5, 1.5);
     h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
     h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices;events", 100, 0, 100);
-
+    std::cout << "Print upon running ntuple Alec" << std::endl;
     h_sums = fs->make<TH1D>("h_sums", TString::Format("partial_mc_stats_weight = %.3f", partial_mc_stats_weight), n_sums+1, 0, n_sums+1);
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "sum_weight_ren_up", "sum_weight_ren_dn", "sum_weight_fac_up", "sum_weight_fac_dn", "sum_weight_ren_fac_up", "sum_weight_ren_fac_dn", "n_sums" })

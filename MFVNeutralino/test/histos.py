@@ -7,6 +7,9 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #currently : keep histos slim -> do only Loose Vertices & NoCuts, Minntk = 3, 4, 5 
 #update : Selected Loose Vertices are changed to Tight Vertices
 #input_files(process, '/eos/uscms/store/group/lpclonglived/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOffdzULV30LepMum_2017/240131_215245/0000/ntuple_0.root')
+#input_files(process, '/eos/uscms/store/user/awarden/DisplacedSUSY_stopToLBottom_M_600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/NtupleULV1Lepm_2017/221117_174445/0000/ntuple_0.root')
+#input_files(process, '/eos/uscms/store/user/alecduqu/merged_ntuple.root')
+input_files(process, '/uscms/home/alecduqu/mfv_leptons/src/JMTucker/MFVNeutralino/test/ntuple.root')
 #max_events(process, 100)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
@@ -99,6 +102,7 @@ for ntk in ntks:
         EX1 = 'Ntk4or5'
     else:
         EX1 = 'Ntk%i' % ntk
+    #EX1 = 'Ntk%i' % ntk   #Alec added
 
     if EX1:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
@@ -108,6 +112,7 @@ for ntk in ntks:
         EX3 = 'ntracks01_0 = 5, ntracks01_1 = 3, '
     if ntk == 9:
         EX3 = 'ntracks01_0 = 5, ntracks01_1 = 4, '
+    #EX3 = '' #Alec added
 
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
@@ -183,14 +188,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
         pset_modifier = chain_modifiers(is_mc_modifier)
-    #elif use_Muon_triggers :
+    elif use_Muon_triggers :
         #samples = pick_samples(dataset, qcd=True, all_signal=True, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False )
-        #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=True, met=True, diboson=True, Lepton_data=False)
+        print(dataset)
+        samples = pick_samples(dataset, qcd=False, data=False, all_signal=True, qcd_lep=False, leptonic=True, met=False, diboson=False, Lepton_data=False)
         #samples = pick_samples(dataset, all_signal=True)
-        #samples = [getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2017')] 
+        #samples = [getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2017')]
         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
     elif use_Electron_triggers :
-        samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False)
+        samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=False, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
     else :
         samples = pick_samples(dataset)

@@ -26,7 +26,12 @@ def zerobias_modifier(sample):
 
 def era_modifier(sample):
     if not sample.is_mc:
-        mo = re.search(r'(201\d)([A-Z])', sample.name)
+        if year==2017 or year==2018 :
+          mo = re.search(r'(201\d)([A-Z])', sample.name)
+        elif year==20161 :
+          mo = re.search(r'(201\d1)([A-Z])', sample.name)
+        else :
+          mo = re.search(r'(201\d2)([A-Z])', sample.name)
         assert mo
         yr, era = mo.groups()
         assert year == int(yr)

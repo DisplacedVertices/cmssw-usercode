@@ -4,6 +4,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/TrackTools.h"
 #include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
+//#include "JMTucker/Tools/interface/BTagging.h" //Alec added to remove bjets
 
 class MFVK0Treer : public edm::EDAnalyzer {
 public:
@@ -18,6 +19,8 @@ private:
   std::unique_ptr<KalmanVertexFitter> kv_reco;
   const TransientTrackBuilder* tt_builder;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  //const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token; //Alec added to remove bjets
+  //const edm::EDGetTokenT<pat::JetCollection> jets_token; //Alec added to remove bjets
   const bool debug;
 };
 
@@ -28,6 +31,8 @@ MFVK0Treer::MFVK0Treer(const edm::ParameterSet& cfg)
                 .fill_tracks(false)),
     kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    //primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),  //Alec added for same as below
+    //jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))), //Alec added to remove events with bjets in resolution study
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {}
 
@@ -62,18 +67,45 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   const reco::Vertex& pv = *nt_filler.pv();
 
+  /*edm::Handle<reco::VertexCollection> primary_vertices; //Alec added here
+  event.getByToken(primary_vertices_token, primary_vertices);
+  const reco::Vertex* primary_vertex_forbjet = primary_vertices->size() ? &(*primary_vertices)[0] : 0;
+
+  if (primary_vertex_forbjet) {
+    edm::Handle<pat::JetCollection> jets;
+    event.getByToken(jets_token, jets);
+
+    bool has_bjet = false; 
+      for (const pat::Jet& jet : *jets) {
+        const double b_disc = jmt::BTagging::discriminator(jet);
+        if (b_disc > jmt::BTagging::discriminator_min(jmt::BTagging::loose))
+          has_bjet = true;
+      }
+    if (has_bjet) {
+      return;
+    }
+    nt_filler.finalize();
+  }*/
+  //Alec added to here
+  //std::cout << "Alec test print" << std::endl;
+  //printf("track key: charge, pt, eta, phi, dxy, dz");
   for (size_t itk = 0; itk < ntracks; ++itk) {
     reco::TrackRef tki(tracks, itk);
     if (!jmt::pass_track(*tki, 1))
+      //std::cout << "Alec print statement" << std::endl;
       continue;
+    //if (tki->phi() < 0.2)
+      //printf("  %4u: %s <%12.6f %12.6f %12.6f %12.6f %12.6f>\n", tki.key(), tki->charge() > 0 ? "+" : "-", tki->pt(), tki->eta(), tki->phi(), tki->dxy(), tki->dz());
 
     for (size_t jtk = itk+1; jtk < ntracks; ++jtk) {
       reco::TrackRef tkj(tracks, jtk);
       if (!jmt::pass_track(*tkj, 1))
-        continue;
+	continue;
 
       if (tki->charge() + tkj->charge() != 0)
         continue;
+
+      //printf("  %4u: %s <%12.6f %12.6f %12.6f %12.6f %12.6f>\n", tkj.key(), tkj->charge() > 0 ? "+" : "-", tkj->pt(), tkj->eta(), tkj->phi(), tkj->dxy(), tkj->dz());
         
       if (debug) {
         printf("track set:\n");
@@ -101,8 +133,8 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       TLorentzVector vp4 = jmt::track_p4(tkrefi) + jmt::track_p4(tkrefj);
       const double mass = vp4.M();
       if (debug) printf("  p: %f m: %f\n", vp4.P(), mass);
-      //if (mass < 0.42 || mass > 0.58) //Alec changed
-      if (mass < 0.3 || mass > .7)
+      if (mass < 0.42 || mass > 0.58) //Alec changed
+      //if (mass < 0.3 || mass > .7)
         continue;
 
       const TVector3 vp42(vp4.X(), vp4.Y(), 0);

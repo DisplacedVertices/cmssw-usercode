@@ -20,18 +20,17 @@ ps = plot_saver(plot_dir('v0bkgsub_%s/%s' % (batch, sample)), size=(600,600))
 in_f = ROOT.TFile(in_fn)
 in_f.Get('massall/h_nvtx').Draw()
 ps.save('nvtx')
-in_f.Get('massall/h_premass').Draw()
-ps.save('prefit_mass')
+#in_f.Get('massall/h_premass').Draw()
+#ps.save('prefit_mass')
 
 abseta_names = ["abseta_lt1", "abseta_gt1lt1p9", "abseta_gt1p9"]
 pt_names = ["pt_gt2lt2p2", "pt_gt2p2lt2p5", "pt_gt2p5lt3", "pt_gt3lt4", "pt_gt4"]
-dxy_names = ["dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3", "dbv_gtp2ltp4", "dbv_gtp4ltp6", "dbv_gtp6ltp8", "dbv_gtp8lt1", "dbv_gt1lt1p2", "dbv_gt1p2lt1p4", "dbv_gt1p4lt1p6", "dbv_gt1p6lt1p9"]
-#dxy_fit_err_array = [] #commented to account for eta
-#dbv_fit_err_array = [] #commented to account for eta
+#dxy_names = ["dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3", "dbv_gtp2ltp4", "dbv_gtp4ltp6", "dbv_gtp6ltp8", "dbv_gtp8lt1", "dbv_gt1lt1p2", "dbv_gt1p2lt1p4", "dbv_gt1p4lt1p6", "dbv_gt1p6lt1p9"]
+dxy_names = ["dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3"]
 #hbkgloplushi_sum_array = []
 #hbkg_sum_array = []
 dict_dxy_fit_err_arrays = {}
-dict_dbv_fit_err_arrays = {}
+#dict_dbv_fit_err_arrays = {}
 
 for abseta in abseta_names:
     dabseta = out_f.mkdir(abseta)
@@ -48,9 +47,9 @@ for abseta in abseta_names:
         dpt.cd()
         dpt.pwd()
         abseta_pt_dxy_fit_err_array_name = abseta+pt+"dxy_fit_err_array"
-        abseta_pt_dbv_fit_err_array_name = abseta+pt+"dbv_fit_err_array"
+        #abseta_pt_dbv_fit_err_array_name = abseta+pt+"dbv_fit_err_array"
         abseta_pt_dxy_fit_err_array_values = []
-        abseta_pt_dbv_fit_err_array_values = []
+        #abseta_pt_dbv_fit_err_array_values = []
  
         for dxy in dxy_names:
             #out_f.pwd()
@@ -66,12 +65,12 @@ for abseta in abseta_names:
 
             if 'dxy' in dxy:
                 h = in_f.Get('massall/'+abseta+'/'+pt+'/'+dxy+'/h_mass_bin')
-            if 'dbv' in dxy:
-                h = in_f.Get('massall/'+abseta+'/'+pt+'/'+dxy+'/h_mass_dbvbin')
+            #if 'dbv' in dxy:
+            #    h = in_f.Get('massall/'+abseta+'/'+pt+'/'+dxy+'/h_mass_dbvbin')
 
             # must keep these numbers in sync
-            fit_range = 0.400, 0.690
-            #fit_range = 0.420, 0.580 #fit range before the mass range was extended in the ntuple
+            #fit_range = 0.400, 0.690 #fit range after the mass range was extended in the ntuple
+            fit_range = 0.430, 0.570 #fit range before the mass range was extended in the ntuple
             #fit_exclude = 0.475, 0.525 #probably the optimal general range, but use the above definition in the nested loops to specialize it for each abseta bin
 
             for n in range(1, h.GetNbinsX()+1):
@@ -113,9 +112,9 @@ for abseta in abseta_names:
             if 'dxy' in dxy:
                 #dxy_fit_err_array.append(full_fit_err)
                 abseta_pt_dxy_fit_err_array_values.append(exclude_fit_err/0.005)
-            if 'dbv' in dxy:
-                #dbv_fit_err_array.append(full_fit_err)
-                abseta_pt_dbv_fit_err_array_values.append(exclude_fit_err/0.005)
+            #if 'dbv' in dxy:
+            #    #dbv_fit_err_array.append(full_fit_err)
+            #    abseta_pt_dbv_fit_err_array_values.append(exclude_fit_err/0.005)
 
             # calc fit residuals
             print('Number of bins in plot:', h.GetNbinsX())
@@ -133,6 +132,8 @@ for abseta in abseta_names:
                 c  = hres.GetBinContent(ibin)
                 ce = hres.GetBinError(ibin)
                 i  = fdraw.Integral(xlo, xhi) / w
+                if i==0:
+                    i = 0.1
                 ie = fdraw.IntegralError(xlo, xhi) / w
                 r = (i - c) / i
                 re = ce / i # (ie**2 + ce**2)**0.5 / i
@@ -188,6 +189,8 @@ for abseta in abseta_names:
                     s = n - b
                     if b<=0:#Alec added
                         b = 1
+                    if n<=0:#Alec added
+                        n = 1
                     se = (ne**2 + be**2)**0.5
                     z = s / (b + be**2)**0.5
                     p = s/n
@@ -264,18 +267,18 @@ for abseta in abseta_names:
                     #('h_tracks_absdxy_v_alphapt', 2, None, None, 1)
                     #('h_ptgt2lt5_dxygtp02ltp1_maxtracks_absdxy_v_alphapt', 2, None, None, 1)
                     ]
-            if "dbv" in dxy:
-                variables = [
-                    ('h_mass_dbvbin',1, 1, None, -1),
-                ]
+            #if "dbv" in dxy:
+            #    variables = [
+            #        ('h_mass_dbvbin',1, 1, None, -1),
+            #    ]
 
             for hname, integ_factor, rebin, x_range, scan_dir in variables:
                 #hon = in_f.Get('masson/'+pt+'/'+dxy+'/%s' % hname)
                 #hbkglo = in_f.Get('masslo/'+pt+'/'+dxy+'/%s' % hname)
                 #hbkghi = in_f.Get('masshi/'+pt+'/'+dxy+'/%s' % hname)
-                hon = in_f.Get('masson/%s/%s/%s/%s' % (abseta, pt, dxy, hname))
-                hbkglo = in_f.Get('masslo/%s/%s/%s/%s' % (abseta, pt, dxy, hname))
-                hbkghi = in_f.Get('masshi/%s/%s/%s/%s' % (abseta, pt, dxy, hname))
+                #hon = in_f.Get('masson/%s/%s/%s/%s' % (abseta, pt, dxy, hname))  #remove hon,hlo,hhi
+                #hbkglo = in_f.Get('masslo/%s/%s/%s/%s' % (abseta, pt, dxy, hname)) #remove hon,hlo,hhi
+                #hbkghi = in_f.Get('masshi/%s/%s/%s/%s' % (abseta, pt, dxy, hname)) #remove hon,hlo,hhi
                 hall = in_f.Get('massall/%s/%s/%s/%s' % (abseta, pt, dxy, hname))
 
                 #d = out_f.mkdir(pt+'/'+dxy+'/'+hname)
@@ -289,9 +292,9 @@ for abseta in abseta_names:
                 print(abseta+'/'+pt+'/'+dxy+'/'+hname)
                 d.cd()
                 d.pwd()
-                hon = hon.Clone('hon')
-                hbkglo = hbkglo.Clone('hbkglo')
-                hbkghi = hbkghi.Clone('hbkghi')
+                #hon = hon.Clone('hon') #remove hon,hlo,hhi
+                #hbkglo = hbkglo.Clone('hbkglo') #remove hon,hlo,hhi
+                #hbkghi = hbkghi.Clone('hbkghi') #remove hon,hlo,hhi
                 if "h_mass" in hname:
                     hsig = hall.Clone('hsig')
                     hsig.SetBinContent(116,0)
@@ -307,13 +310,13 @@ for abseta in abseta_names:
                     #    hbkg_sum += hbkg.GetBinContent(ibin)
                     #hbkgloplushi_sum_array.append(hbkgloplushi_sum)
                     #hbkg_sum_array.append(hbkg_sum)
-                else:
-                    hbkg = hbkglo.Clone('hbkg')
-                    hbkg.Add(hbkghi)
-                    hsig = hon.Clone('hsig')
-                    hbkg.Scale(the_d.b / integ(hbkg))
-                    hsig.Add(hbkg, -1) 
-                    print('Using mass range to roughly extract the background to subtract')
+                #else:
+                #    hbkg = hbkglo.Clone('hbkg')  #remove hon,hlo,hhi
+                #    hbkg.Add(hbkghi)             #remove hon,hlo,hhi
+                #    hsig = hon.Clone('hsig')     #remove hon,hlo,hhi
+                #    hbkg.Scale(the_d.b / integ(hbkg))      #remove hon,hlo,hhi
+                #    hsig.Add(hbkg, -1)                                       #remove hon,hlo,hhi
+                #    print('Using mass range to roughly extract the background to subtract')  #remove hon,hlo,hhi
                 #hsig = hon.Clone('hsig')
 
                 #if abs(integ(hon) - integ_factor * the_d.n) > 1e-5:
@@ -322,7 +325,8 @@ for abseta in abseta_names:
                 #hbkg.Scale(the_d.b / integ(hbkg))
                 #hsig.Add(hbkg, -1)
  
-                for h,c in zip((hon, hbkg, hsig), (1, 4, 2)):
+                #for h,c in zip((hon, hbkg, hsig), (1, 4, 2)):  #remove hon,hlo,hhi
+                for h,c in zip((hbkg, hsig), (4, 2)):
                     h.SetLineColor(c)
                     h.SetLineWidth(2)
                     h.SetStats(0)
@@ -331,20 +335,23 @@ for abseta in abseta_names:
                     if not is_th2(h) and x_range:
                         h.GetXaxis().SetRangeUser(*x_range)
 
-                if is_th2(hon):
+                #if is_th2(hon): #remove hon,hlo,hhi
+                if is_th2(hall):
                     #p_hon, p_hbkg, p_hsig = pfs = [h.ProfileX() for h in hon, hbkg, hsig]
-                    for h in hon, hbkg, hsig:
-                        p_hon, p_hbkg, p_hsig = pfs = h.ProfileX()
+                    #for h in hon, hbkg, hsig: #remove hon,hlo,hhi
+                    #    p_hon, p_hbkg, p_hsig = pfs = h.ProfileX() #remove hon,hlo,hhi
+                    for h in hbkg, hsig:
+                        p_hbkg, p_hsig = pfs = h.ProfileX()
                     for p in pfs:
                         p.SetLineWidth(2)
                         p.SetStats(0)
                         if x_range:
                             p.GetXaxis().SetRangeUser(*x_range)
-                    p_hon.Draw('hist')
+                    #p_hon.Draw('hist') #remove hon,hlo,hhi
                     p_hbkg.Draw('hist same')
                     p_hsig.Draw('hist same')
                 else:
-                    hon.Draw('hist e')
+                    #hon.Draw('hist e')  #remove hon,hlo,hhi
                     hbkg.Draw('hist e same')
                     hsig.Draw('hist e same')
 
@@ -365,7 +372,8 @@ for abseta in abseta_names:
                             z = s/(b + be**2)**0.5
                             print('%7.5f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f (%.3f)' % (s, s/the_d.s), 'b = %10.1f +- %6.1f (%.3f)' % (b,be,b/the_d.b), 'p = %.3f' % p, 'z = %4.1f' % z)
 
-                for h in hon, hbkg, hsig:
+                #for h in hon, hbkg, hsig: #remove hon,hlo,hhi
+                for h in hbkg, hsig:
                     h.Write()
 
             # copy over normalization hist
@@ -373,7 +381,7 @@ for abseta in abseta_names:
             h.SetDirectory(out_f.mkdir('mfvWeight'))
 
         dict_dxy_fit_err_arrays[abseta_pt_dxy_fit_err_array_name] = abseta_pt_dxy_fit_err_array_values
-        dict_dbv_fit_err_arrays[abseta_pt_dbv_fit_err_array_name] = abseta_pt_dbv_fit_err_array_values
+        #dict_dbv_fit_err_arrays[abseta_pt_dbv_fit_err_array_name] = abseta_pt_dbv_fit_err_array_values
         #out_f.Write()
 
 #print('Fit uncertainty of each pt/dxy bin: ', dxy_fit_err_array)
@@ -381,12 +389,18 @@ for abseta in abseta_names:
 #print('hbkgloplushi_sum_array:', hbkgloplushi_sum_array)
 #print('hbkg_sum_array:', hbkg_sum_array)
 
-for abseta in abseta_names:
-    for pt in pt_names:
-        print(abseta, " ", pt , " : ", dict_dxy_fit_err_arrays[abseta+pt+"dxy_fit_err_array"])
+#for abseta in abseta_names:
+#    for pt in pt_names:
+#        print(abseta, " ", pt , " : ", dict_dxy_fit_err_arrays[abseta+pt+"dxy_fit_err_array"])
+
+#for abseta in abseta_names:
+#    for pt in pt_names:
+#        print(abseta, " ", pt , " : ", dict_dbv_fit_err_arrays[abseta+pt+"dbv_fit_err_array"])
 
 for abseta in abseta_names:
     for pt in pt_names:
-        print(abseta, " ", pt , " : ", dict_dbv_fit_err_arrays[abseta+pt+"dbv_fit_err_array"])
+        values_array = dict_dxy_fit_err_arrays[abseta+pt+"dxy_fit_err_array"]
+        #print("std::vector<float> ", abseta, "_", pt , "_data_bin_fit_uncert = ", dict_dxy_fit_err_arrays[abseta+pt+"dxy_fit_err_array"])
+        print('std::vector<float> %s_%s_data_bin_fit_uncert = {%10.4f, %10.4f, %10.4f, %10.4f, %10.4f, %10.4f, %10.4f, %10.4f};' % (abseta, pt, values_array[0], values_array[1], values_array[2], values_array[3], values_array[4], values_array[5], values_array[6], values_array[7]))
 
 out_f.Close()

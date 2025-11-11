@@ -20,33 +20,45 @@ in_f.Get('massall/h_premass').Draw()
 ps.save('prefit_mass')
 
 h = in_f.Get('massall/h_mass')
-#h = in_f.Get('massall/h_mass_ptgt2lt5_dxygtp02ltp1_pimaxtrack')
 
 # must keep these numbers in sync
-fit_range = 0.420, 0.580
-fit_exclude = 0.475, 0.525
+#fit_range = 0.420, 0.580  #Alec commented 
+#fit_exclude = 0.475, 0.525 #Alec commented
+fit_range = .485, .510
 
-npars = 3 # 2 if sample.startswith('ZeroBias') else 3
+#npars = 3 # 2 if sample.startswith('ZeroBias') else 3
+#while 1:
+#    print 'npars', npars
+#    def fitfunc(x, p):
+#        x = x[0]
+#        if x >= fit_exclude[0] and x <= fit_exclude[1]:
+#            ROOT.TF1.RejectPoint()
+#            return 0.
+#        return sum(p[i] * x**i for i in xrange(npars))
+#
+#    fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
+#
+#    res = h.Fit(fcn, 'WL R N S Q')
+#    res.Print()
+#    print 'Chi2 Prob                 =', res.Prob()
+#
+#    if npars == 3 and fcn.GetParameter(2) > 0:
+#        print 'fit wants positive quadratic term, trying again with linear fit'
+#        npars = 2
+#    else:
+#        break
+
 while 1:
-    print 'npars', npars
-    def fitfunc(x, p):
+    def fitfunc(x,p):
         x = x[0]
-        if x >= fit_exclude[0] and x <= fit_exclude[1]:
-            ROOT.TF1.RejectPoint()
-            return 0.
-        return sum(p[i] * x**i for i in xrange(npars))
+        return p[0]*exp(-0.5*((x-p[1])/p[2])^2)
 
-    fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
-
+    fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1])
     res = h.Fit(fcn, 'WL R N S Q')
     res.Print()
     print 'Chi2 Prob                 =', res.Prob()
+    break
 
-    if npars == 3 and fcn.GetParameter(2) > 0:
-        print 'fit wants positive quadratic term, trying again with linear fit'
-        npars = 2
-    else:
-        break
 
 fit_pars = [fcn.GetParameter(i) for i in xrange(npars)]
 fit_errs = [fcn.GetParError(i) for i in xrange(npars)]
@@ -63,7 +75,6 @@ xax = hres.GetXaxis()
 xax.SetRangeUser(*fit_range)
 maxr = 0
 for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
-    #print ibin
     xlo = xax.GetBinLowEdge(ibin)
     xhi = xax.GetBinLowEdge(ibin+1)
     xmd = (xlo + xhi)/2
@@ -71,15 +82,10 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     c  = hres.GetBinContent(ibin)
     ce = hres.GetBinError(ibin)
     i  = fdraw.Integral(xlo, xhi) / w
-    #if ibin==85:
-    #    print "The content of ibin 85 for the first hbkg is %f" % i
-    #    print fdraw.Integral(xlo, xhi)
     ie = fdraw.IntegralError(xlo, xhi) / w
     r = (i - c) / i
     re = ce / i # (ie**2 + ce**2)**0.5 / i
-    hbkg.SetBinContent(ibin, i)   #THIS FIRST hbkg IS CORRECT
-    if ibin==100:
-        print "first hbkg definition bin content 100: %f" % hbkg.GetBinContent(ibin)
+    hbkg.SetBinContent(ibin, i)
     hbkg.SetBinError(ibin, ie)
     if fit_exclude[0] <= xmd <= fit_exclude[1]:
         r, re = 0, 0
@@ -128,7 +134,6 @@ class do(object):
         ne, be = ROOT.Double(), ROOT.Double()
         n = h.IntegralAndError(ibinlo, ibinhi, ne)
         b = hbkg.IntegralAndError(ibinlo, ibinhi, be)
-        #print "ibinlo:%f  , ibinhi:%f" % (ibinlo, ibinhi)
         s = n - b
         se = (ne**2 + be**2)**0.5
         z = s / (b + be**2)**0.5
@@ -164,33 +169,15 @@ def integ(h):
         return h.Integral(0,h.GetNbinsX()+2,0,h.GetNbinsY()+2)
     else:
         return h.Integral(0,h.GetNbinsX()+2)
-def integ_fitrange(h):
-    hxax = h.GetXaxis()
-    return h.Integral(hxax.FindBin(fit_range[0]), hxax.FindBin(fit_range[1]))
-#hbkg HERE USES A LIMITED RANGE THAT IS MESSING UP THE CALCULATION fit_range = 0.420, 0.580
-print "should be complete background, bin content 100: %f" % hbkg.GetBinContent(100)
-h_mass_background_entries = integ(hbkg)
-h_mass_lo = in_f.Get('masslo/h_mass')
-h_mass_hi = in_f.Get('masshi/h_mass')
-h_mass_loandhi = h_mass_lo.Clone('h_mass_loandhi')
-h_mass_loandhi.Add(h_mass_hi)
-print "sideband bin content 100: %f" % h_mass_loandhi.GetBinContent(100)
-h_mass_sideband_entries = integ(h_mass_loandhi)
 
 # do the bkg subtraction in whatever variables you want as long as the hists exist
 # written out to file in folders so the cmp script can do the rest
 
 scans = False
 variables = [
-    ('h_mass',1, 1, None, -1),
     ('h_chi2dof', 1, 1, None, -1),
     ('h_rho', 1, 1, None, 1),
     ('h_dbv', 1, 1, None, 1),
-    ('h_x', 1, 1, None, 1),
-    ('h_y', 1, 1, None, 1),
-    ('h_x_v_y', 2, 1, None, 1),
-    ('h_x_v_y_bpc', 2, 1, None, 1),
-    ('h_dbvsinalpha', 1, 1, None, 1),
     ('h_ct', 1, 1, None, 1),
     ('h_ctau', 1, 1, None, 1),
     ('h_p', 1, 1, None, -1),
@@ -214,62 +201,27 @@ variables = [
     ('h_tracks_npxlayers', 2, 1, None, 0),
     ('h_tracks_nstlayers', 2, 1, None, 0),
     ('h_tracks_dxyerr_v_pt', 2, None, (0, 40), 0),
-    ('h_dbv_v_pt', 1, None, None, 0),
-    #('h_tracks_absdxy_v_pt', 2, 1, None, 1),
-    #('h_tracks_absdxy_v_alphapt', 2, None, None, 1),
-    #('h_ptgt2lt5_dxygtp02ltp1_maxtracks_absdxy_v_alphapt', 2, None, None, 1)
-    ('track_pt_lt10/h_tracks_dxy_tracks_ptbinned', 2, 1, None, 0),
-    ('track_pt_gt10/h_tracks_dxy_tracks_ptbinned', 2, 1, None, 0)
+    ('h_dbv_v_p', 1, None, None, 0)
     ]
 
 for hname, integ_factor, rebin, x_range, scan_dir in variables:
-    #if 'track_pt_lt10' in hname:
-    #    hon = in_f.Get('masson/track_pt_lt10/%s' % hname)
-    #    hbkglo = in_f.Get('masslo/track_pt_lt10/%s' % hname)
-    #    hbkghi = in_f.Get('masshi/track_pt_lt10/%s' % hname)
-    #if 'track_pt_gt10' in hname:
-    #    hon = in_f.Get('masson/track_pt_gt10/%s' % hname)
-    #    hbkglo = in_f.Get('masslo/track_pt_gt10/%s' % hname)
-    #    hbkghi = in_f.Get('masshi/track_pt_gt10/%s' % hname)
-    #else:
     hon = in_f.Get('masson/%s' % hname)
     hbkglo = in_f.Get('masslo/%s' % hname)
     hbkghi = in_f.Get('masshi/%s' % hname)
-    hall = in_f.Get('massall/%s' % hname)
-    print 'masson/%s' % hname
 
-    if 'h_tracks_dxy_tracks_ptbinned' in hname:
-        hname_ptbinned = hname.split("/")
-        d1 = out_f.mkdir(hname_ptbinned[0])
-        d1.cd()
-        d2 = d1.mkdir(hname_ptbinned[1])
-        d2.cd()
-    else:
-        d = out_f.mkdir(hname)
-        d.cd()
+    d = out_f.mkdir(hname)
+    d.cd()
     hon = hon.Clone('hon')
     hbkglo = hbkglo.Clone('hbkglo')
     hbkghi = hbkghi.Clone('hbkghi')
     hbkg = hbkglo.Clone('hbkg')
     hbkg.Add(hbkghi)
-    if "h_mass" in hname:
-        print "second hbkg definition bin content 100: %f" % hbkg.GetBinContent(100)
-    #hsig = hon.Clone('hsig')
-    hsig = hall.Clone('hsig')
+    hsig = hon.Clone('hsig')
 
-    #if abs(integ(hon) - integ_factor * the_d.n) > 1e-5:
-    #    raise ValueError('hint %s n %s' % (hint, the_d.n))
+    if abs(integ(hon) - integ_factor * the_d.n) > 1e-5:
+        raise ValueError('hint %s n %s' % (hint, the_d.n))
 
-    #print 'background scale ratio for %s: (entries in background histogram found from fit to mass peak)/(entries in sidebands of mass peak)' % (hname)
-    #print the_d.b
-    #print integ(hbkg)
-    #hbkg.Scale(the_d.b / integ(hbkg))
-    if "h_tracks_absdxy" in hname:
-        #hbkg.Scale(1.03*h_mass_background_entries / h_mass_sideband_entries) #SCALED UP BY ABOUT 3% OR SO TO COMPLETELY ELIMINATE THE PEAK AT LOW DXY
-        hbkg.Scale(2.83*h_mass_background_entries / h_mass_sideband_entries) #SADLY YOU HAVE TO CHNGE THE SCALE FACTOR MANUALLY WHEN USING THE EXTENDED MASS RANGE
-    else:
-        hbkg.Scale(h_mass_background_entries / h_mass_sideband_entries)
-    print "total background entries / sideband entries: %f / %f" % (h_mass_background_entries,h_mass_sideband_entries)
+    hbkg.Scale(the_d.b / integ(hbkg))
     hsig.Add(hbkg, -1)
  
     for h,c in zip((hon, hbkg, hsig), (1, 4, 2)):
@@ -296,10 +248,7 @@ for hname, integ_factor, rebin, x_range, scan_dir in variables:
         hbkg.Draw('hist e same')
         hsig.Draw('hist e same')
 
-    if 'h_tracks_dxy_tracks_ptbinned' in hname:
-        ps.save(hname_ptbinned[1])
-    else:
-        ps.save(hname)
+    ps.save(hname)
 
     if scans and scan_dir:
         hsig_cumu, hbkg_cumu = [cumulative_histogram(h, 'ge' if scan_dir == 1 else 'le') for h in hsig, hbkg] 

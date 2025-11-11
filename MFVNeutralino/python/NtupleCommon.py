@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'OnnormdzULV30'
+ntuple_version_ = 'ULV30LepMumv1_isMCtrue_fixbjetsandmin_r'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_MET_triggers = False
@@ -17,7 +17,12 @@ elif use_Muon_triggers :
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm'
-dataset = 'ntuple' + ntuple_version_use.lower()
+#dataset = 'ntuple' + ntuple_version_use.lower() Alec commented
+#dataset = 'ntuple_K0_DYmuontrig_masswide'
+#dataset = 'ntuple2018_K0_DYmuontrig_masswide'
+#dataset = 'ntupleonnormdzulv30lepm_noef'
+#dataset = 'mfvK0sNtuple2018_masswide_ULV30LepMumv1_fixmin_rLepMumv1'
+dataset = 'mfvK0sNtuple20161_masswide_ULV30LepMumv1_isMCtrue_fixbjetsandmin_rLepMumv1'
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:

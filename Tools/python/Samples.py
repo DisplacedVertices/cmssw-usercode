@@ -121,6 +121,10 @@ leptonic_samples_20161 = [
 ]
 
 met_samples_20161 = [
+    #MCSample('ttbar_20161',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',                    94164991, nice='t#bar{t}',                                  color=4,   syst_frac=0.15, xsec=831.76),
+]
+
+ttbar_samples_20161 = [
     MCSample('ttbar_20161',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1/MINIAODSIM',                    94164991, nice='t#bar{t}',                                  color=4,   syst_frac=0.15, xsec=831.76),
 ]
 
@@ -283,6 +287,10 @@ leptonic_samples_20162 = [
 ]
 
 met_samples_20162 = [
+    #MCSample('ttbar_20162',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM',                    90609841, nice='t#bar{t}',                                  color=4,   syst_frac=0.15, xsec=831.76),
+]
+
+ttbar_samples_20162 = [
     MCSample('ttbar_20162',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM',                    90609841, nice='t#bar{t}',                                  color=4,   syst_frac=0.15, xsec=831.76),
 ]
 
@@ -787,8 +795,8 @@ WminusHToSSTodddd_samples_2017 = [
 
 
 #all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + mfv_stoplb_samples_2017 + mfv_stopld_samples_2017 + HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017 + mfv_splitSUSY_samples_2017
-#all_signal_samples_2017 = mfv_stoplb_samples_2017 + mfv_stopld_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 
-all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 
+all_signal_samples_2017 = mfv_stoplb_samples_2017 + mfv_stopld_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 
+#all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 
 #all_signal_samples_2017 = WplusHToSSTodddd_samples_2017 
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
@@ -830,7 +838,9 @@ qcd_lep_samples_2018 = [
     MCSample('qcdbctoept250_2018', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3/MINIAODSIM',    15767690, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=562.5),
 ]
 
-ttbar_samples_2018 = []
+ttbar_samples_2018 = [
+    MCSample('ttbar_2018',            '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',            306142112, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=7.572e+02),
+]
 
 bjet_samples_2018 = []
 
@@ -843,7 +853,7 @@ leptonic_samples_2018 = [
 ]
 
 met_samples_2018 = [
-    MCSample('ttbar_2018',            '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',            306142112, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=7.572e+02),
+    #MCSample('ttbar_2018',            '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM',            306142112, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=7.572e+02),
 ]
 
 # diboson_samples_2018 = [
@@ -1016,12 +1026,12 @@ Lepton_data_samples_20161 = [
     DataSample('SingleMuon20161D',  '/SingleMuon/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161E',  '/SingleMuon/Run2016E-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161F',  '/SingleMuon/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161B1', '/SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161B2', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20161E',  '/SingleElectron/Run2016E-HIPM_UL2016_MiniAODv2-v5/MINIAOD'),
-    # DataSample('SingleElectron20161F',  '/SingleElectron/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161B1', '/SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #Alec added these
+    DataSample('SingleElectron20161B2', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20161E',  '/SingleElectron/Run2016E-HIPM_UL2016_MiniAODv2-v5/MINIAOD'),
+    DataSample('SingleElectron20161F',  '/SingleElectron/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
 
@@ -1029,9 +1039,9 @@ Lepton_data_samples_20162 = [
     DataSample('SingleMuon20162F', '/SingleMuon/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162G', '/SingleMuon/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162H', '/SingleMuon/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162F', '/SingleElectron/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162G', '/SingleElectron/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
-    # DataSample('SingleElectron20162H', '/SingleElectron/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20162F', '/SingleElectron/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'), #Alec added these
+    DataSample('SingleElectron20162G', '/SingleElectron/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleElectron20162H', '/SingleElectron/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
 
@@ -1143,10 +1153,10 @@ Lepton_data_samples_2018 = [
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-UL2018_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-UL2018_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-UL2018_MiniAODv2-v3/MINIAOD'),
-    # DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2-v1/MINIAOD'),
-    # DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
+    DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2-v1/MINIAOD'),
+    DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
 ]
 
 data_samples_2018 = [
@@ -1162,6 +1172,7 @@ egamma_data_samples_2018 = [
     DataSample('EGamma2018C', '/EGamma/Run2018C-12Nov2019_UL2018-v2/AOD'),
     DataSample('EGamma2018D', '/EGamma/Run2018D-12Nov2019_UL2018-v8/AOD'),
     ]
+
 
 ########################################################################
 
@@ -1183,6 +1194,8 @@ __all__ = [
     'Lepton_data_samples_20162',
     'met_samples_20161',
     'met_samples_20162',
+    'ttbar_samples_20161',
+    'ttbar_samples_20162',
     'diboson_samples_20161',
     'diboson_samples_20162',
     'mfv_stoplb_samples_20161',
@@ -1286,6 +1299,311 @@ for x in _alls:
 # miniaod
 ########
 
+mfv_stoplb_tau000100um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-156d89435dc24dc05c7b9ca8444ca8ea/USER', 193961)
+mfv_stoplb_tau000300um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1000_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-4f2025787882c0b249a5d1b050d8cf40/USER', 186260)
+mfv_stoplb_tau010000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1000_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-a666c0292b01a06aeb32bb4ee0b314c0/USER', 98261)
+mfv_stoplb_tau001000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1000_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-ff752ef3a66a47c527cd9a5474d74949/USER', 197193)
+mfv_stoplb_tau030000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1000_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-486052cb94ff307639691b006b0d084d/USER', 200668)
+mfv_stoplb_tau000100um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-e0ad2f94e7d725e87033ffafeccb0a57/USER', 199921)
+mfv_stoplb_tau000300um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-6f595773237cc894435d9c623a23b740/USER', 195189)
+mfv_stoplb_tau010000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-2baa85da998849315bd960b6e8619008/USER', 100156)
+mfv_stoplb_tau001000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-68a1b3cd5950a077591ecbf603d9fcd2/USER', 197902)
+mfv_stoplb_tau030000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-7ae5154544276f77b46a8c3985a1b599/USER', 200464)
+mfv_stoplb_tau000100um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-de954880995f97ec7d229b2124cdf6b9/USER', 187459)
+mfv_stoplb_tau000300um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-031a5aded741d4b6c7827c97862e4d86/USER', 200304)
+mfv_stoplb_tau010000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-c3dc591ba3db2cab45733ac34083ac3e/USER', 98900)
+mfv_stoplb_tau001000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-00e9cfbd303f5566d7a923aec3a1c20f/USER', 192400)
+mfv_stoplb_tau030000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-89d8113f44eb20ac882c5aac8cd93578/USER', 197635)
+mfv_stoplb_tau000100um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1831cbabbb9382abcea05609e1a5a971/USER', 130204)
+mfv_stoplb_tau000300um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-fe9911aad67cfcd529655034b0054dd4/USER', 198070)
+mfv_stoplb_tau010000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d98c9292edc01866b5628fdabf425986/USER', 98745)
+mfv_stoplb_tau001000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-4e90b788c2ea88d123e2d7328da42c77/USER', 91871)
+mfv_stoplb_tau030000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-c5c8e98843d88a12edabcd4cb4ff4386/USER', 82216)
+mfv_stoplb_tau000100um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-2e28ea5dd8c76c87846612d8ea2f3f56/USER', 191607)
+mfv_stoplb_tau000300um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-a033e678cc892560c5446efb4ee3d7a2/USER', 200792)
+mfv_stoplb_tau010000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-911cde0521c877f6a9882674a30e99c1/USER', 101386)
+mfv_stoplb_tau001000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-0ff37b7709386f345e4b76a3930bccf2/USER', 98858)
+mfv_stoplb_tau030000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_1800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d0c1efc631e4aebd03cac531ada008da/USER', 99225)
+mfv_stoplb_tau000100um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d91c0c740c8a6c942a8993ed444e781a/USER', 198760)
+mfv_stoplb_tau000300um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-9658c47efeabf9bbe52bb45e5ccbb84f/USER', 187003)
+mfv_stoplb_tau010000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-a12fbd076ee9963b5bbc3a3316b0c1dd/USER', 199948)
+mfv_stoplb_tau001000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-314903a6d3f541c8f77c6ff7dd721562/USER', 196687)
+mfv_stoplb_tau030000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-3d39fdeca36ab14d2c8efc548378e400/USER', 199267)
+mfv_stoplb_tau000100um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_300_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-be17a6eb878aeaa77b4cc3f1651be3ef/USER', 196246)
+mfv_stoplb_tau000300um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_300_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-101d9d67ef192c7c44ef878ecc47ed36/USER', 183219)
+mfv_stoplb_tau010000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_300_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-6e619672b0f0e465362ed59731d28a5a/USER', 199832)
+mfv_stoplb_tau001000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_300_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-4371e09c8f7ea604f2666143c2fb2ab1/USER', 200296)
+mfv_stoplb_tau030000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_300_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-66d7d8b7233d68e661c419297afb5b6d/USER', 200170)
+mfv_stoplb_tau000100um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-42e5ee6937df6795a6a062d3760d675c/USER', 197597)
+mfv_stoplb_tau000300um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-0cd237ff2fd16957c0b5a35d29223c74/USER', 195221)
+mfv_stoplb_tau010000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1ef6d10951e88ef3c770e3b7e6cc3869/USER', 198737)
+mfv_stoplb_tau001000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1596d3db6ed70ce98c94a7efb9bcf1ab/USER', 197003)
+mfv_stoplb_tau030000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-152928631efad479f488e1e115b23570/USER', 191913)
+mfv_stoplb_tau000100um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-110281738b645c1ef8d5ee5972a0b035/USER', 194663)
+mfv_stoplb_tau000300um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d76e817be37322b8f1191b80bdfdba86/USER', 201839)
+mfv_stoplb_tau010000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d895a12d786463bf4dd253f1491aeab0/USER', 188463)
+mfv_stoplb_tau001000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-05b74e1f15947065b71eaf0777e6dc4d/USER', 195368)
+mfv_stoplb_tau030000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-2588130cc7dddf8d327fea5af8ade4e5/USER', 199015)
+mfv_stoplb_tau000100um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-e30f343caa276683f32da0f0ea87cf34/USER', 198566)
+mfv_stoplb_tau000300um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-3fc3df6cad9759e172805264961202e2/USER', 197615)
+mfv_stoplb_tau010000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-ff0adf15b46e30b6ad0eef367d96740f/USER', 98799)
+mfv_stoplb_tau001000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-9ad2680aa9624d9d67845edc540e41ff/USER', 146004)
+mfv_stoplb_tau030000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLBottom_M_800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-28fc473e7a040d30647554dd5f566cc2/USER', 199698)
+mfv_stopld_tau000100um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-f8313999f997ca3f44fb6d56de57b9dc/USER', 199076)
+mfv_stopld_tau000300um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1000_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-0b856e5f47260dd1095bb969ed6db25a/USER', 198992)
+mfv_stopld_tau010000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1000_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-c06b640080abfacf38a5dfaf73f83f48/USER', 98679)
+mfv_stopld_tau001000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1000_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-368ac477467d1ea3121e42abbc3b7cab/USER', 198608)
+mfv_stopld_tau030000um_M1000_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1000_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1294af63a9363b024511c9e088d0e7b6/USER', 187359)
+mfv_stopld_tau000100um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-97ce8a17c95f8a01743ddaa4f2a044c4/USER', 195326)
+mfv_stopld_tau000300um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-11eed516d155afb08fb0ad2e1fd83226/USER', 195508)
+mfv_stopld_tau010000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-356643ede6fe1999136db67ec6711a19/USER', 100349)
+mfv_stopld_tau001000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d546a643c799b7879aae5768d05ad2e7/USER', 201191)
+mfv_stopld_tau030000um_M1200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-17a11452040298eeae3f8d09cdc129c7/USER', 200851)
+mfv_stopld_tau000100um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-929d22f0c660e3f4a41ad7cbd65e0c21/USER', 197836)
+mfv_stopld_tau000300um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-5ad51b8b5ccc12cc181dc94683eaefc2/USER', 192550)
+mfv_stopld_tau010000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-f68d1e27fe3fad5039cbe6b07721ffb3/USER', 98583)
+mfv_stopld_tau001000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-f5e439c7f431745c87bdca0e0e768883/USER', 198538)
+mfv_stopld_tau030000um_M1400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-893b4bd18c85d8a599e96f61d9ab5c44/USER', 200714)
+mfv_stopld_tau000100um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-15f853b4c6abc42d6bd7930f87abc9c2/USER', 201051)
+mfv_stopld_tau000300um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-bcb4c157f93b656de73394fe8fb2756e/USER', 196540)
+mfv_stopld_tau010000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-da32e47314b4c0096cb5944a154576ce/USER', 100274)
+mfv_stopld_tau001000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-49639b18d97f2075afb52cf6328ecdf3/USER', 99126)
+mfv_stopld_tau030000um_M1600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-16704665e684d94afd050c41c64f7562/USER', 98312)
+mfv_stopld_tau000100um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-b7df69fd005acb965b3629e4ff595d1f/USER', 200828)
+mfv_stopld_tau000300um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-b7291b195e6f1fcbb2330a9571ff44d2/USER', 198147)
+mfv_stopld_tau010000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-41b0c7fd7dd18d02752b950a81326177/USER', 99667)
+mfv_stopld_tau001000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-33cfacc6e384fbba8bfca1c23eda463e/USER', 101005)
+mfv_stopld_tau030000um_M1800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_1800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-7c47fb0d5879b592b8549c35b93b6ed4/USER', 97762)
+mfv_stopld_tau000100um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1789e78e1e12327a45daa4aa18382d92/USER', 198799)
+mfv_stopld_tau000300um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-7055cff3d1073bfe1078cca1cfbb41db/USER', 155703)
+mfv_stopld_tau010000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-c59fd6253cb7e5f497be99071c99e3a9/USER', 197403)
+mfv_stopld_tau001000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-67eb59970b24dc31fdd2d3b2cb7f069a/USER', 193307)
+mfv_stopld_tau030000um_M0200_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-871669d99303ca8753d59907d750eae3/USER', 198511)
+mfv_stopld_tau000100um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_300_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-1fc8a7cf4c2dae54a58fcabd0a123964/USER', 197379)
+mfv_stopld_tau000300um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_300_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-6329f9c6af13b5936f483cf97b4e4b09/USER', 197934)
+mfv_stopld_tau010000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_300_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-abf9e1937b46576d69a9b9f987b723e1/USER', 195028)
+mfv_stopld_tau001000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_300_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-d4fdd990ce4e35965deb73bb64a8a377/USER', 199705)
+mfv_stopld_tau030000um_M0300_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_300_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-90bfe8894565eacc36d4a3d0ff664ca0/USER', 199931)
+mfv_stopld_tau000100um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-8adc1af59d70a2214af39d094c7a7dcd/USER', 201684)
+mfv_stopld_tau000300um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-357645537c9bd292ce20af62fbcd3147/USER', 199890)
+mfv_stopld_tau010000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-e69745a11561f03f3b285f0af5264bfe/USER', 190765)
+mfv_stopld_tau001000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-3cd4d40beef2ff9f0d86da22b1f0f1d3/USER', 192163)
+mfv_stopld_tau030000um_M0400_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-2d8261f30ed59e66783ce23d0351e509/USER', 186742)
+mfv_stopld_tau000100um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-e11e22862073d8b29749ba64f3d02ef3/USER', 203406)
+mfv_stopld_tau000300um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-2a41e599bce9e64e6e126a4026db737a/USER', 199321)
+mfv_stopld_tau010000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-3c46c6068456dfc7783b316de81d30ef/USER', 195818)
+mfv_stopld_tau001000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-5d7e12c0934cb5c55ec638e86f9ec967/USER', 184999)
+mfv_stopld_tau030000um_M0600_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-fb77851efdd76e36f6686ac3336ccc20/USER', 193864)
+mfv_stopld_tau000100um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-94eb3c025f47b83422a7feace8cef398/USER', 184102)
+mfv_stopld_tau000300um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-abeaada5ec996acbba073296c62b5dda/USER', 169590)
+mfv_stopld_tau010000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-7c28a8071152225cd35a1a27e3828cda/USER', 99313)
+mfv_stopld_tau001000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-4932078e155d4db80deb13cbbe933fdd/USER', 200829)
+mfv_stopld_tau030000um_M0800_2017.add_dataset('stoplborld_preineff', '/DisplacedSUSY_stopToLD_M_800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_preineffLepMum_2017-76df41eb40e0ec8282f4f3f2e203708d/USER', 197094)
+
+mfv_stoplb_tau000100um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-38b961d0167c38f246262d0cf0821e30/USER', 193961)
+mfv_stoplb_tau000300um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1000_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-2cdcb39286dab64cfc9ab4ff963c6075/USER', 186260)
+mfv_stoplb_tau010000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1000_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e62dfc4006e3145e1dedbf8f63cc9582/USER', 98261)
+mfv_stoplb_tau001000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1000_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-6a01a7a9339568bccbacdf1249ba6ac0/USER', 197193)
+mfv_stoplb_tau030000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1000_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-952a1cf50e57db4aee253871f260daf8/USER', 200668)
+mfv_stoplb_tau000100um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-edc449ca59c439e2cc23cd95cbbb49f0/USER', 199921)
+mfv_stoplb_tau000300um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1c356b19c9eeff9d07b3258d9f03c643/USER', 195189)
+mfv_stoplb_tau010000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-fc5646691cb126efdcd788951c0c3270/USER', 100156)
+mfv_stoplb_tau001000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-781d04216a27cfba92f5b2708d8c7c89/USER', 197902)
+mfv_stoplb_tau030000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-a1d5fc0db3501be34975a8c715cb60cf/USER', 200464)
+mfv_stoplb_tau000100um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-afe5873d585a3299d0cac1ee059a9f3d/USER', 187459)
+mfv_stoplb_tau000300um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-72ff811bc195807f49535920926374da/USER', 200304)
+mfv_stoplb_tau010000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-cf2d47b47c4ed42a2dc5238ff1207542/USER', 98900)
+mfv_stoplb_tau001000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-6c4cb9e1c6835fca9393f0c3c607a789/USER', 192400)
+mfv_stoplb_tau030000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e2a0c66a230d34bfd72db087f93425e2/USER', 197635)
+mfv_stoplb_tau000100um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0f568bbb2e755ee38a5b8eb6edb288d7/USER', 130204)
+mfv_stoplb_tau000300um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-a7b8d3b3344fe4df0f1917df17ccaecc/USER', 198070)
+mfv_stoplb_tau010000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-4771a3bbcaf3f5073b5e1fac5027de87/USER', 98745)
+mfv_stoplb_tau001000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-c23105f2a1d509f933d21747664bfc7c/USER', 91871)
+mfv_stoplb_tau030000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1f819f9ac86a2526c35287e210f480a5/USER', 82216)
+mfv_stoplb_tau000100um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-45022ea641ad682b936c2e8db59228b9/USER', 191607)
+mfv_stoplb_tau000300um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-ffbcc7305e6ab87811178c1c073319ae/USER', 200792)
+mfv_stoplb_tau010000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-f5729039f4fe5bec53c520d09e6bed2a/USER', 101386)
+mfv_stoplb_tau001000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-82c7db99a9c3af254012988846195ae4/USER', 98858)
+mfv_stoplb_tau030000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_1800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-476bb8d45ba40cc3a50e5466fbdfd0ef/USER', 99225)
+mfv_stoplb_tau000100um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-5eb14100fc75db5afc701d503006385d/USER', 198760)
+mfv_stoplb_tau000300um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-33eaf1a985802103d4a379c84c023833/USER', 187003)
+mfv_stoplb_tau010000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b2e41e7ebb710dbe0f40ba434f460b35/USER', 199948)
+mfv_stoplb_tau001000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-de77d5496c954883187021aafbdddadb/USER', 196687)
+mfv_stoplb_tau030000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-ba0d8aa9ee47146dab29a43e6ac13304/USER', 199267)
+mfv_stoplb_tau000100um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_300_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-5e0e08c6a469d71b13677e414ad25258/USER', 196246)
+mfv_stoplb_tau000300um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_300_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-4f1ea9372daca109bad6bd31f11d1b3b/USER', 183219)
+mfv_stoplb_tau010000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_300_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0c2dd0aa20a03993d9f0cf0691459005/USER', 199832)
+mfv_stoplb_tau001000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_300_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1444a1450ee018c16115f294c9cfeabd/USER', 200296)
+mfv_stoplb_tau030000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_300_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-bb652f2f49deeecc962b96806311813a/USER', 200170)
+mfv_stoplb_tau000100um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-974b70c0222040a70b0ae8816762234e/USER', 197597)
+mfv_stoplb_tau000300um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-9fe337a9a399b512b8c41c3272781704/USER', 195221)
+mfv_stoplb_tau010000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0cbfdf404f38336205938f6302276a9a/USER', 198737)
+mfv_stoplb_tau001000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-04b4f4446e4118cadef111d0480e6ef8/USER', 197003)
+mfv_stoplb_tau030000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-2682217e3c061ae0e109059ac0de2f26/USER', 191913)
+mfv_stoplb_tau000100um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-535063703c8053e530823b9fddad0623/USER', 194663)
+mfv_stoplb_tau000300um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1d7452fc5eb954118859b515fb0e5bbb/USER', 201839)
+mfv_stoplb_tau010000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b4efe373e6205106449b49d72ebf74d6/USER', 188463)
+mfv_stoplb_tau001000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-041a97dcc7e735b93dc7221e7a4fcd17/USER', 195368)
+mfv_stoplb_tau030000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-975b44b68dd28366881b11e8246dca9e/USER', 199015)
+mfv_stoplb_tau000100um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-a517eb4f99399460107570ae0628b3da/USER', 198566)
+mfv_stoplb_tau000300um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-01ad281d8f84b98ee6261a7a24816fe9/USER', 197615)
+mfv_stoplb_tau010000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-c9daa7dba3db7147ea09ab0715f55bb8/USER', 98799)
+mfv_stoplb_tau001000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-d761691bb111adc15ea85fc20badc84a/USER', 146004)
+mfv_stoplb_tau030000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLBottom_M_800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-a02136e4043402545a1d0b8a5fa98856/USER', 199698)
+mfv_stopld_tau000100um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-d664b8a3f7830690e0b48db57e713a62/USER', 199076)
+mfv_stopld_tau000300um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1000_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-95286d2dddcd9ff751509258d69d77f8/USER', 198992)
+mfv_stopld_tau010000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1000_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e31ff6f6cc2e362c6f1f5d4d44570e6d/USER', 98679)
+mfv_stopld_tau001000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1000_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-21fb3253a6b15fc7e188ed60693b8272/USER', 198608)
+mfv_stopld_tau030000um_M1000_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1000_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-abf271171e039e27ad20c96f1236289d/USER', 187359)
+mfv_stopld_tau000100um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-fabc3ab947bc78fc7fed9d8ca41c7371/USER', 195326)
+mfv_stopld_tau000300um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-ab3ed3c7cf3ddd4cebef95c471c2ee98/USER', 195508)
+mfv_stopld_tau010000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-00147be307ac6e040cf5f49309199ba5/USER', 100349)
+mfv_stopld_tau001000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-89f3f7fd5ced7a1e27e9cdf4a1e7f4b6/USER', 201191)
+mfv_stopld_tau030000um_M1200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0986bdad269a6dae02dd875719e8723d/USER', 200851)
+mfv_stopld_tau000100um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-cb999eec7ec8f09019e0761d26801530/USER', 197836)
+mfv_stopld_tau000300um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1588461bc8c8fe662437cd86d9170a38/USER', 192550)
+mfv_stopld_tau010000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b74496a7d4a388d6c0c71340724f00f8/USER', 98583)
+mfv_stopld_tau001000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1338bf24c067f482b17a62010b334d2e/USER', 198538)
+mfv_stopld_tau030000um_M1400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b71798213247765c5d818bc328358d24/USER', 200714)
+mfv_stopld_tau000100um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-a8267d1c87c529b64cf3f993bcce4268/USER', 201051)
+mfv_stopld_tau000300um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b7bf26d160d056f57000b9a6f680fbad/USER', 196540)
+mfv_stopld_tau010000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-838543d4a0a6e8f36364aafc49528ac1/USER', 100274)
+mfv_stopld_tau001000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-4911b39c84a628185d0afcc1e3dff9ce/USER', 99126)
+mfv_stopld_tau030000um_M1600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-5b69a8c069c1b12576318fa902dc8e7c/USER', 98312)
+mfv_stopld_tau000100um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b3620fe6456abd8c3a7be2ef2cc039c6/USER', 200828)
+mfv_stopld_tau000300um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-99a75db53bd4074648d6453f80fa656e/USER', 198147)
+mfv_stopld_tau010000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-603f845b5b9799398ca153c1a233ee2a/USER', 99667)
+mfv_stopld_tau001000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-3c3c301b2aecc621f58d9e696b64327b/USER', 101005)
+mfv_stopld_tau030000um_M1800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_1800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-7e60b8bdbb597b96dc6f916e847c5e8c/USER', 97762)
+mfv_stopld_tau000100um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_200_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-315214235ff729970dd511d62f0ff0f1/USER', 198799)
+mfv_stopld_tau000300um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_200_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-c421e66561f90e37c803895094e32d48/USER', 155703)
+mfv_stopld_tau010000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_200_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0b83473c114548f9e221d288e13e267c/USER', 197403)
+mfv_stopld_tau001000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_200_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-42b17fff56ef48d28709583b76b95f35/USER', 193307)
+mfv_stopld_tau030000um_M0200_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_200_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-5e6194d9572cf69aaa1b07e0c2e90711/USER', 198511)
+mfv_stopld_tau000100um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_300_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-16e1b1b4ded34d645347429bc7175290/USER', 197379)
+mfv_stopld_tau000300um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_300_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-79c90a974430e12edf1943c5ad4b4d0d/USER', 197934)
+mfv_stopld_tau010000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_300_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e9a6b4ba697567a01707fe16272016eb/USER', 195028)
+mfv_stopld_tau001000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_300_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-122422c44c0aac55ac2642939b8742d8/USER', 199705)
+mfv_stopld_tau030000um_M0300_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_300_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-06c874dd4b2d9f11f5b86828b54159a4/USER', 199931)
+mfv_stopld_tau000100um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_400_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-02ae066e133622f1649750a93802083a/USER', 201684)
+mfv_stopld_tau000300um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_400_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-8c27c26f7ed4b632f73ac864f143cced/USER', 199890)
+mfv_stopld_tau010000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-f55a7cf7663455170acd979d0eaa2bf8/USER', 190765)
+mfv_stopld_tau001000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_400_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-6de84fbb745d7473232df7156234eb45/USER', 192163)
+mfv_stopld_tau030000um_M0400_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_400_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-cca1a62720698065f204dc54c20c5e5e/USER', 186742)
+mfv_stopld_tau000100um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_600_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-1e63c70adcf0d137d8063ae5c6a68a73/USER', 203406)
+mfv_stopld_tau000300um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_600_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-578eee879ef3a9306f7d2a3ad6d8c7eb/USER', 199321)
+mfv_stopld_tau010000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_600_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e53579a6d6771d80748791bb02ce429b/USER', 195818)
+mfv_stopld_tau001000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_600_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-43f43c12e9f0f6e82bc7d3245647a9a6/USER', 184999)
+mfv_stopld_tau030000um_M0600_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_600_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-b93295920aa12ccfc6e9556d74e56ca9/USER', 193864)
+mfv_stopld_tau000100um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_800_0p1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-3c801e4b88177b05db71c8c0328e782d/USER', 184102)
+mfv_stopld_tau000300um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_800_0p3mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-e91baa41d617e0c276c1d61f7446f059/USER', 169590)
+mfv_stopld_tau010000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_800_10mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-0f8f76d129bc883c84ff9fd780a2d92d/USER', 99313)
+mfv_stopld_tau001000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_800_1mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-2d672c40a238018c3b8d0a8cb9bc8757/USER', 200829)
+mfv_stopld_tau030000um_M0800_2017.add_dataset('stoplborld_postineff', '/DisplacedSUSY_stopToLD_M_800_30mm_TuneCP5_13TeV-madgraph-pythia8/aduquett-NtuplestoplborldULV30_postineffLepMum_2017-606d105d2ba8ee8259c51d544f1030d7/USER', 197094)
+
+wjetstolnu_0j_2017.add_dataset('wjetstolnu_preineff', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-0f6c022d9cdc7028e517b0fff8732cfe/USER', 86756)
+wjetstolnu_1j_2017.add_dataset('wjetstolnu_preineff', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-77e3d4c897439bd2278d207d58fa89aa/USER', 186256)
+wjetstolnu_2j_2017.add_dataset('wjetstolnu_preineff', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-bd45d297fe163d2124aeb164ae832b63/USER', 177007)
+dyjetstollM10_2017.add_dataset('wjetstolnu_preineff', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-4df0bd0a778e6d377b3c3b6b0bee485a/USER', 2138)
+dyjetstollM50_2017.add_dataset('wjetstolnu_preineff', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-270e6bfbbc74b7e48a43e7741624ead6/USER', 91449)
+ZHToSSTodddd_tau100um_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-4b0c3a1fafec13dcc4344d1fb4dcdb6d/USER', 49121)
+ZHToSSTodddd_tau300um_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-b17deca23072a157b98cfa55e4ab1bd5/USER', 50000)
+ZHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-74a6dd19f3b620053cb659f6cded6ca8/USER', 49999)
+ZHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-f3c18118db57bb20d6e04e74b5649bc1/USER', 50000)
+ZHToSSTodddd_tau10mm_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-8f56768d7046821d82886380299bcadc/USER', 50000)
+ZHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-1a1dd94f3c0e01167db4ac37b3863817/USER', 49999)
+ZHToSSTodddd_tau100um_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-17662f360bf2ea6746d5e9600f01287a/USER', 49999)
+ZHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-c19fe1fb02567c06f4bf39b41de79d22/USER', 49999)
+ZHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-9771b21c2a0e98730dde498bb81472fd/USER', 50000)
+ZHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-9eafc9c6e9b249540085089bc7030f90/USER', 49996)
+ZHToSSTodddd_tau10mm_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-fb52d7c0b47e5546ea7fc91757417da3/USER', 49998)
+ZHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-4f75a9b26e632cf215cc5a35ebf38227/USER', 50000)
+ZHToSSTodddd_tau100um_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-ab16a2adb0682a8f72f0e6350a23be14/USER', 49999)
+ZHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-67b20ccfa03687ac1ca98fec78dcda00/USER', 49997)
+ZHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-892a2cdf648086816d29d741b3936d49/USER', 49997)
+ZHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-4a5345a73c3c81fa634a9182c6e0b258/USER', 49995)
+ZHToSSTodddd_tau10mm_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-f9ccff64ae5f5b325c1784d7bfc4ad7b/USER', 49991)
+ZHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_preineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-0b769a67e5a944604d385f321d6b36a9/USER', 49998)
+WplusHToSSTodddd_tau100um_M15_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-4df1b75652af4d8f15fc9bfefee981bf/USER', 50000)
+WplusHToSSTodddd_tau300um_M15_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-69e99fc68fd992aad90505bc7384ea0b/USER', 49000)
+WplusHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-50cc845f6fc4503b943cf2cf7c774031/USER', 49999)
+WplusHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-927386be5d1e89b854a99ccb81821fb6/USER', 50000)
+WplusHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-779e2f7eb993029b48b20168fcd1b161/USER', 50000)
+WplusHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-530111ab49969a659ab2a8e3f9acaee9/USER', 49996)
+WplusHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-e9a38a14532c2067226c185341a14955/USER', 49999)
+WplusHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-c14aae83878c66014a0f54de4f658638/USER', 48000)
+WplusHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-e1b45eceaa81572155b336661746fedd/USER', 49997)
+WplusHToSSTodddd_tau100um_M55_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-390d8a6e0a8ed1abb47aeb82ff11a7ba/USER', 49997)
+WplusHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-7a076c45ce0447d69616b347b352e68a/USER', 49995)
+WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-fcbb6c694872c8060d992f3e98086303/USER', 49991)
+WplusHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-06ce0650577c38e5d7bfc2d875875eb2/USER', 49994)
+WplusHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-e7257148a4f288513bfbd3f84eca445d/USER', 47998)
+WminusHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-0e8cd3619d5c2685d83fab8a0818bd3e/USER', 48999)
+WminusHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-94100bb10c763d6adea0250a024a8933/USER', 48999)
+WminusHToSSTodddd_tau10mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-59a6820af7982a838fc729d9ee6c9ff6/USER', 50000)
+WminusHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-b1b1d291fff6e9815a4b1183fad71a02/USER', 50000)
+WminusHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-a39c914b617e55a7d59803feb6593990/USER', 49997)
+WminusHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-effd26fa36b38c214b1b692039782763/USER', 48000)
+WminusHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-702f2531a8d5ca3def2e921cd372e5c0/USER', 49997)
+WminusHToSSTodddd_tau10mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-60b40f496d920180618b0bc1e33150e0/USER', 49999)
+WminusHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-181ef0144186f4c2edd308a7e9edc763/USER', 49998)
+WminusHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-c2b9d396bb90b617954951a3895ef5d9/USER', 47995)
+WminusHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-d1136e70d376764bed15783cfce6ee21/USER', 49995)
+WminusHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-c34dd8f84477cb350097976ad963065a/USER', 49992)
+WminusHToSSTodddd_tau10mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-673b42ac3b79af3bb51e59a6690feab6/USER', 49994)
+WminusHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_preineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_preineffLepMum_2017-cfabbdde4ff4f407a076c182284c700b/USER', 49993)
+
+wjetstolnu_0j_2017.add_dataset('wjetstolnu_postineff', '/WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-c3c18495f24fb7a96d410618de71d556/USER', 84217)
+wjetstolnu_1j_2017.add_dataset('wjetstolnu_postineff', '/WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-c3c015414273d93bb688b378b2bda21a/USER', 180758)
+wjetstolnu_2j_2017.add_dataset('wjetstolnu_postineff', '/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-e0bb6d0b21a66efaf5ef43be913f3b75/USER', 170804)
+dyjetstollM10_2017.add_dataset('wjetstolnu_postineff', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-f10150f77d002ae747efe35eb649d337/USER', 1964)
+dyjetstollM50_2017.add_dataset('wjetstolnu_postineff', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-ea85cbb21fda36b7caafa0e9c86494ca/USER', 75694)
+ZHToSSTodddd_tau100um_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-0004df3ee32eb62627bf007391492ef3/USER', 49121)
+ZHToSSTodddd_tau300um_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-e3b75358ddddab68d9220b701d609ebf/USER', 50000)
+ZHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-d1688f6cbec5a86f542ae971e9071b95/USER', 49999)
+ZHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-3a5fe39fb2554accc6101541a34b412a/USER', 50000)
+ZHToSSTodddd_tau10mm_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-3a4f111dfa476b4a90cded8edbdde54d/USER', 50000)
+ZHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-cbf03296790c3cdf01d10b5ba9736c3a/USER', 49999)
+ZHToSSTodddd_tau100um_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-722bad29d3f678df74db9167545ea733/USER', 49999)
+ZHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-fd6c2b29527a98611a80af8cf6f8443c/USER', 49999)
+ZHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-ebfd9756cab285670051ebd4a6d0bb60/USER', 50000)
+ZHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-63d451f0d7622b42eb7480856544db44/USER', 49996)
+ZHToSSTodddd_tau10mm_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-d6f43bd923a5b1f6544fbe29a90e1594/USER', 49998)
+ZHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-16f9254d04c870b6827ec306f2179888/USER', 50000)
+ZHToSSTodddd_tau100um_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-aabdf53c5324ed23da667e621a01077b/USER', 49999)
+ZHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-ceb75ac530df633f66588f44b4d83b07/USER', 49997)
+ZHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-83bea8899a99f8803e9e1edf095ee502/USER', 49997)
+ZHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-b126aa96a5c0dd96c428efafbabf2313/USER', 49995)
+ZHToSSTodddd_tau10mm_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-e34fbfa4d530f03e59f41578f91d25f0/USER', 48343)
+ZHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_postineff', '/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-f60a9fd2ec4c5da8e1fdf0af3cb18727/USER', 49998)
+WplusHToSSTodddd_tau100um_M15_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-b9aabc2fc3433cc32ff88f22e2e30b8a/USER', 50000)
+WplusHToSSTodddd_tau300um_M15_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-c8039708b081780d994db3d1ef30d36a/USER', 49000)
+WplusHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-711ae0390b92df53b76a91529cfdde37/USER', 49999)
+WplusHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-96bf90a223e098712a75941f8cd755f7/USER', 50000)
+WplusHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-38d43c2372bad0e49bc38d45ecfcef13/USER', 50000)
+WplusHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-2edd06aa1d1b1f51baf575ca6529a70e/USER', 49996)
+WplusHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-1ca2b1f78dfb142abd479f6084c47f1d/USER', 49999)
+WplusHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-14ebddbeaa69d040def78d34ab4693c4/USER', 48000)
+WplusHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-2c00bf675fef859129a1bf449ea8aa90/USER', 49997)
+WplusHToSSTodddd_tau100um_M55_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-ba73c3c59af6ec760f0b3582a737c4ba/USER', 49997)
+WplusHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-f01707cc01b70423954dcfc735b88431/USER', 49995)
+WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-99e0eb0a81a71ea7095930d6016d27a2/USER', 49991)
+WplusHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-f19c8a1722a04003b0c6f270c99e97c3/USER', 49994)
+WplusHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-6cf3aaad49670c491975388f99fe3c77/USER', 47998)
+WminusHToSSTodddd_tau1mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-adba71fccb3f4641e64ff308e6c11a7e/USER', 48999)
+WminusHToSSTodddd_tau3mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-13659781ae6f4aa29b63d598282247c8/USER', 48999)
+WminusHToSSTodddd_tau10mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-4589cc25756afc0bafe34c428ca58a16/USER', 50000)
+WminusHToSSTodddd_tau30mm_M15_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-15_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-52ee63ead9cdb0626bad6e2d93183742/USER', 50000)
+WminusHToSSTodddd_tau300um_M40_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-be7ee03e85b47ddd1bc616f98c7ef965/USER', 49997)
+WminusHToSSTodddd_tau1mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-5b4eebc0636d1e20e6224f0399ce3640/USER', 48000)
+WminusHToSSTodddd_tau3mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-00b51fd6c5f65e7bff98ea0cb95cfbf7/USER', 49997)
+WminusHToSSTodddd_tau10mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-2d811a15acc7d990b337c338f3b207c6/USER', 49999)
+WminusHToSSTodddd_tau30mm_M40_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-40_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-d4230878791603590ab0e628ded6cef6/USER', 49998)
+WminusHToSSTodddd_tau300um_M55_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-a2b47e671855f71233078ce251025e8d/USER', 47995)
+WminusHToSSTodddd_tau1mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-fe46f8fef69a004f13efd5f299c05c9e/USER', 49995)
+WminusHToSSTodddd_tau3mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-3_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-5dfcc313bf5c242400582c99b3ca9397/USER', 48992)
+WminusHToSSTodddd_tau10mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-41113d77a3c03edebcec81693dbdf6d9/USER', 49994)
+WminusHToSSTodddd_tau30mm_M55_2017.add_dataset('wjetstolnu_postineff', '/WminusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/aduquett-NtupleOnnormdzULV30_postineffLepMum_2017-d95e896f6d72baa1e82b50cd817023e3/USER', 49993)
 
 for sample in Lepton_data_samples_20161:
     sample.add_dataset('miniaod', sample.dataset)
@@ -1298,9 +1616,9 @@ for sample in data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samp
 for sample in Lepton_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset)
 
-for sample in qcd_lep_samples_20161 + leptonic_samples_20161 + diboson_samples_20161 + met_samples_20161: 
+for sample in qcd_lep_samples_20161 + leptonic_samples_20161 + diboson_samples_20161 + met_samples_20161 + ttbar_samples_20161: 
     sample.add_dataset('miniaod', sample.dataset)
-for sample in qcd_lep_samples_20162 + leptonic_samples_20162 + diboson_samples_20162 + met_samples_20162: 
+for sample in qcd_lep_samples_20162 + leptonic_samples_20162 + diboson_samples_20162 + met_samples_20162 + ttbar_samples_20162: 
     sample.add_dataset('miniaod', sample.dataset)
 
 qcdht0200_2017.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 57721120)
@@ -1412,7 +1730,7 @@ zjetstonunuht2500_2018.add_dataset('miniaod', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5
 #ttbarht1200_2018.add_dataset('miniaod', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2779427)
 #ttbarht2500_2018.add_dataset('miniaod', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM',  1451104)
 
-for sample in qcd_lep_samples_2018 + leptonic_samples_2018 + diboson_samples_2018 + met_samples_2018: 
+for sample in qcd_lep_samples_2018 + leptonic_samples_2018 + diboson_samples_2018 + met_samples_2018 + ttbar_samples_2018: 
     sample.add_dataset('miniaod', sample.dataset)
     
 # ww_2018.add_dataset('miniaod', '/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v2/MINIAODSIM', 15670000)
@@ -1526,16 +1844,47 @@ for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017
 
 #is this the correct ntuple version? 
 #mfv_stopld_tau001000um_M1000_2018
-#for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
+#for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:
+
+for x in ttbar_2017, wjetstolnu_0j_2017, wjetstolnu_1j_2017, wjetstolnu_2j_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
+    x.add_dataset("mfvK0sNtuple2017_masswide_ULV30LepMumv1_isMCtrue_fixbjetsandmin_rLepMumv1")
+
+for x in ttbar_2018, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018:
+    x.add_dataset("mfvK0sNtuple2018_masswide_ULV30LepMumv1_isMCtrue_fixbjetsandmin_rLepMumv1")
+
+for x in ttbar_2018, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, EGamma2018A, EGamma2018B, EGamma2018C, EGamma2018D:
+    x.add_dataset("mfvK0sNtuple2018_masswide_ULV30LepMumv1_fixbjetsandmin_rLepMumv1")
+
+for x in ttbar_2018, wjetstolnu_0j_2018, wjetstolnu_1j_2018, wjetstolnu_2j_2018, dyjetstollM10_2018, dyjetstollM50_2018, ww_2018, wz_2018, zz_2018, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, EGamma2018A, EGamma2018B, EGamma2018C, EGamma2018D:
+    x.add_dataset("mfvK0sNtuple2018_masswide_ULV30LepMumv1_fixmin_rLepMumv1")
+                                                                                                             
 SingleElectron2017B.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-8c7c2bda1cd22d80173e548f51d2f831/USER', -1)
 SingleElectron2017C.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-e4d56933c86918c3bd148722113778ad/USER', -1)
 SingleElectron2017E.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-b263ccec0b85cece65a88cc4bcb47b85/USER', -1)
 SingleElectron2017F.add_dataset('ntuple_K0_DYmuontrig', '/FakeDataset/fakefile-FakePublish-618b1b5f1913656e40f0cfb572514b20/USER', -1)
-for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, ttbar_2017, wjetstolnu_amcatnlo_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D:
+for x in qcdmupt15_2017, qcdpt15mupt5_2017, qcdpt20mupt5_2017, qcdpt30mupt5_2017, qcdpt50mupt5_2017, qcdpt80mupt5_2017, qcdpt120mupt5_2017, qcdpt170mupt5_2017, qcdpt300mupt5_2017, qcdpt470mupt5_2017, qcdpt600mupt5_2017, qcdpt800mupt5_2017, qcdpt1000mupt5_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, ttbar_2017, dyjetstollM10_2017, dyjetstollM50_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D:
     x.add_dataset("ntuple_K0_DYmuontrig")
 
+ttbar_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-01de2deb66994653f1489b8c96beff65/USER', -1)
+wjetstolnu_0j_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-b5dec11226cf690963517b9bc95b2a6a/USER', -1)
+wjetstolnu_1j_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-299041620b49ec195a3467f5c9489902/USER', -1)
+wjetstolnu_2j_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-c09aabf9dcd2f65100c8be50d8297258/USER', -1)
+dyjetstollM10_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-8615c2f1ebe454b9db502050cfa1a5f0/USER', -1)
+dyjetstollM50_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-18c7d6fcc0e115b3d58c09e9d2bc8d2c/USER', -1)
+ww_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-320b768fa55adaea054a8d1f1e297329/USER', -1)
+wz_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-73c99734c90a95b0d279204a7692e933/USER', -1)
+zz_2018.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-94c33b0a028abecc0f53e4cdd32c5f1b/USER', -1)
+SingleMuon2018A.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-ff1152844b6da49e054a4a480d0901c8/USER', -1)
+SingleMuon2018B.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-b01df3e14db63816dc1cedf9ae1002be/USER', -1)
+SingleMuon2018C.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-9668e0321c5a815fe071e5ccf84f5174/USER', -1)
+SingleMuon2018D.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-00fb98a89ea42d2a4f94ccbb5c6bc3a1/USER', -1)
+EGamma2018A.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-50a39c6931c8fb5b734b3571baeedbc6/USER', -1)
+EGamma2018B.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-e827d0a970a1be68c6f01f5b70284951/USER', -1)
+EGamma2018C.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-d6ea10da8b1f487607169ff57a07f983/USER', -1)
+EGamma2018D.add_dataset('ntuple2018_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-6e6c5a19c2c8d869e641c081723a6a70/USER', -1)
+    
 ttbar_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-0b62fe2c2e68572d7b19020908d49d6d/USER', -1)
-wjetstolnu_amcatnlo_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-60cc39a06694799dea9f2d0159f6f14f/USER', -1)
+#wjetstolnu_amcatnlo_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-60cc39a06694799dea9f2d0159f6f14f/USER', -1)
 dyjetstollM10_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-99411c72ade5979f99b481f27dd2ba8e/USER', -1)
 dyjetstollM50_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-a9976aaa8cda96912597725368bdee78/USER', -1)
 ww_2017.add_dataset('ntuple_K0_DYmuontrig_masswide', '/FakeDataset/fakefile-FakePublish-6cd7d064e8348c4bfe63bac0035e610a/USER', -1)
@@ -1562,7 +1911,7 @@ SingleElectron2017B.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefi
 SingleElectron2017C.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017E.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017F.add_dataset('trackmoverulv30lepelemv7', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-for x in qcdmupt15_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_amcatnlo_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleElectron2017D:                                                    # ^   wjetstolnu_2017,   Alec removed
+for x in qcdmupt15_2017, qcdempt015_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleElectron2017D:                                                    # ^   wjetstolnu_2017,   Alec removed
     x.add_dataset("trackmoverulv30lepelemv7")
 
 """
@@ -1762,7 +2111,9 @@ condorable = {
         
         },
     "T1_US_FNAL_Disk": {
-        #"miniaod": [MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017,ttbar_2017, ttbar_2018, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D] + diboson_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 # SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, 
+        #"miniaod": [MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017,ttbar_2017, ttbar_2018, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017D] + diboson_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 # SingleElectron2017B, SingleElectron2017D, SingleElectron2017E,
+        #"miniaod": Lepton_data_samples_2017 + all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017
+        "miniaod": Lepton_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161 + Lepton_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162 + Lepton_data_samples_2017 +  all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 +  qcd_samples_2017 + Lepton_data_samples_2018 + all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018
         
                     #mfv_stoplb_tau010000um_M1000_2017, mfv_stoplb_tau000300um_M1200_2017, mfv_stoplb_tau010000um_M1200_2017, mfv_stoplb_tau001000um_M1200_2017, mfv_stoplb_tau000300um_M1600_2017, mfv_stoplb_tau001000um_M1600_2017, mfv_stoplb_tau000100um_M0300_2017, mfv_stoplb_tau000300um_M0300_2017, mfv_stoplb_tau001000um_M0300_2017, mfv_stoplb_tau001000um_M0400_2017, mfv_stoplb_tau010000um_M0600_2017, mfv_stopld_tau000300um_M1000_2017, mfv_stopld_tau010000um_M1000_2017, mfv_stopld_tau010000um_M1200_2017, mfv_stopld_tau001000um_M1400_2017, mfv_stopld_tau000300um_M1600_2017, mfv_stopld_tau010000um_M0200_2017, mfv_stopld_tau000300um_M0300_2017, mfv_stopld_tau001000um_M0400_2017, mfv_stopld_tau000300um_M0600_2017, mfv_stopld_tau010000um_M0600_2017, mfv_stopld_tau001000um_M0600_2017, mfv_stopld_tau010000um_M0800_2017, mfv_stoplb_tau010000um_M1200_2018, mfv_stoplb_tau001000um_M1200_2018, mfv_stoplb_tau010000um_M1400_2018, mfv_stoplb_tau001000um_M1400_2018, mfv_stoplb_tau010000um_M1600_2018, mfv_stoplb_tau001000um_M1600_2018, mfv_stoplb_tau001000um_M0200_2018, mfv_stoplb_tau010000um_M0300_2018, mfv_stoplb_tau010000um_M0400_2018, mfv_stoplb_tau001000um_M0400_2018, mfv_stoplb_tau001000um_M0600_2018, mfv_stoplb_tau000300um_M0800_2018, mfv_stoplb_tau001000um_M0800_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000300um_M1200_2018, mfv_stopld_tau000100um_M1400_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau010000um_M1600_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau001000um_M0200_2018, mfv_stopld_tau001000um_M0300_2018, mfv_stopld_tau000300um_M0400_2018, mfv_stopld_tau001000um_M0600_2018],
         },

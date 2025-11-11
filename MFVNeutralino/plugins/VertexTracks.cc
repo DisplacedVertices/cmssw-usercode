@@ -691,8 +691,20 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
     const auto trackLostInnerHits = tk->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
-    const double track_recon_eff = 1-1.11786*fabs(dxybs)*fabs(dxybs); //Alec added
-    if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added
+    //if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added
+    /*const double track_recon_eff = 1-1.11786*fabs(dxybs)*fabs(dxybs); //Alec added from here for 2017
+    const double rand_0to1 = r3->Uniform(0,1);
+    if (fabs(dxybs) < .3) {
+      if (rand_0to1 > track_recon_eff) {
+       continue;
+      }
+    }
+    else {
+      if (rand_0to1 > (1-1.11786*.3*.3)) {
+       continue;
+      }
+    }*/
+    //Alec added to here
     int min_r = 2000000000;
     for (int i = 1; i <= 4; ++i)
       if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {

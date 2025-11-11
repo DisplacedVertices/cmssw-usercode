@@ -114,6 +114,7 @@ def setup_event_filter(process,
         raise ValueError('trigger_filter %r bad: must be one of ("jets only", "muons only", "electrons only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
+    #print("Alec test print EventFilter.py")
 
     if trigger_filter:
         triggerFilter = triggerFilter.clone()

@@ -19,8 +19,10 @@ namespace jmt {
         tk.hitPattern().stripLayersWithMeasurement() < 6)
       return false;
 
-    if (level >= 1 && !tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1))
-      return false;
+    //if (level >= 1 && !tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1))
+    //  return false;
+    if (level >= 1 && !(tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) || (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,2) && tk.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)==0)))
+      return false; //min_r FIX ADD THIS BACK!!!
 
     if (level >= 2) {
       jmt::TrackRescaler track_rescaler;

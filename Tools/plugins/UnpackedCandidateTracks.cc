@@ -29,7 +29,7 @@ private:
   }
 
   void debug_tk(const reco::Track& tk, const char* tag, const size_t i) const {
-    std::cout << "-> " << tag << " track #" << i << " pt " << tk.pt() << " eta " << tk.eta() << " min_r? " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)
+    std::cout << "-> " << tag << " track #" << i << " pt " << tk.pt() << " eta " << tk.eta() << " min_r " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << " phi " << tk.phi()
               << " npxlayers " << tk.hitPattern().pixelLayersWithMeasurement() << " nstlayers " << tk.hitPattern().stripLayersWithMeasurement() << " dxy " << tk.dxy() << " +- " << tk.dxyError() << " pass? " << pass_tk(tk);
   };
 
@@ -53,11 +53,22 @@ private:
     return false;
   }
 
-
   bool pass_tk(const reco::Track& tk, bool req_base, bool req_min_r, bool req_nsigmadxy) const {
+    //std::cout << "Alec test print UnpackedCandidateTracks.cc" << std::endl;
+    //std::cout << "req_min_r: " << req_min_r << std::endl;
+    //std::cout << "cut_level: " << cut_level << std::endl;
+    //std::cout << "has hit in 1st pixel layer: " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << std::endl;
+    //std::cout << "has hit in 2nd pixel layer: " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,2) << std::endl;
+    //std::cout << "No Missing inner hits: " << (tk.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)==0) << std::endl;
+    //if (tk.phi() < 0.2 && tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6 && !tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,2) && tk.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)==0)  std::cout << " pt " << tk.pt() << " eta " << tk.eta() << " min_r=1? " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << " phi " << tk.phi() << " npxlayers " << tk.hitPattern().pixelLayersWithMeasurement() << " nstlayers " << tk.hitPattern().stripLayersWithMeasurement() << " dxy " << tk.dxy() << " +- " << tk.dxyError() << std::endl << std::endl; //min_r = 2 with no missed hits
+    //if (tk.phi() < 0.2 && tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6 && tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1))  std::cout << " pt " << tk.pt() << " eta " << tk.eta() << " min_r=1? " << tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << " phi " << tk.phi() << " npxlayers " << tk.hitPattern().pixelLayersWithMeasurement() << " nstlayers " << tk.hitPattern().stripLayersWithMeasurement() << " dxy " << tk.dxy() << " +- " << tk.dxyError() << std::endl << std::endl; //min_r = 1
+    //if (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) std::cout << "min_r=1" << std::endl;
+    //void debug_tk(const reco::Track& tk, const char* tag, const size_t i)
+    //debug_tk(mtk, "", mu_tracks->size())
     return
       (!req_base || (tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6)) &&
-      (!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
+      //(!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
+      (!req_min_r || (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) || (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,2) && tk.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)==0))) && //min_r FIX ADD THIS BACK!!!
       (!req_nsigmadxy || fabs(tk.dxy() / tk.dxyError()) > 4);
   }
 
@@ -95,7 +106,7 @@ JMTUnpackedCandidateTracks::JMTUnpackedCandidateTracks(const edm::ParameterSet& 
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
     cut_level(cfg.getParameter<int>("cut_level")),
     skip_weirdos(cfg.getParameter<bool>("skip_weirdos")),
-    debug(cfg.getUntrackedParameter<bool>("debug", false))
+    debug(cfg.getUntrackedParameter<bool>("debug", false)) //Alec changed to true
 {
   produces<reco::TrackCollection>();
   produces<reco::TrackCollection>("lost");

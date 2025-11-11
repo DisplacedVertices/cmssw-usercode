@@ -50,7 +50,9 @@ def hadd(output_fn, input_fns):
     l = len(input_fns)
     start = datetime.now()
     print 'hadding %i files to %s at %s' % (l, output_fn, start)
-    args = ['hadd', output_fn] + input_fns
+    args = ['hadd', '-f0', '-k', output_fn] + input_fns
+    arg_print = ['hadd', '-f0', '-k', output_fn]
+    print arg_print
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()

@@ -2,9 +2,12 @@
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/Geometry.h"
 #include "JMTucker/Tools/interface/NtupleReader.h"
+#include "JMTucker/Tools/interface/BTagging.h"
+//#include "DataFormats/PatCandidates/interface/Jet.h"
+#include <TRandom3.h>
 
 int main(int argc, char** argv) {
-  jmt::NtupleReader<mfv::K0Ntuple> nr;
+  jmt::NtupleReader<mfv::K0Ntuple> nr; //This is calling JMTucker/Tools/inteface/Ntuple.h
   nr.init_options("mfvK0s/t");
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
@@ -20,56 +23,54 @@ int main(int argc, char** argv) {
 
   ////
 
-  enum { mass_all, mass_lo, mass_hi, mass_on, max_mass_type };
-  const char* mass_names[max_mass_type] = {"massall", "masslo", "masshi", "masson"};
+  //enum { mass_all, mass_lo, mass_hi, mass_on, max_mass_type };
+  //const char* mass_names[max_mass_type] = {"massall", "masslo", "masshi", "masson"};
+
+  enum { mass_all, max_mass_type };
+  const char* mass_names[max_mass_type] = {"massall"};
 
   enum { pt_gt2lt2p2, pt_gt2p2lt2p5, pt_gt2p5lt3, pt_gt3lt4, pt_gt4, max_pt_type };                         //Alec added from here
   const char* pt_names[max_pt_type] = {"pt_gt2lt2p2", "pt_gt2p2lt2p5", "pt_gt2p5lt3", "pt_gt3lt4", "pt_gt4"};
 
-  enum { dxy_ltp03, dxy_gtp03ltp06, dxy_gtp06ltp09, dxy_gtp09ltp13, dxy_gtp13ltp17, dxy_gtp17ltp23, dxy_gtp23ltp3, dxy_gtp3, max_dxy_type };
-  const char* dxy_names[max_dxy_type] = {"dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3"};
-
-/*
-  enum { pt_lt0p25, pt_gt0p25lt0p45, pt_gt0p45lt0p7, pt_gt0p7, max_pt_type };
-  const char* pt_names[max_pt_type] = {"pt_lt0p25", "pt_gt0p25lt0p45", "pt_gt0p45lt0p7", "pt_gt0p7"};
+  //enum { track_pt_lt10, track_pt_gt10, max_track_pt_type };
+  //const char* track_pt_names[max_track_pt_type] = {"track_pt_lt10", "track_pt_gt10"};
+  enum { track_pt_lt2, track_pt_gt2lt3, track_pt_gt3lt5, track_pt_gt5lt10, track_pt_gt10, max_track_pt_type };
+  const char* track_pt_names[max_track_pt_type] = {"track_pt_lt2", "track_pt_gt2lt3", "track_pt_gt3lt5", "track_pt_gt5lt10", "track_pt_gt10"};
 
   enum { dxy_ltp03, dxy_gtp03ltp06, dxy_gtp06ltp09, dxy_gtp09ltp13, dxy_gtp13ltp17, dxy_gtp17ltp23, dxy_gtp23ltp3, dxy_gtp3, max_dxy_type };
   const char* dxy_names[max_dxy_type] = {"dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3"};
-*/
-/*
-  enum { p_lt2p2, p_gt2p2lt2p5, p_gt2p5lt3, p_gt3lt4, p_gt4, max_p_type };
-  const char* p_names[max_p_type] = {"p_lt2p2", "p_gt2p2lt2p5", "p_gt2p5lt3", "p_gt3lt4", "p_gt4"};
-
-  enum { dxy_ltp03, dxy_gtp03ltp06, dxy_gtp06ltp09, dxy_gtp09ltp13, dxy_gtp13ltp17, dxy_gtp17ltp23, dxy_gtp23ltp3, dxy_gtp3, max_dxy_type };
-  const char* dxy_names[max_dxy_type] = {"dxy_ltp03", "dxy_gtp03ltp06", "dxy_gtp06ltp09", "dxy_gtp09ltp13", "dxy_gtp13ltp17", "dxy_gtp17ltp23", "dxy_gtp23ltp3", "dxy_gtp3"};
-*/
 
   enum { dbv_gtp2ltp4, dbv_gtp4ltp6, dbv_gtp6ltp8, dbv_gtp8lt1, dbv_gt1lt1p2, dbv_gt1p2lt1p4, dbv_gt1p4lt1p6, dbv_gt1p6lt1p9, max_dbv_type };
   const char* dbv_names[max_dbv_type] = {"dbv_gtp2ltp4", "dbv_gtp4ltp6", "dbv_gtp6ltp8", "dbv_gtp8lt1", "dbv_gt1lt1p2", "dbv_gt1p2lt1p4", "dbv_gt1p4lt1p6", "dbv_gt1p6lt1p9"};
 
   enum { abseta_lt1, abseta_gt1lt1p9, abseta_gt1p9, max_abseta_type };
   const char* abseta_names[max_abseta_type] = {"abseta_lt1", "abseta_gt1lt1p9", "abseta_gt1p9"};
+
+  enum { nhits_6to10, nhits_11to15, nhits_16to20, nhits_21to25, nhits_26to30, nhits_31to35, max_nhit_type };
+  const char* nhit_names[max_nhit_type] = {"nhits_6to10", "nhits_11to15", "nhits_16to20", "nhits_21to25", "nhits_26to30", "nhits_31to35"};
+
+  enum { npxlayers_2, npxlayers_3, npxlayers_4, npxlayers_5, max_npxlayers_type };
+  const char* npxlayers_names[max_npxlayers_type] = {"npxlayers_2", "npxlayers_3", "npxlayers_4", "npxlayers_5"};
+
   //Alec added to here  
 
   TH1D* h_nvtx[max_mass_type];
-  TH1D* h_chi2dof[max_mass_type];
-  TH1D* h_premass[max_mass_type];
-  TH1D* h_mass[max_mass_type];  //Alec commented
-  /*TH1D* h_mass_ptlt2_dxyltp02_pimintrack[max_mass_type];       //Alec added from here to here
-  TH1D* h_mass_ptgt2lt5_dxyltp02_pimintrack[max_mass_type];
-  TH1D* h_mass_ptgt5_dxyltp02_pimintrack[max_mass_type];
-  TH1D* h_mass_ptlt2_dxygtp02ltp1_pimintrack[max_mass_type];    //These were added back when I was comparing max vs. min of the two track impact parameters, no difference
-  TH1D* h_mass_ptlt2_dxygtp1_pimintrack[max_mass_type];
-  TH1D* h_mass_ptgt2lt5_dxygtp02ltp1_pimintrack[max_mass_type];*/
-  //TH1D* h_mass_bin[max_mass_type][max_pt_type][max_dxy_type];
+  //TH1D* h_chi2dof[max_mass_type];
+  //TH1D* h_premass[max_mass_type];
+  TH1D* h_mass[max_mass_type];
   TH1D* h_mass_bin[max_mass_type][max_abseta_type][max_pt_type][max_dxy_type];
-  TH1D* h_mass_dbvbin[max_mass_type][max_abseta_type][max_pt_type][max_dbv_type];
-  TH1D* h_p[max_mass_type];
-  TH1D* h_pt[max_mass_type];
-  TH1D* h_dbv[max_mass_type]; //Alec added
-  TH1D* h_eta[max_mass_type];
+  //TH1D* h_mass_dbvbin[max_mass_type][max_abseta_type][max_pt_type][max_dbv_type];
+  //TH1D* h_p[max_mass_type];
+  //TH1D* h_pt[max_mass_type];
+  //TH1D* h_dbv[max_mass_type]; //Alec added
+  /*TH1D* h_x[max_mass_type]; //Alec added
+  TH1D* h_y[max_mass_type]; //Alec added
+  TH2D* h_x_v_y[max_mass_type]; //Alec added
+  TH2D* h_x_v_y_bpc[max_mass_type]; //Alec added
+  TH1D* h_dbvsinalpha[max_mass_type]; //Alec added
+  TH1D* h_eta[max_mass_type];*/
   TH1D* h_phi[max_mass_type];
-  TH1D* h_deltazpv[max_mass_type];
+  /*TH1D* h_deltazpv[max_mass_type];
   TH1D* h_costh3[max_mass_type];
   TH1D* h_costh2[max_mass_type];
   TH1D* h_trackdeltaeta[max_mass_type];
@@ -79,18 +80,20 @@ int main(int argc, char** argv) {
   TH1D* h_ctau[max_mass_type];
   TH1D* h_rho[max_mass_type];
   TH1D* h_tracks_pt[max_mass_type];
-  TH1D* h_tracks_eta[max_mass_type];
+  TH1D* h_tracks_eta[max_mass_type];*/
   TH1D* h_tracks_phi[max_mass_type];
   TH1D* h_tracks_dxy[max_mass_type];
-  TH1D* h_tracks_absdxy[max_mass_type];
+  //TH1D* h_tracks_dxy_tracks_ptbinned[max_mass_type][max_track_pt_type]; //Alec added
+  //TH1D* h_tracks_dxyerr_tracks_ptbinned[max_mass_type][max_track_pt_type]; //Alec added
+  /*TH1D* h_tracks_absdxy[max_mass_type];
   TH1D* h_tracks_dz[max_mass_type];
   TH1D* h_tracks_dzpv[max_mass_type];
   TH1D* h_tracks_nhits[max_mass_type];
   TH1D* h_tracks_npxhits[max_mass_type];
-  TH1D* h_tracks_nsthits[max_mass_type];
+  TH1D* h_tracks_nsthits[max_mass_type];*/
   TH1D* h_tracks_min_r[max_mass_type];
   TH1D* h_tracks_npxlayers[max_mass_type];
-  TH1D* h_tracks_nstlayers[max_mass_type];
+  /*TH1D* h_tracks_nstlayers[max_mass_type];
   TH1D* h_tracks_nsigmadxy[max_mass_type];
   TH1D* h_tracks_dxyerr[max_mass_type];
   TH1D* h_tracks_dzerr[max_mass_type];
@@ -103,19 +106,13 @@ int main(int argc, char** argv) {
   TH2D* h_tracks_dszerr_v_pt[max_mass_type];
   TH2D* h_dbv_v_pt[max_mass_type]; //Alec added from here
   TH2D* h_tracks_absdxy_v_pt[max_mass_type];
-  TH2D* h_tracks_absdxy_v_alphapt[max_mass_type];
-  /*TH2D* h_ptlt2_dxyltp02_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt2lt5_dxyltp02_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt5_dxyltp02_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptlt2_dxygtp02ltp1_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptlt2_dxygtp1_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt2lt5_dxygtp02ltp1_mintracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptlt2_dxyltp02_maxtracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt2lt5_dxyltp02_maxtracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt5_dxyltp02_maxtracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptlt2_dxygtp02ltp1_maxtracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptlt2_dxygtp1_maxtracks_absdxy_v_alphapt[max_mass_type];
-  TH2D* h_ptgt2lt5_dxygtp02ltp1_maxtracks_absdxy_v_alphapt[max_mass_type];*/
+  TH2D* h_tracks_absdxy_v_alphapt[max_mass_type];*/ //commented for dxy vs nhits
+  //TH2D* h_tracks_absdxy_v_nhits[max_mass_type]; //Alec added
+  //TH1D* h_tracks_absdxy_nhitbinned[max_mass_type][max_nhit_type]; //Alec added
+  //TH1D* h_tracks_nhits_absdxybinned[max_mass_type][max_dxy_type]; //Alec added
+  //TH1D* h_tracks_absdxy_npxlayersbinned[max_mass_type][max_npxlayers_type]; //Alec added
+
+  //TRandom3 *r3 = new TRandom3(); //commented for dxy vs nhits
   //Alec added to here
 
   for (int i = 0; i < max_mass_type; ++i) {
@@ -123,27 +120,20 @@ int main(int argc, char** argv) {
     d->cd();
 
     h_nvtx[i] = new TH1D("h_nvtx", ";# of K0 candidates;events", 30, 0, 30);
-    h_chi2dof[i] = new TH1D("h_chi2dof", ";K0 candidate #chi^{2}/dof;cands/0.1", 70, 0, 7);
-    h_premass[i] = new TH1D("h_premass", ";K0 candidate pre-fit mass (GeV);cands/5 MeV", 400, 0, 2);
+    //h_chi2dof[i] = new TH1D("h_chi2dof", ";K0 candidate #chi^{2}/dof;cands/0.1", 70, 0, 7);
+    //h_premass[i] = new TH1D("h_premass", ";K0 candidate pre-fit mass (GeV);cands/5 MeV", 400, 0, 2);
     h_mass[i] = new TH1D("h_mass", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2); //Alec commented
-    /*h_mass_ptlt2_dxyltp02_pimintrack[i] = new TH1D("h_mass_ptlt2_dxyltp02_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2); //Alec added from here
-    h_mass_ptgt2lt5_dxyltp02_pimintrack[i] = new TH1D("h_mass_ptgt2lt5_dxyltp02_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptgt5_dxyltp02_pimintrack[i] = new TH1D("h_mass_ptgt5_dxyltp02_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptlt2_dxygtp02ltp1_pimintrack[i] = new TH1D("h_mass_ptlt2_dxygtp02ltp1_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptlt2_dxygtp1_pimintrack[i] = new TH1D("h_mass_ptlt2_dxygtp1_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptgt2lt5_dxygtp02ltp1_pimintrack[i] = new TH1D("h_mass_ptgt2lt5_dxygtp02ltp1_pimintrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptlt2_dxyltp02_pimaxtrack[i] = new TH1D("h_mass_ptlt2_dxyltp02_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptgt2lt5_dxyltp02_pimaxtrack[i] = new TH1D("h_mass_ptgt2lt5_dxyltp02_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptgt5_dxyltp02_pimaxtrack[i] = new TH1D("h_mass_ptgt5_dxyltp02_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptlt2_dxygtp02ltp1_pimaxtrack[i] = new TH1D("h_mass_ptlt2_dxygtp02ltp1_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptlt2_dxygtp1_pimaxtrack[i] = new TH1D("h_mass_ptlt2_dxygtp1_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_mass_ptgt2lt5_dxygtp02ltp1_pimaxtrack[i] = new TH1D("h_mass_ptgt2lt5_dxygtp02ltp1_pimaxtrack", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);*/ //Alec added to here
-    h_p[i] = new TH1D("h_p", ";K0 candidate p (GeV);cands/1 GeV", 200, 0, 200);
-    h_pt[i] = new TH1D("h_pt", ";K0 candidate p_{T} (GeV);cands/1 GeV", 200, 0, 200);
-    h_dbv[i] = new TH1D("h_dbv", ";K0 candidate 2D distance from BS (cm);cands/0.005 cm", 400, 0, 2);
-    h_eta[i] = new TH1D("h_eta", ";K0 candidate #eta;cands/0.05", 100, -2.5, 2.5);
+    //h_p[i] = new TH1D("h_p", ";K0 candidate p (GeV);cands/1 GeV", 200, 0, 200);
+    //h_pt[i] = new TH1D("h_pt", ";K0 candidate p_{T} (GeV);cands/1 GeV", 200, 0, 200);
+    //h_dbv[i] = new TH1D("h_dbv", ";K0 candidate 2D distance from BS (cm);cands/0.005 cm", 400, 0, 2);
+    /*h_x[i] = new TH1D("h_x", ";K0 candidate 2D distance from BS along x-axis (cm);cands/0.005 cm", 800, -2, 2);
+    h_y[i] = new TH1D("h_y", ";K0 candidate 2D distance from BS along y-axis (cm);cands/0.005 cm", 800, -2, 2);
+    h_x_v_y[i] = new TH2D("h_x_v_y", ";K0 candidate 2D distance from BS along x-axis (cm);K0 candidate 2D distance from BS along y-axis (cm)", 800, -2, 2, 800, -2, 2);
+    h_x_v_y_bpc[i] = new TH2D("h_x_v_y_bpc", ";K0 candidate 2D distance from beam pipe center along x-axis (cm);K0 candidate 2D distance from beam pipe center along y-axis (cm)", 800, -2, 2, 800, -2, 2);
+    h_dbvsinalpha[i] = new TH1D("h_dbvsinalpha", ";K0 candidate 2D distance from BS times the sine of 2D angle between K0 and pion tracks (cm);cands/0.005 cm", 400, 0 , 2);
+    h_eta[i] = new TH1D("h_eta", ";K0 candidate #eta;cands/0.05", 100, -2.5, 2.5);*/
     h_phi[i] = new TH1D("h_phi", ";K0 candidate #phi;cands/0.063", 100, -M_PI, M_PI);
-    h_deltazpv[i] = new TH1D("h_deltazpv", ";K0 candidate |#Delta z to PV| (cm);cands/0.1 cm", 200, 0, 20);
+    /*h_deltazpv[i] = new TH1D("h_deltazpv", ";K0 candidate |#Delta z to PV| (cm);cands/0.1 cm", 200, 0, 20);
     h_costh3[i] = new TH1D("h_costh3", ";K0 candidate cos(angle3{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
     h_costh2[i] = new TH1D("h_costh2", ";K0 candidate cos(angle2{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
     h_trackdeltaeta[i] = new TH1D("h_trackdeltaeta", ";K0 candidate track #Delta #eta;cands/0.025", 100, 0, 2.5);
@@ -153,18 +143,18 @@ int main(int argc, char** argv) {
     h_ctau[i] = new TH1D("h_ctau", ";K0 candidate c#tau (cm);cands/0.005 cm", 400, 0, 2);
     h_rho[i] = new TH1D("h_rho", ";K0 candidate #rho (cm);cands/0.005 cm", 400, 0, 2);
     h_tracks_pt[i] = new TH1D("h_tracks_pt", ";tracks pt;arb. units", 200, 0, 200);
-    h_tracks_eta[i] = new TH1D("h_tracks_eta", ";tracks eta;arb. units", 50, -4, 4);
+    h_tracks_eta[i] = new TH1D("h_tracks_eta", ";tracks eta;arb. units", 50, -4, 4);*/
     h_tracks_phi[i] = new TH1D("h_tracks_phi", ";tracks phi;arb. units", 32, -3.15, 3.15);
     h_tracks_dxy[i] = new TH1D("h_tracks_dxy", ";tracks dxy to beamspot (cm);arb. units", 2000, -1, 1);  //Alec changed +-.2 to +-1 and 400 to 2000
-    h_tracks_absdxy[i] = new TH1D("h_tracks_absdxy", ";tracks |dxy| to beamspot (cm);arb. units", 1000, 0, 1); //Alec changed 0.2 to 1 and 200 to 1000
+    /*h_tracks_absdxy[i] = new TH1D("h_tracks_absdxy", ";tracks |dxy| to beamspot (cm);arb. units", 1000, 0, 1); //Alec changed 0.2 to 1 and 200 to 1000
     h_tracks_dz[i] = new TH1D("h_tracks_dz", ";tracks dz to BS;arb. units", 400, -20, 20);
     h_tracks_dzpv[i] = new TH1D("h_tracks_dzpv", ";tracks dz to PV;arb. units", 400, -20, 20);
     h_tracks_nhits[i] = new TH1D("h_tracks_nhits", ";tracks nhits;arb. units", 40, 0, 40);
     h_tracks_npxhits[i] = new TH1D("h_tracks_npxhits", ";tracks npxhits;arb. units", 40, 0, 40);
-    h_tracks_nsthits[i] = new TH1D("h_tracks_nsthits", ";tracks nsthits;arb. units", 40, 0, 40);
+    h_tracks_nsthits[i] = new TH1D("h_tracks_nsthits", ";tracks nsthits;arb. units", 40, 0, 40);*/
     h_tracks_min_r[i] = new TH1D("h_tracks_min_r", ";tracks min_r;arb. units", 20, 0, 20);
     h_tracks_npxlayers[i] = new TH1D("h_tracks_npxlayers", ";tracks npxlayers;arb. units", 20, 0, 20);
-    h_tracks_nstlayers[i] = new TH1D("h_tracks_nstlayers", ";tracks nstlayers;arb. units", 20, 0, 20);
+    /*h_tracks_nstlayers[i] = new TH1D("h_tracks_nstlayers", ";tracks nstlayers;arb. units", 20, 0, 20);
     h_tracks_nsigmadxy[i] = new TH1D("h_tracks_nsigmadxy", ";tracks nsigmadxy;arb. units", 400, 0, 40);
     h_tracks_dxyerr[i] = new TH1D("h_tracks_dxyerr", ";tracks dxyerr;arb. units", 400, 0, 0.04);
     h_tracks_dzerr[i] = new TH1D("h_tracks_dzerr", ";tracks dzerr;arb. units", 400, 0, 0.04);
@@ -177,20 +167,26 @@ int main(int argc, char** argv) {
     h_tracks_dszerr_v_pt[i] = new TH2D("h_tracks_dszerr_v_pt", ";p_{T} (GeV);dszerr (cm)", 2000, 0, 200, 2000, 0, 0.2);
     h_dbv_v_pt[i] = new TH2D("h_dbv_v_pt", ";K0 candidate p_{T} (GeV);K0 candidate 2D distance from BS (cm)", 200, 0, 200, 400, 0, 2); //Alec added from here
     h_tracks_absdxy_v_pt[i] = new TH2D("h_tracks_absdxy_v_pt", ";pion track p_{T} (GeV);tracks |dxy| to beamspot (cm)", 200, 0, 200, 1000, 0, 1);
-    h_tracks_absdxy_v_alphapt[i] = new TH2D("h_tracks_absdxy_v_alphapt", ";pion track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 200, 0, 200, 1000, 0, 1);
-    /*h_ptlt2_dxyltp02_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxyltp02_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 20, 0, .02);
-    h_ptgt2lt5_dxyltp02_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt2lt5_dxyltp02_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 2, 5, 20, 0, .02);
-    h_ptgt5_dxyltp02_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt5_dxyltp02_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 5, 200, 20, 0, .02);
-    h_ptlt2_dxygtp02ltp1_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxygtp02ltp1_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 80, .02, .1);
-    h_ptlt2_dxygtp1_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxygtp1_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 900, .1, 1);
-    h_ptgt2lt5_dxygtp02ltp1_mintracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt2lt5_dxygtp02ltp1_mintracks_absdxy_v_alphapt", ";pion mindxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 2, 5, 80, .02, .1);
-    h_ptlt2_dxyltp02_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxyltp02_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 20, 0, .02);
-    h_ptgt2lt5_dxyltp02_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt2lt5_dxyltp02_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 2, 5, 20, 0, .02);
-    h_ptgt5_dxyltp02_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt5_dxyltp02_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 5, 200, 20, 0, .02);
-    h_ptlt2_dxygtp02ltp1_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxygtp02ltp1_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 80, .02, .1);
-    h_ptlt2_dxygtp1_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptlt2_dxygtp1_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 0, 2, 900, .1, 1);
-    h_ptgt2lt5_dxygtp02ltp1_maxtracks_absdxy_v_alphapt[i] = new TH2D("h_ptgt2lt5_dxygtp02ltp1_maxtracks_absdxy_v_alphapt", ";pion maxdxy track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 10, 2, 5, 80, .02, .1);
-//Alec added to here */
+    h_tracks_absdxy_v_alphapt[i] = new TH2D("h_tracks_absdxy_v_alphapt", ";pion track p_{T} * abs sine of 2D angle between K0 and pion track (GeV);tracks |dxy| to beamspot (cm)", 200, 0, 200, 1000, 0, 1);*/ //commented for dxy vs nhits
+    //h_tracks_absdxy_v_nhits[i] = new TH2D("h_tracks_absdxy_v_nhits", ";track nhits;tracks |dxy| to beamspot (cm)", 40, 0, 40, 1000, 0, 1);
+
+    /*for (int n = 0; n < max_nhit_type; ++n) {
+       TDirectory* dmakenhit = d->mkdir(nhit_names[n]);
+       dmakenhit->cd();
+       h_tracks_absdxy_nhitbinned[i][n] = new TH1D("h_tracks_absdxy_nhitbinned", ";tracks |dxy| to beamspot (cm);arb. units", 1000, 0, 1);
+     }
+
+     for (int m = 0; m < max_dxy_type; ++m) {
+       TDirectory* dmakedxy = d->mkdir(dxy_names[m]);
+       dmakedxy->cd();
+       h_tracks_nhits_absdxybinned[i][m] = new TH1D("h_tracks_nhits_absdxybinned", ";tracks nhits;arb. units", 40, 0, 40);
+     }
+
+     for (int q = 0; q < max_npxlayers_type; ++q) {
+       TDirectory* dmakenpxlayers = d->mkdir(npxlayers_names[q]);
+       dmakenpxlayers->cd();
+       h_tracks_absdxy_npxlayersbinned[i][q] = new TH1D("h_tracks_absdxy_npxlayersbinned", ";tracks |dxy| to beamspot (cm);arb. units", 1000, 0, 1);
+     }*/
   
     for (int l = 0; l < max_abseta_type; ++l) {
       TDirectory* dmakeeta = d->mkdir(abseta_names[l]);
@@ -207,26 +203,22 @@ int main(int argc, char** argv) {
           h_mass_bin[i][l][j][k] = new TH1D("h_mass_bin", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
         }
 
-        for (int k = 0; k < max_dbv_type; ++k) {
+        /*for (int k = 0; k < max_dbv_type; ++k) {
           TDirectory* dmakedbv = dmakept->mkdir(dbv_names[k]);
           dmakedbv->cd();
 
           h_mass_dbvbin[i][l][j][k] = new TH1D("h_mass_dbvbin", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-        }
+	}*/
       }
     }
 
-    //for (int j = 0; j < max_pt_type; ++j) {
-      //TDirectory* dmakept = d->mkdir(pt_names[j]);
-      //dmakept->cd();
+    /*for (int m = 0; m < max_track_pt_type; ++m) {
+      TDirectory* dmaketrack_pt = d->mkdir(track_pt_names[m]);
+      dmaketrack_pt->cd();
+      h_tracks_dxy_tracks_ptbinned[i][m] = new TH1D("h_tracks_dxy_tracks_ptbinned", ";tracks dxy to beamspot (cm);arb. units", 2000, -1, 1);
+      h_tracks_dxyerr_tracks_ptbinned[i][m] = new TH1D("h_tracks_dxyerr_tracks_ptbinned", ";tracks dxy to beamspot (cm);arb. units", 400, 0, 0.04);
+    }*/ //commented for dxy vs nhits
 
-      //for (int k = 0; k < max_dbv_type; ++k) {
-        //TDirectory* dmakedbv = dmakept->mkdir(dbv_names[k]);
-        //dmakedbv->cd();
-
-        //h_mass_dbvbin[i][j][k] = new TH1D("h_mass_dbvbin", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-      //}
-    //}
   }
 
   nr.f_out().cd();
@@ -235,7 +227,7 @@ int main(int argc, char** argv) {
   const double min_nsigmadxybs = 0.;
 
   auto fcn = [&]() {
-    const double w = nr.weight();  //Alec added absolute value to the weights here to see what would happen, CHANGE THIS BACK!
+    const double w = nr.weight();  //Alec added absolute value to the weights here to see what would happen
 
     int nselmuons = 0;  //Alec added this TrackerMapper block from here
     //double muon_pT = -99;
@@ -361,6 +353,7 @@ int main(int argc, char** argv) {
 
     for (int isv = 0, isve = nt.svs().n(); isv < isve; ++isv) {
       const TVector3 pos = nt.svs().pos(isv);
+      //std::cout << "Value of is_mc: " << nr.is_mc() << std::endl;
       if (!jmt::Geometry::inside_beampipe(nr.is_mc(), pos.X(), pos.Y()))
         continue;
 
@@ -410,7 +403,8 @@ int main(int argc, char** argv) {
       const double dbv = std::hypot(x-bs.x(), y-bs.y());  //Alec added
 
       if (dbv > 1.9) continue; //Alec added
-      if (dbv < .2) continue; //Alec added, this cut appears to be in place without this to ensure displaced vertices, but just to be safe
+      if (dbv < .2) continue; //Alec added
+      //if (dbv > .2) continue; //Enable this cut if only want small dbv events
       if (p4.Pt() < 2) continue;
 
       int iabseta = abseta_lt1;
@@ -434,28 +428,37 @@ int main(int argc, char** argv) {
 
       //track dxy ntt.dxybs(tki, nt.bs()) 
 
-      if (costh2 < 0.99975) continue;
+      if (costh2 < 0.99975) continue; //cut on the angle between the sum of the 2D pion momentum vectors and the 2D position vector of secondary vertex
       if (ctau < 0.0268) continue; //got rid of this cut to try to eliminate drop off in events at low dxy in past analysis, no noticable effect
       //if (fabs(p4.Eta()) > 0.5) continue;  //added this cut to ensure better agreement between data and MC when plotting wrt Kaon p
+      //if (fabs(p4.Eta()) > 1.5) continue; //This cut ensure all Kaons are in the barrel and not in the endcap, remove if doing K0 study
 
-      int imass2 = mass_on;
+      if (mass < 0.42 || 0.58 < mass) continue;
+      //if (mass < 0.3 || 0.7 < mass) continue;
+      
+      /*int imass2 = mass_on;
       //if      (mass < 0.490) imass2 = mass_lo; //widened the range of mass_on to completely eliminate signal events from lo and hi, now those should be pure background
       //else if (mass > 0.505) imass2 = mass_hi;
       if      (mass < 0.475) imass2 = mass_lo;
-      else if (mass > 0.525) imass2 = mass_hi;
+      else if (mass > 0.525) imass2 = mass_hi;*/
 
-      for (int ii : {0,1}) {
-        const int imass = ii == 0 ? mass_all : imass2;
+      //for (int ii : {0,1}) {
+      //  const int imass = ii == 0 ? mass_all : imass2;
+      const int imass = mass_all; //added to remove mass_on, mass_lo, and mass_hi
 
-        fill(h_chi2dof[imass], nt.svs().chi2dof(isv));
-        fill(h_premass[imass], prep4.M());
+        //fill(h_chi2dof[imass], nt.svs().chi2dof(isv));
+        //fill(h_premass[imass], prep4.M());
         fill(h_mass[imass], mass);
-        fill(h_p[imass], p4.P());
-        fill(h_pt[imass], p4.Pt());
-        fill(h_dbv[imass], dbv); //Alec added
-        fill(h_eta[imass], p4.Eta());
+        //fill(h_p[imass], p4.P());
+        //fill(h_pt[imass], p4.Pt());
+        //fill(h_dbv[imass], dbv); //Alec added
+	/*fill(h_x[imass], x-bs.x()); //Alec added
+	fill(h_y[imass], y-bs.y()); //Alec added
+	fill2(h_x_v_y[imass], x-bs.x(), y-bs.y()); //Alec added
+	fill2(h_x_v_y_bpc[imass], x, y); //Alec added
+        fill(h_eta[imass], p4.Eta());*/
         fill(h_phi[imass], p4.Phi());
-        fill(h_deltazpv[imass], deltazpv);
+        /*fill(h_deltazpv[imass], deltazpv);
         fill(h_costh3[imass], costh3);
         fill(h_costh2[imass], costh2);
         fill(h_trackdeltaeta[imass], trackdeltaeta);
@@ -464,25 +467,55 @@ int main(int argc, char** argv) {
         fill(h_ct[imass], ct);
         fill(h_ctau[imass], ctau);
         fill(h_rho[imass], rho);
-        fill(h_mass_dbvbin[imass][iabseta][ipt][idbv], mass); //Alec added
-        fill2(h_dbv_v_pt[imass], p4.Pt(), dbv); //Alec added
+        fill(h_mass_dbvbin[imass][iabseta][ipt][idbv], mass); //Alec added*/ //commented for dxy vs nhits
+        //fill2(h_dbv_v_pt[imass], p4.Pt(), dbv); //Alec added, then removed to implement tracking inefficiency
 
         for (int tki : {itk, jtk}) {
           //if (fabs(ntt.dxybs(tki, nt.bs())) > .02) continue; //Alec added to see if we can find bias in dxy distribution between data and bkg
           const float alpha = p4.DeltaPhi(ntt.p4(tki, mpion)); //Alec added
+	  const float dbvsinalpha = dbv*fabs(std::sin(alpha));
+	  int inhit = nhits_6to10;
+	  if (ntt.nhits(tki) > 10 && ntt.nhits(tki) < 16) inhit = nhits_11to15;
+	  if (ntt.nhits(tki) > 15 && ntt.nhits(tki) < 21) inhit = nhits_16to20;
+	  if (ntt.nhits(tki) > 20 && ntt.nhits(tki) < 26) inhit = nhits_21to25;
+	  if (ntt.nhits(tki) > 25 && ntt.nhits(tki) < 31) inhit = nhits_26to30;
+	  if (ntt.nhits(tki) > 30 && ntt.nhits(tki) < 36) inhit = nhits_31to35;
+	  int idxy = dxy_ltp03;
+	  if      (fabs(ntt.dxybs(tki, nt.bs()))>.03 && fabs(ntt.dxybs(tki, nt.bs()))<.06) idxy = dxy_gtp03ltp06;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.06 && fabs(ntt.dxybs(tki, nt.bs()))<.09) idxy = dxy_gtp06ltp09;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.09 && fabs(ntt.dxybs(tki, nt.bs()))<.13) idxy = dxy_gtp09ltp13;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.13 && fabs(ntt.dxybs(tki, nt.bs()))<.17) idxy = dxy_gtp13ltp17;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.17 && fabs(ntt.dxybs(tki, nt.bs()))<.23) idxy = dxy_gtp17ltp23;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.23 && fabs(ntt.dxybs(tki, nt.bs()))<.3)  idxy = dxy_gtp23ltp3;
+	  else if (fabs(ntt.dxybs(tki, nt.bs()))>.3)                                       idxy = dxy_gtp3;
+	  int inpxlayers = npxlayers_2;
+	  if (ntt.npxlayers(tki) == 3) inpxlayers = npxlayers_3;
+	  if (ntt.npxlayers(tki) == 4) inpxlayers = npxlayers_4;
+	  if (ntt.npxlayers(tki) == 5) inpxlayers = npxlayers_5;
+
+	  //if (ntt.missinhit(tki) == false) std::cout << "Missed nhit is 0! track min_r = " << ntt.min_r(tki) << std::endl;
+	  //if (ntt.missinhit(tki) == true) std::cout << "Missed nhit is 1! track min_r = " << ntt.min_r(tki) << std::endl;
+	  /*fill(h_dbvsinalpha[imass], dbvsinalpha); //Alec added
           fill(h_tracks_pt[imass], ntt.pt(tki));
-          fill(h_tracks_eta[imass], ntt.eta(tki));
+          fill(h_tracks_eta[imass], ntt.eta(tki));*/
           fill(h_tracks_phi[imass], ntt.phi(tki));
           fill(h_tracks_dxy[imass], ntt.dxybs(tki, nt.bs()));
-          fill(h_tracks_absdxy[imass], fabs(ntt.dxybs(tki, nt.bs())));
+	  /*int itrack_pt = track_pt_lt2;
+	  if      (ntt.pt(tki) > 2 && ntt.pt(tki) < 3) itrack_pt = track_pt_gt2lt3;
+	  if      (ntt.pt(tki) > 3 && ntt.pt(tki) < 5) itrack_pt = track_pt_gt3lt5;
+	  if      (ntt.pt(tki) > 5 && ntt.pt(tki) < 10) itrack_pt = track_pt_gt5lt10;
+	  if      (ntt.pt(tki) > 10) itrack_pt = track_pt_gt10;
+	  fill(h_tracks_dxy_tracks_ptbinned[imass][itrack_pt], ntt.dxybs(tki, nt.bs()));
+	  fill(h_tracks_dxyerr_tracks_ptbinned[imass][itrack_pt], ntt.err_dz(tki));*/
+          /*fill(h_tracks_absdxy[imass], fabs(ntt.dxybs(tki, nt.bs())));
           fill(h_tracks_dz[imass], ntt.dz(tki));
           fill(h_tracks_dzpv[imass], ntt.dzpv(tki, nt.pvs()));
           fill(h_tracks_nhits[imass], ntt.nhits(tki));
           fill(h_tracks_npxhits[imass], ntt.npxhits(tki));
-          fill(h_tracks_nsthits[imass], ntt.nsthits(tki));
+          fill(h_tracks_nsthits[imass], ntt.nsthits(tki));*/
           fill(h_tracks_min_r[imass], ntt.min_r(tki));
           fill(h_tracks_npxlayers[imass], ntt.npxlayers(tki));
-          fill(h_tracks_nstlayers[imass], ntt.nstlayers(tki));
+	  /*fill(h_tracks_nstlayers[imass], ntt.nstlayers(tki));
           fill(h_tracks_nsigmadxy[imass], ntt.nsigmadxybs(tki, nt.bs()));
           fill(h_tracks_dxyerr[imass], ntt.err_dxy(tki));
           fill(h_tracks_dzerr[imass], ntt.err_dz(tki));
@@ -491,18 +524,15 @@ int main(int argc, char** argv) {
           fill(h_tracks_pterr[imass], ntt.err_pt(tki));
           fill(h_tracks_phierr[imass], ntt.err_phi(tki));
           fill(h_tracks_etaerr[imass], ntt.err_eta(tki));
+	  
           fill2(h_tracks_dxyerr_v_pt[imass], ntt.pt(tki), ntt.err_dxy(tki));
           fill2(h_tracks_dszerr_v_pt[imass], ntt.pt(tki), ntt.err_dsz(tki));
-          //fill2(h_tracks_absdxy_v_pt[imass], ntt.pt(tki), fabs(ntt.dxybs(tki, nt.bs()))); //Alec added from here
-          //fill2(h_tracks_absdxy_v_alphapt[imass], ntt.pt(tki)*fabs(alpha), fabs(ntt.dxybs(tki, nt.bs())));
 	  fill2(h_tracks_absdxy_v_pt[imass], p4.Pt(), fabs(ntt.dxybs(tki, nt.bs())));
-          fill2(h_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          /*if (fabs(ntt.dxybs(tki, nt.bs()))<.02 && p4.Pt()<2) fill2(h_ptlt2_dxyltp02_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          if (fabs(ntt.dxybs(tki, nt.bs()))<.02 && p4.Pt()>2 && p4.Pt()<5) fill2(h_ptgt2lt5_dxyltp02_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          if (fabs(ntt.dxybs(tki, nt.bs()))<.02 && p4.Pt()>5) fill2(h_ptgt5_dxyltp02_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          if (fabs(ntt.dxybs(tki, nt.bs()))>.02 && fabs(ntt.dxybs(tki, nt.bs()))<.1 && p4.Pt()<2) fill2(h_ptlt2_dxygtp02ltp1_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          if (fabs(ntt.dxybs(tki, nt.bs()))>.1 && p4.Pt()<2) fill2(h_ptlt2_dxygtp1_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));
-          if (fabs(ntt.dxybs(tki, nt.bs()))>.02 && fabs(ntt.dxybs(tki, nt.bs()))<.1 && p4.Pt()>2 && p4.Pt()<5) fill2(h_ptgt2lt5_dxygtp02ltp1_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));*/
+          fill2(h_tracks_absdxy_v_alphapt[imass], p4.Pt()*fabs(std::sin(alpha)), fabs(ntt.dxybs(tki, nt.bs())));*/ //commented for dxy vs nhits
+	  //fill2(h_tracks_absdxy_v_nhits[imass], ntt.nhits(tki), fabs(ntt.dxybs(tki, nt.bs())));
+	  //fill(h_tracks_absdxy_nhitbinned[imass][inhit], fabs(ntt.dxybs(tki, nt.bs()))); //Alec added
+	  //fill(h_tracks_nhits_absdxybinned[imass][idxy], ntt.nhits(tki)); //Alec added
+	  //fill(h_tracks_absdxy_npxlayersbinned[imass][inpxlayers], fabs(ntt.dxybs(tki, nt.bs()))); //Alec added
           //Alec to here
         }
 
@@ -533,8 +563,22 @@ int main(int argc, char** argv) {
         else if (fabs(ntt.dxybs(maxtk, nt.bs()))>.23 && fabs(ntt.dxybs(maxtk, nt.bs()))<.3)  idxy = dxy_gtp23ltp3;
         else if (fabs(ntt.dxybs(maxtk, nt.bs()))>.3)                                        idxy = dxy_gtp3;
 
-        fill(h_mass_bin[imass][iabseta][ipt][idxy], mass);
+        fill(h_mass_bin[imass][iabseta][ipt][idxy], mass); //commented for dxy vs nhits
 
+	/*const double track_recon_eff = 1-1.11786*fabs(ntt.dxybs(maxtk, nt.bs()))*fabs(ntt.dxybs(maxtk, nt.bs())); //Alec added from here
+        const double rand_0to1 = r3->Uniform(0,1);
+        std::cout << rand_0to1 << std::endl;
+        if (fabs(ntt.dxybs(maxtk, nt.bs())) < .3) {
+          if (rand_0to1 < track_recon_eff) {
+            fill2(h_dbv_v_pt[imass], p4.Pt(), dbv);
+	  }
+        }
+        else {
+          if (rand_0to1 < (1-1.11786*.3*.3)) {
+            fill2(h_dbv_v_pt[imass], p4.Pt(), dbv);
+          }
+        }*/ //commented for dxy vs nhits
+	//Alec added to here
         /*const float max_alpha = p4.DeltaPhi(ntt.p4(maxtk, mpion));  //add this back in when want to bin in pt*sin(alpha)
         const float pt_sinalpha = pt*fabs(std::sin(max_alpha));
         int ipt = pt_lt0p25;
@@ -572,7 +616,7 @@ int main(int argc, char** argv) {
         //Alec added to here
 
         ++nvtx[imass];
-      }
+      //} //commented out this end of the loop needed for mass_lo, mass_hi, and mass_on
     }
 
     for (int i = 0; i < max_mass_type; ++i)

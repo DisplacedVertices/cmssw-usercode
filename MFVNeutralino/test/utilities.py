@@ -28,7 +28,7 @@ def cmd_hadd_vertexer_histos():
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])
 
 def cmd_report_data():
-    for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''), ('SingleElectron', '_ele'), ('MET', '_met'):
+    for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''), ('SingleElectron', '_ele'), ('MET', '_met'), ('EGamma', '_ele'): #Alec added ('EGamma', '_ele')
         maod = 'miniaod' if 'miniaod' in sys.argv else ''
         pc = ''
         if '10pc' in sys.argv:
@@ -67,7 +67,7 @@ def cmd_report_data():
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
-    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron', 'MET':
+    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron', 'MET', 'EGamma': #Alec added 'EGamma'
         print ds
         files = set(glob(ds + '*.root'))
         if not files:
@@ -125,7 +125,7 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
+def _background_samples(trigeff=False, year=2018, bkg_tag='others'):
     if _leptonpresel or trigeff: #FIXME
         if bkg_tag == 'wjetstolnu':
             x = ['wjetstolnu_0j']
@@ -167,6 +167,7 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
 def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
     cwd = os.getcwd()
     ok = True
+    print "year used by background merge: %f" % year_to_use
     if year_to_use==-1:
       for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
                             ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
@@ -233,7 +234,8 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                 print ("{0} {1} merged!".format(year, bkg_tag)) 
          
         #cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root qcdmupt5_leptonpresel_2017.root qcd_leptonpresel_2017.root others_leptonpresel_2017.root'
-        cmd = 'hadd.py background_leptonpresel_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root others_leptonpresel_2017.root'
+        cmd = 'hadd.py simulation_2017.root wjetstolnu_leptonpresel_2017.root dyjets_leptonpresel_2017.root others_leptonpresel_2017.root'
+        #cmd = 'hadd.py simulation_2018.root wjetstolnu_leptonpresel_2018.root dyjets_leptonpresel_2018.root others_leptonpresel_2018.root' 
         print cmd
         os.system(cmd)
     #only work for 2017 data now
@@ -242,7 +244,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
     #    print cmd
     #    os.system(cmd)
 
-def cmd_effsprint(year_to_use=2017):
+def cmd_effsprint(year_to_use=2018):
     if year_to_use==-1:
         for year in 2017, 2018:
             background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
@@ -330,7 +332,7 @@ def cmd_k0hists():
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
-    if glob('*SingleMuon*') or glob('*SingleElectron*'):
+    if glob('*SingleMuon*') or glob('*SingleElectron*') or glob('*EGamma*'): #Alec added glob('*EGamma*')
         cmd_report_data()
         cmd_hadd_data()
     cmd_trigeff_merge()

@@ -2,9 +2,9 @@ from JMTucker.Tools.MetaSubmitter import *
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 
-dataset = 'ntuple_K0_DYmuontrig_masswide' #Alec added these three lines
+dataset = 'mfvK0sNtuple2017_masswide_ULV30LepMumv1_isMCtrue_fixbjetsandmin_rLepMumv1' #Alec added these three lines
 samples = pick_samples(dataset, Lepton_data=True, leptonic=True, diboson=True, qcd_lep=False, ttbar=True, all_signal=False)#Alec set qcd_lep=False, qcd negligible to Z and K
-NtupleReader_submit('hists_sumw2_etaptdbvdxybin_extmassrange_norhocut_'+dataset, dataset, samples)
+NtupleReader_submit('hists_sumw2_fixedminrwithphi_'+dataset, dataset, samples)
 
 #dataset = 'nr_k0ntuplev25mv1' #Alec commented below
 #samples = pick_samples(dataset, both_years=True, ttbar=False, all_signal=False)
