@@ -43,6 +43,7 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
     }
   }
   muon_minr.push_back(min_r);
+  muon_q.push_back(muon.charge()); //Abby change
 }
 
 void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
@@ -54,6 +55,7 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
   electron_pt.push_back(electron.pt());
   electron_eta.push_back(electron.eta());
   electron_phi.push_back(electron.phi());
+  electron_fBrem.push_back(electron.fbrem()); //Abby change
   electron_pt_err.push_back(trk.ptError());
   electron_eta_err.push_back(trk.etaError());
   electron_phi_err.push_back(trk.phiError());
@@ -83,6 +85,7 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
     }
   }
   electron_minr.push_back(min_r);
+  electron_q.push_back(electron.charge()); //Abby change
 }
 
 void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets){
@@ -112,6 +115,41 @@ void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<T
   }
 }
 
+void MFVEvent::mu_hlt_push_back(const reco::Muon& muon, const std::vector<TLorentzVector>& hlt_mu){ //Abby change begin
+
+  double hltmatchdist2 = 0.1*0.1;
+  TLorentzVector hltmatch;
+  for (auto hlt : hlt_mu) {
+    const double dist2 = reco::deltaR2(muon.eta(), muon.phi(), hlt.Eta(), hlt.Phi());
+    if (dist2 < hltmatchdist2) {
+      hltmatchdist2 = dist2;
+      hltmatch = hlt;
+    }
+  }
+  mu_hlt_pt.push_back(hltmatch.Pt());
+  mu_hlt_eta.push_back(hltmatch.Eta());
+  mu_hlt_phi.push_back(hltmatch.Phi());
+  mu_hlt_energy.push_back(hltmatch.E());
+}
+
+void MFVEvent::ele_hlt_push_back(const reco::GsfElectron& electron, const std::vector<TLorentzVector>& hlt_ele){
+
+  double hltmatchdist2 = 0.1*0.1;
+  TLorentzVector hltmatch;
+  for (auto hlt : hlt_ele) {
+    const double dist2 = reco::deltaR2(electron.eta(), electron.phi(), hlt.Eta(), hlt.Phi());
+    if (dist2 < hltmatchdist2) {
+      hltmatchdist2 = dist2;
+      hltmatch = hlt;
+    }
+  }
+  ele_hlt_pt.push_back(hltmatch.Pt());
+  ele_hlt_eta.push_back(hltmatch.Eta());
+  ele_hlt_phi.push_back(hltmatch.Phi());
+  ele_hlt_energy.push_back(hltmatch.E());
+} //Abby change end
+
+
 void MFVEvent::muon_pfiso_push_back(const float muhad_iso,
 				    const float muneut_iso,
 				    const float muphoton_iso,
@@ -139,6 +177,8 @@ void MFVEvent::ele_ID_push_back(const reco::GsfElectron& electron,
 				const int expectedMissingInnerHits,
 				const float iso,
 				const bool passveto){
+
+  float dEtaIn_ = electron.superCluster().isNonnull() && electron.superCluster()->seed().isNonnull() ? electron.deltaEtaSuperClusterTrackAtVtx() - electron.superCluster()->eta() + electron.superCluster()->seed()->eta() : std::numeric_limits<float>::max(); //Abby change
 				
   electron_isEB.push_back(electron.isEB());
   electron_isEE.push_back(electron.isEE());

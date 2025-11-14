@@ -129,7 +129,7 @@ mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4
 mfvSelectedVerticesTightNtk5    = mfvSelectedVerticesTight.clone() # for looping convenience
 
 mfvSelectedVerticesSeq = cms.Sequence(
-    mfvSelectedVerticesExtraLoose *
+    mfvSelectedVerticesLoose *
     mfvSelectedVerticesTight *
     mfvSelectedVerticesTightNtk3 *
     mfvSelectedVerticesTightNtk4 *

@@ -32,7 +32,6 @@ private:
   const double partial_mc_stats_weight;
   const bool weight_gen;
   const bool weight_gen_sign_only;
-  const bool weight_pileup;
   const bool weight_pileup_2;
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
@@ -71,12 +70,11 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))), //Abby change
     enable(cfg.getParameter<bool>("enable")),
-    prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    prints(cfg.getUntrackedParameter<bool>("prints", false)), //Alec changed to true
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
     partial_mc_stats_weight(cfg.getParameter<double>("partial_mc_stats_weight")),
     weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
-    weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     weight_pileup_2(cfg.getParameter<bool>("weight_pileup_2")), //Abby change
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     weight_npv(cfg.getParameter<bool>("weight_npv")),
@@ -89,6 +87,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     mujson(cfg.getParameter<std::string>("mujson")) //Abby change end
     
 {
+  //std::cout << "WeightProducer.cc starts" << std::endl;
   if (weight_gen + weight_gen_sign_only > 1)
     throw cms::Exception("Configuration", "can only set one of weight_gen, weight_gen_sign_only");
 
@@ -187,6 +186,7 @@ double MFVWeightProducer::run (const std::unique_ptr<correction::CorrectionSet>&
 
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
+  //std::cout << "produce void starts" << std::endl;
   if (event.isRealData() != (event.id().run() != 1))
     throw cms::Exception("BadAssumption") << "isRealData = " << event.isRealData() << " and run = " << event.id().run();
 
@@ -226,25 +226,15 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	} //Abby change end
       }
 
-      if (weight_pileup) {
-        const double pu_w = pileup_weight(mevent->npu);
-        if (prints)
-          printf("mc_npu: %g  pu weight: %g  ", mevent->npu, pu_w);
-        if (histos) {
-          h_npu->Fill(mevent->npu);
-          h_sums->Fill(sum_pileup_weight, pu_w);
-        }
-        *weight *= pu_w;
-	*weight_up *= pu_w; //Abby change
-        *weight_down *= pu_w; //Abby change
-      }
-
+      double PUsf = 1.0;
+      double PUsf_up = 1.0;
+      double PUsf_down = 1.0;
       //pulling from json //Abby change begin
       if (weight_pileup_2) {
 
-        double PUsf = 1.0;
-        double PUsf_up = 1.0; 
-        double PUsf_down = 1.0;
+        //double PUsf = 1.0; //Alec moved these above
+        //double PUsf_up = 1.0; 
+        //double PUsf_down = 1.0;
         std::map<std::string, correction::Variable::Type> values {
           {"NumTrueInteractions", mevent->npu}, 
           {"weights", "nominal"}, 
@@ -312,15 +302,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         *weight_down *= w; //Abby change
       }
 
-      //Lepton SF workspace //Abby changes begin 
+      //Lepton SF workspace //Alec correction begin %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       if (apply_lepsf) {
-        double total_lepsf = 1; 
-        double total_lepIDsf = 1; //for histos; in case there are > 1 SV with a leading lepton 
+	//std::cout << "apply lepsf starts" << std::endl;
+	//edm::Handle<MFVEvent> mevent;
+	//event.getByToken(mevent_token, mevent);
+	//printf("TEST event list: %lu, or maybe instead nlep: %i", mevent->muon_pt.size(), mevent->nlep());
+	double total_lepsf = 1;
+        double total_lepIDsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepIDsf = 1;
         double lepRECOsf = 1;
-        double total_lepRECOsf = 1; //for histos; in case there are > 1 SV with a leading lepton 
+        double total_lepRECOsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepISOsf = 1;
-        double total_lepISOsf = 1; //for histos; in case there are > 1 SV with a leading lepton 
+        double total_lepISOsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepTRsf = 1;
         double total_lepTRsf = 1; //for histos; in case there are > 1 SV with a leading lepton
 
@@ -328,170 +322,197 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         double lepIDsf_down = 1;
         double lepRECOsf_down = 1;
         double lepISOsf_down = 1;
-        double lepTRsf_down = 1;
+	double lepTRsf_down = 1;
 
         double total_lepsf_up = 1;
         double lepIDsf_up = 1;
         double lepRECOsf_up = 1;
         double lepISOsf_up = 1;
         double lepTRsf_up = 1;
-
-        //step 1 : get the leading selected lepton (the one that passes all selections; hltmatched, ID, iso, pT, eta)
-        std::vector<float> lepinSV_pt;
-        std::vector<float> lepinSV_eta;
-        std::vector<float> lepinSV_type; //0 == mu, 1 == ele
-        std::vector<int> lepinSV_hlt; // index corresponds to {30.0, 35.0, 38.0, 120.0, 55.0, 27.0, 30.0, 53.0, 180.0, 205.0}
-
-        edm::Handle<MFVVertexAuxCollection> auxes;
-        event.getByToken(vertex_token, auxes);
-
-        const int nsv = int(auxes->size());
-        for (int isv = 0; isv < nsv; ++isv) {
-          const MFVVertexAux& aux = auxes->at(isv);
-
-          // std::cout << " nsv : " << isv << "leading mu : " << aux.leading_selmu_pt.size() << " leading ele : " << aux.leading_selele_pt.size() << std::endl;
-          //could either be size 0 or size 1
-          for (size_t imu = 0; imu < aux.leading_selmu_pt.size(); ++imu) {
-            lepinSV_pt.push_back(aux.leading_selmu_pt[imu]);
-            lepinSV_eta.push_back(aux.leading_selmu_eta[imu]);
-            lepinSV_type.push_back(0);
-            lepinSV_hlt.push_back(aux.leading_selmu_hlt[imu]);
-          }
-          for (size_t iel = 0; iel < aux.leading_selele_pt.size(); ++iel) {
-            lepinSV_pt.push_back(aux.leading_selele_pt[iel]);
-            lepinSV_eta.push_back(aux.leading_selele_eta[iel]);
-            lepinSV_type.push_back(1);
-            lepinSV_hlt.push_back(aux.leading_selele_hlt[iel]);
-
+	//step 1 : get the leading selected lepton (the one that passes all selections; hltmatched, ID, iso, pT, eta)
+	float leading_muonpt = -1;
+	//int leading_muonid = -1;
+	float leading_muoneta = -1;
+	for (int jmu = 0; jmu < mevent->nmuons(); ++jmu) {
+	  if (mevent->muon_pt[jmu] > leading_muonpt) {
+	    leading_muonpt = mevent->muon_pt[jmu];
+	    //leading_muonid = jmu;
+	    leading_muoneta = mevent->muon_eta[jmu];
+	  }
+	}
+	float leading_electronpt = -1;
+        //int leading_electronid = -1;
+        float leading_electroneta = -1;
+        for (int jele = 0; jele < mevent->nelectrons(); ++jele) {
+          if (mevent->electron_pt[jele] > leading_electronpt) {
+	    leading_electronpt = mevent->electron_pt[jele];
+            //leading_electronid = jele;
+            leading_electroneta = mevent->electron_eta[jele];
           }
         }
-        
+	/*float leading_muonpt = *max_element(mevent->muon_pt.begin(), mevent->muon_pt.end());
+	int leading_muonid = std::max_element(mevent->muon_pt.begin(), mevent->muon_pt.end()) - mevent->muon_pt.begin();
+	float leading_muoneta = mevent->muon_eta[leading_muonid];
+	float leading_electronpt = *max_element(mevent->electron_pt.begin(), mevent->electron_pt.end());
+	int leading_electronid = std::max_element(mevent->electron_pt.begin(), mevent->electron_pt.end()) - mevent->electron_pt.begin();
+	float leading_electroneta = mevent->electron_eta[leading_electronid];*/
+	//float leading_leppt = *max_element(assoc_selleppt.begin(), assoc_selleppt.end());
+	//int leading_lepidx = std::max_element(assoc_selleppt.begin(), assoc_selleppt.end()) - assoc_selleppt.begin();
+	float leading_leppt;
+	float leading_lepeta;
+	//int leading_lepid;
+	int leading_leptype; //0 == mu, 1 == ele
 
-        //step 2 : depending on the lepton, get the SFs 
-        //need to loop through all the possible SV that has a leading lepton that passes selections and apply SF to those leptons 
-        for (size_t ilep=0; ilep < lepinSV_type.size(); ilep++) { 
-          if (lepinSV_type[ilep] == 0) { //lepinSV is mu;
-
-            std::map<std::string, correction::Variable::Type> values {
-              {"pt", lepinSV_pt[ilep]}, // muon transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // muon absolute pseudorapidity
-              {"scale_factors", "nominal"}, // variation
-            };
+	int year_int = int(MFVNEUTRALINO_YEAR);
+	if (year_int == 2018) {
+	  if (leading_muonpt > 27.) {
+	    leading_leppt = leading_muonpt;
+	    //leading_lepid = *leading_muonid;
+	    leading_lepeta = leading_muoneta;
+	    leading_leptype = 0;
+	  }
+	  else {
+	    leading_leppt = leading_electronpt;
+	    //leading_lepid = *leading_electronid;
+	    leading_lepeta = leading_electroneta;
+	    leading_leptype = 1;
+	  }
+	}
+	else {
+	  if (leading_muonpt > 30.) {
+            leading_leppt = leading_muonpt;
+            //leading_lepid = *leading_muonid;
+            leading_lepeta = leading_muoneta;
+            leading_leptype = 0;
+          }
+          else {
+            leading_leppt = leading_electronpt;
+            //leading_lepid = *leading_electronid;
+            leading_lepeta = leading_electroneta;
+            leading_leptype = 1;
+          }
+	}
+	//step 2 : depending on the lepton, get the SFs 
+	if (leading_leptype == 0) { //leading_leptype is mu;
+	  
+	  std::map<std::string, correction::Variable::Type> values {
+	    {"pt", leading_leppt}, // muon transverse momentum
+	    {"eta", leading_lepeta}, // muon absolute pseudorapidity
+	    {"scale_factors", "nominal"}, // variation
+	  };
   
-            std::map<std::string, correction::Variable::Type> values_up {
-              {"pt", lepinSV_pt[ilep]}, // muon transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // muon absolute pseudorapidity
-              {"scale_factors", "systup"}, // variation
-            };
+	  std::map<std::string, correction::Variable::Type> values_up {
+            {"pt", leading_leppt}, // muon transverse momentum
+            {"eta", leading_lepeta}, // muon absolute pseudorapidity
+            {"scale_factors", "systup"}, // variation
+	  };
 
-            std::map<std::string, correction::Variable::Type> values_down {
-              {"pt", lepinSV_pt[ilep]}, // muon transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // muon absolute pseudorapidity
-              {"scale_factors", "systdown"}, // variation
-            };
+	  std::map<std::string, correction::Variable::Type> values_down {
+	    {"pt", leading_leppt}, // muon transverse momentum
+	    {"eta", leading_lepeta}, // muon absolute pseudorapidity
+	    {"scale_factors", "systdown"}, // variation
+	  };
 
-            // TrackerMuon Reconstruction UL scale factor
-            if ( lepinSV_pt[ilep] > 40.0) {  //lower limit is 40 for RECO SF? 
-              lepRECOsf = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values);
-              lepRECOsf_up = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values_up);
-              lepRECOsf_down = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values_down);
-  
-            }
-            // Medium ID UL scale factor, down/up variations
-            if (lepinSV_pt[ilep] > 15.0) {  //lower limit is 15 GeV for ID SF, ISO SF
-              lepIDsf = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values);
-              lepIDsf_up = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values_up);
-              lepIDsf_down = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values_down);
+	  // TrackerMuon Reconstruction UL scale factor
+	  if ( leading_leppt > 40.0) {  //lower limit is 40 for RECO SF? 
+	    lepRECOsf = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values);
+	    lepRECOsf_up = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values_up);
+	    lepRECOsf_down = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values_down);  
+	  }
 
-              //ISO UL scale factor 
-              lepISOsf = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values);
-              lepISOsf_up = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values_up);
-              lepISOsf_down = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values_down);
+	  // Medium ID UL scale factor, down/up variations
+	  if (leading_leppt > 15.0) {  //lower limit is 15 GeV for ID SF, ISO SF
+	    lepIDsf = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values);
+	    lepIDsf_up = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values_up);
+	    lepIDsf_down = run(mu_cset, "NUM_MediumID_DEN_TrackerMuons", values_down);
+	    
+	    //ISO UL scale factor 
+	    lepISOsf = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values);
+	    lepISOsf_up = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values_up);
+	    lepISOsf_down = run(mu_cset, "NUM_TightRelIso_DEN_MediumID", values_down);	    
+	  }
 
-            }
-            // // Trigger UL systematic uncertainty only
-            // if (lepinSV_pt[ilep] > 26.0) { //lower limit is 26GeV for Trigger SF 
-            //   lepTRsf = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values);
-            //   lepTRsf_up = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_up);
-            //   lepTRsf_down = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_down);
-            // } 
+	  // // Trigger UL systematic uncertainty only
+	  // if (lepinSV_pt[ilep] > 26.0) { //lower limit is 26GeV for Trigger SF 
+	  //   lepTRsf = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values);
+	  //   lepTRsf_up = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_up);
+	  //   lepTRsf_down = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_down);
+	  // } 
             
-            //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements); 
-            // also, just apply it to one lepton per event; not per SV 
-            if (ilep < 1) { 
-              lepTRsf = 0.99;
-              lepTRsf_up = 0.995;
-              lepTRsf_down = 0.985;
-            }
-          }
-          else { //lepinSV is an electron 
-            // int year = 2017;
-            std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
+	  //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements); 
+	  // also, just apply it to one lepton per event; not per SV 
+	  //if (ilep < 1) { 
+	  lepTRsf = 0.99;
+	  lepTRsf_up = 0.995;
+	  lepTRsf_down = 0.985;
+	  //}
+	}
+	else { //lepinSV is an electron 
+	  // int year = 2017;
+	  std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
 
-            std::map<std::string, correction::Variable::Type> values {
-              {"year", year}, //year
-              {"ValType", "sf"}, // variation
-              {"WorkingPoint",  "Tight"}, //working point
-              {"pt", lepinSV_pt[ilep]}, // electron transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // electron absolute pseudorapidity
-            };
-            std::map<std::string, correction::Variable::Type> values_up {
-              {"year", year}, //year
-              {"ValType", "sfup"}, // variation
-              {"WorkingPoint",  "Tight"}, //working point
-              {"pt", lepinSV_pt[ilep]}, // electron transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // electron absolute pseudorapidity
-            };
+	  std::map<std::string, correction::Variable::Type> values {
+	    {"year", year}, //year
+            {"ValType", "sf"}, // variation
+	    {"WorkingPoint",  "Tight"}, //working point
+	    {"pt", leading_leppt}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
+	  std::map<std::string, correction::Variable::Type> values_up {
+	    {"year", year}, //year
+            {"ValType", "sfup"}, // variation
+	    {"WorkingPoint",  "Tight"}, //working point
+	    {"pt", leading_leppt}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
+	  std::map<std::string, correction::Variable::Type> values_down {
+	    {"year", year}, //year
+            {"ValType", "sfdown"}, // variation
+	    {"WorkingPoint",  "Tight"}, //working point
+	    {"pt", leading_leppt}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
 
-            std::map<std::string, correction::Variable::Type> values_down {
-              {"year", year}, //year
-              {"ValType", "sfdown"}, // variation
-              {"WorkingPoint",  "Tight"}, //working point
-              {"pt", lepinSV_pt[ilep]}, // electron transverse momentum
-              {"eta", lepinSV_eta[ilep]}, // electron absolute pseudorapidity
-            };
-
-            if (lepinSV_pt[ilep] > 10.0) { 
-              lepRECOsf = run(ele_cset, "UL-Electron-ID-SF", values);
-              lepRECOsf_up = run(ele_cset, "UL-Electron-ID-SF", values_up);
-              lepRECOsf_down = run(ele_cset, "UL-Electron-ID-SF", values_down);
+	  if (leading_leppt > 10.0) { 
+	    lepRECOsf = run(ele_cset, "UL-Electron-ID-SF", values);
+	    lepRECOsf_up = run(ele_cset, "UL-Electron-ID-SF", values_up);
+	    lepRECOsf_down = run(ele_cset, "UL-Electron-ID-SF", values_down);
   
-            }
-            //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements)
-            // also, just apply it to one lepton per event; not per SV 
-            if (ilep < 1) { 
-              lepTRsf = 0.99;
-              lepTRsf_up = 0.995;
-              lepTRsf_down = 0.985;
-            }
-          }
+	  }
+	  //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements)
+	  // also, just apply it to one lepton per event; not per SV 
+	  //if (ilep < 1) { 
+	  lepTRsf = 0.99;
+	  lepTRsf_up = 0.995;
+	  lepTRsf_down = 0.985;
+	  //}
+	}
+	//std::cout << "begin calculating lep SF" << std::endl;
+	total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf;
+	//std::cout << "lep ID sf: " << lepIDsf << ", total_lepsf: " << total_lepsf << ", leading lep pt: " << leading_leppt << ", leading lep eta: " << leading_lepeta << ", pileup sf: " << PUsf << ", number of pileup events: " << mevent->npu << std::endl;
+	total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up;
+	total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down;
 
-          total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf;
-          total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up;
-          total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down;
+	//to be used in histos primarily 
+	total_lepRECOsf *= lepRECOsf;
+	total_lepISOsf *= lepISOsf;
+	total_lepIDsf *= lepIDsf;
+	total_lepTRsf *= lepTRsf;
 
-          //to be used in histos primarily 
-          total_lepRECOsf *= lepRECOsf;
-          total_lepISOsf *= lepISOsf;
-          total_lepIDsf *= lepIDsf;
-          total_lepTRsf *= lepTRsf;
-          // std::cout << " total lepsf : " << total_lepsf << std::endl;
-        }
+	if (histos) {
+	  h_lepsums->Fill(sum_leprecoSF, total_lepRECOsf);
+	  h_lepsums->Fill(sum_lepidSF, total_lepIDsf);
+	  h_lepsums->Fill(sum_lepisoSF, total_lepISOsf);
+	  h_lepsums->Fill(sum_leptriggerSF, total_lepTRsf);
+	  h_lepsums->Fill(sum_leptotalSF, total_lepsf);
+	}
+	
+	*weight *= total_lepsf;
+	*weight_up *= total_lepsf_up;
+	*weight_down *= total_lepsf_down;
+      } //end if (leading_leptype == 0)
+//Alec correction end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        if (histos) {
-          h_lepsums->Fill(sum_leprecoSF, total_lepRECOsf);  
-          h_lepsums->Fill(sum_lepidSF, total_lepIDsf); 
-          h_lepsums->Fill(sum_lepisoSF, total_lepISOsf); 
-          h_lepsums->Fill(sum_leptriggerSF, total_lepTRsf);
-          h_lepsums->Fill(sum_leptotalSF, total_lepsf);
-        }
-
-        *weight *= total_lepsf;
-        *weight_up *= total_lepsf_up;
-        *weight_down *= total_lepsf_down;
-        // std::cout << "total lep sf : " << total_lepsf << std::endl;
-      } //Abby changes end
-      
       // Fill in sumw entries for renormalization / factorization scale uncertainty
       if (histos) {
 
@@ -512,9 +533,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
     //rochester corrections have a correction to apply to data/mc so putting it here //Abby changes begin
     if (apply_roccor) {
+      //std::cout << "apply roccor starts" << std::endl;
       double roccor_sf = 1.0; //total for the event
       //these sf are applied to every muon
-      if (event.isRealData()) { 
+      if (event.isRealData()) {
         for (int imu = 0; imu < mevent->nmuons(); ++imu) {
           if (mevent->muon_pt[imu] < 10.) continue;
           double dtSF = rc.kScaleDT(mevent->muon_q[imu], mevent->muon_pt[imu], mevent->muon_eta[imu], mevent->muon_phi[imu], 0, 0); //data
@@ -540,6 +562,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             double dR = reco::deltaR(mevent->muon_eta[imu], mevent->muon_phi[imu], genmu.Eta(), genmu.Phi());
             mindR.push_back(dR);
             genpT.push_back(genmu.Pt());
+	    //std::cout << "genmu works" << std::endl;
           }
           if (mindR.size() !=0) { 
             best_dR = *min_element(mindR.begin(), mindR.end());
@@ -547,19 +570,26 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             genmatch_pt = genpT[best_idx];
           }
           if (best_dR < 0.1) genmatch = true;
-
           if (genmatch) {
+	    //std::cout << "genmatch starts" << std::endl;
+	    //std::cout << "muon_q " << mevent->muon_q[imu] << std::endl;
+	    //std::cout << "muon_pt " << mevent->muon_pt[imu] << std::endl;
+	    //std::cout << "muon_eta " << mevent->muon_eta[imu] << std::endl;
+	    //std::cout << "muon_phi " << mevent->muon_phi[imu] << std::endl;
+	    //std::cout << "genmatch_pt " << genmatch_pt << std::endl;
             double mcSF = rc.kSpreadMC(mevent->muon_q[imu], mevent->muon_pt[imu], mevent->muon_eta[imu], mevent->muon_phi[imu], genmatch_pt, 0, 0); //(recommended), MC scale and resolution correction when matched gen muon is available
-            roccor_sf *= mcSF;
+            roccor_sf *= mcSF; //PROBLEM IS HERE!!!!!!
+	    //std::cout << "genmatch completes" << std::endl;
           }
-          else if (!genmatch){ 
+          else if (!genmatch){
             double mcSF = rc.kSmearMC(mevent->muon_q[imu], mevent->muon_pt[imu], mevent->muon_eta[imu], mevent->muon_phi[imu], mevent->muon_nlayers(imu), u, 0, 0); //MC scale and extra smearing when matched gen muon is not available
-            roccor_sf *= mcSF; 
+            roccor_sf *= mcSF;
           }
         }
       }
+      //std::cout << "roccor scale factor: " << roccor_sf << std::endl;
       *weight *= roccor_sf; 
-      // std::cout << "roccor sf : " << roccor_sf << std::endl;
+      //std::cout << "roccor sf : " << roccor_sf << std::endl;
 
     } //Abby changes end
     
@@ -578,7 +608,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(std::move(weight_up), "lepsfup"); //specific for leptoninSV  //Abby change
   event.put(std::move(weight_down), "lepsfdown"); //specific for leptoninSV //Abby change
 
-  
 }
 
 DEFINE_FWK_MODULE(MFVWeightProducer);
