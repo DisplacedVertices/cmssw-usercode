@@ -38,8 +38,8 @@ displaced_dijet_paths = [
     ]
 
 muon_paths = [
-    "HLT_IsoMu27_v*", #2016,2017
-    "HLT_IsoMu24_v*", #2018
+    "HLT_IsoMu27_v*", #2017
+    "HLT_IsoMu24_v*", #2016,2018
     "HLT_Mu50_v*"
 ]
 

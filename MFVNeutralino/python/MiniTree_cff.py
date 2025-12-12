@@ -14,7 +14,8 @@ mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                              save_tracks = cms.bool(True),
                              )
 
-pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCutsGE1Vtx * mfvMiniTree)
+#pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCutsGE1Vtx * mfvMiniTree) #Alec commented
+pMiniTree = cms.Path(mfvSelectedVerticesTight * mfvWeight * mfvAnalysisCutsGE1Vtx * mfvMiniTree)
 
 mfvAnalysisCutsGE1VtxNtk3    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
 mfvAnalysisCutsGE1VtxNtk4    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')
@@ -38,13 +39,24 @@ mfvMiniTreeNtk4or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTig
 
 mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight')
 
-pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
-pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)
-pMiniTreeNtk3or4 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4 * mfvMiniTreeNtk3or4)
-pMiniTreeNtk3or5 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or5 * mfvAnalysisCutsGE1VtxNtk3or5 * mfvMiniTreeNtk3or5)
-pMiniTreeNtk4or5 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAnalysisCutsGE1VtxNtk4or5 * mfvMiniTreeNtk4or5)
-pMiniTreeNtk3or4exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4exact * mfvMiniTreeNtk3or4exact)
-pMiniTreeNtk3or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or5 * mfvAnalysisCutsGE1VtxNtk3or5exact * mfvMiniTreeNtk3or5exact)
-pMiniTreeNtk4or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAnalysisCutsGE1VtxNtk4or5exact * mfvMiniTreeNtk4or5exact)
+#pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
+#pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)
+#pMiniTreeNtk3or4 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4 * mfvMiniTreeNtk3or4)
+#pMiniTreeNtk3or5 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or5 * mfvAnalysisCutsGE1VtxNtk3or5 * mfvMiniTreeNtk3or5)
+#pMiniTreeNtk4or5 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAnalysisCutsGE1VtxNtk4or5 * mfvMiniTreeNtk4or5)
+#pMiniTreeNtk3or4exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4exact * mfvMiniTreeNtk3or4exact)
+#pMiniTreeNtk3or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or5 * mfvAnalysisCutsGE1VtxNtk3or5exact * mfvMiniTreeNtk3or5exact)
+#pMiniTreeNtk4or5exact = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4or5 * mfvAnalysisCutsGE1VtxNtk4or5exact * mfvMiniTreeNtk4or5exact)
 
-pMiniTreePreSelEvtFilt    = cms.Path(mfvWeight * mfvSelectedVerticesTight    * mfvAnalysisCutsPreSelEvtFilt    * mfvMiniTreePreSelEvtFilt) 
+#pMiniTreePreSelEvtFilt    = cms.Path(mfvWeight * mfvSelectedVerticesTight    * mfvAnalysisCutsPreSelEvtFilt    * mfvMiniTreePreSelEvtFilt)  #Alec commented this block
+
+pMiniTreeNtk3    = cms.Path(mfvSelectedVerticesTightNtk3 * mfvWeight * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
+pMiniTreeNtk4    = cms.Path(mfvSelectedVerticesTightNtk4 * mfvWeight * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)
+pMiniTreeNtk3or4 = cms.Path(mfvSelectedVerticesTightNtk3or4 * mfvWeight * mfvAnalysisCutsGE1VtxNtk3or4 * mfvMiniTreeNtk3or4)
+pMiniTreeNtk3or5 = cms.Path(mfvSelectedVerticesTightNtk3or5 * mfvWeight * mfvAnalysisCutsGE1VtxNtk3or5 * mfvMiniTreeNtk3or5)
+pMiniTreeNtk4or5 = cms.Path(mfvSelectedVerticesTightNtk4or5 * mfvWeight * mfvAnalysisCutsGE1VtxNtk4or5 * mfvMiniTreeNtk4or5)
+pMiniTreeNtk3or4exact = cms.Path(mfvSelectedVerticesTightNtk3or4 * mfvWeight * mfvAnalysisCutsGE1VtxNtk3or4exact * mfvMiniTreeNtk3or4exact)
+pMiniTreeNtk3or5exact = cms.Path(mfvSelectedVerticesTightNtk3or5 * mfvWeight * mfvAnalysisCutsGE1VtxNtk3or5exact * mfvMiniTreeNtk3or5exact)
+pMiniTreeNtk4or5exact = cms.Path(mfvSelectedVerticesTightNtk4or5 * mfvWeight * mfvAnalysisCutsGE1VtxNtk4or5exact * mfvMiniTreeNtk4or5exact)
+
+pMiniTreePreSelEvtFilt    = cms.Path(mfvSelectedVerticesTight * mfvWeight * mfvAnalysisCutsPreSelEvtFilt    * mfvMiniTreePreSelEvtFilt)

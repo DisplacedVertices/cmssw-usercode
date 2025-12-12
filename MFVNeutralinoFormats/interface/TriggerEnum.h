@@ -22,8 +22,8 @@ namespace mfv {
     b_HLT_Ele35_WPTight_Gsf, //2017
     b_HLT_Ele115_CaloIdVT_GsfTrkIdT,
     b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165,
-    b_HLT_IsoMu24, //2018
-    b_HLT_IsoMu27, 
+    b_HLT_IsoMu24, //2016,2018
+    b_HLT_IsoMu27, //2017
     b_HLT_Mu50,
     
     // displaced dilepton triggers 
@@ -157,8 +157,8 @@ namespace mfv {
   }; 
   static const std::vector<size_t> MuonTriggers = {
    //muon triggers
-    mfv::b_HLT_IsoMu27, //2016 and 2017
-    mfv::b_HLT_IsoMu24, //2018
+    mfv::b_HLT_IsoMu27, //2017
+    mfv::b_HLT_IsoMu24, //2016,2018
     mfv::b_HLT_Mu50,
   };
   

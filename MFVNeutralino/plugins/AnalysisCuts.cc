@@ -1088,11 +1088,11 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
       return passed_kinematics;
     }
                     
-  case mfv::b_HLT_IsoMu27 : //for 2016,2017
+  case mfv::b_HLT_IsoMu27 : //for 2017
     {
-    if (year != 20161 && year != 20162 && year != 2017) return false;
+    if (year != 2017) return false;
     for(int im =0; im < nmuons; ++im) {
-      if (mevent->muon_pt[im] < 30) continue; //for 2016,2017
+      if (mevent->muon_pt[im] < 30) continue; //for 2017
       if (mevent->muon_ID[im][1] == 1) {
         if (abs(mevent->muon_eta[im]) < 2.4) {
           if (mevent->muon_iso[im] < 0.15) {
@@ -1108,11 +1108,11 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
     }
     return passed_kinematics;
   }
-  case mfv::b_HLT_IsoMu24 : //for 2018
+  case mfv::b_HLT_IsoMu24 : //for 2016,2018
     {
-      if (year != 2018) return false;
+      if (year != 20161 && year != 20162 && year != 2018) return false;
       for(int im =0; im < nmuons; ++im) {
-        if (mevent->muon_pt[im] < 27) continue; //for 2018
+        if (mevent->muon_pt[im] < 27) continue; //for 2016,2018
 	      if (mevent->muon_ID[im][1] == 1) {
 	        if (abs(mevent->muon_eta[im]) < 2.4) {
 	          if (mevent->muon_iso[im] < 0.15) {

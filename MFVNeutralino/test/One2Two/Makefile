@@ -8,13 +8,13 @@ CFLAGS=-I${CMSSW_BASE}/src -I${CMSSW_RELEASE_BASE}/src -std=c++17 -O3
 all: 2v_from_jets.exe statmodel.exe
 
 MiniNtuple.o: ${CMSSW_BASE}/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc ${CMSSW_BASE}/src/JMTucker/MFVNeutralino/interface/MiniNtuple.h
-	g++ -I${CMSSW_BASE}/src -I${CLHEP_PARAM_PATH}/include -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/tbb/2019_U3-pafccj/include -I${CMSSW_RELEASE_BASE}/src -std=c++17 $(ROOTFLAGS) -c $< -o $@
+	g++ -I${CMSSW_BASE}/src -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/boost/1.67.0-pafccj/include -I${CLHEP_PARAM_PATH}/include -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/tbb/2019_U3-pafccj/include -I${CMSSW_RELEASE_BASE}/src -std=c++17 $(ROOTFLAGS) -c $< -o $@
 
 2v_from_jets.exe: 2v_from_jets.cc MiniNtuple.o $(SHADOWDEPS)
-	g++ -g -Wall -I${CMSSW_BASE}/src -I${CLHEP_PARAM_PATH}/include -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/tbb/2019_U3-pafccj/include -I${CMSSW_RELEASE_BASE}/src -std=c++17 $^ -o $@ $(ROOTFLAGS)
+	g++ -g -Wall -I${CMSSW_BASE}/src -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/boost/1.67.0-pafccj/include -I${CLHEP_PARAM_PATH}/include -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/external/tbb/2019_U3-pafccj/include -I${CMSSW_RELEASE_BASE}/src -std=c++17 $^ -o $@ $(ROOTFLAGS)
 
 statmodel.exe: statmodel.cc 
 	g++ -O3 -Wall -std=c++17 $^ -o $@ -lstdc++fs $(SMFLAGS) $(ROOTFLAGS) -I${CMSSW_BASE}/src -L${CMSSW_BASE}/lib/${SCRAM_ARCH} -lJMTuckerTools
 
 clean:
-	rm -f 2v_from_jets.exe statmodel.exe
+	rm -f 2v_from_jets.exe statmodel.exe MiniNtuple.o

@@ -544,7 +544,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////////////
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
-  /*
+  
   const size_t ngenlep = mevent->gen_leptons.size();
   h_gen_leptons->Fill(ngenlep, w);
 
@@ -631,7 +631,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         );
     h_gen_bs2ddist->Fill(genbs2ddist, w);
   }
-  */
+  
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
