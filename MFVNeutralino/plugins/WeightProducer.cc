@@ -308,7 +308,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	*weight_up *= w;
         *weight_down *= w;
       }
-
+      //std::cout << "Before Lepton SFs" << std::endl;
       //Lepton SF workspace
       if (apply_lepsf) {
 	double total_lepsf = 1;
@@ -333,6 +333,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         double lepISOsf_up = 1;
         double lepTRsf_up = 1;
 
+	double lepSF_nominal = 1;
+	double lepSF_syst = 0;
+	double lepSF_stat =0;
 	double lepSF = 1;
 	double lepSF_up = 1;
 	double lepSF_down = 1;
@@ -387,15 +390,17 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             leading_leptype = 1;
           }
 	}
+	//std::cout << "Before get SF depending on the lepton" << std::endl;
 	//step 2 : depending on the lepton, get the SFs 
 	if (leading_leptype == 0) { //leading_leptype is mu;
+	  //std::cout << "After defining leading leptype == 0" << std::endl;
 	  
 	  std::map<std::string, correction::Variable::Type> values {
 	    {"pt", leading_leppt}, // muon transverse momentum
 	    {"eta", leading_lepeta}, // muon absolute pseudorapidity
 	    {"scale_factors", "nominal"}, // variation
 	  };
-  
+	  //std::cout << "After setting value map for leading lep" << std::endl;
 	  std::map<std::string, correction::Variable::Type> values_up {
             {"pt", leading_leppt}, // muon transverse momentum
             {"eta", leading_lepeta}, // muon absolute pseudorapidity
@@ -407,7 +412,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	    {"eta", leading_lepeta}, // muon absolute pseudorapidity
 	    {"scale_factors", "systdown"}, // variation
 	  };
-
+	  //std::cout << "Before TrackerMuon Reconstruction" << std::endl;
 	  // TrackerMuon Reconstruction UL scale factor
 	  if ( leading_leppt > 40.0) {  //lower limit is 40 for RECO SF? 
 	    lepRECOsf = run(mu_cset, "NUM_TrackerMuons_DEN_genTracks", values);
@@ -428,21 +433,60 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  }
 
 	  //Yuqing's Lepton Scale Factors (muons)
-	  int year = int(MFVNEUTRALINO_YEAR);
-	  if (year == 2017) {
-	    lepSF = run(mu_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", values);
-            lepSF_up = run(mu_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", values_up);
-            lepSF_down = run(mu_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", values_down);
-	  }
-	  else if (year == 2018) {
-	    lepSF = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values);
-	    lepSF_up = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values_up);
-	    lepSF_down = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values_down);
+	  float leading_leppt_fix;
+	  if (leading_leppt > 199) {
+	    leading_leppt_fix = 199;
 	  }
 	  else {
-	    lepSF = run(mu_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values);
-            lepSF_up = run(mu_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values_up);
-            lepSF_down = run(mu_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", values_down);
+	    leading_leppt_fix = leading_leppt;
+	  }
+	  std::map<std::string, correction::Variable::Type> trigvalues {
+	    //{"year", year}, //year
+	    {"scale_factors", "nominal"}, // variation
+	    {"pt", leading_leppt_fix}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
+	  std::map<std::string, correction::Variable::Type> trigvalues_syst {
+	    //{"year", year}, //year
+	    {"scale_factors", "syst"}, // variation
+	    {"pt", leading_leppt_fix}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
+	  std::map<std::string, correction::Variable::Type> trigvalues_stat {
+	    //{"year", year}, //year
+	    {"scale_factors", "stat"}, // variation
+	    {"pt", leading_leppt_fix}, // electron transverse momentum
+	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	  };
+
+	  //std::cout << "After Yuqing muon SF map" << std::endl;
+	  int year = int(MFVNEUTRALINO_YEAR);
+	  if (year == 2017) {
+	    //std::cout << "Before calling from Yuqing Muon jsons with: " << std::endl;
+	    //std::cout << leading_leppt << std::endl;
+	    lepSF_nominal = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+	    //std::cout << "After calling nominal from Yuqing Muon jsons" << std::endl;
+            lepSF_syst = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+            lepSF_stat = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+	    lepSF = lepSF_nominal;
+	    lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
+	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
+	  }
+	  else if (year == 2018) {
+	    lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+	    lepSF_syst = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+	    lepSF_stat = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+	    lepSF = lepSF_nominal;
+            lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
+            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
+	  }
+	  else {
+	    lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+            lepSF_syst = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+            lepSF_stat = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+	    lepSF = lepSF_nominal;
+            lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
+            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
 	  }
 	  
 	  // // Trigger UL systematic uncertainty only
@@ -460,7 +504,8 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  lepTRsf_down = 0.985;
 	  //}
 	}
-	else { //lepinSV is an electron 
+	else { //lepinSV is an electron
+	  //std::cout << "After defining leading leptype == 1" << std::endl;
 	  // int year = 2017;
 	  std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
 
@@ -471,6 +516,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	    {"pt", leading_leppt}, // electron transverse momentum
 	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
 	  };
+	  //std::cout << "After setting values map" << std::endl;
 	  std::map<std::string, correction::Variable::Type> values_up {
 	    {"year", year}, //year
             {"ValType", "sfup"}, // variation
@@ -485,13 +531,14 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	    {"pt", leading_leppt}, // electron transverse momentum
 	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
 	  };
-
+	  //std::cout << "Before calling e ID SFs" << std::endl;
 	  if (leading_leppt > 10.0) { 
 	    lepRECOsf = run(ele_cset, "UL-Electron-ID-SF", values);
 	    lepRECOsf_up = run(ele_cset, "UL-Electron-ID-SF", values_up);
 	    lepRECOsf_down = run(ele_cset, "UL-Electron-ID-SF", values_down);
   
 	  }
+	  //std::cout << "After calling e ID SFs" << std::endl;
 	  //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements)
 	  // also, just apply it to one lepton per event; not per SV 
 	  //if (ilep < 1) { 
@@ -500,11 +547,29 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  lepTRsf_down = 0.985;
 	  //}
 
-	  //Yuqing's Lepton Scale Factors (electron)
-	  lepSF = run(mu_cset, "scale_factor", values);
-	  lepSF_up = run(mu_cset, "scale_factor", values_up);
-	  lepSF_down = run(mu_cset, "scale_factor", values_down);
-	  
+	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
+	  std::map<std::string, correction::Variable::Type> trigvalues {
+            {"year", year}, //year
+            {"ValType", "nominal"}, // variation
+            {"pt", leading_leppt}, // electron transverse momentum
+            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+          };
+          std::map<std::string, correction::Variable::Type> trigvalues_up {
+            {"year", year}, //year
+            {"ValType", "systup"}, // variation
+            {"pt", leading_leppt}, // electron transverse momentum
+            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+          };
+          std::map<std::string, correction::Variable::Type> trigvalues_down {
+            {"year", year}, //year
+            {"ValType", "systdown"}, // variation
+            {"pt", leading_leppt}, // electron transverse momentum
+            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+          };
+	  lepSF = run(eleSF_cset, "scale_factor", trigvalues);
+	  lepSF_up = run(eleSF_cset, "scale_factor", trigvalues_up);
+	  lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
+	  //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
 	}
 	total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
 	//std::cout << "lep ID sf: " << lepIDsf << ", total_lepsf: " << total_lepsf << ", leading lep pt: " << leading_leppt << ", leading lep eta: " << leading_lepeta << ", pileup sf: " << PUsf << ", number of pileup events: " << mevent->npu << std::endl;
@@ -547,7 +612,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
       }
 
     }
-
+    //std::cout << "Before roccor SFs" << std::endl;
     //rochester corrections have a correction to apply to data/mc so putting it here
     if (apply_roccor) {
       double roccor_sf = 1.0; //total for the event

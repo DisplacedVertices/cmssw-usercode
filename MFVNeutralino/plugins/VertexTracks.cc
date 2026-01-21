@@ -22,6 +22,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "JMTucker/Tools/interface/Year.h" //Alec added
 #include <TRandom3.h>
 
 class MFVVertexTracks : public edm::EDFilter {
@@ -683,8 +684,37 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const int nsthits = tk->hitPattern().numberOfValidStripHits();
     const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
-    //const double track_recon_eff = 1-1.11786*fabs(dxybs)*fabs(dxybs); //Alec added
-    //if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added
+    //if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added from here
+    //2016 tracking uncertainty: -1.26 +- 0.21
+    //2017 and 2018 tracking uncertainty: -1.12 +- 0.11
+    /*double track_recon_eff_coef;
+    const int year_cmon = MFVNEUTRALINO_YEAR;
+    if (year_cmon == 20161 || year_cmon == 20162) {
+      track_recon_eff_coef = 1.26;
+      //std::cout << "DISCARDING TRACKS BASED ON 2016 TRACKING INEFFICIENCY STUDY" << std::endl;
+    }
+    else if (year_cmon == 2017 || year_cmon == 2018) {
+      //track_recon_eff_coef = 1.12;
+      track_recon_eff_coef = 1.23; //varied up by 1sigma
+      //std::cout << "DISCARDING TRACKS BASED ON 2017p8 TRACKING INEFFICIENCY STUDY" << std::endl;
+    }
+    else {
+      std::cout << "Error: data year was not properly defined." << std::endl;
+    }
+    const double track_recon_eff = 1-track_recon_eff_coef*fabs(dxybs)*fabs(dxybs);
+    const double rand_0to1 = r3->Uniform(0,1);
+    if (fabs(dxybs) < .3) {
+      if (rand_0to1 > track_recon_eff) {
+       continue;
+      }
+    }
+    else {
+      if (rand_0to1 > (1-track_recon_eff_coef*.3*.3)) {
+       continue;
+      }
+    }*/
+    //Alec added to here
+    
     int min_r = 2000000000;
     for (int i = 1; i <= 4; ++i)
       if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
