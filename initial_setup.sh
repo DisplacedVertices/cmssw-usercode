@@ -1,6 +1,6 @@
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-scram project -n mfv_10627 CMSSW CMSSW_10_6_27
-cd mfv_10627/src
+scram project -n mfv_10648 CMSSW CMSSW_10_6_48
+cd mfv_10648/src
 cmsenv
 git cms-init --upstream-only
 #git clone https://github.com/DisplacedVertices/cmssw-usercode.git JMTucker # we can pull via https but not push. Leaving this here in case someone doesn't have ssh keys set up...
