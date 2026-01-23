@@ -105,11 +105,11 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              min_track_vertex_sig_to_remove = cms.double(1.5), # default track arbitration
                              remove_one_track_at_a_time = cms.bool(True),
                              max_nm1_refit_dist3 = cms.double(-1),
-                             max_nm1_refit_distz = cms.double(-1), #FIXME 0.005 if use_displaced_lepton
+                             max_nm1_refit_distz = cms.double(-1), 
                              ignore_lep_in_refit_distz = cms.bool(True), #do not consider dropping tracks at dz refit step if they are leptons w/ pt > 20 GeV. 
-                             order_seed_vertex = cms.bool(False), #FIXME need to study. True if use_displaced_lepton
+                             order_seed_vertex = cms.bool(False), 
                              max_nm1_refit_distz_error = cms.double(-1), #0.02#0.015 might be too tight so try to relex it
-                             max_nm1_refit_distz_sig = cms.double(3.0), #FIXME -1 if use_displaced_lepton we now use a significant value rather than an absolute one 
+                             max_nm1_refit_distz_sig = cms.double(3.0), 
                              max_nm1_refit_count = cms.int32(-1),
                              trackrefine_sigmacut = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              trackrefine_trimmax = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
