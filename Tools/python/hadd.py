@@ -93,7 +93,8 @@ def hadd(output_fn, input_fns):
         print colors.error('PROBLEM hadding %s' % output_fn)
         return False
 
-
+    return True
+    
 __all__ = [
     'HaddBatchResult',
     'HaddlogParser',
