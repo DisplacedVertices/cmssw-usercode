@@ -862,9 +862,9 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       // If there is a neutralino or stop in the first event, assume that's the
       // LSP id wanted. Otherwise, default to looking for gluino. This
       // isn't relevant for some signals.
-      lsp_id = 1000006;
+      lsp_id = 1000021;
       for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
-	      if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
+        if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
         else if (gen_particles->at(i).pdgId() == 1000006) { lsp_id = 1000006; break; }
         else if (gen_particles->at(i).pdgId() == 9000006) { lsp_id = 9000006; break; }
       }
@@ -875,27 +875,27 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
     
     // the order of these tries is important, at least that MFVtbses come before Ttbar
-    try_MFV_stoplq   (*mc, gen_particles) ||
-    // try_splitSUSY(*mc,gen_particles) || //splitSUSY gluino  -> qqbar neu
     try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
-    // try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
-    // try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb
-    try_Ttbar   (*mc, gen_particles); 
-    // try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
-    // try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
-    // try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
-    // try_MFVthree(*mc, gen_particles, 15, 2, -1) ||
-    // try_MFVthree(*mc, gen_particles,  5, 2,  1) || // udb
-    // try_MFVthree(*mc, gen_particles,  3, 1,  4) || // cds
-    // try_MFVthree(*mc, gen_particles,  5, 1,  4) || // cdb
-    // try_MFVthree(*mc, gen_particles,  5, 5,  2) || // ubb
-    // try_XX4j    (*mc, gen_particles) ||
+    try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
+    try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb
+    //try_Ttbar   (*mc, gen_particles); // this is for bkg ttbar, but breaks signal ttH! Not using it, so comment out for now
+    try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
+    try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
+    try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
+    try_MFVthree(*mc, gen_particles, 15, 2, -1) ||
+    try_MFVthree(*mc, gen_particles,  5, 2,  1) || // udb
+    try_MFVthree(*mc, gen_particles,  3, 1,  4) || // cds
+    try_MFVthree(*mc, gen_particles,  5, 1,  4) || // cdb
+    try_MFVthree(*mc, gen_particles,  5, 5,  2) || // ubb
+    try_XX4j    (*mc, gen_particles) ||
     try_stopdbardbar(*mc, gen_particles, -1) || // stop -> dbar dbar + c.c.
     try_stopdbardbar(*mc, gen_particles, -5) || // stop -> bbar bbar + c.c.
-     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
-     try_MFVdijet(*mc, gen_particles, 4) || //ccbar
-     try_MFVdijet(*mc, gen_particles, 5); //bbbar
-    // try_MFVlq   (*mc, gen_particles);
+    try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 4) || //ccbar
+    try_MFVdijet(*mc, gen_particles, 5) || //bbbar
+    try_MFV_stoplq   (*mc, gen_particles) || // Abby's signal from DV+displaced lepton
+    try_splitSUSY(*mc,gen_particles); //splitSUSY gluino  -> qqbar neu (from DV+MET)
+    //try_MFVlq   (*mc, gen_particles); // maybe the same as the stoplq? dropped for now
 
     if (mc->valid()) {
       for (auto r : mc->primaries())   primaries  ->push_back(*r);
@@ -944,6 +944,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   if (debug) {
+    std::cout << "MFVGenParticles " << *mc << "MFVGenParticles decay_vertices:";
     for (double d : *decay_vertices)
       printf(" %6.3f", d);
     printf("\n");
