@@ -20,6 +20,8 @@ git cms-addpkg EgammaAnalysis/ElectronTools
 
 cd JMTucker
 git checkout UL_Lepton
+
+cd ..
 scram b -j 4
 statuscode=$?
 source /cvmfs/cms.cern.ch/common/crab-setup.sh
