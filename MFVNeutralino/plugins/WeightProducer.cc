@@ -144,7 +144,6 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
-  if (lumi.run() == 1) { // no lumi.isRealData()
     edm::Handle<jmt::MergeableInt> nEvents;
     edm::Handle<jmt::MergeableFloat> sumWeight;
     lumi.getByToken(nevents_token, nEvents);
@@ -163,7 +162,6 @@ void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, con
     else if (throw_if_no_mcstat)
       throw cms::Exception("ProductNotFound", "MCStatProducer luminosity branch products not found!");
   }
-}
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
   if (mc_npu < 0 || mc_npu >= int(pileup_weights.size()))
@@ -194,7 +192,8 @@ double MFVWeightProducer::run (const std::unique_ptr<correction::CorrectionSet>&
 
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
-  if (event.isRealData() != (event.id().run() != 1))
+  //if (event.isRealData() != (event.id().run() != 1)) // This catches data with run == 1 and MC with run !=1
+  if (event.isRealData() && (event.id().run() == 1)) // This only catches data with run == 1
     throw cms::Exception("BadAssumption") << "isRealData = " << event.isRealData() << " and run = " << event.id().run();
 
   if (histos)

@@ -32,6 +32,8 @@ elif use_Electron_triggers :
 else :
     settings.event_filter = 'jets only'
 
+settings.event_filter = False
+
 settings.randpars_filter = False
 # if want to test local : 
 #settings.randpars_filter = 'randpar HToSSTodddd M15_ct10-'
@@ -59,7 +61,12 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTHTo2C_TTTo2L2Nu_M-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/2540000/036644E2-9F05-8D41-8CD4-885679962D80.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/100000/3B05C6F7-7877-BD43-8F5F-E29283865170.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_SingleLeptFromT_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2430000/00351BB6-B311-8F40-B684-A1C7A375AF71.root')
-input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+#input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+
+# Test file!
+max_events(process, 200)
+input_files(process, 'root://cmseos.fnal.gov//store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau0p1_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau0p1_UL17_MINIAOD000.root')
+
 cmssw_from_argv(process)
 
 
@@ -67,6 +74,15 @@ cmssw_from_argv(process)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
+    #Override Samples
+    samples = [
+        getattr(Samples, 'ttHToLLPs_tau000001000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau000010000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau000100000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau001000000um_M0055_2017'),
+    ]
+    
+    '''
     if use_btag_triggers :
        samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
        #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
@@ -95,7 +111,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
     else :
         samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
-    
+    '''
+
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier)#, bjet_trigger_veto_modifier)

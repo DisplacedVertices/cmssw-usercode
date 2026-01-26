@@ -6,7 +6,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #input_files(process, '/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504/0000/ntuple_0.root')
 #input_files(process, '/store/group/lpclonglived/pkotamni/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200106/0000/ntuple_0.root')
-input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/ntuple.root')
+#input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/ntuple.root')
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
@@ -129,7 +129,8 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-
+    
+    '''
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
@@ -142,12 +143,25 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else :
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+    '''
+
+    dataset = "ntuple_tthstudy_lepm_noef"
+
+    samples = [
+        getattr(Samples, 'ttHToLLPs_tau000001000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau000010000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau000100000um_M0055_2017'),
+        getattr(Samples, 'ttHToLLPs_tau001000000um_M0055_2017'),
+    ]
+
+    pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos_LepIPCut_' + version,
+    cs = CondorSubmitter('Histos_ttHNominal_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
+                         pset_template_fn = '/uscms_data/d3/gdecastr/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/histos.py',
                          )
     cs.submit_all(samples)

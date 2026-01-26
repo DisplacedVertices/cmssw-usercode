@@ -144,6 +144,30 @@ for name, ds, fns in _removed:
 ################################################################################
 
 _add_ds("miniaod", {
+'ttHToLLPs_tau000001000um_M0055_2017': (11, ['/store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau0p1_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau0p1_UL17_MINIAOD%03i.root' % i for i in xrange(11)]),
+'ttHToLLPs_tau000010000um_M0055_2017': (11, ['/store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau1_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau1_UL17_MINIAOD%03i.root' % i for i in xrange(11)]),
+'ttHToLLPs_tau000100000um_M0055_2017': (11, ['/store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau10_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau10_UL17_MINIAOD%03i.root' % i for i in xrange(11)]),
+'ttHToLLPs_tau001000000um_M0055_2017': (11, ['/store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau100_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau100_UL17_MINIAOD%03i.root' % i for i in xrange(11)]),
+})
+
+_add_ds("ntuple_tthstudy_lepm_noef", {
+'ttHToLLPs_tau000001000um_M0055_2017': _fromnum0("/store/group/lpclonglived/gdecastr/ttHToLLPs_tau000001000um_M0055_2017/Ntuple_ttHStudy_Lepm_NoEF_2017/260122_125016", 65),
+})
+
+_add_ds("ntuple_tthstudy_lepm_noef", {
+'ttHToLLPs_tau000010000um_M0055_2017': _fromnum0("/store/group/lpclonglived/gdecastr/ttHToLLPs_tau000010000um_M0055_2017/Ntuple_ttHStudy_Lepm_NoEF_2017/260122_125017", 64),
+})
+
+_add_ds("ntuple_tthstudy_lepm_noef", {
+'ttHToLLPs_tau000100000um_M0055_2017': _fromnum0("/store/group/lpclonglived/gdecastr/ttHToLLPs_tau000100000um_M0055_2017/Ntuple_ttHStudy_Lepm_NoEF_2017/260122_125018", 64),
+})
+
+_add_ds("ntuple_tthstudy_lepm_noef", {
+'ttHToLLPs_tau001000000um_M0055_2017': _fromnum0("/store/group/lpclonglived/gdecastr/ttHToLLPs_tau001000000um_M0055_2017/Ntuple_ttHStudy_Lepm_NoEF_2017/260122_125019", 64),
+})
+
+"""
+_add_ds("miniaod", {
     'qcdmupt15_2017': (1, ['/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root'])
 })
 
@@ -425,7 +449,6 @@ _add_ds("NtupleLepton_SF_correctionsLepm", {
 'ggHToSSTodddd_tau1mm_M55_2017': _fromnum0("/store/group/lpclonglived/alecduqu/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/NtupleLepton_SF_correctionsLepm_2017/251219_140147", 71),
 })
 
-"""
 _add_ds("miniaod", {
   'mfv_splitSUSY_tau000001000um_M1200_1100_2017':_fromnum1("/store/user/ali/splitSUSY_M1200_1100_ctau1p0_TuneCP2_13TeV_pythia8/RunIISummer20UL17_MiniAOD/210813_015111/0000/", 50, fnbase="MiniAOD", numbereddirs=False),
   'mfv_splitSUSY_tau000010000um_M1200_1100_2017':_fromnum1("/store/user/ali/splitSUSY_M1200_1100_ctau10p0_TuneCP2_13TeV_pythia8/RunIISummer20UL17_MiniAOD/210813_015035/0000/", 50, fnbase="MiniAOD", numbereddirs=False),

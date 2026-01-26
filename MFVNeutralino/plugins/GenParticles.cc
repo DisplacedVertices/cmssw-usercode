@@ -880,7 +880,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
     // try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
     // try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb
-    try_Ttbar   (*mc, gen_particles); 
+    //try_Ttbar   (*mc, gen_particles); // Commented out for ttbar studies
     // try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
     // try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
     // try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
@@ -892,10 +892,10 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     // try_XX4j    (*mc, gen_particles) ||
     try_stopdbardbar(*mc, gen_particles, -1) || // stop -> dbar dbar + c.c.
     try_stopdbardbar(*mc, gen_particles, -5) || // stop -> bbar bbar + c.c.
-     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
-     try_MFVdijet(*mc, gen_particles, 4) || //ccbar
-     try_MFVdijet(*mc, gen_particles, 5); //bbbar
-    // try_MFVlq   (*mc, gen_particles);
+    try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 4) || //ccbar
+    try_MFVdijet(*mc, gen_particles, 5); //bbbar
+    //try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
       for (auto r : mc->primaries())   primaries  ->push_back(*r);

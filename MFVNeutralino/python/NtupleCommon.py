@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'fixrecreatePeace_norevtxinef_OnnormdzULV30'
-ntuple_version_ = 'wjets_bkgtemplate'
+ntuple_version_ = '_ttHStudy_'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_btag_vetoLepHT_triggers = False
@@ -24,7 +24,7 @@ elif use_Muon_triggers :
     ntuple_version_ += "LepMu"
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
-ntuple_version_use = ntuple_version_ + 'm_noef' #FIXME only used for signal MC
+ntuple_version_use = ntuple_version_ + 'm' #FIXME only used for signal MC / Removed _noef
 dataset = 'ntuple' + ntuple_version_use.lower()
 #dataset = "ntupleonnormdzulv30lepm_noef"
 #dataset = "NtuplerecreatePeacentupleOnnormdzULV30Lepm_NoEF_2018" might have implemented track inef accidentally

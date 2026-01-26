@@ -56,6 +56,7 @@ def _decay(sample):
         'ZHToSSTodddd' : r'ZH \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
         'WplusHToSSTodddd' : r'W^{\plus}H \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
         'WminusHToSSTodddd' : r'W^{\minus}H \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
+        'ttHToLLPs': r't\bar{t}H \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
         }[_model(s)]
     year = int(s.rsplit('_')[-1])
     assert 2015 <= year <= 2018 or year==20161 or year == 20162
@@ -79,12 +80,16 @@ def _set_signal_stuff(sample):
     sample.mass = _mass(sample)
     sample.latex = _latex(sample)
     #sample.xsec = 1e-3
+    br_h_llps = 1.0
     if (sample.name.startswith('WplusH')):
-        sample.xsec = 3*(9.426e-02)*0.01# xsec(pp->3*(W+->lv)H) * br(1% of H->SS) for 3 lepton flavours as in https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#ppWH_Total_Cross_Section_with_ap and https://github.com/cms-sw/genproductions/blob/master/bin/Powheg/production/2017/13TeV/Higgs/WplusHJ_HanythingJ_NNPDF31_13TeV/HWplusJ_HanythingJ_NNPDF31_13TeV_M125_Vleptonic.input
+        sample.xsec = 3*(9.426e-02)*br_h_llps# xsec(pp->3*(W+->lv)H) * br(100% of H->SS) for 3 lepton flavours as in https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#ppWH_Total_Cross_Section_with_ap and https://github.com/cms-sw/genproductions/blob/master/bin/Powheg/production/2017/13TeV/Higgs/WplusHJ_HanythingJ_NNPDF31_13TeV/HWplusJ_HanythingJ_NNPDF31_13TeV_M125_Vleptonic.input
     elif (sample.name.startswith('WminusH')):
-        sample.xsec = 3*(5.983e-02)*0.01# same reasoning as above
+        sample.xsec = 3*(5.983e-02)*br_h_llps# same reasoning as above
     elif (sample.name.startswith('ZH')):
-        sample.xsec = 3*(2.982e-02)*0.01# same reasoning as above
+        sample.xsec = 3*(2.982e-02)*br_h_llps# same reasoning as above
+    elif sample.name.startswith('ttHToLLPs'):
+        sample.xsec = 0.507 * br_h_llps #https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV?u#ttH_Process
+
     else:
         #print(sample.name)
         sample.xsec = 1e-3
@@ -1461,8 +1466,27 @@ ggHToSSTodddd_samples_2017 = [
 
 ]
 
+ttHToLLPs_names_2017 = [
+'ttHToLLPs_tau000001000um_M0055_2017',
+'ttHToLLPs_tau000010000um_M0055_2017',
+'ttHToLLPs_tau000100000um_M0055_2017',
+'ttHToLLPs_tau001000000um_M0055_2017',
+]
+
+ttHToLLPs_samples_2017 = [
+    MCSample('ttHToLLPs_tau000001000um_M0055_2017', '/ttHToLLPs_tau000001000um_M0055_2017/None/USER', 483500),
+    MCSample('ttHToLLPs_tau000010000um_M0055_2017', '/ttHToLLPs_tau000010000um_M0055_2017/None/USER', 480000),
+    MCSample('ttHToLLPs_tau000100000um_M0055_2017', '/ttHToLLPs_tau000100000um_M0055_2017/None/USER', 480500),
+    MCSample('ttHToLLPs_tau001000000um_M0055_2017', '/ttHToLLPs_tau001000000um_M0055_2017/None/USER', 477250),
+]
+
+for s in ttHToLLPs_samples_2017:
+    s.add_dataset('miniaod', s.dataset, s.nevents_orig)
+
+
 #FIXME 
-all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017
+all_signal_samples_2017 = ttHToLLPs_samples_2017
+#all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 + 
 #all_signal_samples_2017 =  ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017  
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
@@ -2205,7 +2229,7 @@ __all__ = [
     'Bjetsignal_samples_run2',
     #'auxiliary_data_samples_2018',
     #'egamma_data_samples_2018',
-
+    'ttHToLLPs_samples_2017',
     'registry',
     ]
 
@@ -2385,6 +2409,9 @@ for s in all_signal_samples_2018:
 ########
 #for x in all_signal_samples_20161 + all_signal_samples_20162 + all_signal_samples_2017 + all_signal_samples_2018:
 #for x in ggHToSSTodddd_tau1mm_M55_20161, mfv_neu_tau001000um_M0400_20161, mfv_stopdbardbar_tau001000um_M0200_20161, mfv_stopdbardbar_tau000300um_M0400_20161, ggHToSSTodddd_tau1mm_M55_20162, mfv_neu_tau001000um_M0400_20162, mfv_stopdbardbar_tau001000um_M0200_20162, mfv_stopdbardbar_tau000300um_M0400_20162, ggHToSSTodddd_tau1mm_M55_2017, mfv_neu_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0200_2017, mfv_stopdbardbar_tau000300um_M0400_2017, ggHToSSTodddd_tau1mm_M55_2018, mfv_neu_tau001000um_M0400_2018, mfv_stopdbardbar_tau001000um_M0200_2018, mfv_stopdbardbar_tau000300um_M0400_2018
+
+for x in ttHToLLPs_tau000001000um_M0055_2017, ttHToLLPs_tau000010000um_M0055_2017, ttHToLLPs_tau000100000um_M0055_2017, ttHToLLPs_tau001000000um_M0055_2017:
+    x.add_dataset("ntuple_tthstudy_lepm_noef")
 
 for x in mfv_neu_tau000100um_M0200_2017, mfv_neu_tau000300um_M0200_2017, mfv_neu_tau001000um_M0200_2017, mfv_neu_tau010000um_M0200_2017, mfv_neu_tau030000um_M0200_2017, mfv_neu_tau000100um_M0300_2017, mfv_neu_tau000300um_M0300_2017, mfv_neu_tau001000um_M0300_2017, mfv_neu_tau010000um_M0300_2017, mfv_neu_tau030000um_M0300_2017, mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau030000um_M0800_2017, mfv_stopdbardbar_tau000100um_M0200_2017, mfv_stopdbardbar_tau000300um_M0200_2017, mfv_stopdbardbar_tau001000um_M0200_2017, mfv_stopdbardbar_tau010000um_M0200_2017, mfv_stopdbardbar_tau030000um_M0200_2017, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopbbarbbar_tau000100um_M0200_2017, mfv_stopbbarbbar_tau000300um_M0200_2017, mfv_stopbbarbbar_tau001000um_M0200_2017, mfv_stopbbarbbar_tau010000um_M0200_2017, mfv_stopbbarbbar_tau030000um_M0200_2017, mfv_stopbbarbbar_tau000100um_M0400_2017, mfv_stopbbarbbar_tau000300um_M0400_2017, mfv_stopbbarbbar_tau001000um_M0400_2017, mfv_stopbbarbbar_tau010000um_M0400_2017, mfv_stopbbarbbar_tau030000um_M0400_2017, mfv_stopbbarbbar_tau000100um_M0800_2017, mfv_stopbbarbbar_tau000300um_M0800_2017, mfv_stopbbarbbar_tau001000um_M0800_2017, mfv_stopbbarbbar_tau010000um_M0800_2017, mfv_stopbbarbbar_tau030000um_M0800_2017, ZHToSSTodddd_tau100um_M15_2017, ZHToSSTodddd_tau300um_M15_2017, ZHToSSTodddd_tau1mm_M15_2017, ZHToSSTodddd_tau3mm_M15_2017, ZHToSSTodddd_tau10mm_M15_2017, ZHToSSTodddd_tau30mm_M15_2017, ZHToSSTodddd_tau100um_M40_2017, ZHToSSTodddd_tau300um_M40_2017, ZHToSSTodddd_tau1mm_M40_2017, ZHToSSTodddd_tau3mm_M40_2017, ZHToSSTodddd_tau10mm_M40_2017, ZHToSSTodddd_tau30mm_M40_2017, ZHToSSTodddd_tau100um_M55_2017, ZHToSSTodddd_tau300um_M55_2017, ZHToSSTodddd_tau1mm_M55_2017, ZHToSSTodddd_tau3mm_M55_2017, ZHToSSTodddd_tau10mm_M55_2017, ZHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau100um_M15_2017, WplusHToSSTodddd_tau300um_M15_2017, WplusHToSSTodddd_tau1mm_M15_2017, WplusHToSSTodddd_tau3mm_M15_2017, WplusHToSSTodddd_tau10mm_M15_2017, WplusHToSSTodddd_tau30mm_M15_2017, WplusHToSSTodddd_tau100um_M40_2017, WplusHToSSTodddd_tau300um_M40_2017, WplusHToSSTodddd_tau1mm_M40_2017, WplusHToSSTodddd_tau3mm_M40_2017, WplusHToSSTodddd_tau10mm_M40_2017, WplusHToSSTodddd_tau30mm_M40_2017, WplusHToSSTodddd_tau100um_M55_2017, WplusHToSSTodddd_tau300um_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau3mm_M55_2017, WplusHToSSTodddd_tau10mm_M55_2017, WplusHToSSTodddd_tau30mm_M55_2017, WminusHToSSTodddd_tau100um_M15_2017, WminusHToSSTodddd_tau300um_M15_2017, WminusHToSSTodddd_tau1mm_M15_2017, WminusHToSSTodddd_tau3mm_M15_2017, WminusHToSSTodddd_tau10mm_M15_2017, WminusHToSSTodddd_tau30mm_M15_2017, WminusHToSSTodddd_tau100um_M40_2017, WminusHToSSTodddd_tau300um_M40_2017, WminusHToSSTodddd_tau1mm_M40_2017, WminusHToSSTodddd_tau3mm_M40_2017, WminusHToSSTodddd_tau10mm_M40_2017, WminusHToSSTodddd_tau30mm_M40_2017, WminusHToSSTodddd_tau100um_M55_2017, WminusHToSSTodddd_tau300um_M55_2017, WminusHToSSTodddd_tau1mm_M55_2017, WminusHToSSTodddd_tau3mm_M55_2017, WminusHToSSTodddd_tau10mm_M55_2017, WminusHToSSTodddd_tau30mm_M55_2017, ggHToSSTodddd_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau10mm_M40_2017, ggHToSSTodddd_tau1mm_M40_2017, ggHToSSTodddd_tau10mm_M55_2017, ggHToSSTodddd_tau1mm_M55_2017:
     x.add_dataset("NtupleLepton_SF_corrections_trkineffLepm")
@@ -3212,6 +3239,12 @@ for s in registry.all():
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
+condorable = {
+    "T3_US_FNALLPC": {
+        "miniaod": ttHToLLPs_samples_2017, #mfv_splitSUSY_samples_2017
+        },
+}
+'''
 # be careful about the list, some samples are distributed at different samples so it won't work
 condorable = {
     "T2_DE_DESY": {
@@ -3241,7 +3274,7 @@ condorable = {
     #     "miniaod" : [mfv_stoplb_tau001000um_M1000_2017, mfv_stoplb_tau030000um_M1000_2017, mfv_stoplb_tau010000um_M0400_2017, mfv_stoplb_tau030000um_M0600_2017, mfv_stoplb_tau010000um_M0800_2017, mfv_stopld_tau030000um_M1400_2017, mfv_stopld_tau001000um_M1600_2017, mfv_stopld_tau000100um_M1800_2017, mfv_stopld_tau030000um_M0200_2017, mfv_stopld_tau000100um_M0600_2017, mfv_stopld_tau000100um_M0800_2017, mfv_stopld_tau001000um_M1000_2018, mfv_stopld_tau001000um_M1600_2018, mfv_stopld_tau000100um_M1800_2018, mfv_stopld_tau030000um_M0200_2018, mfv_stopld_tau030000um_M0300_2018, mfv_stopld_tau000100um_M0600_2018],
     #     },
 }
-
+'''
 _seen = set()
 for site, d in condorable.iteritems():
     if not xrootd_sites.has_key(site):
@@ -3255,7 +3288,7 @@ for site, d in condorable.iteritems():
             s.datasets[ds].xrootd_url = xrootd_sites[site]
 
 # can only run signal ntuples via condor where we can split by nevents, so require they're all reachable
-for s in mfv_splitSUSY_samples_2017:
+for s in ttHToLLPs_samples_2017: #mfv_splitSUSY_samples_2017:
     if s not in _seen:
         raise ValueError('%s not in condorable dict' % s.name)
 
@@ -3263,6 +3296,7 @@ for s in mfv_splitSUSY_samples_2017:
 # other info
 ########
 
+'''
 for ds in 'main', 'miniaod':
     # these in status=PRODUCTION
     #for s in ():
@@ -3279,6 +3313,7 @@ for ds in 'main', 'miniaod':
             s.datasets[ds].json      = json_path('ana_%s.json'      % y)
             s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)
             s.datasets[ds].json_1pc  = json_path('ana_%s_1pc.json'  % y)
+'''
 
 ########################################################################
 
