@@ -444,7 +444,9 @@ def get(i): return _l[i]
         cwd = os.getcwd()
         os.chdir(working_dir)
         try:
-            submit_out, submit_ret = popen('condor_submit cs_submit.jdl', return_exit_code=True)
+            submit_cmd = 'bash -lc "source ~/lpc-scripts/call_host.sh >/dev/null 2>&1 || true; condor_submit cs_submit.jdl"'
+            submit_out, submit_ret = popen(submit_cmd, return_exit_code=True)
+            #submit_out, submit_ret = popen('condor_submit cs_submit.jdl', return_exit_code=True)
             ok = False
             cluster = None
             schedd = None
