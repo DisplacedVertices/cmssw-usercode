@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-#FIXME : update lepton minpT but need to study min_njets and min_ht
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),
                               jets_src = cms.InputTag('selectedPatJets'),

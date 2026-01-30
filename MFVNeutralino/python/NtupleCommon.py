@@ -387,6 +387,10 @@ def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclu
     to_replace = []
 
     if sample.is_signal:
+        # NOTE that this is not implemented in a way that works for WminusH at all, and also that the `decay` line *only* works for ZH.
+        # Moreover, it was only pre-UL samples that made use of randomized parameters for VH signals.
+        # We should think about some cleanup here. Ultimately, parse_randpars is set to False in EventFilter_cfi.py, which is
+        # why the VH samples work at all!
         if sample.name.startswith('ZH_') or sample.name.startswith('Wplus'):
             magic_randpar = 'randpars_filter = False'
             
