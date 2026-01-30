@@ -1937,7 +1937,6 @@ all_signal_samples_2018 =  mfv_signal_samples_2018 + mfv_stopdbardbar_samples_20
 ########
 
 BTagCSV_data_samples_20161 = [
-    #DataSample('BTagCSV20161B1', '/BTagCSV/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1/MINIAOD'), #FIXME not included in TM ntupling
     DataSample('BTagCSV20161B', '/BTagCSV/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
     DataSample('BTagCSV20161C', '/BTagCSV/Run2016C-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
     DataSample('BTagCSV20161D', '/BTagCSV/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
@@ -1946,7 +1945,6 @@ BTagCSV_data_samples_20161 = [
 ]
 
 DisplacedJet_data_samples_20161 = [
-    #DataSample('DisplacedJet20161B1', '/DisplacedJet/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1/MINIAOD'), #FIXME not included in TM ntupling
     DataSample('DisplacedJet20161B', '/DisplacedJet/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
     DataSample('DisplacedJet20161C', '/DisplacedJet/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('DisplacedJet20161D', '/DisplacedJet/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
@@ -1955,13 +1953,11 @@ DisplacedJet_data_samples_20161 = [
     ]
 
 Lepton_data_samples_20161 = [
-    #DataSample('SingleMuon20161B1', '/SingleMuon/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #FIXME not included in TM ntupling
     DataSample('SingleMuon20161B', '/SingleMuon/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161C',  '/SingleMuon/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161D',  '/SingleMuon/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161E',  '/SingleMuon/Run2016E-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161F',  '/SingleMuon/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
-    #DataSample('SingleElectron20161B1', '/SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2/MINIAOD'), #FIXME not included in TM ntupling
     DataSample('SingleElectron20161B', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
