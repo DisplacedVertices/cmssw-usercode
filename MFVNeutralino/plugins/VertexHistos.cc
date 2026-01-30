@@ -13,6 +13,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVVertexHistos : public edm::EDAnalyzer {
  public:
@@ -825,7 +826,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////
 
   if (nsv >= 2) {
-    int this_year = 2017;
+    int this_year = int(MFVNEUTRALINO_YEAR);
     bool pass_dd = false;
     bool pass_bjet = false;
     bool pass_trig = false;
