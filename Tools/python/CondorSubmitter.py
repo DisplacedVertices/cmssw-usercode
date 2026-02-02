@@ -422,10 +422,10 @@ def get(i): return _l[i]
                 to_replace = []
             else:
                 to_add, to_replace = ret
-            #for a,b,err in to_replace:
-            #    if pset.find(a) < 0:
-            #        raise ValueError(err)
-            #    pset = pset.replace(a,b)
+            for a,b,err in to_replace:
+                if pset.find(a) < 0:
+                    raise ValueError(err)
+                pset = pset.replace(a,b)
             if to_add:
                 pset += '\n' + '\n'.join(to_add) + '\n'
 
@@ -454,7 +454,7 @@ def get(i): return _l[i]
                 for line in submit_out.split('\n'):
                     if line.startswith('Attempting to submit jobs to '):
                         schedd = line.strip().replace('Attempting to submit jobs to ', '')
-                        #assert schedd in cls.schedds
+                        assert schedd in cls.schedds
             for line in submit_out.split('\n'):
                 if 'job(s) submitted to cluster' in line:
                     ok = True

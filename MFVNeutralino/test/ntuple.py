@@ -87,7 +87,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
        samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
     elif use_Lepton_triggers :
         #samples = pick_samples(dataset, qcd=True, data = False, all_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False) #bkg template
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal=True, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False) #trk ineff apply
+        samples = pick_samples(dataset, qcd=False, data = False, all_signal=True, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False) #trk ineff apply
         #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=True, diboson=False, Lepton_data=True) #set settings.is_mc to False
     elif use_Muon_triggers :
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
