@@ -32,6 +32,9 @@ dataset = 'ntuple' + ntuple_version_use.lower()
 #dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
 #dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
 
+if sum([use_btag_triggers,use_btag_vetoLepHT_triggers,use_MET_triggers,use_Lepton_triggers,use_Muon_triggers,use_Electron_triggers,use_DisplacedLepton_triggers]) != 1 :
+    sys.exit("Must set exactly one trigger scheme to be on. Exiting.")
+
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
         process.mfvEvent.lightweight = True
