@@ -20,7 +20,7 @@ private:
   struct Mode {
     enum mode_t { either, jets_only, muons_only, electrons_only_veto_muons, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_leptons_and_HT, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
     const mode_t mode;
-    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_leptons_and_HT" ? bjets_OR_displaced_dijet_veto_leptons_and_HT : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "muons only" ? muons_only : m == "electrons only veto muons" ? electrons_only_veto_muons : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
+    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets OR displaced dijet veto leptons and HT" ? bjets_OR_displaced_dijet_veto_leptons_and_HT : m == "bjets OR displaced dijet veto HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "muons only" ? muons_only : m == "electrons only veto muons" ? electrons_only_veto_muons : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
     bool operator==(mode_t m) const { return mode == m; }
   };
   const Mode mode;

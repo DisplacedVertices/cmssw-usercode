@@ -408,7 +408,9 @@ def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclu
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
-            magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+            magic = "event_filter = 'bjets OR displaced dijet'"
+        if use_btag_vetoLepHT_triggers:
+            magic = "event_filter = 'bjets OR displaced dijet veto leptons and HT'"
         elif use_Lepton_triggers :
             magic ="event_filter = 'leptons only'"
         elif use_Muon_triggers :

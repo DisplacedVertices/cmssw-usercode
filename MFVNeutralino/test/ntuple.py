@@ -18,17 +18,17 @@ settings.keep_tk = False
 
 
 if use_btag_triggers :
-    settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+    settings.event_filter = 'bjets OR displaced dijet'
 elif use_btag_vetoLepHT_triggers :
-    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # for new trigger studies
+    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # default for displacement trigger analysis!
 elif use_MET_triggers :
     settings.event_filter = 'met only'
 elif use_Lepton_triggers :
-    settings.event_filter = 'leptons only'
+    settings.event_filter = 'leptons only' # default for lepton-triggered analysis! Use muons/electrons only when processing data, to not double count things in both Egamma and Muon Primary Datasets
 elif use_Muon_triggers :
     settings.event_filter = 'muons only' 
 elif use_Electron_triggers :
-    settings.event_filter = 'electrons only' 
+    settings.event_filter = 'electrons only veto muons' 
 else :
     settings.event_filter = 'jets only'
 
