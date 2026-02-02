@@ -665,7 +665,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   //TRandom3 *r3 = new TRandom3(); //Alec added
   for (size_t i = 0, ie = all_tracks->size(); i < ie; ++i) {
     const reco::TrackRef& tk = (*all_tracks)[i];
-    const auto rs = (track_rescaler_which == 1) ? track_rescaler.scale(*tk, "")
+    // only jmt::TrackRescaler::w_SingleLep needs the second argument for general vs. ele vs. mu tracks
+    const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*tk, "")
                   :  track_rescaler.scale(*tk);
     const bool is_second_track = i >= second_tracks_start_at;
 
@@ -969,7 +970,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (use_separated_leptons) {
     for (size_t i = 0, im = all_muon_tracks->size(); i < im; ++i) {
       const reco::TrackRef& mtk = (*all_muon_tracks)[i];
-      const auto rs = (track_rescaler_which == 1) ? track_rescaler.scale(*mtk, "muon")
+      const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*mtk, "muon")
                   :  track_rescaler.scale(*mtk);
       const double p = mtk->p();
       const double pt = mtk->pt();
@@ -1135,7 +1136,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
     for (size_t i = 0, ie = all_electron_tracks->size(); i < ie; ++i) {
       const reco::TrackRef& etk = (*all_electron_tracks)[i];
-      const auto rs = (track_rescaler_which == 1) ? track_rescaler.scale(*etk, "electron")
+      const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*etk, "electron")
                   :  track_rescaler.scale(*etk);
       //copy/calculate the cheap things but now for electrons ... 
       const double p = etk->p();
