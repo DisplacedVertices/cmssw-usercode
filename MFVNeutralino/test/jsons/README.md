@@ -1,0 +1,142 @@
+# Adjustments by Joey, 2/3/2026:
+
+- Following https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiRecommendationsRun2#Luminosity_for_pp_13_TeV_data_20, I grabbed the golden json files from https://twiki.cern.ch/twiki/bin/view/CMS/DCUserPage#Run_II_Analysis_Purpose_of_this. 
+
+- The direct links that I could wget (rather than deal with lxplus 2FA) were https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt, https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt, https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt
+
+- I removed the bad 319337 LS 48 (started at LS49 for that run instead)
+
+- Since we use a logical OR of several triggers now, I don't want to deal with the messiness of dropping prescaled triggers in general. We in principle are fully making use of unprescaled triggers anyway, with the one key exception being the BTagCSV and DisplacedDijet triggers that (I believe) were not enabled for the first era of 2017: double check in https://twiki.cern.ch/twiki/bin/view/CMS/HLTPathsRunIIList to be sure.
+
+- I moved ana_2016.json to uld/ana_2016.json (and similar for the rest), and then copied the Cert_*JSON.txt files from before to names like ana_2016_new.json.
+
+- I ran compareJSON.py --or ana_201[78]_new.json > ana_2017p8_new.json (grab from https://raw.githubusercontent.com/cms-sw/cmssw/refs/heads/CMSSW_10_6_X/FWCore/PythonUtilities/scripts/compareJSON.py if needed)
+
+- I then did a diff with the old ana_2017p8 and did see differences: but likely because it was built from a particular trigger set (?).
+
+- Next, split 2016 into a 20161 and 20162 based on the run numbers in https://twiki.cern.ch/twiki/bin/view/CMS/PdmVDatasetsUL2016, so that I can compute the lumi for each subset.
+
+- Once confident, drop the "_new" from the files, and make use of them in our code.
+
+- Just keep in mind that the 1pc and 10pc files are based on the old jsons, so we should be a little careful, or do the detailed work to actually update them.
+
+- To calculate lumi, copy the files to lxplus and use brilcalc via:
+
+source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
+brilcalc lumi -c "offline" -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_2016_new.json
+
+(there are ways to run from FNAL, but the database connection is sometimes flaky)
+
+This gave me:
+
+2016 total
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 144   | 393  | 234231 | 233406 | 38.184814445      | 36.313753344     |
++-------+------+--------+--------+-------------------+------------------+
+
+20161 
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 79    | 230  | 140904 | 140386 | 20.560945431      | 19.501601622     |
++-------+------+--------+--------+-------------------+------------------+
+
+20162 
++-------+------+-------+-------+-------------------+------------------+
+| nfill | nrun | nls   | ncms  | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+-------+-------+-------------------+------------------+
+| 66    | 163  | 93327 | 93020 | 17.623869013      | 16.812151722     |
++-------+------+-------+-------+-------------------+------------------+
+
+2017 
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 175   | 457  | 206287 | 205294 | 44.694928264      | 42.068228660     |
++-------+------+--------+--------+-------------------+------------------+
+
+2018 
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 196   | 478  | 234526 | 234124 | 62.040722723      | 59.561229979     |
++-------+------+--------+--------+-------------------+------------------+
+
+2017 for BTagCSV / DisplacedDijet, starting with run 299368:
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 149   | 374  | 181687 | 180908 | 39.505177116      | 37.187361833     |
++-------+------+--------+--------+-------------------+------------------+
+
+2018 for HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV, which is the only trigger that wasn't active in all runs. Started with run 315974:
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 174   | 428  | 211858 | 211456 | 56.608177717      | 54.286478538     |
++-------+------+--------+--------+-------------------+------------------+
+(perhaps we use this smaller json for all of the 2018 displacement trigger channel, for simplicity? We lose 10% of the lumi for the other paths, but otherwise it's messy)
+
+
+
+
+# Original instructions
+- run brilcalc on lxplus. set up with
+  https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html
+
+  and git for my working dir with scripts:
+  https://github.com/jordantucker/mybrilcalc
+
+- since /afs was unmounted @ lpc, symlinks replaced with copies (2017 and 2018 are UL now):
+
+  2015.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt
+  2016.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt
+  2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt
+  2018.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt
+
+most recent:
+  2018.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt 
+
+- By hand, remove these:
+
+  319337 LS 48          # offline beamspot in wrong place leads to events with many seed tracks
+
+- "2017p8" is the addition of both jsons, e.g.
+  compareJSON.py --or ana_201[78].json > ana_2017p8.json
+
+- "ana_".json are the hlt-menu-ok and prescale-ne-1 dropped versions.
+  They are produced by first dumping the by-ls int. lumi csvs with
+  brilcalc, with and without the --hltpath argument. See
+  drop_prescaled.py for example commands.
+
+  drop_prescaled.py compares the lumi reported with and without the
+  HLT filter, since brilcalc applies prescales in the former case.
+
+  (The "official" versions of the by-lumi csv files currently live in
+  /uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/ . They can change with new
+  versions of the brilcalc normtag, but this is more stable lately.)
+
+- "_10pc" or "_1pc" are 10% or 1% slices. They are produced with
+  pick10pc.py.
+
+- "ana_avail_" are what condor/crab report say they were able to run
+  on.  This is made after the first time condor/crab ntuple is run on
+  the default set of datasets (currently MET) and the report is
+  scrutinized.  (Can run Tools/test/noop.py for this.)
+  Thereafter, compare subsequent runs' reports to this
+  file. (See utilities.py.)  For a different set of datasets,
+  e.g. /SingleMu, use "ana_avail_*_mu".
+
+- To produce the split-by-era jsons, prepare ds.txt with one dataset
+  per line.  Then run split_by_era.sh.  It handles one year at a time.
+  Can compare /AOD to /MINIAOD this way to see that all runs made it
+  into miniaod.
+
+  When done, use jsonoverlaps to find out if the datasets have
+  overlaps. (Has happened before, e.g. for 2018A2 and 3 PromptReco
+  https://hypernews.cern.ch/HyperNews/CMS/get/physTools/3610.html .)
+  Current JSON files are checked without overlaps.
+
+
