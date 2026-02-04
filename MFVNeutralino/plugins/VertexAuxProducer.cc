@@ -302,28 +302,25 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
     if (rs_ttks.size() > 1) {
-      try {
-        reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
-        if (rs_sv.isValid()) {
-          const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
-          aux.rescale_chi2 = rs_sv.chi2();
-          aux.rescale_x = rs_sv.x();
-          aux.rescale_y = rs_sv.y();
-          aux.rescale_z = rs_sv.z();
-          aux.rescale_cxx = rs_sv.covariance(0,0);
-          aux.rescale_cxy = rs_sv.covariance(0,1);
-          aux.rescale_cxz = rs_sv.covariance(0,2);
-          aux.rescale_cyy = rs_sv.covariance(1,1);
-          aux.rescale_cyz = rs_sv.covariance(1,2);
-          aux.rescale_czz = rs_sv.covariance(2,2);
-          aux.rescale_bs2ddist = d.value();
-          aux.rescale_bs2derr = d.error();
-        }
-        else {
-          aux.rescale_chi2 = -1;
-        }
+      reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
+      if (rs_sv.isValid()) {
+        const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
+        aux.rescale_chi2 = rs_sv.chi2();
+        aux.rescale_x = rs_sv.x();
+        aux.rescale_y = rs_sv.y();
+        aux.rescale_z = rs_sv.z();
+        aux.rescale_cxx = rs_sv.covariance(0,0);
+        aux.rescale_cxy = rs_sv.covariance(0,1);
+        aux.rescale_cxz = rs_sv.covariance(0,2);
+        aux.rescale_cyy = rs_sv.covariance(1,1);
+        aux.rescale_cyz = rs_sv.covariance(1,2);
+        aux.rescale_czz = rs_sv.covariance(2,2);
+        aux.rescale_bs2ddist = d.value();
+        aux.rescale_bs2derr = d.error();
       }
-      catch (...) {}
+      else {
+        aux.rescale_chi2 = -1;
+      }
     }
 
     if (ttks.size() > 2) {
