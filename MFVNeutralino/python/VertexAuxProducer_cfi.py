@@ -22,7 +22,4 @@ mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    verbose = cms.untracked.bool(False),
                                    )
 
-mfvVerticesAux = mfvVerticesAuxTmp.clone(sv_to_jets_src = 'mfvVerticesToJets',
-                                         sv_to_muons_src = 'mfvVerticesToLeptons',
-                                         sv_to_ele_src = 'mfvVerticesToLeptons'
-                                        )
+mfvVerticesAux = mfvVerticesAuxTmp.clone(sv_to_jets_src = 'mfvVerticesToJets')
