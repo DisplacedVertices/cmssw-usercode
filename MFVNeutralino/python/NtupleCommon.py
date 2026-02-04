@@ -179,7 +179,7 @@ def make_output_commands(process, settings):
         'keep *_mcStat_*_*',
         'keep MFVVertexAuxs_mfvVerticesAux_*_*',
         'keep MFVEvent_mfvEvent__*',
-        'keep MFVSeedTracks_mfvSeedTracks__*',
+        #'keep MFVSeedTracks_mfvSeedTracks__*', # this was pursued by Abby at one point but later dropped
         ]
 
     if settings.keep_gen:
@@ -289,7 +289,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
-    process.load('JMTucker.MFVNeutralino.SeedTracks_cfi')
+    #process.load('JMTucker.MFVNeutralino.SeedTracks_cfi') # this was pursued by Abby at one point but later dropped
     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
@@ -361,8 +361,8 @@ def miniaod_ntuple_process(settings):
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
                          process.prefiringweight *
-                         process.mfvEvent *
-                         process.mfvSeedTracks)
+                         process.mfvEvent )
+                         #process.mfvSeedTracks) # this was pursued by Abby at one point but later dropped
 
     output_commands = make_output_commands(process, settings)
 
