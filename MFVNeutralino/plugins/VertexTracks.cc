@@ -1303,7 +1303,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
-  if (verbose) {
+  if (true) {
     printf("n_all_tracks: %5lu   n_seed_tracks: %5lu\n", all_tracks->size(), seed_tracks->size());
     printf("n_all_muon_tracks: %5lu   n_muon_seed_tracks: %5lu\n", all_muon_tracks->size(), muon_seed_tracks->size());
     printf("n_all_electron_tracks: %5lu   n_electron_seed_tracks: %5lu\n", all_electron_tracks->size(), electron_seed_tracks->size());

@@ -1398,6 +1398,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         float tkpt_todrop = tks[i]->pt();
         float tkphi_todrop = tks[i]->phi();
         float leptkpt_todrop = -1;
+        std::cout << "other tks[i].id().id() " << tks[i].id().id() << std::endl;
         if (tks[i].id().id() == 155 || tks[i].id().id() == 156) {
           leptkpt_todrop = tks[i]->pt();
         }
@@ -1495,6 +1496,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 h_dzstage_droppedtk_dphi_vs_sigma->Fill(dphi_avg, distz_sig);
 
              //ignoring lepton tracks 
+             std::cout << "tks[i].id().id() " << tks[i].id().id() << std::endl;
              if (ignore_lep_in_refit_distz && (tks[i].id().id() == 155 || tks[i].id().id() == 156) && fabs(tks[i]->pt()) >= 20.0 ) {
                 break;
              }
