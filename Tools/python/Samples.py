@@ -2087,13 +2087,6 @@ Lepton_data_samples_2018 = [
     DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
 ]
 
-egamma_data_samples_2018 = [
-    DataSample('EGamma2018A', '/EGamma/Run2018A-12Nov2019_UL2018-v2/AOD'),
-    DataSample('EGamma2018B', '/EGamma/Run2018B-12Nov2019_UL2018-v2/AOD'),
-    DataSample('EGamma2018C', '/EGamma/Run2018C-12Nov2019_UL2018-v2/AOD'),
-    DataSample('EGamma2018D', '/EGamma/Run2018D-12Nov2019_UL2018-v8/AOD'),
-    ]
-
 ########################################################################
 
 registry = SamplesRegistry()
@@ -2198,7 +2191,6 @@ __all__ = [
     'JetHT_data_samples_2018',
     'Bjetsignal_samples_run2',
     #'auxiliary_data_samples_2018',
-    #'egamma_data_samples_2018',
 
     'registry',
     ]
@@ -3267,7 +3259,7 @@ for ds in 'main', 'miniaod':
     #    s.datasets[ds].notes['buggedpileup2017'] = True
 
     # set up jsons
-    #for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
+    #for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018
     for y,ss in (20161, Lepton_data_samples_20161 + BTagCSV_data_samples_20161 + DisplacedJet_data_samples_20161), (20162, Lepton_data_samples_20162 + BTagCSV_data_samples_20162 + DisplacedJet_data_samples_20162), (2017, JetHT_data_samples_2017 + Lepton_data_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017), (2018, Lepton_data_samples_2018 + BTagCSV_data_samples_2018 + DisplacedJet_data_samples_2018):
         for s in ss:
             s.datasets[ds].json      = json_path('ana_%s.json'      % y)
