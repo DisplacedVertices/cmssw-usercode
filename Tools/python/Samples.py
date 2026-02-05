@@ -2049,42 +2049,30 @@ singleelectron_data_samples_2017 = [
 #]
 
 JetHT_data_samples_2018 = [
-    # switch back to no GT36 to be consistent with lepton data ntuples in 2018
-    DataSample('JetHT2018A', '/JetHT/Run2018A-15Feb2022_UL2018-v2/MINIAOD'),
-    DataSample('JetHT2018B', '/JetHT/Run2018B-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('JetHT2018C', '/JetHT/Run2018C-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('JetHT2018D', '/JetHT/Run2018D-15Feb2022_UL2018-v1/MINIAOD'),
-
-    #DataSample('JetHT2018A', '/JetHT/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('JetHT2018B', '/JetHT/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('JetHT2018C', '/JetHT/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('JetHT2018D', '/JetHT/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018A', '/JetHT/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018B', '/JetHT/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018C', '/JetHT/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('JetHT2018D', '/JetHT/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
 ] 
 
 BTagCSV_data_samples_2018 = JetHT_data_samples_2018
 
 DisplacedJet_data_samples_2018 = [
-    # switch back to no GT36 to be consistent with lepton data ntuples in 2018
-    DataSample('DisplacedJet2018A', '/DisplacedJet/Run2018A-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018B', '/DisplacedJet/Run2018B-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018C', '/DisplacedJet/Run2018C-15Feb2022_UL2018-v1/MINIAOD'),
-    DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-15Feb2022_UL2018-v1/MINIAOD'),
-    
-    #DataSample('DisplacedJet2018A', '/DisplacedJet/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('DisplacedJet2018B', '/DisplacedJet/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('DisplacedJet2018C', '/DisplacedJet/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
-    #DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018A', '/DisplacedJet/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018B', '/DisplacedJet/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018C', '/DisplacedJet/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
 ]
 
 Lepton_data_samples_2018 = [
-    DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-UL2018_MiniAODv2-v3/MINIAOD'),
-    DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-UL2018_MiniAODv2-v2/MINIAOD'),
-    DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-UL2018_MiniAODv2-v2/MINIAOD'),
-    DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-UL2018_MiniAODv2-v3/MINIAOD'),
-    DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2-v1/MINIAOD'),
-    DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2-v1/MINIAOD'),
-    DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2-v1/MINIAOD'),
-    DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2-v2/MINIAOD'),
+    DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
+    DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
+    DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-UL2018_MiniAODv2_GT36-v3/MINIAOD'),
+    DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
+    DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
+    DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2_GT36-v3/MINIAOD'),
 ]
 
 ########################################################################
