@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-#from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 kvr_params = cms.PSet(
     maxDistance = cms.double(0.01),
@@ -79,7 +78,6 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                )
 
 mfvVertices = cms.EDProducer('MFVVertexer',
-                             #jmtNtupleFiller_pset(True, True, False),
                              kvr_params = kvr_params,
                              do_track_refinement = cms.bool(False), # remove tracks + trim out tracks with IP significance larger than trackrefine_sigmacut and trackrefine_trimmax, respectively   
                              resolve_split_vertices_loose = cms.bool(False), # an alternative merging routine with `loose` criteria, to merge any nearby vertices within a given dist or significance
