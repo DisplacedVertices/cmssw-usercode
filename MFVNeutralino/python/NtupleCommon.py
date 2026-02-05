@@ -284,7 +284,6 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -351,7 +350,6 @@ def miniaod_ntuple_process(settings):
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
-                         process.BadPFMuonFilterUpdateDz *
                          process.fullPatMetSequence *
                          process.egammaPostRecoSeq * #Abby lepton correction
                          process.selectedPatJets *
