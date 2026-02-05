@@ -6,7 +6,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 from JMTucker.Tools.Year import year
 
 settings = NtupleSettings()
-settings.is_mc = True #FIXME
+settings.is_mc = True # NOTE: you must set this differently when processing data vs. MC!
 settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
@@ -39,7 +39,9 @@ settings.randpars_filter = False
 process = ntuple_process(settings)
 #max_events(process, 10)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+#input_files(process, 'root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
+#input_files(process, 'root://cmsxrootd.fnal.gov//store/data/Run2017B/SingleElectron/MINIAOD/UL2017_MiniAODv2-v1/270000/5E96AE29-4D22-8543-80C6-D8DEA2A38DF3.root')
+
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/40000/0BD790C6-883F-0147-A66E-8EC9DC53750F.root')
 #input_files(process, '/store/mc/RunIISummer20UL16MiniAODAPVv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/30000/F80DB8BA-EB71-E04B-A334-5B701A3FDF3E.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/40000/DC0DDB54-E968-A948-B805-FCCDA9CDB11A.root')
