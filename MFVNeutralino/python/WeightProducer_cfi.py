@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PileupWeights import get_pileup_weights
 from JMTucker.Tools.Year import year
+from JMTucker.MFVNeutralino.NtupleCommon import use_Lepton_triggers
 import os
 
 if (year == 20161) :
@@ -49,8 +50,8 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            weight_npv = cms.bool(False),
                            npv_weights = cms.vdouble(),
                            misc_weight_indices = cms.vint32(),
-                           apply_lepsf = cms.bool(True),
-                           apply_roccor = cms.bool(True), #rocchester corrections for muons
+                           apply_lepsf = cms.bool(True) if use_Lepton_triggers else cms.bool(False),
+                           apply_roccor = cms.bool(True) if use_Lepton_triggers else cms.bool(False), #rochester corrections for muons
                            pujson = cms.string(pujson_path),
                            elejson = cms.string(elejson_path),
                            mujson = cms.string(mujson_path),
