@@ -749,7 +749,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_n_seed_vertices->Fill(vertices->size());
   }
 
-  if (order_seed_vertex){ //FIXMENOW
+  if (order_seed_vertex){
     //order vertices by pt 
     std::sort(vertices->begin(), vertices->end(), order_seed_vtx_pt());
   }
