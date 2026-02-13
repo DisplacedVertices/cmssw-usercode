@@ -1,0 +1,34 @@
+# sample id in ROOT file 3
+# filename = mfv_stopdbardbar_tau001000um_M0200_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 12
+________
+bin             b70    b71    b72
+observation       0      0      0
+________
+bin             b70    b71    b72            b70    b71    b72
+process       sig73  sig73  sig73           bkg7   bkg7   bkg7
+process           0      0      0              1      1      1
+rate         0.09884094475209712 0.3632782266829163 1.0142405644357202         0.013035225953293232 0.0024426750889414914 0.06252209895776527
+________
+
+lumi7     lnN    1.01   1.01   1.01              -      -      -
+
+pu7b1     lnN    1.02      -      -              -      -      -
+pu7b2     lnN       -   1.02      -              -      -      -
+pu7b3     lnN       -      -   1.02              -      -      -
+disp_trig_uncerts7b1 lnN  1.0617      -      -              -      -      -
+disp_trig_uncerts7b2 lnN       - 1.0617      -              -      -      -
+disp_trig_uncerts7b3 lnN       -      - 1.0617              -      -      -
+
+fake-shape7 lnN 1.0737254579808657/0.9320790046457512 1.0786529433558865/0.9290541780959617 1.0933923360249556/0.9188042773615523              -      -      -
+
+lumi_17   lnN  1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
+
+mc_stat7b1 gmN 170    0.0005814173220711595      -      -              -      -      -
+mc_stat7b2 gmN 637         - 0.0005702954892981418      -              -      -      -
+mc_stat7b3 gmN 1782        -      - 0.0005691585659010776              -      -      -
+
+

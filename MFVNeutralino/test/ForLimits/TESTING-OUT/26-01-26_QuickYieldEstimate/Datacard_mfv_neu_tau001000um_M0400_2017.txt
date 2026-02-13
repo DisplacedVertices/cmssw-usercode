@@ -1,0 +1,34 @@
+# sample id in ROOT file 1
+# filename = mfv_neu_tau001000um_M0400_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 12
+________
+bin             b70    b71    b72
+observation       0      0      0
+________
+bin             b70    b71    b72            b70    b71    b72
+process       sig71  sig71  sig71           bkg7   bkg7   bkg7
+process           0      0      0              1      1      1
+rate         0.4231484549641609 1.2044686601124703 1.612611439123749         0.013035225953293232 0.0024426750889414914 0.06252209895776527
+________
+
+lumi7     lnN    1.01   1.01   1.01              -      -      -
+
+pu7b1     lnN    1.02      -      -              -      -      -
+pu7b2     lnN       -   1.02      -              -      -      -
+pu7b3     lnN       -      -   1.02              -      -      -
+disp_trig_uncerts7b1 lnN  1.0336      -      -              -      -      -
+disp_trig_uncerts7b2 lnN       - 1.0336      -              -      -      -
+disp_trig_uncerts7b3 lnN       -      - 1.0336              -      -      -
+
+fake-shape7 lnN 1.1273823205164528/0.8945477626981647 1.1336099798088664/0.8902654919156564 1.1407747684858507/0.8852958699873595              -      -      -
+
+lumi_17   lnN  1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
+
+mc_stat7b1 gmN 750    0.0005641979399522146      -      -              -      -      -
+mc_stat7b2 gmN 2111        - 0.0005705678162541309      -              -      -      -
+mc_stat7b3 gmN 2835        -      - 0.0005688223771159608              -      -      -
+
+

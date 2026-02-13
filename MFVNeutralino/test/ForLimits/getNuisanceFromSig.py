@@ -1,0 +1,183 @@
+from __future__ import absolute_import
+
+import numpy as np
+
+import helper_PyStorage_objects as sth
+import nuisance_configs_and_functions as nsfc
+
+
+# Nuisance tags
+nuis_allsigs = set([
+    "mc_stat", # MC Gamma-N
+    "reco_effi", # Reconstruction efficiency
+    "vtx_reco_TM", # TrackMover
+    "pileup", # Pileup
+    "int_lumi",])
+nuis_lep = set([
+    "lep_effi",])
+nuis_bjet = set([
+    "disp_kine", # Displacement trigger kinematic filters
+    "bjet_filt", # B-Jet filters
+    "disp_filt", # Displaced jet track filters
+    "disp_tres", # Track Resolution, displaced filters
+    "bjet_inef", # Inefficiencies in offline b jet selection
+    "btag_scfa", # B-tag scale factors
+    "JES", # Jet Energy Scale
+    "JER", # Jet Energy Resolution
+    "calo_inef",])
+
+nuis_replacements = { # This replaces clusters of nuisances with overall uncertainties, e.g. B-jet SFs and JES/R are put together
+    "all": {},
+    # "bjet": {},
+    "bjet": {
+        "trig_JESR_btag": set([
+            "disp_kine", # Displacement trigger kinematic filters
+            "bjet_filt", # B-Jet filters
+            "disp_filt", # Displaced jet track filters
+            "disp_tres", # Track Resolution, displaced filters
+            "bjet_inef", # Inefficiencies in offline b jet selection # Note: this is the AN edit
+            "btag_scfa", # B-tag scale factors
+            "JES", # Jet Energy Scale
+            "JER",]),
+    },
+    "lep": {},
+}
+
+
+
+nuis_bkg = set([
+    "sum_dbvc", # The Constructed Sum-d_BV^C Distribution
+    "pileup", #Pile-Up Effects
+    "sig_cont", # Signal contamination
+    "bkg_norm",])
+
+nuis_bkg_replacements = { # not to be confused with nuis_replacements (about signal)
+}
+
+
+
+
+
+
+def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
+    """
+    Not to be confused with get_bkg_nuis_fromname.
+
+    -OUTPUTS-
+    nuis_ls is appended to
+    """
+    new_nuis = []
+
+    if nuis_name == "mc_stat": new_nuis = nsfc.get_mc_stat(nuis_name, siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "reco_effi": new_nuis = nsfc.get_reco_effi("tk_reco_eff", siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "vtx_reco_TM": new_nuis = nsfc.get_vtx_reco_TM(nuis_name, siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "pileup": new_nuis = nsfc.get_pileup("CMS_pileup_", siginfo, debug_mode=debug_mode)
+    
+    elif nuis_name == "int_lumi": new_nuis = nsfc.get_int_lumi("lumi_", siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "lep_effi": new_nuis = nsfc.get_lep_effi("CMS_eff_lep", siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "trig_JESR_btag": new_nuis = nsfc.get_trig_JESR_btag("disp_trig_uncerts", siginfo, debug_mode=debug_mode)
+
+    elif nuis_name == "calo_inef": new_nuis = nsfc.get_calo_inef("calo_ineff", siginfo, debug_mode=debug_mode)
+
+    else: print "Error: nuisance name not implemented for", nuis_name
+
+    nuis_ls += new_nuis
+    return
+
+
+
+
+
+
+def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
+    new_nuis = []
+
+    if nuis_name == "sum_dbvc": new_nuis = nsfc.get_bkg_sum_dbvc(nuis_name, debug_mode=debug_mode)
+
+    elif nuis_name == "pileup": new_nuis = nsfc.get_bkg_pileup("bkg_pu", debug_mode=debug_mode)
+
+    elif nuis_name == "sig_cont": new_nuis = nsfc.get_bkg_sig_cont(nuis_name, debug_mode=debug_mode)
+
+    elif nuis_name == "bkg_norm": new_nuis = nsfc.get_bkg_bkg_norm("bkg_norm", debug_mode=debug_mode) # Note naming
+
+    else: print "Error: background nuisance name not implemented for", nuis_name
+
+    nuis_bkg_ls += new_nuis
+    return
+
+
+
+
+
+
+def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
+    """
+    Given a siginfo object, produce a list of nuisance parameters.
+
+    -INPUTS-
+    siginfo: a SignalROOTInfo object
+    nuis_ls: empty list (though it should work if not empty)
+    """
+
+    trig_type = siginfo.trig_type
+
+    nuis_set = nuis_allsigs.copy()
+    if trig_type == "lep":
+        nuis_set.update(nuis_lep)
+    elif trig_type == "bjet":
+        nuis_set.update(nuis_bjet)
+    else:
+        print "FAIL: please make sure the input SignalROOTInfo object has a trig_type identified"
+        return
+
+    for repl in nuis_replacements[trig_type].keys():
+        nuis_set.add(repl)
+        nuis_set = nuis_set.difference(nuis_replacements[trig_type][repl])
+    if debug_mode: print "\nNuisances identified: ", nuis_set, "\n"
+    
+    
+    for nuis in sorted(nuis_set):
+        get_nuis_fromname(nuis, siginfo, nuis_ls, debug_mode=debug_mode)
+    if debug_mode:
+        print "Nuisances that produced a SIG Nuisance object:"
+        for nuis in nuis_ls: nuis.print_diagnostics()
+        print "Warning: most nuisances haven't been implemented. I will write them after the rest of the pipeline is set up."
+    
+    return
+
+
+
+
+
+
+def get_nuis_frombkg(nuis_bkg_ls, debug_mode=False):
+    """
+    Given the background information, produce a list of nuisance parameters.
+
+    -INPUTS-
+    nuis_bkg_ls: empty list (though it should work if not empty)
+    """
+
+    nuis_set = nuis_bkg.copy()
+
+    for repl in nuis_bkg_replacements.keys():
+        nuis_set.add(repl)
+        nuis_set = nuis_set.difference(nuis_bkg_replacements[repl])
+    if debug_mode: print "Nuisances identified: ", nuis_set, "\n"
+
+
+    for nuis in sorted(nuis_set):
+        get_bkg_nuis_fromname(nuis, nuis_bkg_ls, debug_mode=debug_mode)
+    if debug_mode:
+        print "Nuisances that produced a BKG Nuisance object:"
+        for nuis in nuis_bkg_ls: nuis.print_diagnostics()
+        print "Warning: most nuisances haven't been implemented. I will write them after the rest of the pipeline is set up."
+    
+    return
+
+

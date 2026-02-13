@@ -1,0 +1,46 @@
+# sample id in ROOT file 2
+# filename = mfv_stopdbardbar_tau000300um_M0400_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 24
+________
+bin             b70    b71    b72
+observation       0      0      0
+________
+bin             b70    b71    b72            b70    b71    b72
+process       sig72  sig72  sig72           bkg7   bkg7   bkg7
+process           0      0      0              1      1      1
+rate         1.79730705396 1.13642271753 0.19252653947         0.0130352259533 0.00244267508894 0.0625220989578
+________
+
+lumi7     lnN    1.01   1.01   1.01              -      -      -
+
+calo_ineff7b1 lnN    1.01      -      -              -      -      -
+calo_ineff7b2 lnN       -   1.01      -              -      -      -
+calo_ineff7b3 lnN       -      -   1.01              -      -      -
+CMS_pileup_7b1 lnN    1.02      -      -              -      -      -
+CMS_pileup_7b2 lnN       -   1.02      -              -      -      -
+CMS_pileup_7b3 lnN       -      -   1.02              -      -      -
+disp_trig_uncerts7b1 lnN  1.0323      -      -              -      -      -
+disp_trig_uncerts7b2 lnN       - 1.0323      -              -      -      -
+disp_trig_uncerts7b3 lnN       -      - 1.0323              -      -      -
+vtx_reco_TM7b1 lnN  1.1984      -      -              -      -      -
+vtx_reco_TM7b2 lnN       - 1.1984      -              -      -      -
+vtx_reco_TM7b3 lnN       -      - 1.1984              -      -      -
+
+fake-shape7 lnN 1.12685121148/0.895713863551 1.12354824544/0.897917817259 1.11904909391/0.901499422245              -      -      -
+
+lumi_17   lnN  1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
+mc_stat7b1 gmN 3817   0.000470869021211      -      -              -      -      -
+mc_stat7b2 gmN 2416        - 0.000470373641362      -              -      -      -
+mc_stat7b3 gmN 406         -      - 0.000474203299188              -      -      -
+
+bkg_pu7   lnN       -      -      -         1.0001 1.0001 1.0001
+sig_cont7 lnN       -      -      -           1.05   1.05   1.05
+fake-bkg7 lnN       -      -      -            1.1    1.1    1.1
+
+bkg_norm7b1 lnN       -      -      -           1.15      -      -
+bkg_norm7b2 lnN       -      -      -              -   1.15      -
+bkg_norm7b3 lnN       -      -      -              -      -   1.15
+

@@ -88,6 +88,10 @@ def _set_signal_stuff(sample):
     else:
         #print(sample.name)
         sample.xsec = 1e-3
+    if (sample.name.startswith('ggH')):
+        sample.filt_eff = 0.10
+    else:
+        sample.filt_eff = 1.0
     sample.is_private = sample.dataset.startswith('/mfv_') and sample.dataset.endswith('/USER')
     if sample.is_private:
         sample.dbs_inst = 'phys03'

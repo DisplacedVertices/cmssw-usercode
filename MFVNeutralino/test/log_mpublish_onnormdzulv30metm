@@ -1,0 +1,30 @@
+No dirs in argv
+
+usage: mpublish [options] condor_or_crab_dirs
+
+mpublish: get the staged-out files from condor/crab directories and print out
+lines for SampleFiles.py
+
+positional arguments:
+  condor_or_crab_dirs   The condor/crab directories.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dataset DATASET     The dataset name to use.
+  --blacklist [BLACKLIST [BLACKLIST ...]]
+                        Don't include files that match these patterns (default
+                        ['vertex_histos*root']).
+  --pattern PATTERN     Glob-style pattern to filter the files, useful if
+                        there are multiple files output per job.
+  --partial             If set, partial publishing is allowed.
+  --only-done           If set, only look at dirs with the mmon_done marker
+                        file.
+  --no-coderep          whether to disable coderep output
+  --no-lpc-shortcut     whether to use the lpc shortcut on crab dirs
+  --no-dbs              whether to use information from dbs
+  --nevents-per-job NEVENTS_PER_JOB
+                        nevents to use if reading dbs fails
+  --include-condor-nevents
+                        If set, parse xmls to get nevents from condor wds.
+  --from-merge          Input is from merge jobs (implies --partial and --no-
+                        coderep).

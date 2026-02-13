@@ -1,0 +1,34 @@
+# sample id in ROOT file 0
+# filename = ggHToSSTodddd_tau1mm_M55_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 12
+________
+bin             b70    b71    b72
+observation       0      0      0
+________
+bin             b70    b71    b72            b70    b71    b72
+process       sig70  sig70  sig70           bkg7   bkg7   bkg7
+process           0      0      0              1      1      1
+rate         0.0 0.0011088099479675292 0.4213910159096125         0.013035225953293232 0.0024426750889414914 0.06252209895776527
+________
+
+lumi7     lnN    1.01   1.01   1.01              -      -      -
+
+pu7b1     lnN    1.02      -      -              -      -      -
+pu7b2     lnN       -   1.02      -              -      -      -
+pu7b3     lnN       -      -   1.02              -      -      -
+disp_trig_uncerts7b1 lnN  1.1204      -      -              -      -      -
+disp_trig_uncerts7b2 lnN       - 1.1204      -              -      -      -
+disp_trig_uncerts7b3 lnN       -      - 1.1204              -      -      -
+
+fake-shape7 lnN 1.0/1.0 1.0170126033155933/0.9753400425366816 1.0879522649794031/0.9222119755251107              -      -      -
+
+lumi_17   lnN  1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
+
+mc_stat7b1 gmN 0      0.0005748296950443266      -      -              -      -      -
+mc_stat7b2 gmN 2           - 0.0005544049739837646      -              -      -      -
+mc_stat7b3 gmN 733         -      - 0.0005748854241604536              -      -      -
+
+
