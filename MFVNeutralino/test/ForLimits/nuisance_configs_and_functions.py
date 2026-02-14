@@ -39,14 +39,14 @@ SIGNAL Nuisances
 """
 
 def get_mc_stat(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo(nuis_name, 1.2, False, True, False, nuis_type="GammaN", nbins=siginfo.nbins)
+    nuis = sth.NuisanceInfo(nuis_name, 1.2, make_updn=False, sep_yrs=True, corr=False, nuis_type="GammaN", nbins=siginfo.nbins, ana_spec=True)
     return [nuis]
 
 
 
 def get_reco_effi(nuis_name, siginfo, debug_mode=False):
     # FIXME This is Alec's study
-    nuis = sth.NuisanceInfo("fake-shape", 1.2, True, True, True, nuis_type="shape", nbins=siginfo.nbins) # Dummy
+    nuis = sth.NuisanceInfo("fake-shape", 1.2, make_updn=True, sep_yrs=True, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=True) # Dummy
     return [nuis]
 
 
@@ -60,20 +60,20 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
         print "Warning: value not sensible. Skipping value."
         return []
     
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, False, True, corr=False, nbins=siginfo.nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo(nuis_name, 1.02, False, True, False, nbins=siginfo.nbins) #FIXME need shape
+    nuis = sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins) #FIXME need shape
     return [nuis]
 
 
 
 def get_int_lumi(nuis_name, siginfo, debug_mode=False):
     # FIXME this is a dummy
-    return [sth.NuisanceInfo("lumi", 1.01, False, True, True, nbins=siginfo.nbins),
-            sth.NuisanceInfo("lumi_17", 1.01, False, False, True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"])
+    return [sth.NuisanceInfo("lumi", 1.01, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins),
+            sth.NuisanceInfo("lumi_17", 1.01, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"])
         ]
 
 
@@ -92,7 +92,7 @@ def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
     if not np.isfinite(frac_unc):
         print "Warning: value not sensible. Skipping value."
         return []
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, False, True, corr=False, nbins=siginfo.nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
@@ -104,7 +104,7 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
     else:
         frac_unc = 0.01
     
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, False, True, corr=False, nbins=siginfo.nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
@@ -116,20 +116,20 @@ BACKGROUND Nuisances
 """
 
 def get_bkg_sum_dbvc(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo("fake-bkg", 1.10, False, True, corr=True, nbins=nbins)]
+    return [sth.NuisanceInfo("fake-bkg", 1.10, make_updn=False, sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
 
 
 
 def get_bkg_pileup(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.0001, False, True, corr=True, nbins=nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1.0001, make_updn=False, sep_yrs=True, corr=True, nbins=nbins)]
 
 
 
 def get_bkg_sig_cont(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.05, False, True, corr=True, nbins=nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1.05, make_updn=False, sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
 
 
 
 def get_bkg_bkg_norm(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.15, False, True, corr=False, nbins=nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1.15, make_updn=False, sep_yrs=True, corr=False, nbins=nbins, ana_spec=True)]
 

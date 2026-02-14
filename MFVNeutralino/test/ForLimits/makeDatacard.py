@@ -6,6 +6,7 @@ import ROOT
 import numpy as np
 
 import script_configs as config
+import nuisance_configs as ns_conf
 import helper_PyStorage_objects as sth
 from io import open
 
@@ -58,13 +59,15 @@ def return_sep():
     return "        "
 
 
-def make_nuis_dcnm(nuis, siginfo):
+def make_nuis_dcnm(nuis, siginfo, force_no_CADItag=False):
     """
     Given a nuisance, return the name/s it will show up as.
+    -If analysis-specific, tag with CADI (unless forced not to)
     -If separate years, tag with year_tag
     -If separate bins (==corr/uncorr), tag b1, b2 etc
     """
     nuis_rootname = nuis.nuis_name
+    if nuis.add_anaID==True and not(force_no_CADItag): nuis_rootname = ns_conf.nuis_names["CMS-CADI-tag"] + nuis_rootname
     if nuis.sep_yrs==True: nuis_rootname += year_tag
 
     if nuis.corr==True:
@@ -81,6 +84,51 @@ def return_newline():
     return """
 ________
 """
+
+
+def turn_info_to_line(ns_name, ns_type, strls, write_sig):
+    """
+    ns_name, ns_type: str
+    strls: list of anything that becomes str
+    write_sig: Boolean
+    """
+    if  (len(strls)!=nbins): raise Exception("Bad line input.")
+    new_line = """
+"""
+    
+    nuis_seg = ""
+    dash = pad("-", 7, False)
+
+    for i in range(nbins):
+        if strls[i] == None: nuis_seg += dash
+        else: nuis_seg += pad(str(strls[i]), 7, False)
+
+    new_line += pad(ns_name, 30) + pad(ns_type, 5)
+    if write_sig==True: new_line += nuis_seg + return_sep() + "DASH3"
+    elif write_sig==False: new_line += "DASH3" + return_sep() + nuis_seg
+    else: raise Exception("Specify whether to write signal or bkg")
+    
+    return new_line
+
+
+def turn_info_to_nlines(ns_names, ns_type, strls, write_sig):
+    """
+    ns_names: list-like of str
+    ns_type: str
+    strls: list of anything that becomes str
+    write_sig: Boolean
+    """
+    if (len(strls)!=nbins) or (len(ns_names)!=nbins): raise Exception("Bad line input.")
+    new_lines = """"""
+    
+    for i in range(nbins):
+        in_strls = []
+        for j in range(nbins):
+            if j!=i: in_strls.append(None)
+            else: in_strls.append(strls[i])
+        new_lines += turn_info_to_line(ns_names[i], ns_type, in_strls, write_sig)
+
+    return new_lines
 
 
 def return_no_dashes(template):
@@ -195,17 +243,7 @@ def return_lnN_corr(f, ns_ls, siginfo, write_sig):
             raise Exception("Failure: Nuisance object not complete")
 
         dc_name = make_nuis_dcnm(nuis, siginfo)
-        nuis_segment = ""
-        
-        for i in range(nbins):
-            nuis_segment += pad(str(nuis.nuis_val[i]), 7, False)
-
-        new_lines += """
-""" + pad(dc_name, 10) + pad("lnN", 4)
-        
-        if write_sig==True: new_lines += nuis_segment + return_sep() + "DASH3"
-        elif write_sig==False: new_lines += "DASH3" + return_sep() + nuis_segment
-        else: raise Exception("Specify whether to write sigal or bkg")
+        new_lines += turn_info_to_line(dc_name, "lnN", nuis.nuis_val, write_sig)
 
     new_lines += """
 """
@@ -231,20 +269,7 @@ def return_lnN_uncorr(f, ns_ls, siginfo, write_sig):
             raise Exception("Failure: Nuisance object not complete")
 
         dc_names = make_nuis_dcnm(nuis, siginfo)
-        dash = pad("-", 7, False)
-        
-        for i in range(nbins):
-            new_lines += """
-""" + pad(dc_names[i], 10) + pad("lnN", 4)
-            
-            nuis_segment = ""
-            for j in range(nbins):
-                if j!=i: nuis_segment += dash
-                else: nuis_segment += pad(str(nuis.nuis_val[j]), 7, False)
-            
-            if write_sig==True: new_lines += nuis_segment + return_sep() + "DASH3"
-            elif write_sig==False: new_lines += "DASH3" + return_sep() + nuis_segment
-            else: raise Exception("Specify whether to write sigal or bkg")
+        new_lines += turn_info_to_nlines(dc_names, "lnN", nuis.nuis_val, write_sig)
 
     new_lines += """
 """
@@ -267,7 +292,7 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
     for nuis in ns_ls:
         if nuis.nuis_type != "shape": continue
 
-        dc_name = make_nuis_dcnm(nuis, siginfo)
+        dc_name = make_nuis_dcnm(nuis, siginfo, force_no_CADItag=True)
         if write_sig: process_htag = sig_nm(sig_id).replace(" ","")
         else: process_htag = bkg_nm().replace(" ","")
 
@@ -277,25 +302,21 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
         h_central = f.Get(process_htag)
         h_shape_up = f.Get(hname_up)
         h_shape_dn = f.Get(hname_dn)
+        print(hname_up)
         #h_updn_ls = [h_shape_up, h_shape_dn]
         
 
-        nuis_segment = ""
+        strls = []
         
         for i in range(nbins):
+            print(h_shape_dn.GetBinContent(i+1))
             try:
-                nuis_segment += str(h_shape_dn.GetBinContent(i+1) / h_central.GetBinContent(i+1)) + "/" + str(h_shape_up.GetBinContent(i+1) / h_central.GetBinContent(i+1))
+                strls.append(str(h_shape_dn.GetBinContent(i+1) / h_central.GetBinContent(i+1)) + "/" + str(h_shape_up.GetBinContent(i+1) / h_central.GetBinContent(i+1)))
             except:
-                nuis_segment += str(1.0) + "/" + str(1.0)
+                strls.append(str(1.0) + "/" + str(1.0))
                 print "Warning: division by 0 encountered in up/down variations. Filling fake 1.0 values. Error in", siginfo.fn, "bin", i, "."
-            if i!= nbins-1: nuis_segment += " "
 
-        new_lines += """
-""" + pad(dc_name, 10) + pad("lnN", 4)
-        
-        if write_sig==True: new_lines += nuis_segment + return_sep() + "DASH3"
-        elif write_sig==False: new_lines += "DASH3" + return_sep() + nuis_segment
-        else: raise Exception("Specify whether to write sigal or bkg")
+        new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
 
     new_lines += """
 """
@@ -329,26 +350,22 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
             if write_sig==False: raise Exception("GammaN not implemented for background")
 
             dc_names = make_nuis_dcnm(nuis, siginfo)
-            dash = pad("-", 7, False)
 
             sig_cts_hname = "h_"+"sig"+sig_id+"_ngen_perbin_"+year
             h_sig_cts = f.Get(sig_cts_hname)
 
             for i in range(nbins):
-                new_lines += """
-""" + pad(dc_names[i], 10) + pad("gmN", 4) + pad(str(int(h_sig_cts.GetBinContent(i+1))), 6)
-
-                nuis_segment = ""
+                strls = []
                 for j in range(nbins):
-                    if j!=i: nuis_segment += dash
+                    if j!=i: strls.append(None)
                     else:
                         try:
-                            nuis_segment += pad(str(sig_norm_ls[j] / h_sig_cts.GetBinContent(j+1)), 7, False)
+                            strls.append(sig_norm_ls[j] / h_sig_cts.GetBinContent(j+1))
                         except:
                             print "Warning: division by 0 encountered in Gamma-N. Filling mean sumw as a placeholder. Error in", siginfo.fn, "bin", i, "."
-                            nuis_segment += pad(str(sum(sig_norm_ls) / h_sig_cts.Integral()), 7, False)
+                            strls.append(sum(sig_norm_ls) / h_sig_cts.Integral())
 
-                new_lines += nuis_segment + return_sep() + "DASH3"
+                new_lines += turn_info_to_line(dc_names[i], "gmN "+pad(str(int(h_sig_cts.GetBinContent(i+1))),5), strls, write_sig)
             continue
 
 
@@ -359,18 +376,12 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
                 if (nuis.corr!=True): raise Exception("Anti-correlated lnN does not have un-correlated bins implemented")
 
                 dc_name = make_nuis_dcnm(nuis, siginfo)
-                nuis_segment = ""
-        
-                for i in range(nbins):
-                    nuis_segment += pad(str(nuis.nuis_val[i]) + "/" + str(1/nuis.nuis_val[i]), 7, False)
-                
-                new_lines += """
-""" + pad(dc_name, 10) + pad("lnN", 4)
-        
-                if write_sig==True: new_lines += nuis_segment + return_sep() + "DASH3"
-                elif write_sig==False: new_lines += "DASH3" + return_sep() + nuis_segment
 
-                continue
+                strls = []
+                for i in range(nbins):
+                    strls.append(str(nuis.nuis_val[i]) + "/" + str(1/nuis.nuis_val[i]))
+
+                new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
 
 
                 
@@ -396,8 +407,6 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
     nuis_bkg_ls: list of nuisance objects, for background
     siginfo: SigInfo object storing information about signal MiniTree
     sig_id: string, the integer indexing the signal
-    #year: string, 4-5 digit year
-    #year_tag: string/char, represents the year
     debug_mode: Bool, whether to make debug statements
     """
 
@@ -435,7 +444,8 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
 
     template += return_shape_lines(f=f, ns_ls=nuis_bkg_ls, siginfo=siginfo, sig_id=sig_id, write_sig=False)
 
-    
+
+    #Tidy Template
     template = return_no_dashes(template)
 
     if debug_mode: print "Printing DATACARD:\n"

@@ -186,9 +186,8 @@ def make_sigs(f, sig_nums, sig_scales, **kwargs):
 
         # Rescale signal
         xsec = sigfn.get_xsec()
-        filt_eff = sigfn.get_filteff()
-        if debug: print "X-Sec:", xsec, "Filter-Eff:", filt_eff
-        sigyield = xsec * sb_conf.template_norms["lumi"][year_id] * filt_eff
+        if debug: print "X-Sec:", xsec
+        sigyield = xsec * sb_conf.template_norms["lumi"][year_id]
 
         scale = sigyield / sumw
         sig_scales.update({sigfn : scale})

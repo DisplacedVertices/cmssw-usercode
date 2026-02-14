@@ -151,10 +151,12 @@ class SignalROOTInfo(object):
         else: raise NotImplementedError()
         return
 
+    """
     def get_filteff(self):
         if self.root_exists: return self.mcsample.filt_eff
         else: raise NotImplementedError()
         return
+    """
 
 
 
@@ -176,13 +178,14 @@ class NuisanceInfo(object):
     corr: Boolean. Will this nuisance produce one line on the datacard, or more than one? If non-correlated, it will produce nuisb1, nuisb2 (or nuis7b1) etc
     nuis_type: string. If make_updn is True, it MUST be "shape".
     nbins: int
+    ana_spec: Boolean. Is this analysis-specific and gets tagged with CMS+CADI?
     extra_info: list
 
     -Other Things Stored-
     """
 
     
-    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr, nuis_type="lnN", nbins=3, extra_info=[]):
+    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr, nuis_type="lnN", nbins=3, ana_spec=False, extra_info=[]):
         """
         It will always expand one entry into an array of size nbins. If you don't want this behavior, give it e.g. [1, 1.05, 1] so some bins don't fluctuate.
         """
@@ -210,6 +213,7 @@ class NuisanceInfo(object):
         self.corr = corr
         self.nuis_type = nuis_type
         self.nbins = int(nbins)
+        self.add_anaID = ana_spec
         self.extra_info = extra_info
 
         if corr==False:

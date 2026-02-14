@@ -27,6 +27,7 @@ lumi_uncs = {
 }
 
 
+"""
 sig_xsecs = {
     "index_start": { # In Samples.py, some xsecs depend on the process name start
         "WplusH": 3*(9.426e-02)*0.01,
@@ -35,14 +36,17 @@ sig_xsecs = {
     },
     "others": 1e-3,
 }
+"""
 
 
+"""
 sig_filtereffs = {
     "index_start": { # In Samples.py, some xsecs depend on the process name start
         "ggH": 0.10,
     },
     "others": 1.0,
 }
+"""
 
 
 """ Instructions: if make_updn==True, add a list for what expression "weight" should be replaced with. Give in the order: up, down. """

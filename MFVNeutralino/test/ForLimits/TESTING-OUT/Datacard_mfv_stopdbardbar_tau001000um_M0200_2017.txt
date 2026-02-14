@@ -14,33 +14,33 @@ process           0      0      0              1      1      1
 rate         0.321114461311 1.18021830285 3.29506474574         0.0130352259533 0.00244267508894 0.0625220989578
 ________
 
-lumi7     lnN    1.01   1.01   1.01              -      -      -
+lumi7                         lnN     1.01   1.01   1.01              -      -      -
 
-calo_ineff7b1 lnN    1.01      -      -              -      -      -
-calo_ineff7b2 lnN       -   1.01      -              -      -      -
-calo_ineff7b3 lnN       -      -   1.01              -      -      -
-CMS_pileup_7b1 lnN    1.02      -      -              -      -      -
-CMS_pileup_7b2 lnN       -   1.02      -              -      -      -
-CMS_pileup_7b3 lnN       -      -   1.02              -      -      -
-disp_trig_uncerts7b1 lnN  1.0617      -      -              -      -      -
-disp_trig_uncerts7b2 lnN       - 1.0617      -              -      -      -
-disp_trig_uncerts7b3 lnN       -      - 1.0617              -      -      -
-vtx_reco_TM7b1 lnN  1.0516      -      -              -      -      -
-vtx_reco_TM7b2 lnN       - 1.0516      -              -      -      -
-vtx_reco_TM7b3 lnN       -      - 1.0516              -      -      -
+CMS_EXO24035_calo_ineff7b1    lnN     1.01      -      -              -      -      -
+CMS_EXO24035_calo_ineff7b2    lnN        -   1.01      -              -      -      -
+CMS_EXO24035_calo_ineff7b3    lnN        -      -   1.01              -      -      -
+CMS_pileup_7b1                lnN     1.02      -      -              -      -      -
+CMS_pileup_7b2                lnN        -   1.02      -              -      -      -
+CMS_pileup_7b3                lnN        -      -   1.02              -      -      -
+CMS_EXO24035_disp_trig_uncerts7b1 lnN   1.0617      -      -              -      -      -
+CMS_EXO24035_disp_trig_uncerts7b2 lnN        - 1.0617      -              -      -      -
+CMS_EXO24035_disp_trig_uncerts7b3 lnN        -      - 1.0617              -      -      -
+CMS_EXO24035_vtx_reco_TM7b1   lnN   1.0516      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM7b2   lnN        - 1.0516      -              -      -      -
+CMS_EXO24035_vtx_reco_TM7b3   lnN        -      - 1.0516              -      -      -
 
-fake-shape7 lnN 1.07372545798/0.932079004646 1.07865294336/0.929054178096 1.09339233602/0.918804277362              -      -      -
+fake-shape7                   lnN   1.07372545798/0.932079004646 1.07865294336/0.929054178096 1.09339233602/0.918804277362              -      -      -
 
-lumi_17   lnN  1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
-mc_stat7b1 gmN 170    0.00188890859594      -      -              -      -      -
-mc_stat7b2 gmN 637         - 0.00185277598563      -              -      -      -
-mc_stat7b3 gmN 1782        -      - 0.0018490823489              -      -      -
+lumi_17                       lnN   1.01/0.9900990099009901 1.01/0.9900990099009901 1.01/0.9900990099009901              -      -      -
+CMS_EXO24035_mc_stat7b1       gmN 170    0.00188890859594      -      -              -      -      -
+CMS_EXO24035_mc_stat7b2       gmN 637         - 0.00185277598563      -              -      -      -
+CMS_EXO24035_mc_stat7b3       gmN 1782        -      - 0.0018490823489              -      -      -
 
-bkg_pu7   lnN       -      -      -         1.0001 1.0001 1.0001
-sig_cont7 lnN       -      -      -           1.05   1.05   1.05
-fake-bkg7 lnN       -      -      -            1.1    1.1    1.1
+bkg_pu7                       lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont7        lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg7        lnN        -      -      -            1.1    1.1    1.1
 
-bkg_norm7b1 lnN       -      -      -           1.15      -      -
-bkg_norm7b2 lnN       -      -      -              -   1.15      -
-bkg_norm7b3 lnN       -      -      -              -      -   1.15
+CMS_EXO24035_bkg_norm7b1      lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm7b2      lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm7b3      lnN        -      -      -              -      -   1.15
 
