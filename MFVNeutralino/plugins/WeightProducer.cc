@@ -178,16 +178,33 @@ double MFVWeightProducer::npv_weight(int mc_npv) const {
 }
 
 
-double MFVWeightProducer::run (const std::unique_ptr<correction::CorrectionSet>& cset, const std::string& key, const std::map<std::string, correction::Variable::Type>& values) const {
-  correction::Correction::Ref sf = cset->at(key);
-  std::vector<correction::Variable::Type> inputs;
-  // std::cout << "run fcn called ... " << std::endl;
-  for (const correction::Variable& input: sf->inputs()) { 
-    // std::cout << "input name : " << input.name() << std::endl;
-    inputs.push_back(values.at(input.name()));
+double MFVWeightProducer::run (const std::unique_ptr<correction::CorrectionSet>& cset,
+                               const std::string& key,
+                               const std::map<std::string, correction::Variable::Type>& values) const {
+  correction::Correction::Ref sf;
+  try {
+    sf = cset->at(key);
   }
-  double result = sf->evaluate(inputs);
-  return result;
+  catch (const std::exception& e) {
+    std::cerr << "FAILED cset->at(key): " << key << "  what=" << e.what() << "\n";
+    throw;
+  }
+
+  std::vector<correction::Variable::Type> inputs;
+  for (const correction::Variable& input: sf->inputs()) {
+    const std::string& n = input.name();
+    try {
+      inputs.push_back(values.at(n));
+    }
+    catch (const std::exception& e) {
+      std::cerr << "FAILED values.at(name) for key=" << key
+                << " missing=" << n << " provided:";
+      for (const auto& kv : values) std::cerr << " " << kv.first;
+      std::cerr << "  what=" << e.what() << "\n";
+      throw;
+    }
+  }
+  return sf->evaluate(inputs);
 }
 
 
@@ -506,10 +523,21 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	else { //lepinSV is an electron
 	  //std::cout << "After defining leading leptype == 1" << std::endl;
 	  // int year = 2017;
-	  std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
+    int y = int(MFVNEUTRALINO_YEAR);
+
+    // for electron ID SF JSON (electron162UL.json.gz)
+    std::string year_id;
+    if (y == 20161) year_id = "2016preVFP";
+    else if (y == 20162) year_id = "2016postVFP";
+    else if (y == 2017)  year_id = "2017";
+    else if (y == 2018)  year_id = "2018";
+    else year_id = std::to_string(y);
+
+  // for electron trigger SF JSON (electron_trigsf_runII.json)
+  std::string year_trig = std::to_string(y);
 
 	  std::map<std::string, correction::Variable::Type> values {
-	    {"year", year}, //year
+	    {"year", year_id}, //year
             {"ValType", "sf"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
@@ -517,14 +545,14 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  };
 	  //std::cout << "After setting values map" << std::endl;
 	  std::map<std::string, correction::Variable::Type> values_up {
-	    {"year", year}, //year
+	    {"year", year_id}, //year
             {"ValType", "sfup"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
 	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
 	  };
 	  std::map<std::string, correction::Variable::Type> values_down {
-	    {"year", year}, //year
+	    {"year", year_id}, //year
             {"ValType", "sfdown"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
@@ -548,19 +576,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
 	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
 	  std::map<std::string, correction::Variable::Type> trigvalues {
-            {"year", year}, //year
+            {"year", year_trig}, //year
             {"ValType", "nominal"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity
           };
           std::map<std::string, correction::Variable::Type> trigvalues_up {
-            {"year", year}, //year
+            {"year", year_trig}, //year
             {"ValType", "systup"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity
           };
           std::map<std::string, correction::Variable::Type> trigvalues_down {
-            {"year", year}, //year
+            {"year", year_trig}, //year
             {"ValType", "systdown"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity

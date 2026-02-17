@@ -6,7 +6,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 from JMTucker.Tools.Year import year
 
 settings = NtupleSettings()
-settings.is_mc = True #FIXME
+settings.is_mc = True
 settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
@@ -64,25 +64,1358 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
 
 # Test file!
-max_events(process, 200)
-input_files(process, 'root://cmseos.fnal.gov//store/user/joeyr/ttH_to_LLPs/ttH_to_LLPs_m55_ctau0p1_UL17/merged/ttH_to_LLPs_to_dddd_m55_ctau0p1_UL17_MINIAOD000.root')
-
-cmssw_from_argv(process)
-
+#max_events(process, 10)
+#input_files(process,
+#    "root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16MiniAODAPVv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-15_ctauS-0p1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v2/60000/EA3D8723-2B40-1A4B-B164-9ADFF4555DDD.root"
+#)
+#cmssw_from_argv(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    #Override Samples
+    # Override Samples:
+    if year == 20161:
+        '''
+        # ttH Private
+        samples = [
+            getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_20161'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_20161'),
+        ]
+        
+        # Jet-triggered samples
+        samples = [
+            # --- ggH, MS = 15 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M15_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M15_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M15_20161'),
+
+            # --- ggH, MS = 40 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M40_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M40_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M40_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M40_20161'),
+
+            # --- ggH, MS = 55 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M55_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_20161'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M55_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0200_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 300 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0300_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0300_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0300_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0300_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0300_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 400 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0400_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0400_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0400_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0400_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0400_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0600_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 800 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0800_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0800_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0800_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0800_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0800_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1200_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1200_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1600_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1600_20161'),
+
+            # --- MFV stop -> bbar bbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M3000_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M3000_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M3000_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M3000_20161'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M3000_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0200_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 300 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0300_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0300_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0300_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0300_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0300_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 400 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0400_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0400_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0400_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0600_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 800 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0800_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0800_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0800_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0800_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0800_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1200_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1200_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1600_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1600_20161'),
+
+            # --- MFV stop -> dbar dbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M3000_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M3000_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M3000_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M3000_20161'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M3000_20161'),
+
+            # --- MFV neutralino (gluino->neu neu->2T2B2S), M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_20161'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_20161'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_20161'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_20161'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_20161'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_20161'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_20161'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_20161'),
+        ]
+        '''
+        # Lepton-triggered samples
+        
+        samples = [
+
+            # --- MFV neutralino, M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_20161'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_20161'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_20161'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_20161'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_20161'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_20161'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_20161'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_20161'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_20161'),
+
+            # --- ZH (Z->LL), MS = 15 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M15_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M15_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M15_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M15_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M15_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M15_20161'),
+
+            # --- ZH (Z->LL), MS = 40 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M40_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M40_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M40_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M40_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M40_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M40_20161'),
+
+            # --- ZH (Z->LL), MS = 55 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M55_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M55_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M55_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M55_20161'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M55_20161'),
+
+            # --- W+H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M15_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M15_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M15_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M15_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M15_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M15_20161'),
+
+            # --- W+H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M40_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M40_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M40_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M40_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M40_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M40_20161'),
+
+            # --- W+H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M55_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M55_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M55_20161'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M55_20161'),
+
+            # --- W-H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M15_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M15_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M15_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M15_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M15_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M15_20161'),
+
+            # --- W-H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M40_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M40_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M40_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M40_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M40_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M40_20161'),
+
+            # --- W-H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M55_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M55_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M55_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M55_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_20161'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_20161'),
+        ]
+
+    if year == 20162:
+        '''
+        # ttH Private
+        samples = [
+            getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_20162'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_20162'),
+        ]
+        
+        # Jet-triggered samples
+        samples = [
+            # --- ggH, MS = 15 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M15_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M15_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M15_20162'),
+
+            # --- ggH, MS = 40 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M40_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M40_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M40_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M40_20162'),
+
+            # --- ggH, MS = 55 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M55_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_20162'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M55_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0200_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 300 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0300_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0300_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0300_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0300_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0300_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 400 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0400_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0400_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0400_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0400_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0400_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0600_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 800 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0800_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0800_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0800_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0800_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0800_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1200_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1200_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1600_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1600_20162'),
+
+            # --- MFV stop -> bbar bbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M3000_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M3000_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M3000_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M3000_20162'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M3000_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0200_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 300 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0300_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0300_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0300_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0300_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0300_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 400 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0400_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0400_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0400_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0600_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 800 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0800_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0800_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0800_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0800_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0800_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1200_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1200_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1600_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1600_20162'),
+
+            # --- MFV stop -> dbar dbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M3000_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M3000_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M3000_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M3000_20162'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M3000_20162'),
+
+            # --- MFV neutralino (gluino->neu neu->2T2B2S), M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_20162'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_20162'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_20162'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_20162'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_20162'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_20162'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_20162'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_20162'),
+        ]
+        '''
+        # Lepton-triggered samples
+  
+        samples = [
+                # --- MFV neutralino, M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_20162'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_20162'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_20162'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_20162'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_20162'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_20162'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_20162'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_20162'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_20162'),
+
+            # --- ZH (Z->LL), MS = 15 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M15_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M15_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M15_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M15_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M15_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M15_20162'),
+
+            # --- ZH (Z->LL), MS = 40 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M40_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M40_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M40_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M40_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M40_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M40_20162'),
+
+            # --- ZH (Z->LL), MS = 55 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M55_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M55_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M55_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M55_20162'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M55_20162'),
+
+            # --- W+H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M15_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M15_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M15_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M15_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M15_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M15_20162'),
+
+            # --- W+H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M40_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M40_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M40_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M40_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M40_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M40_20162'),
+
+            # --- W+H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M55_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M55_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M55_20162'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M55_20162'),
+
+            # --- W-H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M15_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M15_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M15_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M15_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M15_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M15_20162'),
+
+            # --- W-H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M40_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M40_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M40_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M40_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M40_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M40_20162'),
+
+            # --- W-H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M55_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M55_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M55_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M55_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_20162'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_20162'),
+        ]
+        
+
+    if year == 2017:
+
+        '''
+        # ttH Private
+        samples = [
+            getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_2017'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_2017'),
+
+            getattr(Samples, 'ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau001000000um_M0055_JOEY_2017'),
+            
+        ]
+
+        # Jet-triggered samples
+        samples = [
+            # --- ggH, MS = 15 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M15_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M15_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M15_2017'),
+
+            # --- ggH, MS = 40 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M40_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M40_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M40_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M40_2017'),
+
+            # --- ggH, MS = 55 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M55_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_2017'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M55_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0200_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 300 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0300_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0300_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0300_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0300_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0300_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 400 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0400_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0400_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0400_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0400_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0400_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0600_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 800 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0800_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0800_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0800_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0800_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0800_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1200_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1200_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1600_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1600_2017'),
+
+            # --- MFV stop -> bbar bbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M3000_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M3000_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M3000_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M3000_2017'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M3000_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0200_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 300 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0300_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0300_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0300_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0300_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0300_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 400 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0400_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0400_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0400_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0600_2017'),
+            #getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_2017'), DOESNT EXIST!
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0600_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 800 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0800_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0800_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0800_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0800_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0800_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1200_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1200_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1600_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1600_2017'),
+
+            # --- MFV stop -> dbar dbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M3000_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M3000_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M3000_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M3000_2017'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M3000_2017'),
+
+            # --- MFV neutralino (gluino->neu neu->2T2B2S), M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_2017'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_2017'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_2017'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_2017'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_2017'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_2017'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_2017'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_2017'),
+        ]
+        '''
+        # Lepton-triggered samples
+
+        samples = [
+            # --- MFV neutralino, M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_2017'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_2017'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_2017'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_2017'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_2017'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_2017'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_2017'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_2017'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_2017'),
+
+            # Lepton-triggered VH
+            # --- ZH (Z->LL), MS = 15 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M15_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M15_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M15_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M15_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M15_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M15_2017'),
+
+            # --- ZH (Z->LL), MS = 40 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M40_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M40_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M40_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M40_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M40_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M40_2017'),
+
+            # --- ZH (Z->LL), MS = 55 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M55_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M55_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M55_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M55_2017'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M55_2017'),
+
+            # --- W+H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M15_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M15_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M15_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M15_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M15_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M15_2017'),
+
+            # --- W+H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M40_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M40_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M40_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M40_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M40_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M40_2017'),
+
+            # --- W+H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M55_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M55_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M55_2017'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M55_2017'),
+
+            # --- W-H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M15_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M15_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M15_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M15_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M15_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M15_2017'),
+
+            # --- W-H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M40_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M40_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M40_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M40_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M40_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M40_2017'),
+
+            # --- W-H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M55_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M55_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M55_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M55_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_2017'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_2017'),
+    ]
+
+
+    if year == 2018:
+
+
+        '''
+        # ttH Private
+        samples = [
+            getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_2018'),
+            getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_2018'),
+        ]
+        
+        # Jet-triggered samples
+        samples = [
+            # --- ggH, MS = 15 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M15_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M15_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M15_2018'),
+
+            # --- ggH, MS = 40 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M40_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M40_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M40_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M40_2018'),
+
+            # --- ggH, MS = 55 ---
+            getattr(Samples, 'ggHToSSTodddd_tau000100um_M55_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_2018'),
+            getattr(Samples, 'ggHToSSTodddd_tau100mm_M55_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0200_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 300 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0300_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0300_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0300_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0300_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0300_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 400 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0400_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0400_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0400_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0400_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0400_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0600_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 800 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M0800_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M0800_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M0800_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M0800_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M0800_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1200_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1200_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1600_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1600_2018'),
+
+            # --- MFV stop -> bbar bbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M3000_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M3000_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M3000_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M3000_2018'),
+            getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M3000_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0200_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 300 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0300_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0300_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0300_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0300_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0300_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 400 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0400_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0400_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0400_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0400_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0600_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 800 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0800_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0800_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0800_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0800_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0800_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 1200 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1200_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1200_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M1600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M1600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M1600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M1600_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M1600_2018'),
+
+            # --- MFV stop -> dbar dbar, M = 3000 ---
+            getattr(Samples, 'mfv_stopdbardbar_tau000100um_M3000_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau000300um_M3000_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M3000_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau010000um_M3000_2018'),
+            getattr(Samples, 'mfv_stopdbardbar_tau030000um_M3000_2018'),
+
+            # --- MFV neutralino (gluino->neu neu->2T2B2S), M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_2018'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_2018'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_2018'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_2018'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_2018'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_2018'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_2018'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_2018'),
+        ]
+        '''
+        # Lepton-triggered samples
+        samples = [
+
+            # --- MFV neutralino, M = 200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0200_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0200_2018'),
+
+            # --- MFV neutralino, M = 300 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0300_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0300_2018'),
+
+            # --- MFV neutralino, M = 400 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0400_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0400_2018'),
+
+            # --- MFV neutralino, M = 600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0600_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0600_2018'),
+
+            # --- MFV neutralino, M = 800 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M0800_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M0800_2018'),
+
+            # --- MFV neutralino, M = 1200 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1200_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1200_2018'),
+
+            # --- MFV neutralino, M = 1600 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M1600_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M1600_2018'),
+
+            # --- MFV neutralino, M = 3000 ---
+            getattr(Samples, 'mfv_neu_tau000100um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau000300um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau001000um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_2018'),
+            getattr(Samples, 'mfv_neu_tau030000um_M3000_2018'),
+
+            # Lepton-triggered VH
+            # --- ZH (Z->LL), MS = 15 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M15_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M15_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M15_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M15_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M15_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M15_2018'),
+
+            # --- ZH (Z->LL), MS = 40 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M40_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M40_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M40_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M40_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M40_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M40_2018'),
+
+            # --- ZH (Z->LL), MS = 55 ---
+            getattr(Samples, 'ZHToSSTodddd_tau100um_M55_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau300um_M55_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau3mm_M55_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau10mm_M55_2018'),
+            getattr(Samples, 'ZHToSSTodddd_tau30mm_M55_2018'),
+
+            # --- W+H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M15_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M15_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M15_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M15_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M15_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M15_2018'),
+
+            # --- W+H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M40_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M40_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M40_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M40_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M40_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M40_2018'),
+
+            # --- W+H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WplusHToSSTodddd_tau100um_M55_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau300um_M55_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau3mm_M55_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau10mm_M55_2018'),
+            getattr(Samples, 'WplusHToSSTodddd_tau30mm_M55_2018'),
+
+            # --- W-H (W->LNu), MS = 15 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M15_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M15_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M15_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M15_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M15_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M15_2018'),
+
+            # --- W-H (W->LNu), MS = 40 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M40_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M40_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M40_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M40_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M40_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M40_2018'),
+
+            # --- W-H (W->LNu), MS = 55 ---
+            getattr(Samples, 'WminusHToSSTodddd_tau100um_M55_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau300um_M55_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau1mm_M55_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau3mm_M55_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_2018'),
+            getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_2018'),
+    ]
+
+
+    '''
+    # For ttH studies
     samples = [
         getattr(Samples, 'ttHToLLPs_tau000001000um_M0055_2017'),
         getattr(Samples, 'ttHToLLPs_tau000010000um_M0055_2017'),
         getattr(Samples, 'ttHToLLPs_tau000100000um_M0055_2017'),
         getattr(Samples, 'ttHToLLPs_tau001000000um_M0055_2017'),
     ]
-    
     '''
+    
+    ''' ## Old Stuff from repo
     if use_btag_triggers :
        samples = pick_samples(dataset, qcd=True, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False, BTagCSV_data=False, DisplacedJet_data=False)
        #samples = pick_samples(dataset, qcd=False, data=False, all_signal=False, qcd_lep=False, leptonic=False, ttbar=False, diboson=False, Lepton_data=False, BTagCSV_data=True, DisplacedJet_data=True) #set settings.is_mc to False
