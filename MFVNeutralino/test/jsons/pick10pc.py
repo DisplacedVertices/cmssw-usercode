@@ -38,12 +38,6 @@ def doit(*x):
 # brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2.json -o run2_byls.csv
 # brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger.json -o run2_displacement_trigger_byls.csv
 
-# bad:
-# IsoMu27 was unprescaled for all of Run 2, so this works:
-# brilcalc lumi -c "offline" --byls -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2.json -o run2_byls.csv -hltpath HLT_IsoMu27_v\*
-# brilcalc lumi -c "offline" --byls -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger.json -o run2_displacement_trigger_byls.csv -hltpath HLT_IsoMu27_v\*
-# and then gzip both files
-
 for pc in 10, 1:
     doit('ana_run2.json', 'run2_byls.csv.gz', (ac.int_lumi_run2)/1000.0, pc/100., 'ana_run2_%spc.json' % pc)
     doit('ana_run2_displacement_trigger.json', 'run2_displacement_trigger_byls.csv.gz', (ac.int_lumi_bjet_trig_run2)/1000.0, pc/100., 'ana_run2_displacement_trigger_%spc.json' % pc)
