@@ -1,6 +1,7 @@
 import random, sys, gzip
 from FWCore.PythonUtilities.LumiList import LumiList
 from JMTucker.Tools.general import intlumi_from_brilcalc_csv
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 def doit(*x):
     print x
@@ -32,10 +33,25 @@ def doit(*x):
     print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
     LumiList(lumis=out_ll).writeJSON(out_fn)
 
-for year, intlumi in (2016, 36.3138), (2018, 59.832):
-   for pc in 10, 1:
-       #doit('ana_%s.json' % year, '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))
-       doit('ana_%s_SingleLept.json' % year, '/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/%s/%s.byls.csv.gz' % (year, year), intlumi, pc/100., 'ana_SingleLept_%s_%spc.json' % (year, pc))
+
+# use brilcalc's byls option, and then gzip the files:
+# brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2.json -o run2_byls.csv
+# brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger.json -o run2_displacement_trigger_byls.csv
+
+# bad:
+# IsoMu27 was unprescaled for all of Run 2, so this works:
+# brilcalc lumi -c "offline" --byls -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2.json -o run2_byls.csv -hltpath HLT_IsoMu27_v\*
+# brilcalc lumi -c "offline" --byls -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger.json -o run2_displacement_trigger_byls.csv -hltpath HLT_IsoMu27_v\*
+# and then gzip both files
+
+for pc in 10, 1:
+    doit('ana_run2.json', 'run2_byls.csv.gz', (ac.int_lumi_run2)/1000.0, pc/100., 'ana_run2_%spc.json' % pc)
+    #doit('ana_run2_displacement_trigger.json', 'run2_displacement_trigger_byls.csv', (ac.int_lumi_bjet_trig_run2)/1000.0, pc/100., 'ana_run2_displacement_trigger_%spc.json' % pc)
+
+#for year, intlumi in (2016, 36.3138), (2018, 59.832):
+#   for pc in 10, 1:
+#       #doit('ana_%s.json' % year, '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))
+#       doit('ana_%s_SingleLept.json' % year, '/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/%s/%s.byls.csv.gz' % (year, year), intlumi, pc/100., 'ana_SingleLept_%s_%spc.json' % (year, pc))
 
 #for year, intlumi in (2017, 41.480):
 # for pc in 10, 1:
