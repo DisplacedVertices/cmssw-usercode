@@ -18,6 +18,9 @@
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/Point3D.h"
 
+// NOTE we had many histograms related to the b-jet triggers that were dropped at some point. If we need them again for future diagnostics, look through the changes in
+// git diff -w 86b060eed6add63c29e9a207187e8facf007fbee 89eacba44ddc9ba1586906ef5a41abe76c40abd9 EventHistos.cc
+
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
   explicit MFVEventHistos(const edm::ParameterSet&);
