@@ -16,6 +16,9 @@ jet_cuts = (
     '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.80 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))',
     )
 
+# The only places where this / jtupleParams.muonCuts / jtupleParams.muonCut (and similar for electrons)
+# in principle get used either have it commented out in the python or the C++ ignores it, and we implement our own cuts elsewhere (for better or for worse).
+# Exceptions are MFVNeutralino/test/TriggerStudies/eff.py and Tools/plugins/ResolutionsHistogrammer.cc, but we are not currently using these.
 muon_cuts = (
     'isPFMuon',
     'isGlobalMuon',
