@@ -45,7 +45,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else :
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
+
+
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
 
     cs = CondorSubmitter('MiniTree_LepIPCut_' + version,
                          ex = year,

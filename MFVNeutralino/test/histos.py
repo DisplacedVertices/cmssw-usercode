@@ -143,7 +143,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
-    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))
 
     cs = CondorSubmitter('Histos_LepIPCut_' + version,
                          ex = year,

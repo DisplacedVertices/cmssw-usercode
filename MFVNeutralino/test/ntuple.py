@@ -98,7 +98,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else :
         samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path(json_filename), limit_ttbar=True)
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier)#, bjet_trigger_veto_modifier)
     ms.condor.stageout_files = 'all'

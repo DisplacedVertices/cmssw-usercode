@@ -3242,17 +3242,18 @@ for ds in 'main', 'miniaod':
     #for s in ():
     #    s.datasets[ds].ignore_invalid = True
 
-    # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
-    #for s in qcdht0700_2017, dyjetstollM10_2017, dyjetstollM50_2017, dyjetstollM50ext_2017:
-    #    s.datasets[ds].notes['buggedpileup2017'] = True
-
     # set up jsons
-    #for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018
-    for y,ss in (20161, Lepton_data_samples_20161 + BTagCSV_data_samples_20161 + DisplacedJet_data_samples_20161), (20162, Lepton_data_samples_20162 + BTagCSV_data_samples_20162 + DisplacedJet_data_samples_20162), (2017, JetHT_data_samples_2017 + Lepton_data_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017), (2018, Lepton_data_samples_2018 + BTagCSV_data_samples_2018 + DisplacedJet_data_samples_2018):
-        for s in ss:
-            s.datasets[ds].json      = json_path('ana_%s.json'      % y)
-            s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)
-            s.datasets[ds].json_1pc  = json_path('ana_%s_1pc.json'  % y)
+    for ss in Lepton_data_samples_20161 + Lepton_data_samples_20162 + Lepton_data_samples_2017 + Lepton_data_samples_2018 :
+        for s in ss :
+            s.datasets[ds].json      = json_path('ana_run2.json'     )
+            s.datasets[ds].json_10pc = json_path('ana_run2_10pc.json')
+            s.datasets[ds].json_1pc  = json_path('ana_run2_1pc.json' )
+    
+    for ss in BTagCSV_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2018 + DisplacedJet_data_samples_2018 :
+        for s in ss :
+            s.datasets[ds].json      = json_path('ana_run2_displacement_trigger.json'     )
+            s.datasets[ds].json_10pc = json_path('ana_run2_displacement_trigger_10pc.json')
+            s.datasets[ds].json_1pc  = json_path('ana_run2_displacement_trigger_1pc.json' )
 
 ########################################################################
 
