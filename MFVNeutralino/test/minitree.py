@@ -13,12 +13,12 @@ cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
-# blind btag triggered events
-#if not is_mc and use_btag_triggers :
+# blind data events with >= 4 tracks per vertex until we're ready
+if not is_mc :
 #    del process.pMiniTreeNtk3
-#    del process.pMiniTreeNtk4
-#    del process.pMiniTreeNtk3or4
-#    del process.pMiniTree
+    del process.pMiniTreeNtk4
+    del process.pMiniTreeNtk3or4
+    del process.pMiniTree
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

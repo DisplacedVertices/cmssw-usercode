@@ -65,7 +65,7 @@ if not settings.is_mc:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
+    if use_btag_triggers or use_btag_vetoLepHT_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
 
         if year == 20161:

@@ -41,6 +41,11 @@ nm1s = [
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
 
+# blind data events with >= 4 tracks per vertex until we're ready
+if not is_mc :
+    ntks = [3]
+    nvs = [0,1,2]
+
 for ntk in ntks:
     if ntk == 5:
         EX1 = EX2 = EX3 = ''

@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
+from JMTucker.Tools.Year import year
 
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),
@@ -11,11 +12,11 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               min_ht = cms.double(-1),
                               muons_src = cms.InputTag('selectedPatMuons'),
                               muon_cut = jtupleParams.muonCut,
-                              min_muon_pt = cms.double(20),
+                              min_muon_pt = cms.double(30 if year == 2017 else 27),
                               electrons_src = cms.InputTag('selectedPatElectrons'),
                               electron_cut = jtupleParams.electronCut,
-                              min_electron_pt = cms.double(20),
-                              min_nleptons = cms.int32(1),
+                              min_electron_pt = cms.double(35 if year == 2018 else 38 if year == 2017 else 30),
+                              min_nleptons = cms.int32(0),
                               rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
                               veto_bjet_triggers = cms.bool(False),
                               bjet_triggers_to_veto = cms.vstring('HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v',
@@ -45,14 +46,14 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               )
 
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
-mfvEventFilterMuonsOnly = mfvEventFilter.clone(mode = 'muons only', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1))
-mfvEventFilterElectronsOnlyVetoMuons = mfvEventFilter.clone(mode = 'electrons only veto muons', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1))
+mfvEventFilterMuonsOnly = mfvEventFilter.clone(mode = 'muons only', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1), min_nleptons = cms.int32(1))
+mfvEventFilterElectronsOnlyVetoMuons = mfvEventFilter.clone(mode = 'electrons only veto muons', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1), min_nleptons = cms.int32(1))
 mfvEventFilterLowHT = mfvEventFilter.clone(mode = 'low HT', min_ht = cms.double(450.0), min_njets = cms.int32(2))
-mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_electron_pt = cms.double(999), min_muon_pt = cms.double(27))
+mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_nleptons = cms.int32(1))
 mfvEventFilterDileptonOnly = mfvEventFilter.clone(mode = 'dilepton only', min_electron_pt = cms.double(20), min_muon_pt = cms.double(20), min_nleptons = cms.int32(2))
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
-mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(200))
-mfvEventFilterBjetsORDisplacedDijetVetoLeptonHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto leptons and HT', min_ht = cms.double(200), min_nleptons = cms.int32(1))
+mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(-1))
+mfvEventFilterBjetsORDisplacedDijetVetoLeptonHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto leptons and HT', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterMETOnly = mfvEventFilter.clone(mode = 'MET only', min_ht = cms.double(-1))
 mfvEventFilterDisplacedDijetVetoBjets = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(200), min_nleptons = cms.int32(0), veto_bjet_triggers = cms.bool(True))
