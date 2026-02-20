@@ -55,13 +55,6 @@ electron_paths = [
     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
 ]
 
-displaced_lepton_paths = [
-    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v*",
-    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v*",
-    "HLT_DoublePhoton70_v*",
-    "HLT_DoubleMu43NoFiltersNoVtx_v*",
-    ]
-
 dilepton_paths = [
     "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
     "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",

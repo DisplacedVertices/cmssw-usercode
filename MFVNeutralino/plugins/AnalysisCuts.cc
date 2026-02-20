@@ -257,22 +257,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
       else success = (pass_muon_events || pass_ele_events); // both 
 
       if (apply_displacedlepton_triggers) {
-	for(size_t trig : mfv::DisplacedLeptonTriggers){
-	  if(satisfiesDispLepTrigger(mevent, trig, setup)) { 
-	    success = true;
-	    break;
-	  }
-	}
-      }
-      // if we want to consider displaced lepton triggers, to make it a logical OR, we need the single lepton triggers to fail. 
-      if (apply_displacedlepton_triggers && success == false) {
-	      for(size_t trig : mfv::DisplacedLeptonTriggers){
-	        if(satisfiesDispLepTrigger(mevent, trig, setup)) { 
-	          success = true;
-	          break;
-          }
-	      } 
-	    } 
+        throw std::invalid_argument("displaced dilepton triggers are no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
+      } 
       if(!success) return false;
     } 
 
@@ -429,12 +415,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
               }
             }
             if(apply_displacedlepton_triggers){
-                    for(size_t trig : mfv::DisplacedLeptonTriggers){
-                      if(mevent->pass_hlt(trig)){
-                        at_least_one_trigger_passed = true;
-                         break;
-                      }
-                    }
+              throw std::invalid_argument("displaced dilepton triggers are no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
             }
             if(!at_least_one_trigger_passed) return false;
         }
@@ -1201,77 +1182,7 @@ bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size
 
   bool passed_kinematics = false;
 
-  switch(trig){
-  case mfv::b_HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL :
-    {
-      for(int ie =0; ie < nelectrons; ++ie){
-      if (mevent->electron_pt[ie] < 45) continue;
-      if (mevent->electron_ID[ie][3] == 1) {
-        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-          for(int im=0; im < nmuons; ++im){
-            if (mevent->muon_pt[im] < 45) continue;
-              if (mevent->muon_ID[im][1] == 1) {
-                if (abs(mevent->muon_eta[im]) < 2.4) {
-                  if (mevent->muon_iso[im] < 0.15) {
-                    passed_kinematics = true;
-                  }
-                }
-              }
-            }
-          }
-  	}
-      }
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 :
-    {
-      int pass_ele = 0;
-      for(int ie=0; ie < nelectrons; ++ie){
-  	    if (mevent->electron_pt[ie] < 75) continue;
-        if (mevent->electron_ID[ie][3] == 1) {
-          if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            pass_ele +=1;
-          }
-        }
-      }
-      if (pass_ele > 1) passed_kinematics = true;
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_DoublePhoton70 :
-    {
-      int pass_ele = 0;
-      for(int ie=0; ie < nelectrons; ++ie){
-  	    if (mevent->electron_pt[ie] < 75) continue;
-        if (mevent->electron_ID[ie][3] == 1) {
-          if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            pass_ele +=1;
-          }
-        }
-      }
-      if (pass_ele > 1) passed_kinematics = true;
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_DoubleMu43NoFiltersNoVtx :
-    {
-      int pass_mu = 0;
-      for(int im=0; im < nmuons; ++im){
-  	    if (mevent->muon_pt[im] < 45) continue;
-  	      if (mevent->muon_ID[im][1] == 1) {
-  	        if (abs(mevent->muon_eta[im]) < 2.4) {
-  	          if (mevent->muon_iso[im] < 0.15) {
-  	            pass_mu +=1;
-  	          }
-  	        }
-  	      }
-      }
-     if (pass_mu > 1) passed_kinematics = true;
-     return passed_kinematics;
-   }
-  default :
-    {
-      throw std::invalid_argument(std::string(mfv::hlt_paths[trig]) + " not implemented in satisfiesTrigger");
-    }
-  }
+  throw std::invalid_argument("satisfiesDispLepTrigger is no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
 
   return false;
 }

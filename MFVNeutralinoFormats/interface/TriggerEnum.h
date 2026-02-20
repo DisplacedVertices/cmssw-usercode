@@ -26,11 +26,12 @@ namespace mfv {
     b_HLT_IsoMu27, //2017
     b_HLT_Mu50,
     
-    // displaced dilepton triggers 
-    b_HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL, 
-    b_HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90, 
-    b_HLT_DoublePhoton70, 
-    b_HLT_DoubleMu43NoFiltersNoVtx, 
+    // HT triggers for 2016 (PFHT800 was prescaled in period H, 
+    // and logical OR of the rest makes up for it + a saturation issue)
+    b_HLT_PFHT800, 
+    b_HLT_PFHT900, 
+    b_HLT_PFJet450, 
+    b_HLT_AK8PFJet450, 
 
     // di-Lepton triggers
     // b_HLT_Ele15_IsoVVVL_PFHT450,
@@ -162,10 +163,10 @@ namespace mfv {
     mfv::b_HLT_Mu50,
   };
   
-  //displaced dilepton triggers 
-  static const std::vector<size_t> DisplacedLeptonTriggers = {
-    mfv::b_HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL, mfv::b_HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90,
-    mfv::b_HLT_DoublePhoton70, mfv::b_HLT_DoubleMu43NoFiltersNoVtx
+  // HT triggers for 2016
+  static const std::vector<size_t> HTTriggers2016 = {
+    mfv::b_HLT_PFHT800, mfv::b_HLT_PFHT900,
+    mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450
   };		
 
 }
