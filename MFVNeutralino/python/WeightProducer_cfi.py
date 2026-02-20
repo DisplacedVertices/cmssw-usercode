@@ -38,7 +38,6 @@ else :
 mfvWeight = cms.EDProducer('MFVWeightProducer',
                            throw_if_no_mcstat = cms.bool(True),
                            mevent_src = cms.InputTag('mfvEvent'),
-                           vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                            enable = cms.bool(True),
                            prints = cms.untracked.bool(False),
                            histos = cms.untracked.bool(True),

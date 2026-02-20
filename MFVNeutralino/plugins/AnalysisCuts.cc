@@ -1176,12 +1176,6 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
                     
 //displaced lepton trigger & per trigger preselection 
 bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size_t trig, const edm::EventSetup& setup) { 
-  if(!mevent->pass_hlt(trig)) return false;
-  int nmuons     = mevent->nmuons();
-  int nelectrons = mevent->nelectrons();
-
-  bool passed_kinematics = false;
-
   throw std::invalid_argument("satisfiesDispLepTrigger is no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
 
   return false;

@@ -24,7 +24,6 @@ private:
   const edm::EDGetTokenT<jmt::MergeableFloat> sumweight_token;
   const bool throw_if_no_mcstat;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
-  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const bool enable;
   const bool prints;
   const bool histos;
@@ -72,7 +71,6 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     sumweight_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
     throw_if_no_mcstat(cfg.getParameter<bool>("throw_if_no_mcstat")),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
