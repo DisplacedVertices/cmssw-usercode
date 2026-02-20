@@ -191,7 +191,7 @@ def make_output_commands(process, settings):
     if settings.keep_tk:
         output_commands += ['keep *_jmtRescaledTracks_*_*']
 
-    if settings.keep_all: #FIXME
+    if settings.keep_all: 
         def dedrop(l):
             return [x for x in l if not x.strip().startswith('drop')]
         our_output_commands = output_commands

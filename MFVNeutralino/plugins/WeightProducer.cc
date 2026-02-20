@@ -99,7 +99,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
   produces<double>();
 
-  //FIXME way to turn off?
+  // NOTE the lepton-specific weights are not filled when apply_lepsf is false in the python configuration
   produces<double>("lepsfup"); //syst up 
   produces<double>("lepsfdown"); //syst down 
   

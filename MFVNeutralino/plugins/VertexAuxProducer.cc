@@ -134,7 +134,7 @@ std::pair<bool, Measurement1D> MFVVertexAuxProducer::track_dist(const reco::Tran
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one (0 : BTagDisplJet, 1 : SingleLepton, 2 : JetHT, -1 disable)
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // which rescaling if ever a different one (0 : BTagDisplJet, 1 : SingleLepton, 2 : JetHT, -1 disable)
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
                        jmt::AnalysisEras::pick(event, this),
                        track_rescaler_which);
@@ -273,8 +273,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         //need to double check track ids w/ types
         reco::TrackRef tk = it->castTo<reco::TrackRef>();
         
-        // using generalized function to separate into track types (#FIXME : tk.id's change based on CMSSW)
-        if (track_rescaler_which == 1){
+        // using generalized function to separate into track types (NOTE: tk.id's change based on CMSSW)
+        if (track_rescaler_which == jmt::TrackRescaler::w_SingleLep){
           if ((tk.id().id() == 166) & (tk->pt() >= 20.0)) {
             rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "electron").rescaled_tk));
           }
