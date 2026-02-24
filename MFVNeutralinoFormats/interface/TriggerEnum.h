@@ -134,9 +134,7 @@ namespace mfv {
   extern const int   filter_nreqs[n_filter_paths];
 
   // For use in the Bjet/DisplacedDijet trigger studies
-  static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {
-    // HT trigger
-    mfv::b_HLT_PFHT1050,
+  static const std::vector<size_t> BjetOrDisplacedDijetTriggers = {
     // bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
     mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, 
     // bjet triggers 2018 - only use the first two, since they contribute most of the efficiency
@@ -164,7 +162,8 @@ namespace mfv {
   };
   
   // HT triggers for 2016
-  static const std::vector<size_t> HTTriggers2016 = {
+  static const std::vector<size_t> HTTriggers = {
+    mfv::b_HLT_PFHT1050,
     mfv::b_HLT_PFHT800, mfv::b_HLT_PFHT900,
     mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450
   };		

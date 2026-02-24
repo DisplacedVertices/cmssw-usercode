@@ -164,8 +164,8 @@ namespace mfv {
 
     bool satisfiesTrigger(size_t trig) const;
     bool satisfiesTriggerAndOffline(size_t trig) const;
-    bool satisfiesHTOrBjetOrDisplacedDijetTrigger() const;
-    bool satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const;
+    bool satisfiesBjetOrDisplacedDijetTrigger() const;
+    bool satisfiesBjetOrDisplacedDijetTriggerAndOffline() const;
   };
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);
