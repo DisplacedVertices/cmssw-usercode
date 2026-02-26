@@ -3243,13 +3243,13 @@ for ds in 'main', 'miniaod':
     #    s.datasets[ds].ignore_invalid = True
 
     # set up jsons
-    for ss in Lepton_data_samples_20161 + Lepton_data_samples_20162 + Lepton_data_samples_2017 + Lepton_data_samples_2018 :
+    for ss in Lepton_data_samples_20161, Lepton_data_samples_20162, Lepton_data_samples_2017, Lepton_data_samples_2018 :
         for s in ss :
             s.datasets[ds].json      = json_path('ana_run2.json'     )
             s.datasets[ds].json_10pc = json_path('ana_run2_10pc.json')
             s.datasets[ds].json_1pc  = json_path('ana_run2_1pc.json' )
     
-    for ss in BTagCSV_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2018 + DisplacedJet_data_samples_2018 :
+    for ss in BTagCSV_data_samples_20161, DisplacedJet_data_samples_20161, BTagCSV_data_samples_20162, DisplacedJet_data_samples_20162, BTagCSV_data_samples_2017, DisplacedJet_data_samples_2017, BTagCSV_data_samples_2018, DisplacedJet_data_samples_2018 :
         for s in ss :
             s.datasets[ds].json      = json_path('ana_run2_displacement_trigger.json'     )
             s.datasets[ds].json_10pc = json_path('ana_run2_displacement_trigger_10pc.json')
