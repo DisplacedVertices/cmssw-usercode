@@ -539,7 +539,7 @@ for s in ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161:
 #FIXME
 #all_signal_samples_20161 = ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161 # Private ttH
 #all_signal_samples_20161 = ggHToSSTodddd_samples_20161 + mfv_stopbbarbbar_samples_20161 + mfv_stopdbardbar_samples_20161 + mfv_signal_samples_20161 # Jet-triggered ggH + mfv
-all_signal_samples_20161 = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161 + mfv_signal_samples_20161 #Leptonic VH + mfv
+all_signal_samples_20161 = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161 + mfv_signal_samples_20161 + ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161 #Leptonic VH + mfv
 
 
 #######
@@ -972,7 +972,7 @@ for s in ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162:
 #FIXME
 #all_signal_samples_20162 = ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162 # Private ttH
 #all_signal_samples_20162 = ggHToSSTodddd_samples_20162 + mfv_stopbbarbbar_samples_20162 + mfv_stopdbardbar_samples_20162 + mfv_signal_samples_20162 # Jet-triggered ggH + mfv
-all_signal_samples_20162 = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162 + mfv_signal_samples_20162 # Leptonic VH + MFV SUSY
+all_signal_samples_20162 = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162 + mfv_signal_samples_20162 + ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162 # Leptonic VH + MFV SUSY
 
 
 ########
@@ -1500,10 +1500,10 @@ ggHToSSTodddd_samples_2017 = [
 ]
 
 ttHToLLPs_dddd_samples_JOEY_2017 = [
-    MCSample('ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017/None/USER', 483500),
-    MCSample('ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017/None/USER', 480000),
-    MCSample('ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017/None/USER', 480500),
-    MCSample('ttHToLLPs_dddd_tau001000000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau001000000um_M0055_JOEY_2017/None/USER', 477250),
+    MCSample('ttHToLLPs_dddd_tau000000100um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000000100um_M0055_JOEY_2017/None/USER', 483500),
+    MCSample('ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017/None/USER', 480000),
+    MCSample('ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017/None/USER', 480500),
+    MCSample('ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017', '/ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017/None/USER', 477250),
 ]
 
 ttHToLLPs_bbbb_samples_2017 = [
@@ -1518,9 +1518,9 @@ for s in ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017 + ttHToLLPs_d
     s.add_dataset('miniaod', s.dataset, s.nevents_orig)
 
 #FIXME
-#all_signal_samples_2017 = ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017 + ttHToLLPs_dddd_samples_JOEY_2017 # Private ttH
+# = ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017 + ttHToLLPs_dddd_samples_JOEY_2017 # Private ttH
 #all_signal_samples_2017 = ggHToSSTodddd_samples_2017 + mfv_stopbbarbbar_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_signal_samples_2017 # Jet-triggered ggH + mfv
-all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 + mfv_signal_samples_2017 # Leptonic VH + MFV SUSY
+all_signal_samples_2017 = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 + mfv_signal_samples_2017 + ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017 # Leptonic VH + MFV SUSY
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
 
@@ -1994,9 +1994,9 @@ for s in ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018:
     s.add_dataset('miniaod', s.dataset, s.nevents_orig)
 
 #FIXME
-all_signal_samples_2018 = ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018 # Private ttH
+#all_signal_samples_2018 = ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018 # Private ttH
 #all_signal_samples_2018 = ggHToSSTodddd_samples_2018 + mfv_stopbbarbbar_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_signal_samples_2018 # Jet-triggered ggH + mfv
-#all_signal_samples_2018 = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 + mfv_signal_samples_2018 # Leptonic VH + MFV SUSY
+all_signal_samples_2018 = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 + mfv_signal_samples_2018 + ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018 # Leptonic VH + MFV SUSY
 
 
 ########
@@ -3331,6 +3331,7 @@ for s in registry.all():
 condorable = {
     "T1_US_FNAL_Disk": {
         "miniaod": all_signal_samples_20161 + all_signal_samples_20162 + all_signal_samples_2017 + all_signal_samples_2018,
+        #"miniaod": all_signal_samples_2018,
     },
 }
 '''

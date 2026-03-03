@@ -76,6 +76,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     # Override Samples:
     if year == 20161:
+        samples = [
+            getattr(Samples, 'mfv_neu_tau010000um_M3000_20161'),
+        ]
         '''
         # ttH Private
         samples = [
@@ -271,7 +274,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'mfv_neu_tau010000um_M3000_20161'),
             getattr(Samples, 'mfv_neu_tau030000um_M3000_20161'),
         ]
-        '''
+        
         # Lepton-triggered samples
         
         samples = [
@@ -404,7 +407,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_20161'),
             getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_20161'),
         ]
-
+        '''
     if year == 20162:
         '''
         # ttH Private
@@ -412,7 +415,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_20162'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_20162'),
         ]
-        
+
         # Jet-triggered samples
         samples = [
             # --- ggH, MS = 15 ---
@@ -733,20 +736,19 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'WminusHToSSTodddd_tau10mm_M55_20162'),
             getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_20162'),
         ]
-        
+
 
     if year == 2017:
-
         '''
         # ttH Private
         samples = [
             getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_2017'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_2017'),
 
+            getattr(Samples, 'ttHToLLPs_dddd_tau000000100um_M0055_JOEY_2017'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000001000um_M0055_JOEY_2017'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_JOEY_2017'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000100000um_M0055_JOEY_2017'),
-            getattr(Samples, 'ttHToLLPs_dddd_tau001000000um_M0055_JOEY_2017'),
             
         ]
 
@@ -813,6 +815,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'mfv_stopbbarbbar_tau030000um_M1200_2017'),
 
             # --- MFV stop -> bbar bbar, M = 1600 ---
+            getattr(Samples, 'mfv_stopbbarbbar_tau000100um_M1600_2017'),
             getattr(Samples, 'mfv_stopbbarbbar_tau000300um_M1600_2017'),
             getattr(Samples, 'mfv_stopbbarbbar_tau001000um_M1600_2017'),
             getattr(Samples, 'mfv_stopbbarbbar_tau010000um_M1600_2017'),
@@ -849,7 +852,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             # --- MFV stop -> dbar dbar, M = 600 ---
             getattr(Samples, 'mfv_stopdbardbar_tau000100um_M0600_2017'),
             getattr(Samples, 'mfv_stopdbardbar_tau000300um_M0600_2017'),
-            #getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_2017'), DOESNT EXIST!
+            getattr(Samples, 'mfv_stopdbardbar_tau001000um_M0600_2017'),
             getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0600_2017'),
             getattr(Samples, 'mfv_stopdbardbar_tau030000um_M0600_2017'),
 
@@ -1073,15 +1076,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
 
     if year == 2018:
-
-
         '''
         # ttH Private
         samples = [
             getattr(Samples, 'ttHToLLPs_bbbb_tau000010000um_M0055_2018'),
             getattr(Samples, 'ttHToLLPs_dddd_tau000010000um_M0055_2018'),
         ]
-        
+
         # Jet-triggered samples
         samples = [
             # --- ggH, MS = 15 ---
@@ -1404,16 +1405,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             getattr(Samples, 'WminusHToSSTodddd_tau30mm_M55_2018'),
     ]
 
-
-    '''
-    # For ttH studies
-    samples = [
-        getattr(Samples, 'ttHToLLPs_tau000001000um_M0055_2017'),
-        getattr(Samples, 'ttHToLLPs_tau000010000um_M0055_2017'),
-        getattr(Samples, 'ttHToLLPs_tau000100000um_M0055_2017'),
-        getattr(Samples, 'ttHToLLPs_tau001000000um_M0055_2017'),
-    ]
-    '''
     
     ''' ## Old Stuff from repo
     if use_btag_triggers :
