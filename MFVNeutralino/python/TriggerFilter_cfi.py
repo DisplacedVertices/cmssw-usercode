@@ -30,8 +30,8 @@ bjet_paths = [
 
 displaced_dijet_paths = [
     # displaced dijet triggers 2016
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v*",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v*",
     # displaced dijet triggers 2017/2018
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
