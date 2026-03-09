@@ -244,7 +244,7 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   double min_track_nstlayers = 6;
   double min_track_hit_r = 1;
   
-  const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // JMTBAD which rescaling if ever a different one
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
                        jmt::AnalysisEras::pick(event.id().event()),
                        //jmt::AnalysisEras::pick(event, this),

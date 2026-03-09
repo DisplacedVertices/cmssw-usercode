@@ -13,6 +13,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVVertexHistos : public edm::EDAnalyzer {
  public:
@@ -151,7 +152,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("max_nm1_refit_dist2", "maximum n-1 refit distance (2D) (cm)", 1000, 0, 1);
   hs.add("max_nm1_refit_distz", "maximum n-1 refit z distance (cm)", 1000, 0, 1);
 
-  hs.add("nlep", "# leptons", 10, 0, 10);
 
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -542,7 +542,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"max_nm1_refit_dist2", max_nm1_refit_dist2},
         {"max_nm1_refit_distz", max_nm1_refit_distz},
 
-        {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 ntracks},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
         {"ntracksptgt10",           aux.ntracksptgt(10)},
@@ -827,7 +826,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////
 
   if (nsv >= 2) {
-    int this_year = 2017;
+    int this_year = int(MFVNEUTRALINO_YEAR);
     bool pass_dd = false;
     bool pass_bjet = false;
     bool pass_trig = false;
@@ -848,7 +847,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_caloht_trigcomb->Fill(caloht, 0., w);
     h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 0., w);
 
-    if (this_year == 2016) {
+    if (this_year == 20161 || this_year == 20162) {
       for (int jt=20; jt<22; jt++){
         if (mevent->pass_hlt(jt)) {
           h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-19)+0.1, w);   //     bin #2 (x-val = 1.1)

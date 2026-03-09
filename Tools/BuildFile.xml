@@ -7,8 +7,11 @@
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/VertexReco"/>
+<use name="JMTucker/MFVNeutralinoFormats"/>
 <use name="Geometry/Records"/>
 <use name="Geometry/TrackerGeometryBuilder"/>
+<use name="RecoEgamma/EgammaTools"/>
+<use name="correctionlib"/> <!-- Abby change -->
 <export>
   <lib name="1"/>
 </export>

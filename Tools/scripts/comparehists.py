@@ -16,11 +16,12 @@ parser.add_argument('--show-progress', type=int, default=10,
                     help='Print how far along we are processing the histograms: if this is 10 (default), a line is printed for every 1/10 chunk. Disable with value <= 0.')
 parser.add_argument('--only-n-first', type=int, default=-1,
                     help='Only do the first ONLY_N_FIRST histograms (default: do all).')
+parser.add_argument('--only-select', nargs='+', default=[], help='Do only a select # of histograms')
 parser.add_argument('--raise-on-incompatibility', action='store_true',
                     help='If histograms are not comparable (e.g. different binning), raise an exception if True, else skip that one (default).')
 parser.add_argument('--per-page', type=int, default=100,
                     help='Put PER_PAGE histograms per html page (default: 100 per page).')
-parser.add_argument('--opt-stat', type=int, default=1112211,
+parser.add_argument('--opt-stat', type=int, default=1211,
                     help='The value for SetOptStat (default: %(default)s).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
@@ -35,7 +36,7 @@ lambda_fmt = 'lambda name, hists, curr: (%s)'
 group = parser.add_argument_group('Callback function snippets: will be of the form ' + lambda_fmt % '<snippet here>')
 group.add_argument('--no-stats', default='False',
                     help='Snippet for no_stats lambda (default: %(default)s).')
-group.add_argument('--stat-size', default='(0.2,0.2)',
+group.add_argument('--stat-size', default='(0.2,0.1)',
                     help='Snippet for stat_size lambda (default: %(default)s).')
 group.add_argument('--apply-commands', default='None',
                   help='Snippet for apply_commands (default: %(default)s).')
@@ -155,5 +156,6 @@ compare_hists(ps,
               sort_names = options.sort_names,
               show_progress = options.show_progress,
               only_n_first = options.only_n_first,
+              only_select = options.only_select,
               raise_on_incompatibility = options.raise_on_incompatibility,
               **lambda_kwargs)

@@ -53,8 +53,11 @@ private:
   const int min_ntracksptgt3;
   const int min_ntracksptgt5;
   const int min_ntracksptgt10;
+  const unsigned int min_ntracknsigma4;
   const int min_njetsntks;
   const int max_njetsntks;
+  const int min_nlep20_inSV;
+  const int max_nlep20_inSV;
   const double max_chi2dof;
   const double min_tkonlypt;
   const double max_abstkonlyeta;
@@ -153,8 +156,11 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
     min_ntracksptgt10(cfg.getParameter<int>("min_ntracksptgt10")),
+    min_ntracknsigma4(cfg.getParameter<int>("min_ntracknsigma4")),
     min_njetsntks(cfg.getParameter<int>("min_njetsntks")),
     max_njetsntks(cfg.getParameter<int>("max_njetsntks")),
+    min_nlep20_inSV(cfg.getParameter<int>("min_nlep20_inSV")),
+    max_nlep20_inSV(cfg.getParameter<int>("max_nlep20_inSV")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     min_tkonlypt(cfg.getParameter<double>("min_tkonlypt")),
     max_abstkonlyeta(cfg.getParameter<double>("max_abstkonlyeta")),
@@ -361,6 +367,12 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     }
   }
 
+  std::vector<double> vec_vtx_nsigmadxy4 = {};
+  for (int i = 0; i < vtx.ntracks(); ++i) {
+    if (fabs(vtx.track_dxy[i] / vtx.track_dxy_err(i)) > 4.0)
+       vec_vtx_nsigmadxy4.push_back(fabs(vtx.track_dxy[i] / vtx.track_dxy_err(i)));
+  }
+
   return 
     vtx.ntracks() >= min_ntracks &&
     vtx.ntracks() <= max_ntracks &&
@@ -368,8 +380,11 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.ntracksptgt(3)  >= min_ntracksptgt3 &&
     vtx.ntracksptgt(5)  >= min_ntracksptgt5 &&
     vtx.ntracksptgt(10) >= min_ntracksptgt10 &&
+    vec_vtx_nsigmadxy4.size() >= min_ntracknsigma4 &&  
     vtx.njets[mfv::JByNtracks] >= min_njetsntks &&
     vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
+    vtx.nlepptgt20 >= min_nlep20_inSV &&
+    vtx.nlepptgt20 <= max_nlep20_inSV &&
     vtx.chi2dof() < max_chi2dof &&
     vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
     fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
@@ -426,6 +441,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent)
     event.getByToken(mevent_token, mevent);
 
+
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_aux_token, auxes);
 
@@ -439,10 +455,10 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   std::unique_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
-  for (const MFVVertexAux& aux : *auxes)
+  for (const MFVVertexAux& aux : *auxes) {
     if (use_vertex(!event.isRealData(), aux, use_mevent ? &*mevent : 0))
       selected->push_back(aux);
-
+  }
   sorter.sort(*selected);
 
   if (produce_vertices || produce_refs) {

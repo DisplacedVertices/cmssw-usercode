@@ -25,7 +25,7 @@ tfileservice(process, 'eff.root')
 global_tag(process, which_global_tag(settings))
 max_events(process, 10000)
 dataset = 'miniaod'
-sample_files(process, 'wjetstolnu_2017', dataset, 1)
+#sample_files(process, 'wjetstolnu_2017', dataset, 1)
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
 process.load('JMTucker.Tools.UpdatedJets_cff')
@@ -74,8 +74,6 @@ runMetCorAndUncFromMiniAOD(process,
                            isData = not settings.is_mc,
                            )
 
-process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
-
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
@@ -108,7 +106,7 @@ else:
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.weightSeq * process.reftrig * process.updatedJetsSeqMiniAOD * process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
+process.p = cms.Path(process.weightSeq * process.reftrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
 
 for x in ['']:
     num = getattr(process, 'den%s' % x).clone(require_hlt = trig_id)
@@ -129,12 +127,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        samples = Samples.leptonic_samples_2017 + Samples.met_samples_2017
+        #samples = Samples.leptonic_samples_2017 + Samples.met_samples_2017
+        samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
+        """
         if useElectron:
           samples += Samples.singleelectron_data_samples_2017
         else:
           samples += Samples.auxiliary_data_samples_2017
         samples += Samples.mfv_splitSUSY_samples_2017
+        """
     elif year == 2018:
         samples = Samples.leptonic_samples_2018 + Samples.met_samples_2018
         if useElectron:

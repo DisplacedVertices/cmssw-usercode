@@ -47,7 +47,6 @@ def hadd(output_fn, input_fns):
     other problems reported by hadd. If so, prints an error to
     stdout. Returns true if success.
     """
-    
     l = len(input_fns)
     start = datetime.now()
     print 'hadding %i files to %s at %s' % (l, output_fn, start)
@@ -56,6 +55,19 @@ def hadd(output_fn, input_fns):
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()
     assert stderr is None
+    
+    log_fn = output_fn + '.haddlog'
+    is_eos = '/store/' in output_fn # ugh
+    while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
+        log_fn += '.2'
+
+    if is_eos:
+        fd, tmp_fn = tempfile.mkstemp()
+        os.fdopen(fd, 'wt').write(stdout)
+        eos.cp(tmp_fn, log_fn) # if the haddlog already exists the new one will silently go into the ether...
+        os.remove(tmp_fn)
+    else:
+        open(log_fn, 'wt').write(stdout)
 
     log_fn = output_fn + '.haddlog'
     is_eos = '/store/' in output_fn # ugh
@@ -82,7 +94,7 @@ def hadd(output_fn, input_fns):
         return False
 
     return True
-
+    
 __all__ = [
     'HaddBatchResult',
     'HaddlogParser',

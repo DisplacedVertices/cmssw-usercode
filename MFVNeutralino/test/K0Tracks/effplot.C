@@ -4,10 +4,17 @@ void effplot()
   gStyle->SetOptStat(0);
   TString year = "2017";
   //TString file_dir = "/uscms/home/joeyr/crabdirs/hists_k0ntupleulv1bmv2_summer20ul_miniaodv2/";
-  TString file_dir = "./K0NtupleULV1Bmv2_Summer20UL_MiniAODv2/";
-  TString out_dir = "/uscms/home/joeyr/publicweb/plots/K0study_2017/";
-  TString fnmc = "background_btagpresel_"+year+".root";
-  TString fndata = "BTagCSV"+year+".root";
+  //TString file_dir = "./K0NtupleULV1Bmv2_Summer20UL_MiniAODv2/";   Alec commented
+  TString file_dir = "/uscms/home/alecduqu/crab_dirs/hists_dbv1p9cut_ipweighted_ntuple_K0_DYmuontrig/bkgsub_roots/";
+  //TString out_dir = "/uscms/home/joeyr/publicweb/plots/K0study_2017/";   Alec commented
+  TString out_dir = "/uscms/home/alecduqu/crab_dirs/hists_dbv1p9cut_ipweighted_ntuple_K0_DYmuontrig/bkgsub_roots/";
+  TString fnmc = "simulation_"+year+".root";
+  //TString fnmc = "simulation_minus_qcd_leptonpresel_"+year+".root";
+  //TString fnmc = "qcd_leptonpresel_"+year+".root";
+  //TString fndata = "BTagCSV"+year+".root";
+  TString fndata = "Data_"+year+".root";
+  //TString fnmc = "AllBackgrounds.root";                                                                                                                            
+  //TString fndata = "AllData.root"; 
   int rebin = 60;
   int nbins = 10;
   Double_t bins[] = {0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.9,2.0};
@@ -46,8 +53,10 @@ void effplot()
   rp->GetLowerRefGraph()->SetLineColor(kBlue);
   rp->GetLowerRefGraph()->SetMinimum(0.85);
   rp->GetLowerRefGraph()->SetMaximum(1.15);
+  /*rp->GetLowerRefGraph()->SetMinimum(-1);
+  rp->GetLowerRefGraph()->SetMaximum(6);*/
   rp->GetLowerRefYaxis()->SetTitle("data/MC");
-  //rp->GetUpperPad().SetLogy();
+  //rp->GetUpperPad()->SetLogy();
   rp->GetLowYaxis()->SetNdivisions(505);
 
   l->Draw();

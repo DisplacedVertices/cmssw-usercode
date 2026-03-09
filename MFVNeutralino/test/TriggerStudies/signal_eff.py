@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
@@ -12,6 +10,16 @@ ps = plot_saver(plot_dir('sigeff_trig'), size=(600,600), log=False, pdf=True)
 study_new_triggers = True
 
 if study_new_triggers :
+    #root_file_dir = '/afs/hep.wisc.edu/home/acwarden/crabdirs/TrigFiltCheckV3/'
+    #trigs = ['TriggerLeptons', 'TriggerEMu_35_27', 'TriggerEMu_35_50', 'TriggerEMu_50_27', 'TriggerEMu_50_50']
+    #nice = ['SingleLep', 'EMu_35_27', 'EMu_35_50', 'EMu_50_27', 'EMu_50_50']
+    #root_file_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigFiltCheckV3/'
+    #trigs = ['Trigger','TriggerBjets','TriggerDispDijet','TriggerMET']
+    #nice = ['HT1050','Bjet','DisplacedDijet','MET']
+    #root_file_dir = '/uscms/home/pkotamni/nobackup/crabdirs/TrigFiltCheckP0/'
+    #trigs = ['Trigger','TriggerMET','TriggerMuons']
+    #nice = ['HT1050','MET','Muons']
+    
     root_file_dir = '/uscms_data/d3/shogan/crab_dirs/TrigFiltCheckV3'
     #trigs = ['TriggerBjets','TriggerDispDijet','TriggerOR']
     #nice = ['Bjet','DisplacedDijet','Logical OR']
@@ -27,6 +35,9 @@ else :
 
 def sample_ok(s):
     return True #s.mass not in (500,3000)
+#multijet = [s for s in Samples.mfv_signal_samples_2018 if sample_ok(s)]
+#dijet = [s for s in Samples.mfv_stopdbardbar_samples_2018 if sample_ok(s)]
+#splitSUSY = Samples.mfv_splitSUSY_samples_M2000_2017
 multijet = [s for s in Samples.mfv_signal_samples_2016 if sample_ok(s)]
 dijet_d = [s for s in Samples.mfv_stopdbardbar_samples_2016 if sample_ok(s)]
 dijet_b = [s for s in Samples.mfv_stopbbarbbar_samples_2016 if sample_ok(s)]
@@ -46,9 +57,12 @@ def mvpave(pave, x1, y1, x2, y2):
     pave.SetY1(y1)
     pave.SetY2(y2)
 
+#for sample in multijet + dijet:
+#for sample in splitSUSY:
 for sample in multijet + dijet_d + dijet_b:# +  higgs:
     fn = os.path.join(root_file_dir, sample.name + '.root')
     if not os.path.exists(fn):
+        #print sample.name + '; not finding it'
         continue
     f = ROOT.TFile(fn)
     sample.ys = {n: getit(f,'p'+n) for n in trigs}
@@ -83,7 +97,22 @@ if len(trigs) > 1:
         else:
             tlatex.DrawLatex(0.725, 1.05, kind)
 
-        ps.save(kind)
+    tlatex = ROOT.TLatex()
+    tlatex.SetTextSize(0.04)
+    if kind == 'multijet' :
+        tlatex.DrawLatex(0.725, 1.05, '#tilde{N} #rightarrow tbs')
+    elif kind == 'dijet' :
+        tlatex.DrawLatex(0.725, 1.05, '#tilde{t} #rightarrow #bar{d}#bar{d}')
+    elif kind == 'semilept_lb':
+        tlatex.DrawLatex(0.725, 1.05, '#tilde{t} #rightarrow lb')
+    elif kind == 'semilept_ld':
+        tlatex.DrawLatex(0.725, 1.05, '#tilde{t} #rightarrow ld')
+    elif kind == 'higgs':
+        tlatex.DrawLatex(0.725, 1.05, 'WH #rightarrow SS #rightarrow d#bar{d}d#bar{d}') 
+    else:
+        tlatex.DrawLatex(0.725, 1.05, kind)
+        
+    ps.save(kind)
 else:
     for sample in multijet + dijet_d + dijet_b:# + higgs:
         print sample.name

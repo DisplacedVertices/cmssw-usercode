@@ -27,7 +27,7 @@ def getit(fn):
     h,n = hr.draw('weight', 'nvtx>=2' + ('&& genmatch0 && genmatch1' if req_genmatch else ''), binning='1,0,1', get_n=True, goff=True)
     #i = get_integral(h)[0]
     #c = i/n
-    d = Samples.norm_from_file(f)
+    d = Samples.sumw_from_file(f)
     e,l,u = clopper_pearson(n, d)
     ee = (u-l)/2
     return e,ee,n,d

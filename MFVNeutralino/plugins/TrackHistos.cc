@@ -102,7 +102,7 @@ void MFVTrackHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   double bsz = mevent->bsz;
   const math::XYZPoint bs(bsx, bsy, bsz);
 
-  const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // JMTBAD which rescaling if ever a different one
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
                        jmt::AnalysisEras::pick(event.id().event()),
                        //jmt::AnalysisEras::pick(event, this),

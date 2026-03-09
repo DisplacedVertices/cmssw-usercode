@@ -101,7 +101,8 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       TLorentzVector vp4 = jmt::track_p4(tkrefi) + jmt::track_p4(tkrefj);
       const double mass = vp4.M();
       if (debug) printf("  p: %f m: %f\n", vp4.P(), mass);
-      if (mass < 0.42 || mass > 0.58)
+      //if (mass < 0.42 || mass > 0.58) //Alec changed
+      if (mass < 0.3 || mass > .7)
         continue;
 
       const TVector3 vp42(vp4.X(), vp4.Y(), 0);

@@ -1,0 +1,68 @@
+./mctruth.exe with options: in_fn: /eos/uscms/store/group/lpclonglived/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthOnnormdzULV30LepMumv6_2017/240226_125240/0000/mctruth_2.root out_fn: hists.root tree_path: mfvMovedTreeMCTruth/t json: none every/quiet/silent: 0/0/0 num_chunks: 1 which_chunk: 0 weights: 1 pu_weights: none half mc by lumi: 0 quarter mc by lumi: 0
+ min_lspdist3: 0
+init time: Real time 0:00:00, CP time 0.320
+tree has 26 entries; running on 0-25
+0123 run: 1
+ lumi: 19 event: 18453
+ jet0: 0 jet1: 2
+ pt 1.71062
+ phi 1.15159
+ eta -0.0648213
+ which_pv 255
+ which_jet 255
+ is_mu 0
+ is_ele 0
+ is_good_mu 0
+ is_good_ele 0
+456 run: 1
+ lumi: 19 event: 18471
+ jet0: 1 jet1: 2
+78 run: 1
+ lumi: 19 event: 18478
+ jet0: 2 jet1: 1
+ pt 16.6941
+ phi -0.629611
+ eta 1.98364
+ which_pv 255
+ which_jet 0
+ is_mu 0
+ is_ele 0
+ is_good_mu 0
+ is_good_ele 0
+ pt 9.8848
+ phi -0.554513
+ eta 1.96899
+ which_pv 255
+ which_jet 0
+ is_mu 0
+ is_ele 0
+ is_good_mu 0
+ is_good_ele 0
+ ncloseseedtks: 5 nmovedcloseseedtks: 3 nmisccloseseedtks: 2
+91011121314 run: 1
+ lumi: 19 event: 18529
+ jet0: 0 jet1: 2
+ run: 1
+ lumi: 19 event: 18529
+ jet0: 1 jet1: 4
+15 run: 1
+ lumi: 19 event: 18536
+ jet0: 2 jet1: 4
+1617 run: 1
+ lumi: 19 event: 18558
+ jet0: 0 jet1: 1
+ pt 4.68417
+ phi 0.771615
+ eta -2.19422
+ which_pv 255
+ which_jet 255
+ is_mu 0
+ is_ele 0
+ is_good_mu 0
+ is_good_ele 0
+1819 run: 1
+ lumi: 19 event: 18577
+ jet0: 3 jet1: 1
+202122232425finished /eos/uscms/store/group/lpclonglived/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthOnnormdzULV30LepMumv6_2017/240226_125240/0000/mctruth_2.root, 26 events done, 26 not skipped, 0 with negative weights
+cpu time per not-skipped event: 0.000385, loop time:Real time 0:00:00, CP time 0.010
+         0.0      -nan +- 0.5000      -nan +- 0.5000      -nan +- 0.5000

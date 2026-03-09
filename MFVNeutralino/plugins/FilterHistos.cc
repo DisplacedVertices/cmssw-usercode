@@ -324,7 +324,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // Get a shorthand for the current year
     int ul_year = int(MFVNEUTRALINO_YEAR);
-
+    /*
     if (require_two_good_leptons) {
         bool has_nice_muon = false;
         bool has_nice_ele  = false;
@@ -351,7 +351,6 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
         if ((not has_nice_muon) or (not has_nice_ele) or (mevent->nbtags(1) < 2)) return;
     }
-
     if (require_exact_ncalojets) {
         int n_central_hltcalojets = 0;
         for (size_t i=0; i < mevent->hlt_calo_jet_pt.size(); ++i) {
@@ -882,7 +881,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             }
         }
     }
-
+    */
     // Done with nested conditional hell
     // SHAUN: There has got to be a better way to do all of this
 }

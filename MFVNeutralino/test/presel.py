@@ -23,7 +23,9 @@ process.mfvEvent.vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 1)
-process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsMuon = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsElectron = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsBJetDispJetVetoHT = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 4)
 process.mfvAnalysisCutsDisplaced   = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 6)
 
 process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
@@ -44,13 +46,16 @@ def doit(name):
     obj = getattr(process, name)
     setattr(process, '%sJetTriggered'    % name, obj.clone())
     setattr(process, '%sJetPreSel'       % name, obj.clone())
-    setattr(process, '%sLeptonTriggered' % name, obj.clone())
-    setattr(process, '%sLeptonPreSel'    % name, obj.clone())
-    setattr(process, '%sDisplacedTriggered'    % name, obj.clone())
-    setattr(process, '%sDisplacedPreSel'       % name, obj.clone())
+    setattr(process, '%sMuonTriggered' % name, obj.clone())
+    setattr(process, '%sMuonPreSel'    % name, obj.clone())
+    setattr(process, '%sElectronTriggered' % name, obj.clone())
+    setattr(process, '%sElectronPreSel'    % name, obj.clone())
+    setattr(process, '%sBJetDispJetVetoHTTriggered'    % name, obj.clone())
+    setattr(process, '%sBJetDispJetVetoHTPreSel'       % name, obj.clone())
     setattr(process, 'p%sJet' % name, cms.Path(process.mfvTriggerFilterJetsOnly    * process.preSeq * getattr(process, '%sJetTriggered'    % name) * process.mfvAnalysisCutsJet    * getattr(process, '%sJetPreSel'    % name)))
-    setattr(process, 'p%sLep' % name, cms.Path(process.mfvTriggerFilterLeptonsOnly * process.preSeq * getattr(process, '%sLeptonTriggered' % name) * process.mfvAnalysisCutsLepton * getattr(process, '%sLeptonPreSel' % name)))
-    setattr(process, 'p%sDisplaced' % name, cms.Path(process.mfvTriggerFilterBjetsORDisplacedDijet * process.preSeq * getattr(process, '%sDisplacedTriggered'    % name) * process.mfvAnalysisCutsDisplaced * getattr(process, '%sDisplacedPreSel'    % name)))
+    setattr(process, 'p%sMu' % name, cms.Path(process.mfvTriggerFilterMuonsOnly * process.preSeq * getattr(process, '%sMuonTriggered' % name) * process.mfvAnalysisCutsMuon * getattr(process, '%sMuonPreSel' % name)))
+    setattr(process, 'p%sEle' % name, cms.Path(process.mfvTriggerFilterElectronsOnly * process.preSeq * getattr(process, '%sElectronTriggered' % name) * process.mfvAnalysisCutsElectron * getattr(process, '%sElectronPreSel' % name)))
+    setattr(process, 'p%sBJetDispJetVetoHT' % name, cms.Path(process.mfvTriggerFilterBjetsORDisplacedDijetVetoHT * process.preSeq * getattr(process, '%sBJetDispJetVetoHTTriggered'    % name) * process.mfvAnalysisCutsBJetDispJetVetoHT * getattr(process, '%sBJetDispJetVetoHTPreSel'    % name)))
 
 doit('mfvEventHistos')
 if not settings.is_mc:
@@ -60,7 +65,7 @@ if not settings.is_mc:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
+    if use_btag_triggers or use_btag_vetoLepHT_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
 
         if year == 20161:
@@ -78,7 +83,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, all_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
 
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path(json_filename), limit_ttbar=True)
 
     ms = MetaSubmitter('PreselHistosFix' + settings.version, dataset=dataset)
     ms.common.pset_modifier = pset_modifier

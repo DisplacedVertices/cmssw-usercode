@@ -187,9 +187,28 @@ def named_product(**items):
 
 def sub_popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-
+    
 def popen(cmd, return_exit_code=False, print_output=False):
     child = sub_popen(cmd)
+    output = []
+    for line in child.stdout:
+        if print_output:
+            print line,
+        output.append(line)
+    output = ''.join(output)
+    if return_exit_code:
+        return output, child.returncode
+    else:
+        return output
+
+def wisc_sub_popen(cmd):
+    setup = [
+        "eval `scram unsetenv -sh`"
+    ]
+    return subprocess.Popen([';'.join(setup+[cmd])], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+
+def wisc_popen(cmd, return_exit_code=False, print_output=False):
+    child = wisc_sub_popen(cmd)
     output = []
     for line in child.stdout:
         if print_output:

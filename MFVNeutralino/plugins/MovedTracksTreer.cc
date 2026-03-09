@@ -61,7 +61,6 @@ namespace {
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt_filler.fill(event);
   gentruth_filler(event);
-
   auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
 
   if (for_mctruth) {
@@ -143,8 +142,16 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                 (*move_vertex)[1] - nt_filler.bs().y((*move_vertex)[2]),
                 (*move_vertex)[2]);
 
-    for (const reco::TrackRef& tk : *sel_tracks)
+    //for (const reco::TrackRef tk : *sel_tracks)
+    //  tks_push_back(*tk);
+
+    for (reco::TrackRef tk : *sel_tracks) {
+      const int whichtk = nt.tracks().n();
       tks_push_back(*tk);
+      auto vf = nt_filler.pvs_filler();
+      const int whichpv = nt_filler.tracks_filler().which_pv(event, &vf, tk);
+      nt.tracks().set_which_pv(whichtk, whichpv);
+    }
 
     for (const reco::Track& tk : *moved_tracks) {
       double dist2min = 0.1;
@@ -199,6 +206,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
           }
           if (whichtk != -1)
             nt.tracks().set_which_jet(whichtk, whichjet);
+    
+
+ 
         }
       }
     }
@@ -255,15 +265,18 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                       v.rescale_chi2, v.rescale_x - nt_filler.bs().x(v.rescale_z), v.rescale_y - nt_filler.bs().y(v.rescale_z), v.rescale_z, v.rescale_cxx, v.rescale_cxy, v.rescale_cxz, v.rescale_cyy, v.rescale_cyz, v.rescale_czz, // JMTBAD get rid of beamspot subtraction everywhere (then just use NtupleAdd here)
                       v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, false,
                       v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
-
+     
     for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
+      /*
       jmt::MinValue m(0.1);
-      for (size_t j = 0, je = nt.tracks().n(); j < je; ++j)
+      for (size_t j = 0, je = nt.tracks().n(); j < je; ++j){
         m(j, mag2(v.track_qpt(i) - nt.tracks().qpt(j),
                   v.track_eta[i] - nt.tracks().eta(j),
                   v.track_phi[i] - nt.tracks().phi(j)));
+        }
 
       assert(m.i() != -1);
+      std::cout << " m.i() " << m.i() << std::endl;
       if (nt.tracks().which_sv(m.i()) != 255) {
         const int w = nt.tracks().which_sv(m.i());
         cms::Exception ce("BadAssumption");
@@ -277,18 +290,17 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
           ce << "--this isn't a valid vertex number (max " << nt.vertices().n() << ")\n";
         throw ce;
       }
+      */
       const size_t iv = nt.vertices().n() - 1;
       assert(iv < 255);
-      nt.tracks().set_which_sv(m.i(), iv);
+      nt.tracks().set_which_sv(99, iv); //FIXME
     }
   }
 
   if (apply_presel) {
-    if ((!for_mctruth && (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req)) ||
-        nt.jets().ht() < 1000)
-    return;
+    if ((!for_mctruth && (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req))) // || nt.jets().ht() < 1000)
+      return;
   }
-
   nt_filler.finalize();
 }
 

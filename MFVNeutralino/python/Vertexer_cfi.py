@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-#from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 kvr_params = cms.PSet(
     maxDistance = cms.double(0.01),
@@ -26,7 +25,7 @@ mfvVertexTracksGen = cms.EDFilter('MFVVertexTracksGen',
                                track_genjet_match_thres = cms.double(0.01),
                                min_genparticle_pt = cms.double(0),
                                verbose = cms.untracked.bool(False),
-                               histos = cms.untracked.bool(True),
+                               histos = cms.untracked.bool(False),
                                )
 
 
@@ -35,10 +34,10 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                disregard_event = cms.bool(False),
                                use_tracks = cms.bool(True),
-                               #use_separated_leptons = cms.bool(True), #use lepton tracks -> if they were separated at unpackedcandidates
+                               use_separated_leptons = cms.bool(False), # Turning this off in this fork, but Abby uses this extensively. # use lepton tracks -> if they were separated at unpackedcandidates
                                tracks_src = cms.InputTag('jmtRescaledTracks'),
-                               #electron_tracks_src = cms.InputTag('jmtRescaledTracks', "electrons"),
-                               #muon_tracks_src = cms.InputTag('jmtRescaledTracks', "muons"),
+                               electron_tracks_src = cms.InputTag('jmtRescaledTracks', "electrons"),
+                               muon_tracks_src = cms.InputTag('jmtRescaledTracks', "muons"),
                                save_quality_tracks = cms.bool(False),#trackattach
                                match_jets = cms.bool(False),
                                match_jet_src = cms.InputTag('selectedPatJets'),
@@ -56,15 +55,15 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                no_track_cuts = cms.bool(False),
                                min_seed_jet_pt = cms.double(30),
                                min_track_pt = cms.double(1),
+                               min_leptrack_pt = cms.double(20), # should already be enforced during earlier steps; just as precaution/placeholder
                                min_track_pt_loose = cms.double(0.9), # loose track selection when match_jets is True
                                min_track_dxy = cms.double(0),
                                min_track_sigmadxy = cms.double(0),
                                min_track_rescaled_sigmadxy = cms.double(4),
-                               min_leptrack_rescaled_sigmadxy = cms.double(3),
+                               min_leptrack_rescaled_sigmadxy = cms.double(3), # relaxed lepton nsigmadxy 
                                min_track_rescaled_sigmadxy_loose = cms.double(3.5), # loose track selection when match_jets is True
                                min_track_sigmadxypv = cms.double(0),
-                               min_track_hit_r = cms.int32(1),
-                               min_leptrack_hit_r = cms.int32(2),
+                               min_track_hit_r = cms.int32(1), # relaxed to 2 iff lost hits = 0 
                                min_track_nhits = cms.int32(0),
                                min_track_npxhits = cms.int32(0),
                                min_track_npxlayers = cms.int32(2),
@@ -79,7 +78,6 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                )
 
 mfvVertices = cms.EDProducer('MFVVertexer',
-                             #jmtNtupleFiller_pset(True, True, False),
                              kvr_params = kvr_params,
                              do_track_refinement = cms.bool(False), # remove tracks + trim out tracks with IP significance larger than trackrefine_sigmacut and trackrefine_trimmax, respectively   
                              resolve_split_vertices_loose = cms.bool(False), # an alternative merging routine with `loose` criteria, to merge any nearby vertices within a given dist or significance
@@ -89,9 +87,6 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              resolve_shared_jets_src = cms.InputTag('selectedPatJets'), 
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
                              seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'),
-                             all_tracks_src = cms.InputTag('mfvVertexTracks', 'all'),
-                             #muon_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'museed'),
-                             #electron_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'eleseed'), # these two are used just to check if the seed track is a lepton or not 
                              n_tracks_per_seed_vertex = cms.int32(2),
                              max_seed_vertex_chi2 = cms.double(5),
                              use_2d_vertex_dist = cms.bool(False),
@@ -108,10 +103,11 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              min_track_vertex_sig_to_remove = cms.double(1.5), # default track arbitration
                              remove_one_track_at_a_time = cms.bool(True),
                              max_nm1_refit_dist3 = cms.double(-1),
-                             max_nm1_refit_distz = cms.double(-1), #(0.005), #0.03#0.005 might be too tight so try to relex it
+                             max_nm1_refit_distz = cms.double(-1), 
                              ignore_lep_in_refit_distz = cms.bool(True), #do not consider dropping tracks at dz refit step if they are leptons w/ pt > 20 GeV. 
+                             order_seed_vertex = cms.bool(False), 
                              max_nm1_refit_distz_error = cms.double(-1), #0.02#0.015 might be too tight so try to relex it
-                             max_nm1_refit_distz_sig = cms.double(3.0), #-1 we now use a significant value rather than an absolute one 
+                             max_nm1_refit_distz_sig = cms.double(3.0), 
                              max_nm1_refit_count = cms.int32(-1),
                              trackrefine_sigmacut = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              trackrefine_trimmax = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)

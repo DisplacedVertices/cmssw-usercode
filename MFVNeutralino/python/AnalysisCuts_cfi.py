@@ -1,30 +1,40 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_btag_vetoLepHT_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
 
 if use_btag_triggers:
-  apply_presel = cms.int32(6)
+  apply_presel = cms.int32(6)  
+elif use_btag_vetoLepHT_triggers:
+  apply_presel = cms.int32(6)  
 elif use_MET_triggers:
   apply_presel = cms.int32(5)
+elif use_Lepton_triggers:
+  apply_presel = cms.int32(2)
+elif use_Muon_triggers:
+  apply_presel = cms.int32(2)
+elif use_Electron_triggers:
+  apply_presel = cms.int32(2)
 else:
   apply_presel = cms.int32(1)
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
-                                                             # 6 = bjets/displaced dijet (HT agnostic)
-                               require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
+                                                             # 6 = bjets/displaced dijet (with HT and lepton veto, when enabled)
+                               require_met_filters = cms.bool(False), # JPR 2/5/2026: I think we should turn this to True, but we should do a dedicated study first
                                require_bquarks  = cms.bool(False),
                                require_trigbit  = cms.bool(True),
                                require_gen_sumdbv  = cms.bool(False),
-                               require_bjet_psel   = cms.bool(True), # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               require_bjet_psel   = cms.bool(True) if use_btag_triggers or use_btag_vetoLepHT_triggers else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               require_isomu27 = cms.bool(False),
                                study_btag_sf       = cms.bool(False),
                                study_btag_sfvar    = cms.int32(0), # Only used if above bool = True. Set to +1 for up-var, -1 for dn-var, 0 for central val
                                dijet_agnostic      = cms.bool(False),
                                bjet_agnostic       = cms.bool(False),
                                bjet_veto           = cms.bool(False),
+                               leptonht_veto       = cms.bool(True) if  use_btag_vetoLepHT_triggers else cms.bool(False),
                                study_jer           = cms.bool(False),
                                study_jes           = cms.bool(False),
-                               jes_jer_var_up      = cms.bool(True), # Only used if study_jer or study_jes is true. True = var_up, False = var_down
+                               jes_jer_var_up      = cms.bool(False), # Only used if study_jer or study_jes is true. True = var_up, False = var_down
                                btagger_choice  = cms.int32(2), # 0 = CSV, 1 = DeepCSV, 2 = DeepJet
                                btag_wp         = cms.int32(0), # 0 = Loose, 1 = Medium, 2 = Tight
                                trigbit_tostudy = cms.int32(99999),
@@ -32,7 +42,11 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                l1_bit = cms.int32(-1),
                                trigger_bit = cms.int32(-1),
                                apply_trigger = cms.int32(0),
+                               apply_displacedlepton_triggers = cms.bool(False),
+                               require_displaced_lepton = cms.bool(False),
                                apply_cleaning_filters = cms.bool(False),
+                               apply_muons_only = cms.bool(True) if use_Muon_triggers else cms.bool(False),
+                               apply_electrons_only = cms.bool(True) if use_Electron_triggers else cms.bool(False), 
                                min_npv = cms.int32(0),
                                max_npv = cms.int32(100000),
                                min_npu = cms.double(-1e9),
@@ -45,7 +59,6 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                min_ht = cms.double(0),
                                max_ht = cms.double(1e9),
                                min_nleptons = cms.int32(0),
-                               min_nselleptons = cms.int32(0),
                                apply_vertex_cuts = cms.bool(True),
                                vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                min_nvertex = cms.int32(2),

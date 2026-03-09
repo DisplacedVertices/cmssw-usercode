@@ -2,16 +2,19 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-sample_files(process, 'qcdht0500_2017' if is_mc else 'JetHT2017B', dataset, 1)
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_btag_vetoLepHT_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers
+#sample_files(process, 'WplusHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', dataset, 1)
+#sample_files(process, 'mfv_stopld_tau000100um_M0200_2018' if is_mc else 'JetHT2017B', dataset, 1)
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
+#max_events(process, 100)
+input_files(process, '/store/group/lpclonglived/joeyr/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30BvetoLHTm_20161/250222_142639/0000/ntuple_1.root')
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
-# blind btag triggered events
-if not is_mc and use_btag_triggers :
-    del process.pMiniTreeNtk3
+# blind data events with >= 4 tracks per vertex until we're ready
+if not is_mc :
     del process.pMiniTreeNtk4
     del process.pMiniTreeNtk3or4
     del process.pMiniTree
@@ -20,20 +23,27 @@ if not is_mc and use_btag_triggers :
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
-        #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        samples =  Samples.ttbar_samples_2018 + Samples.qcd_samples_2018 + Samples.samples_for_minitree_2018
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
-    elif use_MET_triggers :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, leptonic=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
-    else :
-        samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
-        #samples = pick_samples(dataset)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
+    if use_Muon_triggers or use_Electron_triggers :
+        sys.exit('In minitree.py, use_Muon_triggers and use_Electron_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). Instead, do use_Lepton_triggers.')
 
-    cs = CondorSubmitter('MiniTree' + version + '_BjetAgnostic_P1p00',
+    if  use_btag_vetoLepHT_triggers:
+        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
+    elif use_Lepton_triggers :
+        samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
+    else :
+        print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
+        samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
+
+    json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
+    set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
+
+    cs = CondorSubmitter('MiniTree_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

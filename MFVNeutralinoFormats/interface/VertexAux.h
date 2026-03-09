@@ -7,6 +7,7 @@
 #include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/LeptonVertexAssociation.h"
 
 struct MFVVertexAux {
   typedef unsigned char uchar;
@@ -51,12 +52,18 @@ struct MFVVertexAux {
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i) {
       costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
-      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = 0;
+      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = missdistsv0[i] = missdistsv0err[i] = 0;
     }
+    nmuons = nelectrons = nleptons = 0;
+    nmuptgt20 = neleptgt20 = nlepptgt20 = 0;
+    ntracks_ = 0;
+    sumpt2_ = 0;
+    sumpt2_new = 0;
   }
-
   uchar which;
-  std::vector<uchar> which_lep; // electrons have 7th bit set
+  int ntracks_;
+  float sumpt2_;
+  float sumpt2_new = 0;
 
   float x;
   float y;
@@ -111,6 +118,79 @@ struct MFVVertexAux {
   float eta [mfv::NMomenta];
   float phi [mfv::NMomenta];
   float mass[mfv::NMomenta];
+
+  // electrons, muons associated to the SV
+  int nelectrons;
+  int nmuons;
+  int nleptons;
+  //now w/ pt requirement
+  int neleptgt20;
+  int nmuptgt20;
+  int nlepptgt20;
+
+  std::vector<float> muon_pt;
+  std::vector<float> muon_eta;
+  std::vector<float> muon_phi;
+  //hltmatched //Abby change begin
+  std::vector<double> mu_besthltmatchdR;
+  std::vector<float> mu_hlt_pt;
+  std::vector<float> mu_hlt_eta;
+  std::vector<float> mu_hlt_phi;
+  std::vector<float> mu_hlt_energy;
+  std::vector<bool> mu_is_hltmatched; //Abby change end
+  
+  std::vector<float> muon_x;
+  std::vector<float> muon_y;
+  std::vector<float> muon_z;
+  std::vector<float> muon_dxy;
+  std::vector<float> muon_dz;
+  std::vector<float> muon_dxybs;
+  std::vector<float> muon_dxyerr;
+  std::vector<float> rescaled_muon_dxyerr; //Abby change
+  std::vector<float> muon_dzerr;
+  std::vector<float> muon_iso;
+  std::vector<std::vector<int>> muon_ID;
+  std::vector<float> muvtxtip;
+  std::vector<float> muvtxtiperr;
+  std::vector<float> muvtxtipsig;
+
+  std::vector<float> electron_pt;
+  std::vector<float> electron_eta;
+  std::vector<float> electron_phi;
+
+  //hltmatched //Abby change begin
+  std::vector<double> ele_besthltmatchdR;
+  std::vector<float> ele_hlt_pt;
+  std::vector<float> ele_hlt_eta;
+  std::vector<float> ele_hlt_phi;
+  std::vector<float> ele_hlt_energy;
+  std::vector<bool> ele_is_hltmatched; //Abby change end
+  
+  std::vector<float> electron_x;
+  std::vector<float> electron_y;
+  std::vector<float> electron_z;
+  std::vector<float> electron_dxy;
+  std::vector<float> electron_dz;
+  std::vector<float> electron_dxybs;
+  std::vector<float> electron_dxyerr;
+  std::vector<float> rescaled_electron_dxyerr; //Abby change
+  std::vector<float> electron_dzerr;
+  std::vector<float> electron_iso;
+  std::vector<std::vector<int>> electron_ID;
+  std::vector<std::vector<int>> electron_ID_noiso; //Abby change
+  std::vector<float> elevtxtip;
+  std::vector<float> elevtxtiperr;
+  std::vector<float> elevtxtipsig;
+
+  //selected mu/ele associated to SV : passes ID,iso,eta,pT,hltmatched and is leading lepton -> ie the lepton used for event selection  //Abby change begin
+  //easier to save these for weightproducer to derive SF 
+  std::vector<float> leading_selmu_pt; 
+  std::vector<float> leading_selmu_eta;
+  std::vector<float> leading_selmu_hlt; //which hlt trigger was fired 
+  std::vector<float> leading_selele_pt;
+  std::vector<float> leading_selele_eta;
+  std::vector<float> leading_selele_hlt; //which hlt trigger was fired //Abby change end
+
 
   TLorentzVector p4(int w=0) const {
     TLorentzVector v;
@@ -181,7 +261,6 @@ struct MFVVertexAux {
   void costhjetmomvtxdispavg(float costhjetmomvtxdispavg) { costhjetmomvtxdispavg_ = bin(costhjetmomvtxdispavg, -1, 1); }
   void costhjetmomvtxdisprms(float costhjetmomvtxdisprms) { costhjetmomvtxdisprms_ = bin(costhjetmomvtxdisprms, -1, 1); }
 
-
   float geo2ddist() const { return mag(x,y); }
   float geo3ddist() const { return mag(x,y,z); }
 
@@ -210,34 +289,39 @@ struct MFVVertexAux {
 
   float pvdz() const { return sqrt(pv3ddist*pv3ddist - pv2ddist*pv2ddist); }
   float pvdzerr() const {
-    // JMTBAD
-    float z = pvdz();
-    if (z == 0)
+    float pvz = pvdz();
+    if (pvz == 0)
       return -1;
-    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/z;
+    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/pvz;
   }
   float pvdzsig() const { return sig(pvdz(), pvdzerr()); }
 
+
+  //for tracks associated to jets only (mfv::NMomenta)
   uchar costhmombs_  [mfv::NMomenta];
   uchar costhmompv2d_[mfv::NMomenta];
   uchar costhmompv3d_[mfv::NMomenta];
   float costhmombs  (size_t i) const { return unbin(costhmombs_  [i], -1, 1); }
   float costhmompv2d(size_t i) const { return unbin(costhmompv2d_[i], -1, 1); }
   float costhmompv3d(size_t i) const { return unbin(costhmompv3d_[i], -1, 1); }
-  void costhmombs  (size_t i, float x) { costhmombs_  [i] = bin(x, -1, 1); }
-  void costhmompv2d(size_t i, float x) { costhmompv2d_[i] = bin(x, -1, 1); }
-  void costhmompv3d(size_t i, float x) { costhmompv3d_[i] = bin(x, -1, 1); }
+  void costhmombs  (size_t i, float xval) { costhmombs_  [i] = bin(xval, -1, 1); }
+  void costhmompv2d(size_t i, float xval) { costhmompv2d_[i] = bin(xval, -1, 1); }
+  void costhmompv3d(size_t i, float xval) { costhmompv3d_[i] = bin(xval, -1, 1); }
 
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
-
+  float missdistsv0   [mfv::NMomenta];
+  float missdistsv0err[mfv::NMomenta];
+  float missdistsv0sig(int w) const { return sig(missdistsv0[w], missdistsv0err[w]); }
+  
   std::vector<uchar> track_w_;
   std::vector<bool> track_q_;
   std::vector<unsigned> track_hp_;
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
   std::vector<float> track_dxy;
+  std::vector<float> track_dxy_old; //not taking into account beamspot slope //Abby change
   std::vector<float> track_dz;
   std::vector<double> track_vx;
   std::vector<double> track_vy;
@@ -252,6 +336,14 @@ struct MFVVertexAux {
   std::vector<float> track_pt_err;
   std::vector<float> track_eta;
   std::vector<float> track_phi;
+  std::vector<float> track_tkdist_val;
+  std::vector<float> track_tkdist_sig;
+  std::vector<float> track_tkdisttosv1_val; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> track_tkdisttosv1_sig; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> outsed_track_tkdist_val;
+  std::vector<float> outsed_track_tkdist_sig;
+  std::vector<float> outsed_track_dxy; //only if nsv > 0 and nonempty only to sv0
+  std::vector<float> outsed_track_nsigmadxy; //only if nsv > 0 and nonempty only to sv0 
 
   void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
   float track_weight(int i) const { return float(track_w_[i])/255.f; }
@@ -332,9 +424,9 @@ struct MFVVertexAux {
       n == track_cov.size();
   }
 
-  TLorentzVector track_p4(int i, float mass=0) const {
+  TLorentzVector track_p4(int i, float assumed_mass=0) const {
     TLorentzVector v;
-    v.SetXYZM(track_px[i], track_py[i], track_pz[i], mass);
+    v.SetXYZM(track_px[i], track_py[i], track_pz[i], assumed_mass);
     return v;
   }
 
@@ -564,20 +656,37 @@ struct MFVVertexAux {
     return v;
   }
 
+  std::vector<float> trackpairdpts() const { //Abby change begin
+    std::vector<float> v;
+    size_t n = ntracks();
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(std::abs(track_pt(i) - track_pt(j)));
+    return v;
+  } //Abby change end
+
   float mintrackpt() const { return _min(track_pts(), false); } // already filtered
   float maxtrackpt() const { return _max(track_pts(), false); }
 
   float maxmntrackpt(int n) const {
-    std::vector<float> pt = track_pts();
-    int nt = int(pt.size());
+    std::vector<float> tkpts = track_pts();
+    int nt = int(tkpts.size());
     if (n > nt - 1)
       return -1;
-    std::sort(pt.begin(), pt.end());
-    return pt[nt-1-n];
+    std::sort(tkpts.begin(), tkpts.end());
+    return tkpts[nt-1-n];
   }
 
   float trackptavg() const { return _avg(track_pts(), false); }
   float trackptrms() const { return _rms(track_pts(), false); }
+
+  float trackpairdptmin() const { return stats(this, trackpairdpts()).min; } //Abby change begin
+  float trackpairdptmax() const { return stats(this, trackpairdpts()).max; }
+  float trackpairdptavg() const { return stats(this, trackpairdpts()).avg; }
+  float trackpairdptrms() const { return stats(this, trackpairdpts()).rms; } //Abby change end
 
   float trackdxymin() const { return _min(track_dxy); }
   float trackdxymax() const { return _max(track_dxy); }

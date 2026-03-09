@@ -147,7 +147,7 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
   LLP_daus[0].clear();
   LLP_daus[1].clear();
 
-  const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // JMTBAD which rescaling if ever a different one
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1 && min_track_rescaled_sigmadxy > 0,
                        jmt::AnalysisEras::pick(event, this),
                        track_rescaler_which);

@@ -10,11 +10,15 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", default="")
 parser.add_argument("--plots", nargs='+')
-parser.add_argument("--color", nargs='+', type=int)
-parser.add_argument("--legend", nargs='+')
+# parser.add_argument("--color", nargs='+', type=int, default = [2,4])
+# parser.add_argument("--legend", nargs='+', default = ["comparison_before_dz_lep20", "comparison_after_dz_lep20"])
+# parser.add_argument("--norm", action='store_true')
+# parser.add_argument("--x_range", nargs='+', type=float, default = [0,2])
+parser.add_argument("--color", default = [2,4])
+parser.add_argument("--legend", default = ["comparison_before_dz_lep20", "comparison_after_dz_lep20"])
 parser.add_argument("--norm", action='store_true')
-parser.add_argument("--x_range", nargs='+', type=float)
-parser.add_argument("--output")
+parser.add_argument("--x_range", default = [0,2])
+parser.add_argument("--output", default = "comparison_before_after_dz_lep20.png")
 args = parser.parse_args()
 
 R.gROOT.SetBatch(R.kTRUE)
@@ -22,6 +26,7 @@ f = R.TFile(args.input)
 h_list = []
 for i in range(0,len(args.plots)):
   h = f.Get(args.plots[i])
+  print(h)
   h.SetName(args.legend[i])
   h.SetLineColor(args.color[i])
   if args.norm:

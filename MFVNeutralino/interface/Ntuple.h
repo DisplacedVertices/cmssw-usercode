@@ -459,6 +459,23 @@ namespace mfv {
     VerticesSubNtuple vertices_;
     MovedTracksSubNtuple tm_;
   };
+   
+  ////
+  class VertexerNtuple : public jmt::TrackingAndJetsNtuple {
+  public:
+    VertexerNtuple() { clear(); }
+    virtual void clear() { jmt::TrackingAndJetsNtuple::clear(); vertices().clear(); }
+    virtual void write_to_tree(TTree* t) { jmt::TrackingAndJetsNtuple::write_to_tree(t); vertices().write_to_tree(t); }
+    virtual void read_from_tree(TTree* t) { jmt::TrackingAndJetsNtuple::read_from_tree(t); vertices().read_from_tree(t); }
+    virtual void copy_vectors() { jmt::TrackingAndJetsNtuple::copy_vectors(); vertices().copy_vectors(); }
+
+    VerticesSubNtuple& vertices() { return vertices_; }
+    const VerticesSubNtuple& vertices() const { return vertices_; }
+
+  private:
+    VerticesSubNtuple vertices_;
+  };
+
 
   ////
 
@@ -483,6 +500,7 @@ namespace mfv {
   ////
 
   class SplitPVNtuple : public jmt::TrackingAndJetsNtuple {};
+
 }
 
 #endif

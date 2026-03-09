@@ -1,20 +1,52 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-#ntuple_version_ = 'ULV9_dileptrig'
-#ntuple_version_ = 'ULV9_trigstudy_'
-#ntuple_version_ = 'UL16APVV9_trigstudy_'
-ntuple_version_ = 'OnnormdzULV30'
-lsp_id = -1 # should do that in a smarter way would be -1 if not MET
-use_btag_triggers = True
+ntuple_version_ = '_tagTest' # we'll replace Test with a number like 001 for our real ntuple production, and will tag the code accordingly
+
+# trigger schemes we are currently using
+use_btag_vetoLepHT_triggers = True
+use_Lepton_triggers = False
+
+# trigger schemes for data, to avoid double counting of PDs
+use_Muon_triggers = False
+use_Electron_triggers = False
+
+# trigger schemes we aren't currently using
+use_btag_triggers = False
 use_MET_triggers = False
+use_DisplacedLepton_triggers = False
+
+# for gen-level studies of our LLPs
+lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
+
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
+elif use_btag_vetoLepHT_triggers : 
+    ntuple_version_ += "BvetoLHT" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
     lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
     ntuple_version_ += "MET"
+elif use_Lepton_triggers :
+    ntuple_version_ += 'Lep'
+elif use_Muon_triggers :
+    ntuple_version_ += "LepMu"
+elif use_Electron_triggers :
+    ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
+
+# old stuff from Peace:
+#dataset = "ntupleonnormdzulv30lepm_noef"
+#dataset = "NtuplerecreatePeacentupleOnnormdzULV30Lepm_NoEF_2018" might have implemented track inef accidentally
+#dataset = "NtupleOnnormdzULV30BvetoLHTm_NoEF_trkinef"
+#dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
+#dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
+
+if use_btag_triggers :
+    sys.exit('use_btag_triggers is deprecated, please use use_btag_vetoLepHT_triggers instead. Exiting.')
+
+if sum([use_btag_triggers,use_btag_vetoLepHT_triggers,use_MET_triggers,use_Lepton_triggers,use_Muon_triggers,use_Electron_triggers,use_DisplacedLepton_triggers]) != 1 :
+    sys.exit("Must set exactly one trigger scheme to be on. Exiting.")
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
@@ -74,7 +106,7 @@ def minitree_only(process, mode, settings, output_commands):
             process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
             from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
             process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
-                                                  jmtNtupleFiller_pset(settings.is_miniaod, True),
+                                                  jmtNtupleFiller_pset(settings.is_miniaod, True, False), 
                                                   kvr_params = kvr_params,
                                                   vertices_src = cms.InputTag('mfvVertices'),
                                                   auxes_src = cms.InputTag('mfvVerticesAuxPresel'),
@@ -91,12 +123,14 @@ def minitree_only(process, mode, settings, output_commands):
 
         process.TFileService.fileName = 'minintuple.root'
 
-def event_filter(process, mode, settings, output_commands, **kwargs):
-    if mode:
-        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = False, **kwargs)
-        #setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
+#updated event_filter : takes in two modes, the default/original and the rp_mode, indexed at 0 and 1 respectfully
+def event_filter(process, mode, settings, output_commands, **kwargs):
+    if mode[0] or mode[1]:
+        print(mode[0])
+        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode[0], event_filter_require_vertex = False, rp_mode=mode[1], **kwargs)
+        
 ########################################################################
 
 class NtupleSettings(CMSSWSettings):
@@ -110,6 +144,7 @@ class NtupleSettings(CMSSWSettings):
         self.keep_gen = False
         self.keep_tk = False
         self.event_filter = True
+        self.randpars_filter = False
 
     @property
     def version(self):
@@ -157,6 +192,7 @@ def make_output_commands(process, settings):
         'keep *_mcStat_*_*',
         'keep MFVVertexAuxs_mfvVerticesAux_*_*',
         'keep MFVEvent_mfvEvent__*',
+        #'keep MFVSeedTracks_mfvSeedTracks__*', # this was pursued by Abby at one point but later dropped
         ]
 
     if settings.keep_gen:
@@ -168,7 +204,7 @@ def make_output_commands(process, settings):
     if settings.keep_tk:
         output_commands += ['keep *_jmtRescaledTracks_*_*']
 
-    if settings.keep_all:
+    if settings.keep_all: 
         def dedrop(l):
             return [x for x in l if not x.strip().startswith('drop')]
         our_output_commands = output_commands
@@ -199,7 +235,7 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
-    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask:#, process.pfNoPileUpJMETask:
+    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
@@ -261,11 +297,11 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+    #process.load('JMTucker.MFVNeutralino.SeedTracks_cfi') # this was pursued by Abby at one point but later dropped
     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
@@ -277,9 +313,9 @@ def miniaod_ntuple_process(settings):
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
     # change made to use corrected MET
-    #process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    #if not settings.is_mc:
-    #  process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
+    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
+    if not settings.is_mc:
+        process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
     process.mfvTriggerFloats.year = settings.year
 
@@ -289,9 +325,8 @@ def miniaod_ntuple_process(settings):
     #for splitSUSY
     process.mfvGenParticles.lsp_id = lsp_id
     process.mfvGenParticles.debug = False
-
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
-    process.mfvVertexTracks.min_track_pt = 1.0
+    # process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
+    # process.mfvVertexTracks.min_track_pt = 1.0
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
@@ -302,20 +337,34 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    #process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-
-    # MET correction and filters
+    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
+    
+    # MET correction and filters 
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
-    #from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
-    #runMetCorAndUncFromMiniAOD(process,
-    #                           isData = not settings.is_mc,
-    #                           )
+    runMetCorAndUncFromMiniAOD(process,
+                               isData = not settings.is_mc,
+                               )
+
+    # #Abby lepton corrections, EGamma scales and smearings 
+    # #https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018#SFs_for_Electrons_UL_2018 
+    if settings.year == 2017 or settings.year == 2018:  setup_era = '%i-UL'%settings.year
+    elif settings.year == 20161: setup_era = '2016preVFP-UL'
+    elif settings.year == 20162: setup_era = '2016postVFP-UL'
+
+    from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+    setupEgammaPostRecoSeq(process,
+                           runEnergyCorrections=True,
+                           runVID=False, #turn off to save CPU time by not needlessly re-running VID, if you want the Fall17V2 IDs, set this to True or remove (default is True)
+                           #eleIDModules=['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff'],
+                           #phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                           era = setup_era) #end of Abby lepton corrections
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
-                         process.BadPFMuonFilterUpdateDz *
-                         #process.fullPatMetSequence *
+                         process.fullPatMetSequence *
+                         process.egammaPostRecoSeq * #Abby lepton correction
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
@@ -323,14 +372,16 @@ def miniaod_ntuple_process(settings):
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
                          process.prefiringweight *
-                         process.mfvEvent)
+                         process.mfvEvent )
+                         #process.mfvSeedTracks) # this was pursued by Abby at one point but later dropped
 
     output_commands = make_output_commands(process, settings)
 
     mods = [
         (prepare_vis,    settings.prepare_vis),
         (run_n_tk_seeds, settings.run_n_tk_seeds),
-        (event_filter,   settings.event_filter),
+        (event_filter,    [settings.event_filter, settings.randpars_filter]),
+        #(event_filter,   settings.event_filter),
         (minitree_only,  settings.minitree_only),
         ]
     for modifier, mode in mods:
@@ -346,10 +397,37 @@ def ntuple_process(settings):
     else:
         return aod_ntuple_process(settings)
 
+def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclusive miniaods
+    to_replace = []
+
+    if sample.is_signal:
+        # NOTE that this is not implemented in a way that works for WminusH at all, and also that the `decay` line *only* works for ZH.
+        # Moreover, it was only pre-UL samples that made use of randomized parameters for VH signals.
+        # We should think about some cleanup here. Ultimately, parse_randpars is set to False in EventFilter_cfi.py, which is
+        # why the VH samples work at all!
+        if sample.name.startswith('ZH_') or sample.name.startswith('Wplus'):
+            magic_randpar = 'randpars_filter = False'
+            
+            decay = sample.name[sample.name.find('_')+1 : sample.name.find('_Z')]
+            # special case : 50um is referenced as 0p05 in config string
+            ctau = '%s' % (sample.tau/1000)
+            if ctau == '0.05' :
+                ctau = '0p05'
+            to_replace.append((magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar))
+    return [], to_replace
+
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
             magic = "event_filter = 'bjets OR displaced dijet'"
+        if use_btag_vetoLepHT_triggers:
+            magic = "event_filter = 'bjets OR displaced dijet veto leptons and HT'"
+        elif use_Lepton_triggers :
+            magic ="event_filter = 'leptons only'"
+        elif use_Muon_triggers :
+            magic ="event_filter = 'muons only'"
+        elif use_Electron_triggers :
+            magic ="event_filter = 'electrons only veto muons'"
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]

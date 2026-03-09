@@ -13,8 +13,11 @@ namespace jmt {
 
     last_cacheIdentifier = event.cacheIdentifier();
 
-    if (input_is_miniaod)
+    if (input_is_miniaod) 
       event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
+      // event.getByToken(unpacked_candidate_mutracks_map_token, unpacked_candidate_mutracks_map);
+      // event.getByToken(unpacked_candidate_eletracks_map_token, unpacked_candidate_eletracks_map);
+
     for (size_t i = 0, ie = tracks_maps_tokens.size(); i < ie; ++i)
       event.getByToken(tracks_maps_tokens[i], tracks_maps[i]);
 
@@ -58,6 +61,7 @@ namespace jmt {
     tracks_maps.resize(tracks_maps_tokens.size());
   }
 
+  // [TODO] : do similar for muon and electron
   std::vector<reco::TrackRef> TrackRefGetter::tracks(const edm::Event& event, const pat::Jet& jet) {
     setup_event(event);
     std::vector<reco::TrackRef> r;
@@ -97,7 +101,7 @@ namespace jmt {
           r.push_back(tk);
       }
     }
-
+    
     return r;
   }
 
@@ -141,29 +145,11 @@ namespace jmt {
     }
     return has;
   }
-
+  
   int TrackRefGetter::has_track(const edm::Event& e, const reco::VertexRef& v, const reco::TrackRef& tk) {
     for (auto rq : tracks(e,v))
       if (rq.first == tk)
         return rq.second;
     return -1;
   }
-  
-  /*size_t TrackRefGetter::ijet(const edm::Event& event, const pat::JetCollection& jets, const reco::TrackRef& tk) {
-    for (size_t i = 0, ie = jets.size(); i < ie; ++i)
-      for (reco::TrackRef r : tracks(event, jets[i]))
-        if (r == tk)
-          return i;
-
-    return size_t(-1);
-  }
-
-  size_t TrackRefGetter::ivertex(const edm::Event& event, const reco::VertexCollection& vertices, const reco::TrackRef& tk) {
-    for (size_t i = 0, ie = vertices->size(); i < ie; ++i)
-      for (reco::TrackRef r : tracks(event, vertices[i], 0))
-        if (r == tk)
-          return i;
-
-    return size_t(-1);
-  }*/
 }

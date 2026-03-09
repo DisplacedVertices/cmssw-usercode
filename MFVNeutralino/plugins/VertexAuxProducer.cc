@@ -2,6 +2,7 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -27,6 +28,7 @@
 #include "JMTucker/Tools/interface/Math.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+
 #include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -40,13 +42,20 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   std::unique_ptr<KalmanVertexFitter> kv_reco;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
-  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
-  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<std::vector<double> > gen_vertices_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   jmt::TrackRefGetter track_ref_getter;
+  const std::string sv_to_muons_src;
+  edm::EDGetTokenT<mfv::MuonVertexAssociation> sv_to_muons_token;
+  const std::string sv_to_ele_src;
+  edm::EDGetTokenT<mfv::ElectronVertexAssociation> sv_to_ele_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const edm::EDGetTokenT<double> rho_token;
+  EffectiveAreas electron_effective_areas;
   const mfv::VertexAuxSorter sorter;
   const bool verbose;
   const std::string module_label;
@@ -55,27 +64,36 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   VertexDistance3D distcalc_3d;
   Measurement1D gen_dist(const reco::Vertex&, const std::vector<double>& gen, const bool use3d);
   Measurement1D miss_dist(const reco::Vertex&, const reco::Vertex&, const math::XYZTLorentzVector& mom);
+  std::pair<bool, Measurement1D> track_dist(const reco::TransientTrack & t, const reco::Vertex & v);
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
-    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
-    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     gen_vertices_token(consumes<std::vector<double> >(cfg.getParameter<edm::InputTag>("gen_vertices_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
+	vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
+	sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
     track_ref_getter(cfg.getParameter<std::string>("@module_label"),
                          cfg.getParameter<edm::ParameterSet>("track_ref_getter"),
                          consumesCollector()),
+    sv_to_muons_src(cfg.getParameter<std::string>("sv_to_muons_src")),
+    sv_to_ele_src(cfg.getParameter<std::string>("sv_to_ele_src")),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+    electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     sorter(cfg.getParameter<std::string>("sort_by")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
   for (int i = 0; i < mfv::NJetsByUse; ++i)
     sv_to_jets_token[i] = consumes<mfv::JetVertexAssociation>(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i])); // JMTBAD yuck, rethink
+
+  sv_to_muons_token = consumes<mfv::MuonVertexAssociation>(edm::InputTag(sv_to_muons_src, mfv::muonsby_name));
+  sv_to_ele_token = consumes<mfv::ElectronVertexAssociation>(edm::InputTag(sv_to_ele_src, mfv::electronsby_name));
 
   produces<std::vector<MFVVertexAux> >();
 }
@@ -110,13 +128,21 @@ Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco
   return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, v0.covariance() + v1.covariance())) / 2 / val);
 }
 
+std::pair<bool, Measurement1D> MFVVertexAuxProducer::track_dist(const reco::TransientTrack & t, const reco::Vertex & v) { //use 3d by default
+  return IPTools::absoluteImpactParameter3D(t, v);
+}
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // which rescaling if ever a different one (0 : BTagDisplJet, 1 : SingleLepton, 2 : JetHT, -1 disable)
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
                        jmt::AnalysisEras::pick(event, this),
                        track_rescaler_which);
+
+  // track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
+  //                      jmt::AnalysisEras::pick(event, this),
+  //                      track_rescaler_which,
+  //                      "");
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
@@ -146,20 +172,30 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   }
 
   //////////////////////////////////////////////////////////////////////
+ const bool use_sv_to_muons = sv_to_muons_src != "dummy";
+  edm::Handle<mfv::MuonVertexAssociation> sv_to_muons;
+  if (use_sv_to_muons)
+    event.getByToken(sv_to_muons_token, sv_to_muons);
+
+  const bool use_sv_to_ele = sv_to_ele_src != "dummy";
+  edm::Handle<mfv::ElectronVertexAssociation> sv_to_ele;
+  if (use_sv_to_ele)
+    event.getByToken(sv_to_ele_token, sv_to_ele);
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
-
+  
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(electrons_token, electrons);
+
+  edm::Handle<double> rho;
+  event.getByToken(rho_token, rho);
 
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<std::vector<double> > gen_vertices;
   event.getByToken(gen_vertices_token, gen_vertices);
   assert(gen_vertices->size() == 6);
-
-  //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::VertexCollection> secondary_vertices;
   event.getByToken(vertex_token, secondary_vertices);
@@ -175,14 +211,44 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
   std::set<int> trackicity;
-
-  for (int isv = 0; isv < nsv; ++isv) {
+  std::set<std::pair<int, int>> buffer_trackicity; // the buffer will be storing the track id & track key 
+  std::vector<size_t> sort_ntrack = {};
+  std::vector<size_t> sort_irawsv = {};
+  for (int isv = 0; isv < nsv; ++isv){
+      const reco::Vertex& sv = secondary_vertices->at(isv);
+      size_t ntracks = sv.nTracks();
+      if (isv == 0) { 
+        sort_ntrack.push_back(ntracks);
+        sort_irawsv.push_back(isv);
+      }
+      else { 
+        std::vector<size_t>::iterator it_ntracks = sort_ntrack.end();
+        std::vector<size_t>::iterator it_vtx = sort_irawsv.end();
+        while (it_ntracks != sort_ntrack.begin() && ntracks <= sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)-1])
+        {
+          --it_ntracks;
+          --it_vtx;
+        }
+        if (it_ntracks == sort_ntrack.end() && ntracks > sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)]) {
+          sort_ntrack.push_back(ntracks);
+          sort_irawsv.push_back(isv);
+        }
+        else {
+          sort_ntrack.insert(it_ntracks, ntracks);
+          sort_irawsv.insert(it_vtx, isv);
+        }
+      }
+  }
+  edm::Handle<reco::TrackCollection> vertex_seed_tracks;
+  event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
+  std::vector<size_t> vec_outsedtki;
+  for (int irawsv = 0; irawsv < nsv; ++irawsv) {
+    int isv = sort_irawsv[nsv-irawsv-1];
     const reco::Vertex& sv = secondary_vertices->at(isv);
+    const reco::Vertex& sv0 = secondary_vertices->at(sort_irawsv[nsv-1]); 
     const reco::VertexRef svref(secondary_vertices, isv);
-    MFVVertexAux& aux = auxes->at(isv);
+    MFVVertexAux& aux = auxes->at(irawsv);
     aux.which = int2uchar(isv);
-    aux.which_lep.clear();
-
     aux.x = sv.x();
     aux.y = sv.y();
     aux.z = sv.z();
@@ -196,13 +262,45 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
+    aux.ntracks_ = sv.tracksSize(); //get the ntracks using cmssw -- to use for minitrees
 
+    //need to split into : general tracks, muon candidate tracks, electron candidate tracks
     std::vector<reco::TransientTrack> ttks, rs_ttks;
-    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it)
+    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it){
+      reco::TrackRef tk = it->castTo<reco::TrackRef>();
       if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
         ttks.push_back(tt_builder->build(**it));
-        rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+        //need to double check track ids w/ types
+        reco::TrackRef tk = it->castTo<reco::TrackRef>();
+        
+        // using generalized function to separate into track types (NOTE: tk.id's change based on CMSSW)
+        if (track_rescaler_which == jmt::TrackRescaler::w_SingleLep){
+          if ((tk.id().id() == 166) & (tk->pt() >= 20.0)) {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "electron").rescaled_tk));
+          }
+          else if ((tk.id().id() == 167) & (tk->pt() >= 20.0))  {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "muon").rescaled_tk));
+          }
+          else {
+            rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it, "").rescaled_tk));
+          }
+        }
+        else rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+
       }
+      //get seed tracks outside all vertices
+      size_t sedtki = 0;
+      for (const reco::Track& sedtk : *vertex_seed_tracks) {
+	      assert(abs(sedtk.charge()) == 1);
+	      if ((fabs(sedtk.pt() - fabs(tk->charge() * tk->pt())) < 0.0001 &&
+		    fabs(sedtk.eta() - tk->eta()) < 0.0001 &&
+		    fabs(sedtk.phi() - tk->phi()) < 0.0001) || std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
+		    continue;
+	      }
+	      vec_outsedtki.push_back(sedtki);
+	      sedtki++;
+      }
+    }
     if (rs_ttks.size() > 1) {
       reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
       if (rs_sv.isValid()) {
@@ -220,8 +318,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.rescale_bs2ddist = d.value();
         aux.rescale_bs2derr = d.error();
       }
-      else
+      else {
         aux.rescale_chi2 = -1;
+      }
     }
 
     if (ttks.size() > 2) {
@@ -252,7 +351,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             ttks_nm1[j-(j>=i)] = ttks[j];
 
         if (verbose) {
-          printf("refit %lu, pts:", i);
+          // printf("refit %lu, pts:", i);
           for (size_t j = 0; j < nttks-1; ++j)
             printf(" %f", ttks_nm1[j].track().pt());
         }
@@ -279,7 +378,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     }
 
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
-
     math::XYZVector bs2sv = sv.position() - beamspot->position();
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
@@ -287,7 +385,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
     p4s[mfv::PTracksOnly] = p4s[mfv::PJetsByNtracks] = p4s[mfv::PTracksPlusJetsByNtracks] = sv.p4();
-
+ 
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
 
@@ -376,7 +474,119 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.costhjetmomvtxdisprms(-2);
       }
     }
+    aux.nelectrons = 0;
+    aux.nmuons = 0;
+    aux.nleptons = 0;
+    aux.neleptgt20 = 0;
+    aux.nmuptgt20 = 0;
+    aux.nlepptgt20 = 0;
 
+    //calculating transverse impact parameter between lepton and sv requires a trasient track
+    std::vector<reco::TransientTrack> matchedmu_ttracks;
+    std::vector<reco::TransientTrack> matchedele_ttracks;
+
+    if (use_sv_to_ele) {
+      const int nele = sv_to_ele->numberOfAssociations(svref);
+      aux.nelectrons += nele;
+      if (verbose) printf("    nele %i:\n", nele);
+      if (nele > 0) {
+        const edm::RefVector<pat::ElectronCollection>& electronref = (*sv_to_ele)[svref];
+        for (int iel = 0; iel < nele; ++iel) {
+          reco::GsfTrackRef etk = electronref[iel]->gsfTrack();
+          if (!etk.isNull()) {
+            matchedele_ttracks.push_back(tt_builder->build(etk));    
+            const auto pfIso = electronref[iel]->pfIsolationVariables();
+            const float eA = electron_effective_areas.getEffectiveArea(fabs(electronref[iel]->superCluster()->eta()));
+            const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electronref[iel]->pt();
+
+            bool isVetoEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-veto");
+            bool isLooseEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-loose");
+            bool isMedEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-medium");
+            bool isTightEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-tight");
+
+            aux.electron_iso.push_back(iso);
+            std::vector<int> eleID;
+            eleID.push_back(isVetoEl);
+            eleID.push_back(isLooseEl);
+            eleID.push_back(isMedEl);
+            eleID.push_back(isTightEl);
+            aux.electron_ID.push_back(eleID);
+            aux.electron_pt.push_back(electronref[iel]->pt());
+
+            if (electronref[iel]->pt() >= 20.0) aux.neleptgt20 += 1;
+            aux.electron_eta.push_back(electronref[iel]->eta());
+            aux.electron_phi.push_back(electronref[iel]->phi());
+            aux.electron_x.push_back(etk->vx());
+            aux.electron_y.push_back(etk->vy());
+            aux.electron_z.push_back(etk->vz());
+            if (primary_vertex != 0) {
+              aux.electron_dxy.push_back(etk->dxy(primary_vertex->position()));
+              aux.electron_dz.push_back(etk->dz(primary_vertex->position()));
+            }
+            aux.electron_dxybs.push_back(etk->dxy(beamspot->position()));
+            aux.electron_dxyerr.push_back(etk->dxyError());
+            aux.electron_dzerr.push_back(etk->dzError());
+          }
+        }
+        for (auto mettk : matchedele_ttracks ) {
+          std::pair<bool, Measurement1D> ele_vtx_dist = IPTools::absoluteTransverseImpactParameter(mettk, sv);
+          aux.elevtxtip.push_back(ele_vtx_dist.second.value());
+          aux.elevtxtiperr.push_back(ele_vtx_dist.second.error());
+          aux.elevtxtipsig.push_back(ele_vtx_dist.second.significance());
+        }
+      }  
+    }
+
+    if (use_sv_to_muons) {
+      const int nmu = sv_to_muons->numberOfAssociations(svref);
+      aux.nmuons += nmu;
+      if (verbose) printf("    nmu %i:\n", nmu);
+      if (nmu > 0) {
+        const edm::RefVector<pat::MuonCollection>& muonref = (*sv_to_muons)[svref];
+        for (int imu = 0; imu < nmu; ++imu) {
+          reco::TrackRef mtk = muonref[imu]->innerTrack();
+          if (!mtk.isNull()) {
+            matchedmu_ttracks.push_back(tt_builder->build(mtk));    
+          
+            const float iso = (muonref[imu]->pfIsolationR04().sumChargedHadronPt + std::max(0., muonref[imu]->pfIsolationR04().sumNeutralHadronEt + muonref[imu]->pfIsolationR04().sumPhotonEt -0.5*muonref[imu]->pfIsolationR04().sumPUPt))/muonref[imu]->pt();
+            aux.muon_iso.push_back(iso);
+
+            bool isLooseMuon = muonref[imu]->passed(reco::Muon::CutBasedIdLoose);
+            bool isMedMuon = muonref[imu]->passed(reco::Muon::CutBasedIdMedium);
+            bool isTightMuon = muonref[imu]->passed(reco::Muon::CutBasedIdTight);
+
+            std::vector<int> muID;
+            muID.push_back(isLooseMuon);
+            muID.push_back(isMedMuon);
+            muID.push_back(isTightMuon);
+            aux.muon_ID.push_back(muID);
+
+            aux.muon_pt.push_back(muonref[imu]->pt());
+            if (muonref[imu]->pt() >= 20.0) aux.nmuptgt20 += 1;
+            aux.muon_eta.push_back(muonref[imu]->eta());
+            aux.muon_phi.push_back(muonref[imu]->phi());
+            aux.muon_x.push_back(mtk->vx());
+            aux.muon_y.push_back(mtk->vy());
+            aux.muon_z.push_back(mtk->vz());
+            if (primary_vertex != 0) {
+              aux.muon_dxy.push_back(mtk->dxy(primary_vertex->position()));
+              aux.muon_dz.push_back(mtk->dz(primary_vertex->position()));
+            }
+            aux.muon_dxybs.push_back(mtk->dxy(beamspot->position()));
+            aux.muon_dxyerr.push_back(mtk->dxyError());
+            aux.muon_dzerr.push_back(mtk->dzError());
+          }
+        }
+        for (auto mmttk : matchedmu_ttracks ) {
+          std::pair<bool, Measurement1D> mu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mmttk, sv);
+          aux.muvtxtip.push_back(mu_vtx_dist.second.value());
+          aux.muvtxtiperr.push_back(mu_vtx_dist.second.error());
+          aux.muvtxtipsig.push_back(mu_vtx_dist.second.significance());
+        }
+      }
+    }
+    aux.nleptons = int(matchedmu_ttracks.size() + matchedele_ttracks.size());
+    aux.nlepptgt20 = aux.nmuptgt20 + aux.neleptgt20;
     if (verbose) printf("    momenta:\n");
     for (int i = 0; i < mfv::NMomenta; ++i) {
       aux.pt[i]   = p4s[i].pt();
@@ -386,37 +596,34 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (verbose) printf("    %i <%f,%f,%f,%f>\n", i, aux.pt[i], aux.eta[i], aux.phi[i], aux.mass[i]);
     }
       
-    //const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
-    //const double sv_z = fabs(sv.position().z() - bsz);
-
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
+    float sumpt2 = 0;
 
     std::vector<double> costhtkmomvtxdisps;
 
     if (verbose) printf("    tracks %i:\n", int(trke-trkb));
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
+      const reco::TransientTrack sedtri = tt_builder->build(**trki); 
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
+      sumpt2 += pow(tri->pt(),2);
 
-      if (trackicity.count(tri.key()) > 0)
+      if (buffer_trackicity.count({tri.key(), tri.id().id()}) > 0)
         throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
-      else
-        trackicity.insert(tri.key());
+      else 
+        buffer_trackicity.insert({tri.key(), tri.id().id()});
+  
+      // if (trackicity.count(tri.key()) > 0)
+      //   throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      // else {
+      //   trackicity.insert(tri.key());
+      // }
+
 
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
-
-      assert(muons->size() <= 128);
-      assert(electrons->size() <= 128);
-      for (size_t i = 0, ie = muons->size(); i < ie; ++i)
-        if (muons->at(i).track() == trref)
-          aux.which_lep.push_back(i);
-      if (aux.which_lep.size() == 0) // if a muon matched, don't check for electrons
-        for (size_t i = 0, ie = electrons->size(); i < ie; ++i)
-          if (electrons->at(i).closestCtfTrackRef() == trref)
-            aux.which_lep.push_back(i | (1<<7));
 
       costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
 
@@ -452,8 +659,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_pt_err.push_back(tri->ptError());
       aux.track_eta.push_back(tri->eta());
       aux.track_phi.push_back(tri->phi());
+      std::pair<bool, Measurement1D> tkdist = track_dist(sedtri, sv);
+      aux.track_tkdist_val.push_back(tkdist.second.value());
+      aux.track_tkdist_sig.push_back(tkdist.second.significance());
+      if (nsv >= 2 && irawsv == 0){
+         const reco::Vertex& sv1 = secondary_vertices->at(sort_irawsv[nsv-2]);
+         std::pair<bool, Measurement1D> tkdist_tosv1 = track_dist(sedtri, sv1);
+         aux.track_tkdisttosv1_val.push_back(tkdist_tosv1.second.value());
+         aux.track_tkdisttosv1_sig.push_back(tkdist_tosv1.second.significance());
+      }
     }
 
+    aux.sumpt2_ = sumpt2;
     jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
     aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min.back());
     aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max.back());
@@ -498,13 +715,43 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           auto mdpv = miss_dist(*primary_vertex, sv, mom);
           aux.missdistpv[i] = mdpv.value();
           aux.missdistpverr[i] = mdpv.error();
+          auto mdsv0 = miss_dist(sv0, sv, mom);
+          aux.missdistsv0[i] = mdsv0.value();
+          aux.missdistsv0err[i] = mdsv0.error();
         }
       }
     }
 
-    if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.bs2derr);
+    if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f rescaled bs2ddist %f bs2derr %f rescaled bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.rescale_bs2ddist, aux.bs2derr, aux.rescale_bs2derr);
   }
+  //investigate outside seed tracks from vertices 
+  for (int irawsv = 0; irawsv < nsv; ++irawsv) {
+	  int isv = sort_irawsv[nsv - irawsv - 1];
+	  const reco::Vertex& sv = secondary_vertices->at(isv);
+	  const reco::VertexRef svref(secondary_vertices, isv);
+	  MFVVertexAux & aux = auxes->at(irawsv);
 
+	  size_t sedtki = 0;
+	  for (const reco::Track& sedtk : *vertex_seed_tracks) {
+		  assert(abs(sedtk.charge()) == 1);
+		  if (std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
+			  const reco::TransientTrack outsedtri = tt_builder->build(sedtk);
+			  std::pair<bool, Measurement1D> tkdist = track_dist(outsedtri, sv);
+			  aux.outsed_track_tkdist_val.push_back(tkdist.second.value());
+			  aux.outsed_track_tkdist_sig.push_back(tkdist.second.significance());
+			  if (irawsv == 0) {
+				  const double dxybs = sedtk.dxy(*beamspot);
+				  const auto rs = track_rescaler.scale(sedtk);
+				  const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+				  const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+				  aux.outsed_track_dxy.push_back(fabs(sedtk.dxy(beamspot->position())));
+				  aux.outsed_track_nsigmadxy.push_back(rescaled_sigmadxybs);
+
+			  }
+		  }
+	  }
+	  
+  }
   sorter.sort(*auxes);
 
   event.put(std::move(auxes));

@@ -1,0 +1,96 @@
+Wrote on 03/20/2025 by Peace Kotamnives
+
+1. **reweight background** sample by year and by trigger channel 
+~/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/utilities_20161.py btagpresel histos 20161 &
+or 
+~/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/utilities_20161.py leptonpresel histos 20161 &
+
+Note that some FIXMEs in the scripts are subjected to change based on the existence of background processes in the directory that this command is executed. To change to 20162, 2017, or 2018, simply replace 20161 to such year, except utilities.py for 2017.
+
+2. **merge background** sample by processes to one (we need to do this outside utilities*.py to avoid runtime error (i.e. hadd before reweight is done) ) 
+hadd.py background_leptonpresel_20161.root qcd_leptonpresel_20161.root wjetstolnu_leptonpresel_20161.root dyjets_leptonpresel_20161.root diboson_leptonpresel_20161.root ttbar_leptonpresel_20161.root
+or 
+hadd.py background_btagpresel_20161.root qcd_btagpresel_20161.root ttbar_btagpresel_20161.root
+
+3. **get a yield table** of signal or background by trigger channel
+python effsprint.py ~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm csv run2 presel integral > run2_bkg_lepton_trig_yields 
+or
+python effsprint.py ~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm csv run2 presel vh integral > run2_vh_lepton_trig_yields
+
+Options : vh, ggh, rpv 
+
+Note that :
+reweighted background by utilities*.py should have weight in effprint.py set to 1. 
+These scripts are assumed to take histo*.root inputs but they can be adapted for minitree*.root inputs. The main issue about minitree*.root is that their histograms are not applied for event weights, unlike histo*.root inputs. 
+
+
+Wrote on 4/07/2025 by Peace Kotamnives
+
+
+1. **make nice plot comparision** between normalized signals, background, and data by run2/2017 lumi 
+python data_mc_comp.py part0 bjet 
+
+Options : part0,part1 ... part5  and bjet,lep
+each plot comparision by part may need different signal yield normalization (e.g. part0 includes *FullSel/*PreSel but part1 includes *OnlyOneVtx). please adjust these normalization in ../../Tools/python/ROOTTools.py based on signal yield table 
+
+2. **submit minitree** for closure test or sum dBV template construction 
+python minitree.py 
+
+Note that minitree takes a lot of space. Alternatively, one can change the modifier to pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier()) to divide input to half. However, the weight becomes twice and it's wise to get correct weights required in 2v_from_jets.cc via effsprint.py
+
+3. **predict bkg yields by 1vtx and 2vtx inputs** by year
+python predict2v_Nstar.py 2017 bjet 
+
+Options : bjet,lep
+
+4. **make signal efficiency plots** by year across mass/ctau points
+python trigger_eff.py 2017 bjet ggh
+python signal_eff_wrt_presel.py 2017 bjet ggh
+python signal_eff.py 2017 bjet ggh
+
+Options : 20161,20162, ... 2018 and bjet,lep and ggh,vh,rpv
+
+5. **study vertex efficiency uncertainty in various signals** by using TrackMover framework 
+The procedures are described in https://share.evernote.com/note/29b6283b-3493-ef43-61ec-5dbbae7d8941 or 'Technical note on TrackMover procedures.'
+They are applicable for all LLP signals decaying to a pair of quarks. However, for neutralino/gluino -> tbs, here are a few exceptions :
+
+Step 1 : [nl,nb] = [3,2], settings.event_filter = 'bjets OR displaced dijet novtx', min_jet_pt = cms.double(20.0), tau = cms.double(1.), halftoss = cms.bool(False)
+Step 2 : Only generate low-eta and high-eta histograms from TrackMoverLow(High)Eta/mctruth.cc or histos.cc after changing mctruth.cc.neu -> mctruth.cc and histos.cc.neu to histos.cc because these signals are separted by the low/high eta of a displacement vector 
+
+Additionally, use WeightFiles2Dkinneu.C and WeightFiles2Dmoveneu.C to derive the 2D/3D-movedist and jetdr/sump 2D weight maps  
+
+Step 3 : use  robust_uncerts_mm_1vtx_newmctm_neu.py to quantify the uncertainty 
+
+Note that in stop, vh, and ggh are also subjected to variations in these steps :
+
+vh :
+    Step 1 : [nl,nb] = [2,0], settings.event_filter = 'muons only novtx', min_jet_pt = cms.double(20.0), tau = cms.double(1.), halftoss = cms.bool(True)
+    Step 2 : mctruth.cc.vh -> mctruth.cc and histos.cc.vh to histos.cc
+    Step 3 : use robust_uncerts_mm_1vtx_newmctm_vh.py
+    
+ggh :
+    Step 1 : [nl,nb] = [2,0], settings.event_filter = 'bjets OR displaced dijet novtx', min_jet_pt = cms.double(20.0), tau = cms.double(1.), halftoss = cms.bool(True)
+    Step 2 : mctruth.cc.ggh -> mctruth.cc and histos.cc.ggh to histos.cc
+    Step 3 : use robust_uncerts_mm_1vtx_newmctm_ggh.py
+
+stop :
+    Step 1 : [nl,nb] = [2,0], settings.event_filter = 'bjets OR displaced dijet novtx', min_jet_pt = cms.double(20.0) for M200 or min_jet_pt = cms.double(100.0) for M400 and M800, tau = cms.double(1.), halftoss = cms.bool(False)
+    Step 2 : mctruth.cc.stop -> mctruth.cc and histos.cc.stop to histos.cc
+    Step 3 : use robust_uncerts_mm_1vtx_newmctm_stop_dd(bb).py or robust_uncerts_mm_1vtx_newmctm_stop_hightpt.py (for one stop->dd for now)
+
+
+For current studies as of 04/28/2025 
+- all ntuple files including TM ntuples are explained and identified in SampleFiles.py 
+- histograms for deriving yields are in 
+    - LPC : /uscms/home/pkotamni/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm(_noef) for Run2 displacement triggers  
+    - LPC : /uscms/home/pkotamni/Histos_LepIPCut_OnnormdzULV30Lepm(_noef/) for Run2 lepton triggers 
+- minitress for more studies are in 
+    - LXPLUS : /eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm for Run2 displacement triggers
+    - LXPLUS : /eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm for Run2 lepton triggers 
+
+
+
+
+
+
+

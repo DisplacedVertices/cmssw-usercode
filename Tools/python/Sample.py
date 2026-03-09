@@ -8,8 +8,8 @@ from JMTucker.Tools import DBS
 ########################################################################
 
 xrootd_sites = {
-    'T3_US_FNALLPC': 'root://cmsxrootd.fnal.gov/', #'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
+    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', # use 'root://cmsxrootd-site.fnal.gov/', if files are truly on the T1, but be careful since we currently use this regional redirector rather than find things at a per-site level
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
@@ -281,6 +281,7 @@ class MCSample(Sample):
 
     @property
     def partial_weight_orig(self):
+        print "WARNING partial_weight_orig is being used: are you sure it can't be replaced with partial_weight, which handles gen-level event weights properly?"
         return self.xsec / float(self.nevents_orig) # total weight = partial_weight * integrated_luminosity in 1/pb
 
     @property
@@ -288,10 +289,13 @@ class MCSample(Sample):
         return 1./self.partial_weight_orig # units of 1/pb
 
     def nevents(self, f_or_fn):
-        return norm_from_file(f_or_fn, self.norm_path)
+        return nevents_from_file(f_or_fn, self.norm_path)
+
+    def sumw(self, f_or_fn):
+        return sumw_from_file(f_or_fn, self.norm_path)
 
     def partial_weight(self, f_or_fn):
-        return self.xsec / self.nevents(f_or_fn)
+        return self.xsec / self.sumw(f_or_fn)
 
     def int_lumi(self, f_or_fn):
         return 1./self.partial_weight(f_or_fn)
@@ -328,7 +332,7 @@ class SamplesRegistry:
             return sorted(a)
 
     def add(self, s):
-        assert not self.d_samples.has_key(s.name)
+        # FIXME assert not self.d_samples.has_key(s.name)
         self.d_samples[s.name] = s
 
     def add_list(self, name, l):
@@ -498,6 +502,9 @@ class sums_from_file(object):
             self._norm = self._get('sum_nevents_total')
         return self._norm
 
+    def sumw(self):
+        return self.norm_weight('sum_gen_weight_total')
+
     def norm_weight(self, weight_name):
         return self._get(weight_name)
 
@@ -526,6 +533,14 @@ class sums_from_file(object):
             self._nfiles = int(n)
         return self._nfiles
 
+def sumw_from_file(f_or_fn, path=None):
+    return sums_from_file(f_or_fn, path).sumw()
+
+def nevents_from_file(f_or_fn, path=None):
+    return sums_from_file(f_or_fn, path).norm()
+
+# Joey, May 2025: trying to move away from this.
+# We don't typically want to normalize to nevents, which this does.
 def norm_from_file(f_or_fn, path=None):
     return sums_from_file(f_or_fn, path).norm()
 
@@ -543,7 +558,9 @@ def merge(samples, output='merge.root', norm_to=1., norm_path=''):
         if norm_path:
             sample.norm_path = norm_path
         weights.append(sample.partial_weight(sample.fn))
-
+        print(sample.name)
+        print(sample.partial_weight(sample.fn))
+    print("sum weights : "+str(sum(weights)))
     if norm_to > 0:
         norm_to /= sum(weights)
     else:
@@ -681,6 +698,8 @@ __all__ = [
     'SumSample',
     'SamplesRegistry',
     'anon_samples',
+    'sumw_from_file',
+    'nevents_from_file',
     'norm_from_file',
     'norm_from_file_weight',
     'merge',

@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 import sys
 
-version = 'V25mv3'
+version = 'OnnormdzULV30Lepm'
 year = sys.argv[1]
 ntk = int(sys.argv[2])
 
@@ -69,7 +69,7 @@ def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, eff
         nlcb = h_nlcb.GetBinContent(nl+1, nc+1, nb+1)
         num += nlcb * (1 - (1-effb)**nb * (1-effc)**nc * (1-effl)**nl)
         den += nlcb
-  return num/den
+  return num/(den+1e-16)
 
 def btag_eff_per_event(nvtx, event_flavor, bdisc):
   h = f.Get('h_%s_%dv_1%s_btag_flavor_code' % (event_flavor, nvtx, bdisc))

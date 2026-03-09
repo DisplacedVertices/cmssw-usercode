@@ -4,17 +4,30 @@ namespace mfv {
   // be sure these end in _v
   const char* hlt_paths[mfv::n_hlt_paths] = {
     "HLT_PFHT1050_v",
+
+    // lepton triggers 
+    "HLT_Ele27_WPTight_Gsf_v",
+    "HLT_Ele32_WPTight_Gsf_v",
     "HLT_Ele35_WPTight_Gsf_v",
     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v",
+    "HLT_IsoMu24_v",
     "HLT_IsoMu27_v",
     "HLT_Mu50_v",
-    "HLT_Ele15_IsoVVVL_PFHT450_v",
-    "HLT_Mu15_IsoVVVL_PFHT450_v",
-    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v",
-    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v",
-    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
-    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
+
+    // HT triggers for 2016
+    "HLT_PFHT800_v", 
+    "HLT_PFHT900_v", 
+    "HLT_PFJet450_v", 
+    "HLT_AK8PFJet450_v", 
+    
+    // // di-lepton triggers
+    // "HLT_Ele15_IsoVVVL_PFHT450_v",
+    // "HLT_Mu15_IsoVVVL_PFHT450_v",
+    // "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v",
+    // "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v",
+    // "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
+    // "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
 
     // 2017 bjet triggers
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v",
@@ -40,8 +53,8 @@ namespace mfv {
     "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v",
 
     // MET trigger
-    "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
-
+    // "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+    "HLT_PFMET120_PFMHTNoMu120_IDTight_v",
     // Low-HT triggers to study filters requiring HLT tracks
     "HLT_HT425_v",
     "HLT_HT325_v",

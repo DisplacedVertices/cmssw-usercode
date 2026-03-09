@@ -98,6 +98,14 @@ namespace mfv {
     switch(trig){
       case b_HLT_PFHT1050 :
         return ht(40) >= 1200 && njets >= 4;
+      case b_HLT_PFHT800 :
+        return ht(40) >= 1000 && njets >= 4;
+      case b_HLT_PFHT900 :
+        return ht(40) >= 1000 && njets >= 4;
+      case b_HLT_PFJet450 :
+        return ht(40) >= 1000 && njets >= 4;
+      case b_HLT_AK8PFJet450 :
+        return ht(40) >= 1000 && njets >= 4;
       case b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
         if(njets < 4) return false;
@@ -226,9 +234,9 @@ namespace mfv {
     return false;
   }
 
-  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTrigger() const {
+  bool MiniNtuple::satisfiesBjetOrDisplacedDijetTrigger() const {
     bool at_least_one_trigger_passed = false;
-    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+    for(size_t trig : BjetOrDisplacedDijetTriggers){
       if(satisfiesTrigger(trig)){
         at_least_one_trigger_passed = true;
         break;
@@ -237,9 +245,9 @@ namespace mfv {
     return at_least_one_trigger_passed;
   }
 
-  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const {
+  bool MiniNtuple::satisfiesBjetOrDisplacedDijetTriggerAndOffline() const {
     bool at_least_one_trigger_passed = false;
-    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+    for(size_t trig : BjetOrDisplacedDijetTriggers){
       if(satisfiesTriggerAndOffline(trig)){
         at_least_one_trigger_passed = true;
         break;

@@ -9,18 +9,18 @@ year = 'run2'
 version = 'ULV11'
 
 #mode = 'vary_eff'
-mode = 'vary_dphi'
+#mode = 'vary_dphi'
 #mode = 'vary_bquarks'
-#mode = ''
+mode = ''
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_sumdbvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
-pfix = '/uscms/homes/s/shogan/public/2v_from_jets/old/'
+pfix = '/afs/cern.ch/user/p/pekotamn/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/One2Two/'
 
-fn1 = ['%s2v_from_jets%s_%s_3track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_3track_%s_btags_%s.root' % (pfix, '' if is_mc else '_data', year, mode, version)]
-fn2 = ['%s2v_from_jets%s_%s_4track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_4track_%s_btags_%s.root' % (pfix, '' if is_mc else '_data', year, mode, version)]
-fn3 = ['%s2v_from_jets%s_%s_5track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_5track_%s_btags_%s.root' % (pfix, '' if is_mc else '_data', year, mode, version)]
+fn1 = ['%s2v_from_jets%s_%s_3track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_3track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version)]
+fn2 = ['%s2v_from_jets%s_%s_4track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_4track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version)]
+fn3 = ['%s2v_from_jets%s_%s_5track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version), '%s2v_from_jets%s_%s_5track_btags_%s.root' % (pfix, '' if is_mc else '_data', year, version)]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']
@@ -29,7 +29,7 @@ if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
 
 # Note in 2015--2016, the 5-trk, two-vertex ratio was equal to 1 (hence "bratio1")
-if mode == 'vary_bquarks':
+if mode == '': #FIXME 'vary_bquarks':
     ls = ['3-track two-vertex ratio', '5-track two-vertex ratio']
 
 fns = [fn1, fn2, fn3]

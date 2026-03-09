@@ -54,6 +54,8 @@ EOF
 int dvv_nbins = 100;
 double dvv_bin_width = 0.01;
 std::vector<TString> cb_cbbar_vector = {};
+//const std::string ulversion = "ULV30Lepm"; // FIXME
+const std::string ulversion = "ULV30BvetoLHTm";
 
 struct ConstructDvvcParameters {
   int ibkg_begin_;
@@ -77,7 +79,7 @@ struct ConstructDvvcParameters {
       is_mc_(true),
       only_10pc_(false),
       inject_signal_(false),
-      year_("2017p8"),
+      year_("2017p8"), //2017p8
       ntracks_(5),
       bquarks_(-1),
       btags_(-1),
@@ -121,7 +123,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-    printf("ibkg_begin-end = %d-%d, is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, min_npu = %d, max_npu = %d", ibkg_begin(), ibkg_end(), is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), min_npu(), max_npu());
+     printf("ibkg_begin-end = %d-%d, is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, min_npu = %d, max_npu = %d", ibkg_begin(), ibkg_end(), is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), min_npu(), max_npu());
   }
 
   float extra_eff_2d(float dvv) {
@@ -138,12 +140,26 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    //file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeFullBkgStatsULV11Bm";
-    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
+    if (ulversion == "ULV30BvetoLHTm") {
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+    }
+    else { 
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+    }
   } else if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    if (ulversion == "ULV30BvetoLHTm") {
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+    }
+    else { 
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+    }
   } else {
-    file_path = "/uscms_data/d3/dquach/crab3dirs/MiniTreeV27m_moresidebands";
+    if (ulversion == "ULV30BvetoLHTm") {
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+    }
+    else { 
+       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+    }
   }
 
   std::vector<const char*>  samples;
@@ -151,68 +167,211 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   std::cout << "The year is: " << p.year() << std::endl;
 
-  bool use_20161 = p.year() == "20161" or p.year() == "2016"   or p.year() == "run2";
-  bool use_20162 = p.year() == "20162" or p.year() == "2016"   or p.year() == "run2";
+  bool use_20161 = p.year() == "20161" or p.year() == "20161"   or p.year() == "run2";
+  bool use_20162 = p.year() == "20162" or p.year() == "20162"   or p.year() == "run2";
   bool  use_2017 = p.year() == "2017"  or p.year() == "2017p8" or p.year() == "run2";
   bool  use_2018 = p.year() == "2018"  or p.year() == "2017p8" or p.year() == "run2";
-
   // FIXME these weights are based off of the number of finished ntuples (which is
   // close to, but not necessarily 100% of ntuples). When it comes time to do the
   // final studies, we'll need to make sure ALL ntuples/minitrees finish, and then
   // update some of the weights
-  if (use_20161) {
-    samples.push_back("qcdht0300_2016APV");    weights.push_back(140.4);
-    samples.push_back("qcdht0500_2016APV");    weights.push_back(10.5);
-    samples.push_back("qcdht0700_2016APV");    weights.push_back(3.13);
-    samples.push_back("qcdht1000_2016APV");    weights.push_back(1.59);
-    samples.push_back("qcdht1500_2016APV");    weights.push_back(0.21);
-    samples.push_back("qcdht2000_2016APV");    weights.push_back(0.09);
-    samples.push_back("ttbar_2016APV");        weights.push_back(0.16);
-  }
+  if (ulversion == "ULV30BvetoLHTm"){
+       if (p.is_mc()) {
+          if (use_20161) {
+		samples.push_back("ttbar_20161");    weights.push_back(0.35);
+		samples.push_back("qcdht0100_20161");    weights.push_back(12658.82);
+		samples.push_back("qcdht0200_20161");    weights.push_back(1408.45);
+		samples.push_back("qcdht0300_20161");    weights.push_back(277.09);
+		samples.push_back("qcdht0500_20161");    weights.push_back(22.53);
+		samples.push_back("qcdht0700_20161");    weights.push_back(5.84);
+		samples.push_back("qcdht1000_20161");    weights.push_back(3.47);
+		samples.push_back("qcdht1500_20161");    weights.push_back(0.48);
+		samples.push_back("qcdht2000_20161");    weights.push_back(0.19);
+	  }
 
-  if (use_20162) {
-    samples.push_back("qcdht0300_2016");       weights.push_back(117.7);
-    samples.push_back("qcdht0500_2016");       weights.push_back(9.74);
-    samples.push_back("qcdht0700_2016");       weights.push_back(2.52);
-    samples.push_back("qcdht1000_2016");       weights.push_back(1.50);
-    samples.push_back("qcdht1500_2016");       weights.push_back(0.20);
-    samples.push_back("qcdht2000_2016");       weights.push_back(0.08);
-    samples.push_back("ttbar_2016");           weights.push_back(0.14);
-  }
+	  if (use_20162) {
+		samples.push_back("ttbar_20162");    weights.push_back(0.31);
+		samples.push_back("qcdht0100_20162");    weights.push_back(11914.23);
+		samples.push_back("qcdht0200_20162");    weights.push_back(1048.92);
+		samples.push_back("qcdht0300_20162");    weights.push_back(246.00);
+		samples.push_back("qcdht0500_20162");    weights.push_back(18.50);
+		samples.push_back("qcdht0700_20162");    weights.push_back(5.58);
+		samples.push_back("qcdht1000_20162");    weights.push_back(2.75);
+		samples.push_back("qcdht1500_20162");    weights.push_back(0.37);
+		samples.push_back("qcdht2000_20162");    weights.push_back(0.15);
+	  }
 
-  if (use_2017) {  
-    samples.push_back("qcdht0300_2017");    weights.push_back(242.0);
-    samples.push_back("qcdht0500_2017");    weights.push_back(20.2);
-    samples.push_back("qcdht0700_2017");    weights.push_back(5.46);
-    samples.push_back("qcdht1000_2017");    weights.push_back(3.21);
-    samples.push_back("qcdht1500_2017");    weights.push_back(0.35);
-    samples.push_back("ttbar_2017");        weights.push_back(0.14);
-  }
+	  if (use_2017) {  
+		samples.push_back("ttbar_2017");    weights.push_back(0.27);
+		samples.push_back("qcdht0200_2017");    weights.push_back(2954.88);
+		samples.push_back("qcdht0300_2017");    weights.push_back(601.09);
+		samples.push_back("qcdht0500_2017");    weights.push_back(67.95);
+		samples.push_back("qcdht0700_2017");    weights.push_back(15.25);
+		samples.push_back("qcdht1000_2017");    weights.push_back(8.68);
+		samples.push_back("qcdht1500_2017");    weights.push_back(1.04);
+		samples.push_back("qcdht2000_2017");    weights.push_back(0.43);
+	  }
 
-  if (use_2018) {  
-    samples.push_back("qcdht0300_2018");    weights.push_back(335.0);
-    samples.push_back("qcdht0500_2018");    weights.push_back(29.3);
-    samples.push_back("qcdht0700_2018");    weights.push_back(8.01);
-    samples.push_back("qcdht1000_2018");    weights.push_back(4.40);
-    samples.push_back("qcdht1500_2018");    weights.push_back(0.54);
-    samples.push_back("qcdht2000_2018");    weights.push_back(0.23);
-    samples.push_back("ttbar_2018");        weights.push_back(0.32); //weights.push_back(0.16);
-  }
+	  if (use_2018) {  
+		samples.push_back("ttbar_2018");    weights.push_back(0.30);
+		samples.push_back("qcdht0200_2018");    weights.push_back(3235.19);
+		samples.push_back("qcdht0300_2018");    weights.push_back(624.06);
+		samples.push_back("qcdht0500_2018");    weights.push_back(73.49);
+		samples.push_back("qcdht0700_2018");    weights.push_back(15.73);
+		samples.push_back("qcdht1000_2018");    weights.push_back(9.01);
+		samples.push_back("qcdht1500_2018");    weights.push_back(1.00);
+		samples.push_back("qcdht2000_2018");    weights.push_back(1.00);
+	  }
+       }
+       else {
+	    if (use_2017) {
+	        samples.push_back("JetHT2017B");                      weights.push_back(1);
+	        samples.push_back("JetHT2017C");                      weights.push_back(1);
+	        samples.push_back("JetHT2017D");                      weights.push_back(1);
+	        samples.push_back("JetHT2017E");                      weights.push_back(1);
+	        samples.push_back("JetHT2017F");                      weights.push_back(1);
+	    }
+	    if (use_2018) {  
+	        samples.push_back("JetHT2018A");                      weights.push_back(1);
+	        samples.push_back("JetHT2018B");                      weights.push_back(1);
+	        samples.push_back("JetHT2018C");                      weights.push_back(1);
+	        samples.push_back("JetHT2018D");                      weights.push_back(1);
+	    }
+        }
 
-  if (not p.is_mc()) {
-    if (use_2017) {
-      samples.push_back("JetHT2017B");                      weights.push_back(1);
-      samples.push_back("JetHT2017C");                      weights.push_back(1);
-      samples.push_back("JetHT2017D");                      weights.push_back(1);
-      samples.push_back("JetHT2017E");                      weights.push_back(1);
-      samples.push_back("JetHT2017F");                      weights.push_back(1);
-    }
-    if (use_2018) {  
-      samples.push_back("JetHT2018A");                      weights.push_back(1);
-      samples.push_back("JetHT2018B");                      weights.push_back(1);
-      samples.push_back("JetHT2018C");                      weights.push_back(1);
-      samples.push_back("JetHT2018D");                      weights.push_back(1);
-    }
+  }
+  else {
+	  if (p.is_mc()) {
+            if (use_20161) { 
+		samples.push_back("dyjetstollM10_20161");    weights.push_back(18.10);
+		samples.push_back("dyjetstollM50_20161");    weights.push_back(1.10);
+		samples.push_back("qcdbctoept020_20161");    weights.push_back(831.25);
+		samples.push_back("qcdbctoept030_20161");    weights.push_back(906.11);
+		samples.push_back("qcdbctoept080_20161");    weights.push_back(99.62);
+		samples.push_back("qcdbctoept170_20161");    weights.push_back(6.15);
+		samples.push_back("qcdbctoept250_20161");    weights.push_back(1.62);
+		samples.push_back("qcdempt015_20161");    weights.push_back(6408.17);
+		samples.push_back("qcdempt020_20161");    weights.push_back(13452.91);
+		samples.push_back("qcdempt030_20161");    weights.push_back(34786.25);
+		samples.push_back("qcdempt050_20161");    weights.push_back(650179.33);
+		samples.push_back("qcdempt080_20161");    weights.push_back(1490.82);
+		samples.push_back("qcdempt120_20161");    weights.push_back(270.35);
+		samples.push_back("qcdempt170_20161");    weights.push_back(3411.90);
+		samples.push_back("qcdempt300_20161");    weights.push_back(19.00);
+		samples.push_back("qcdmupt15_20161");    weights.push_back(541.11);
+		samples.push_back("ttbar_20161");    weights.push_back(0.17);
+		samples.push_back("wjetstolnu_0j_20161");    weights.push_back(6.82);
+		samples.push_back("wjetstolnu_1j_20161");    weights.push_back(1.05);
+		samples.push_back("wjetstolnu_2j_20161");    weights.push_back(0.74);
+		samples.push_back("ww_20161");    weights.push_back(0.09);
+		samples.push_back("wz_20161");    weights.push_back(0.07);
+		samples.push_back("zz_20161");    weights.push_back(0.19);
+            }
+            
+            if (use_20162) { 
+		samples.push_back("dyjetstollM10_20162");    weights.push_back(11.32);
+		samples.push_back("dyjetstollM50_20162");    weights.push_back(1.10);
+		samples.push_back("qcdbctoept020_20162");    weights.push_back(705.76);
+		samples.push_back("qcdbctoept030_20162");    weights.push_back(797.35);
+		samples.push_back("qcdbctoept080_20162");    weights.push_back(72.58);
+		samples.push_back("qcdbctoept170_20162");    weights.push_back(4.60);
+		samples.push_back("qcdbctoept250_20162");    weights.push_back(1.17);
+		samples.push_back("qcdempt015_20162");    weights.push_back(5582.99);
+		samples.push_back("qcdempt020_20162");    weights.push_back(11650.56);
+		samples.push_back("qcdempt030_20162");    weights.push_back(25156.70);
+		samples.push_back("qcdempt050_20162");    weights.push_back(6199.98);
+		samples.push_back("qcdempt080_20162");    weights.push_back(1298.58);
+		samples.push_back("qcdempt120_20162");    weights.push_back(225.78);
+		samples.push_back("qcdempt170_20162");    weights.push_back(151.61);
+		samples.push_back("qcdempt300_20162");    weights.push_back(16.46);
+		samples.push_back("qcdmupt15_20162");    weights.push_back(456.73);
+		samples.push_back("ttbar_20162");    weights.push_back(0.16);
+		samples.push_back("wjetstolnu_0j_20162");    weights.push_back(5.60);
+		samples.push_back("wjetstolnu_1j_20162");    weights.push_back(0.89);
+		samples.push_back("wjetstolnu_2j_20162");    weights.push_back(0.66);
+		samples.push_back("ww_20162");    weights.push_back(0.08);
+		samples.push_back("wz_20162");    weights.push_back(0.06);
+		samples.push_back("zz_20162");    weights.push_back(0.18);
+            }
+
+            if (use_2017) { 
+		samples.push_back("dyjetstollM10_2017");    weights.push_back(15.45);
+		samples.push_back("dyjetstollM50_2017");    weights.push_back(2.18);
+		samples.push_back("qcdbctoept015_2017");    weights.push_back(589.79);
+		samples.push_back("qcdbctoept020_2017");    weights.push_back(1142.48);
+		samples.push_back("qcdbctoept030_2017");    weights.push_back(1058.97);
+		samples.push_back("qcdbctoept080_2017");    weights.push_back(101.06);
+		samples.push_back("qcdbctoept170_2017");    weights.push_back(5.57);
+		samples.push_back("qcdbctoept250_2017");    weights.push_back(1.47);
+		samples.push_back("qcdempt020_2017");    weights.push_back(14035.33);
+		samples.push_back("qcdempt030_2017");    weights.push_back(29803.79);
+		samples.push_back("qcdempt050_2017");    weights.push_back(7906.91);
+		samples.push_back("qcdempt080_2017");    weights.push_back(4664.42);
+		samples.push_back("qcdempt120_2017");    weights.push_back(300.25);
+		samples.push_back("qcdempt170_2017");    weights.push_back(183.50);
+		samples.push_back("qcdempt300_2017");    weights.push_back(20.24);
+		samples.push_back("ttbar_2017");    weights.push_back(0.14);
+		samples.push_back("wjetstolnu_0j_2017");    weights.push_back(12.65);
+		samples.push_back("wjetstolnu_1j_2017");    weights.push_back(2.00);
+		samples.push_back("wjetstolnu_2j_2017");    weights.push_back(1.41);
+		samples.push_back("ww_2017");    weights.push_back(0.21);
+		samples.push_back("wz_2017");    weights.push_back(0.16);
+		samples.push_back("zz_2017");    weights.push_back(0.18);
+		samples.push_back("qcdpt15mupt5_2017");    weights.push_back(18680.12);
+		samples.push_back("qcdpt20mupt5_2017");    weights.push_back(1827.01);
+		samples.push_back("qcdpt30mupt5_2017");    weights.push_back(1347.09);
+		samples.push_back("qcdpt50mupt5_2017");    weights.push_back(412.17);
+		samples.push_back("qcdpt80mupt5_2017");    weights.push_back(84.36);
+		samples.push_back("qcdpt120mupt5_2017");    weights.push_back(33.29);
+		samples.push_back("qcdpt170mupt5_2017");    weights.push_back(6.18);
+		samples.push_back("qcdpt300mupt5_2017");    weights.push_back(0.43);
+		samples.push_back("qcdpt470mupt5_2017");    weights.push_back(0.06);
+		samples.push_back("qcdpt600mupt5_2017");    weights.push_back(0.02);
+		samples.push_back("qcdpt800mupt5_2017");    weights.push_back(0.00);
+		samples.push_back("qcdpt1000mupt5_2017");    weights.push_back(0.00);
+            }
+	    if (use_2018) {
+		samples.push_back("dyjetstollM10_2018");    weights.push_back(11.84);
+		samples.push_back("dyjetstollM50_2018");    weights.push_back(3.56);
+		samples.push_back("qcdbctoept015_2018");    weights.push_back(671.48);
+		samples.push_back("qcdbctoept020_2018");    weights.push_back(1709.18);
+		samples.push_back("qcdbctoept030_2018");    weights.push_back(1912.59);
+		samples.push_back("qcdbctoept080_2018");    weights.push_back(141.47);
+		samples.push_back("qcdbctoept170_2018");    weights.push_back(9.93);
+		samples.push_back("qcdbctoept250_2018");    weights.push_back(7.42);
+		samples.push_back("qcdempt015_2018");    weights.push_back(13836.45);
+		samples.push_back("qcdempt020_2018");    weights.push_back(20392.99);
+		samples.push_back("qcdempt030_2018");    weights.push_back(46444.82);
+		samples.push_back("qcdempt050_2018");    weights.push_back(11273.78);
+		samples.push_back("qcdempt080_2018");    weights.push_back(2316.50);
+		samples.push_back("qcdempt120_2018");    weights.push_back(410.66);
+		samples.push_back("qcdempt170_2018");    weights.push_back(267.03);
+		samples.push_back("qcdempt300_2018");    weights.push_back(29.73);
+		samples.push_back("qcdmupt15_2018");    weights.push_back(1089.56);
+		samples.push_back("ttbar_2018");    weights.push_back(0.16);
+		samples.push_back("wjetstolnu_0j_2018");    weights.push_back(20.75);
+		samples.push_back("wjetstolnu_1j_2018");    weights.push_back(4.62);
+		samples.push_back("wjetstolnu_2j_2018");    weights.push_back(2.07);
+		samples.push_back("ww_2018");    weights.push_back(0.54);
+		samples.push_back("wz_2018");    weights.push_back(1.35);
+		samples.push_back("zz_2018");    weights.push_back(0.21);
+
+            }  
+          }
+	  else {
+	    if (use_2017) {
+	        samples.push_back("SingleElectron2017B");    weights.push_back(1);
+                samples.push_back("SingleElectron2017D");    weights.push_back(1);
+                samples.push_back("SingleElectron2017F");    weights.push_back(1);
+                samples.push_back("SingleMuon2017D");        weights.push_back(1);
+                samples.push_back("SingleMuon2017F");        weights.push_back(1);
+                samples.push_back("SingleElectron2017C");    weights.push_back(1);
+                samples.push_back("SingleElectron2017E");    weights.push_back(1);
+                samples.push_back("SingleMuon2017C");        weights.push_back(1);
+                samples.push_back("SingleMuon2017E");        weights.push_back(1);
+	    }
+          }
+
   }
   const char* tree_path; int min_ntracks0 = 0; int max_ntracks0 = 1000000; int min_ntracks1 = 0; int max_ntracks1 = 1000000; //which ntracks?
   if (p.ntracks() == 3)      { tree_path = "mfvMiniTreeNtk3/t"; }
@@ -227,7 +386,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.is_mc()) {
     if      (p.year() == "20161")        { dphi_pdf_c = 1.22; dphi_pdf_a = 2.63; }
     else if (p.year() == "20162")        { dphi_pdf_c = 1.22; dphi_pdf_a = 2.54; }
-    else if (p.year() == "2016")         { dphi_pdf_c = 1.22; dphi_pdf_a = 2.73; }
+    else if (p.year() == "20162")         { dphi_pdf_c = 1.22; dphi_pdf_a = 2.73; }
     else if (p.year() == "2017")         { dphi_pdf_c = 1.24; dphi_pdf_a = 4.86; }
     else if (p.year() == "2018")         { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8" or p.year() == "run2")  { dphi_pdf_c = 1.23; dphi_pdf_a = 4.18; }
@@ -255,7 +414,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   } else {
     vpeffs_version = "ULV11Bm";
   }
-  TString eff_file_name_2d = TString::Format("/uscms/homes/s/shogan/public/vpeffs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  TString eff_file_name_2d = TString::Format("/afs/cern.ch/user/p/pekotamn/crabdirs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
   TString jet_angle_fname = TString::Format("background_lw_2017.root");
 
   const char* eff_hist = "maxtk3";
@@ -287,7 +446,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 25, 0., 1.);
+  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 100, 0., 4.0);
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
@@ -309,11 +468,11 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     std::string st_name = samples[i];
 
-    // 2016APV must come before 2016 in these conditionals
-    if (st_name.find("2016APV") != std::string::npos) {
+    // 20161 must come before 2016 in these conditionals
+    if (st_name.find("20161") != std::string::npos) {
       bdisc_cut_value = 0.6502;
     } 
-    else if (st_name.find("2016") != std::string::npos) {
+    else if (st_name.find("20162") != std::string::npos) {
       bdisc_cut_value = 0.6377;
     } 
     else if (st_name.find("2017") != std::string::npos) {
@@ -394,17 +553,20 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
-  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 500, 0, 2.);
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 100, 0, 1.);
+  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 100, 0, 1.);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 100, 0, 4.0);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
   TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
 
 
-  TF1* f_dphi = new TF1("f_dphi", "(abs(x)-[0])**[1] + [2]", 0, M_PI);
-  f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
-
+  //TF1* f_dphi = new TF1("f_dphi", "(abs(x)-[0])**[1] + [2]", 0, M_PI);
+  //f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+  TF1* f_dphi = new TF1("f_dphi", "[1] + [2] + 1.0/[0]", 0, M_PI);
+  dphi_pdf_c = M_PI;
+  f_dphi->SetParameters(dphi_pdf_c, 0.0, 0.0);
+  
   TF1* i_dphi = 0;
   TF1* i_dphi2 = 0;
   if (p.vary_dphi()) {
@@ -523,9 +685,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_2v_npu->Write();
 
   h_c1v_dbv->Write();
-  h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
+  //h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
-  h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
+  //h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
   h_c1v_sumdbv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
@@ -691,14 +853,19 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
-  // production version
-  const char* version = "ULV11";
-
-
+  // production version 
+  char* version;
+  if (ulversion == "ULV30BvetoLHTm") {
+      version = "ULV30BvetoLHTm";
+  }
+  else{  
+      version = "ULV30Lepm";
+  }  
  
   // This for loop runs over simulated background 
-  for (const char* year : {"2016", "2017", "2018", "2017p8", "run2"}) {
-    for (int ntracks : {3, 4, 5, 7}) {
+  
+  for (const char* year : { "run2",}) { //{"20161", "20162", "2017", "2018", "2017p8", "run2"}) {
+    for (int ntracks : { 3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
 
       construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_%s.root", year, ntracks, version));
@@ -720,21 +887,22 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.min_npu(37).max_npu(255),            TString::Format("2v_from_jets_%s_%dtrack_npu37to255_%s.root", year, ntracks, version));
     }
   }
-  
-    // This for loop runs over real data
-//  for (const char* year : {"2017", "2018", "2017p8"}) {
-//    for (int ntracks : {3, 4, 5, 7, 8, 9}) {
-//      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-//      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
-//      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
-//      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
+    
+  // This for loop runs over real data
+  /*
+  for (const char* year : {"2017",}){ // "2018", "2017p8"}) {
+    for (int ntracks : {3, 4, 5, 7,}){ // 8, 9}) {
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
+      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_nobtags_%s.root", year, ntracks, version));
-//    }
-//  }
-
+    }
+  }
+  */
   // For use in bquark_fraction.py
   std::ofstream outfile;
   outfile.open("cb_vals/cb_vals.csv");

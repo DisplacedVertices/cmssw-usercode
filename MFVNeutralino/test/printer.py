@@ -2,9 +2,11 @@ import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.Year import year
 
+from JMTucker.MFVNeutralino.NtupleCommon import dataset
 simple = False
 
 sample_files(process, 'wjetstolnu_2017', 'ntuplev18m', 1)
+#sample_files(process, 'test', dataset, 1)
 no_event_sort(process)
 file_event_from_argv(process)
 

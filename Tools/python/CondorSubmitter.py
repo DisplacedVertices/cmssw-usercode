@@ -20,6 +20,8 @@ job=${jobmap[$realjob]}
 
 echo realjob $realjob job $job start at $(date)
 
+export X509_CERT_DIR=/cvmfs/grid.cern.ch/etc/grid-security/certificates/
+
 export SCRAM_ARCH=__SCRAM_ARCH__
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
@@ -104,7 +106,10 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
+# Default memory request is 2100 MB. Request more only when needed, otherwise our priority drops faster and it takes longer to get a slot!
+#RequestMemory = 4000
 transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el7:x86_64"
 x509userproxy = $ENV(X509_USER_PROXY)
 __EXTRAS__
 Queue __NJOBS__
@@ -440,7 +445,9 @@ def get(i): return _l[i]
         cwd = os.getcwd()
         os.chdir(working_dir)
         try:
-            submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
+            submit_cmd = 'bash -lc "source ~/lpc-scripts/call_host.sh >/dev/null 2>&1 || true; condor_submit cs_submit.jdl"'
+            submit_out, submit_ret = popen(submit_cmd, return_exit_code=True)
+            #submit_out, submit_ret = popen('condor_submit cs_submit.jdl', return_exit_code=True)
             ok = False
             cluster = None
             schedd = None

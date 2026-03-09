@@ -9,7 +9,7 @@ namespace jmt {
   class RescaledTracksSubNtupleView : public TracksSubNtuple {
   public:
     RescaledTracksSubNtupleView(TracksSubNtuple& t) : TracksSubNtuple(t) {}
-    void setup(const BaseSubNtuple& b, int which=TrackRescaler::w_JetHT) { rescaler_.setup(b.is_mc(), AnalysisEras::pick(b.event()), which); }
+    void setup(const BaseSubNtuple& b, int which=TrackRescaler::w_BTagDispJet) { rescaler_.setup(b.is_mc(), AnalysisEras::pick(b.event()), which); }
     void scaling(bool enable) { rescaler_.enable(enable); }
 
     float cov_33(int i) const { set(i); return rescaler_.scales().dxycov   (TracksSubNtuple::cov_33(i)); }

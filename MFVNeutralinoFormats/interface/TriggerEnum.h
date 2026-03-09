@@ -14,22 +14,33 @@ namespace mfv {
   enum {
 
     // HT-triggered analysis trigger
-    b_HLT_PFHT1050,  // 0
+    b_HLT_PFHT1050,
 
     // Lepton triggers
-    b_HLT_Ele35_WPTight_Gsf,  // 1
+    b_HLT_Ele27_WPTight_Gsf, //2016
+    b_HLT_Ele32_WPTight_Gsf, //2018
+    b_HLT_Ele35_WPTight_Gsf, //2017
     b_HLT_Ele115_CaloIdVT_GsfTrkIdT,
     b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165,
-    b_HLT_IsoMu27,
+    b_HLT_IsoMu24, //2016,2018
+    b_HLT_IsoMu27, //2017
     b_HLT_Mu50,
-    b_HLT_Ele15_IsoVVVL_PFHT450,
-    b_HLT_Mu15_IsoVVVL_PFHT450, 
-    b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL,
-    b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL,
-    b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ,
-    b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,
-
     
+    // HT triggers for 2016 (PFHT800 was prescaled in period H, 
+    // and logical OR of the rest makes up for it + a saturation issue)
+    b_HLT_PFHT800, 
+    b_HLT_PFHT900, 
+    b_HLT_PFJet450, 
+    b_HLT_AK8PFJet450, 
+
+    // di-Lepton triggers
+    // b_HLT_Ele15_IsoVVVL_PFHT450,
+    // b_HLT_Mu15_IsoVVVL_PFHT450, 
+    // b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL,
+    // b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL,
+    // b_HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ,
+    // b_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,
+
     // 2017 bjet triggers
     b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33,  // 12
     b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0,
@@ -123,9 +134,7 @@ namespace mfv {
   extern const int   filter_nreqs[n_filter_paths];
 
   // For use in the Bjet/DisplacedDijet trigger studies
-  static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {
-    // HT trigger
-    mfv::b_HLT_PFHT1050,
+  static const std::vector<size_t> BjetOrDisplacedDijetTriggers = {
     // bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
     mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, 
     // bjet triggers 2018 - only use the first two, since they contribute most of the efficiency
@@ -137,6 +146,28 @@ namespace mfv {
     //displaced dijet triggers 2016
     mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack, mfv::b_HLT_HT650_DisplacedDijet80_Inclusive
   };
+
+  static const std::vector<size_t> ElectronTriggers = {
+   //electron triggers
+   mfv::b_HLT_Ele27_WPTight_Gsf, //2016
+   mfv::b_HLT_Ele35_WPTight_Gsf, //2017
+   mfv::b_HLT_Ele32_WPTight_Gsf, //2018
+   mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT, mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165,
+  }; 
+  static const std::vector<size_t> MuonTriggers = {
+   //muon triggers
+    mfv::b_HLT_IsoMu27, //2017
+    mfv::b_HLT_IsoMu24, //2016,2018
+    mfv::b_HLT_Mu50,
+  };
+  
+  // HT triggers for 2016
+  static const std::vector<size_t> HTTriggers = {
+    mfv::b_HLT_PFHT1050,
+    mfv::b_HLT_PFHT800, mfv::b_HLT_PFHT900,
+    mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450
+  };		
+
 }
 
 #endif

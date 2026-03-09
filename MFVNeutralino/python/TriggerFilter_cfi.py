@@ -5,6 +5,11 @@ jet_paths = [
     "HLT_PFHT1050_v*",
     ]
 
+MET_paths = [
+    "HLT_PFMET120_PFMHT120_IDTight_v*",
+    #"HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*",
+    ]
+
 low_HT_paths = [
     "HLT_HT325_v*",  # for 2016 HLT track studies
     "HLT_HT425_v*",  # for 2017+8 HLT track studies
@@ -25,20 +30,30 @@ bjet_paths = [
 
 displaced_dijet_paths = [
     # displaced dijet triggers 2016
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v*",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v*",
     # displaced dijet triggers 2017/2018
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
     ]
 
-lepton_paths = [
-    #"HLT_Ele35_WPTight_Gsf_v*",
-    #"HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
-    #"HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
-    "HLT_IsoMu27_v*",
-    #"HLT_Mu50_v*",
-    ]
+muon_paths = [
+    "HLT_IsoMu27_v*", #2017
+    "HLT_IsoMu24_v*", #2016,2018
+    "HLT_Mu50_v*"
+]
+
+muoniso_paths = [
+     "HLT_IsoMu27_v*",
+]
+
+electron_paths = [
+    "HLT_Ele27_WPTight_Gsf_v*", #2016
+    "HLT_Ele35_WPTight_Gsf_v*", #2017
+    "HLT_Ele32_WPTight_Gsf_v*", #2018
+    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+]
 
 dilepton_paths = [
     "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
@@ -53,12 +68,13 @@ cross_paths = [
     ]
 
 mfvTriggerFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
-    HLTPaths = jet_paths + lepton_paths + cross_paths,
+    HLTPaths = jet_paths + electron_paths + muon_paths + cross_paths,
     andOr = True, # = OR
     throw = False,
     )
 
 mfvTriggerFilterJetsOnly = mfvTriggerFilter.clone(HLTPaths = jet_paths)
+mfvTriggerFilterMETOnly = mfvTriggerFilter.clone(HLTPaths = MET_paths)
 mfvTriggerFilterLowHT    = mfvTriggerFilter.clone(HLTPaths = low_HT_paths)
 mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(
         HLTPaths = bjet_paths,
@@ -66,15 +82,22 @@ mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(
         throw = False,
         )
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
+mfvTriggerFilterMuonsOnly = mfvTriggerFilter.clone(HLTPaths = muon_paths)
+mfvTriggerFilterElectronsOnly = mfvTriggerFilter.clone(HLTPaths = electron_paths)
 mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(
-        HLTPaths = lepton_paths,
+    HLTPaths = electron_paths + muon_paths,
+    andOr = True, # OR
+    throw = False,
+)
+mfvTriggerFilterDileptonOnly = mfvTriggerFilter.clone(
+        HLTPaths = dilepton_paths,
         andOr = True, # OR
         throw = False,
         )
 
-mfvTriggerFilterDileptonOnly = mfvTriggerFilter.clone(
-        HLTPaths = dilepton_paths,
-        andOr = True, # OR
+mfvTriggerFilterMETANDMuons = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = MET_paths + muoniso_paths,
+        andOr = False, # AND
         throw = False,
         )
 
@@ -91,6 +114,12 @@ mfvTriggerFilterBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hl
         )
 
 mfvTriggerFilterBjetsORDisplacedDijetVetoHT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = bjet_paths + displaced_dijet_paths,
+        andOr = True, # OR
+        throw = False,
+        )
+
+mfvTriggerFilterBjetsORDisplacedDijetVetoLeptonHT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = bjet_paths + displaced_dijet_paths,
         andOr = True, # OR
         throw = False,

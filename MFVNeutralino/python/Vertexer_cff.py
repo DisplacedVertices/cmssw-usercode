@@ -5,6 +5,7 @@ from JMTucker.MFVNeutralino.Vertexer_cfi import mfvVertexTracksGen, mfvVertexTra
 from JMTucker.MFVNeutralino.VertexAuxProducer_cfi import mfvVerticesAuxTmp, mfvVerticesAux
 from JMTucker.MFVNeutralino.VertexSelector_cfi import mfvSelectedVertices
 from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
+from JMTucker.MFVNeutralino.LeptonVertexAssociator_cfi import mfvVerticesToLeptons
 from JMTucker.Tools.RescaledTracks_cfi import jmtRescaledTracks
 
 mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
@@ -16,10 +17,28 @@ mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
 
 mfvVertexSequenceBare = cms.Sequence(
+    mfvGenParticles * 
     jmtRescaledTracks *
     mfvVertexTracks *
     mfvVertices
     )
+
+mfvVertexSequence = cms.Sequence(
+    mfvVertexSequenceBare *
+    mfvVerticesAuxTmp *
+    mfvSelectedVerticesTmp *
+    mfvVerticesToJets *
+    mfvVerticesToLeptons *
+    mfvVerticesAuxPresel *
+    mfvVerticesAux
+    )
+"""
+mfvVertexSequenceBare = cms.Sequence(
+    jmtRescaledTracks *
+    mfvVertexTracks *
+    mfvVertices
+    )
+
 
 #mfvVertexSequenceBare = cms.Sequence(
 #    jmtRescaledTracks *
@@ -34,10 +53,11 @@ mfvVertexSequence = cms.Sequence(
     mfvVerticesAuxTmp *
     mfvSelectedVerticesTmp *
     mfvVerticesToJets *
+    mfvVerticesToLeptons *
     mfvVerticesAuxPresel *
     mfvVerticesAux
     )
-
+"""
 def modifiedVertexSequence(process, name, **kwargs):
     kwargs_tracks, kwargs_vertices = {}, {}
     for k,v in kwargs.iteritems():

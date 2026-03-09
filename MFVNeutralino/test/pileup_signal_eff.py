@@ -24,7 +24,7 @@ def getit(fn):
     hr = draw_hist_register(t, True)
     h,n = hr.draw('weight', 'nvtx>=2', binning='1,0,1', get_n=True, goff=True)
     i = get_integral(h)[0]
-    d = Samples.norm_from_file(f)
+    d = Samples.sumw_from_file(f)
     e,l,u = clopper_pearson(i, d)
     ee = (u-l)/2
     return e,ee,i,d

@@ -6,7 +6,7 @@ FLAGS = $(CFLAGS) \
         -L$(CMSSW_BASE)/lib/$(SCRAM_ARCH) -lJMTuckerTools \
 	-std=c++17 -lstdc++fs -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
 
-all: hists.exe
+all: hists.exe 
 
 %.exe: %.cc $(SHADOWDEPS)
 	g++ -o $@ $< $(FLAGS)

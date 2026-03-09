@@ -2,7 +2,8 @@ from JMTucker.Tools.ROOTTools import *
 
 class PerSignal:
     tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 3000: '3mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm', 1000000: '1 m', 10000000: '10 m', 100000000: '100 m'}
-
+    #tau_names = {1: '1 mm', 3: '3 mm', 10: '10 mm', 30: '30 mm', 100: '100 #mum', 300: '300 #mum', 1000: ' ', 3000: ' ', 10000: ' ', 30000: ' ', 100000: ' ', 1000000: ' ', 10000000: ' ', 100000000: ' '}
+    
     @classmethod
     def clear_samples(_, samples):
         for s in samples:
@@ -62,11 +63,19 @@ class PerSignal:
                     eyl = eyh = 0.
                 c.set(s.tau, s.mass, s.y, eyl, eyh)
 
-    def draw(self, draw_missing=True, canvas='c_per_signal', size=(600,600),
+    def draw(self, draw_missing=True, canvas='c_per_signal', canvas_margins=(0.10,0.10,0.15,0.10) ,  size=(600,600),
              do_tau_paves=True, do_decay_paves=True):
         if type(canvas) == str:
             canvas = ROOT.TCanvas(canvas, '', *size)
         self.canvas = canvas
+        if type(canvas_margins) == int or type(canvas_margins) == float:
+            top, bottom, left, right = tuple(canvas_margins for x in xrange(4))
+        else:
+            top, bottom, left, right = canvas_margins
+        self.canvas.SetTopMargin(top)
+        self.canvas.SetBottomMargin(bottom)
+        self.canvas.SetLeftMargin(left)
+        self.canvas.SetRightMargin(right)
         self.canvas.cd()
 
         taus   = sorted(self.taus)
@@ -118,7 +127,7 @@ class PerSignal:
             xax.SetRangeUser(0, npoints)
             yax.SetRangeUser(*self.y_range)
             yax.SetTitle(self.y_title)
-            yax.SetLabelSize(0.03)
+            yax.SetLabelSize(0.042) #FIXME 
 #            yax.SetTitleSize(0.032)
 
             if curve.g_missing:
@@ -140,7 +149,7 @@ class PerSignal:
                 p.SetTextFont(42)
                 p.SetFillColor(ROOT.kWhite)
                 p.AddText(tau_name)
-                p.SetTextSize(0.042)
+                p.SetTextSize(0.04)
                 p.SetBorderSize(0)
                 p.Draw()
                 self.tau_paves.append(p)
@@ -173,12 +182,13 @@ class PerSignal:
         if do_decay_paves:
             for ic, curve in enumerate([c for c in self.curves if c.in_legend]):
                 if self.decay_paves_at_top:
-                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.97-(ic+1)*0.05), nmasses, self.y_range[0]+self.y_span*(0.97-ic*0.05)
+                    decay_pave_loc = 2.9, self.y_range[0]+self.y_span*(0.97-(ic+1)*0.05), nmasses+2.4, self.y_range[0]+self.y_span*(0.97-ic*0.05)
                 else:
-                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.03+ic*0.05), nmasses, self.y_range[0]+self.y_span*(0.03+(ic+1)*0.05)
+                    decay_pave_loc = 2.9, self.y_range[0]+self.y_span*(0.03+ic*0.05), nmasses+2.4, self.y_range[0]+self.y_span*(0.03+(ic+1)*0.05)
                 p = ROOT.TPaveText(*decay_pave_loc)
                 p.AddText(curve.title)
-                p.SetTextFont(42)
+                p.SetTextFont(42) 
+                p.SetTextSize(0.025) 
                 p.SetTextColor(curve.color) #if len(self.curves) > 1 else ROOT.kBlack)
                 p.SetFillColor(ROOT.kWhite)
                 p.SetBorderSize(0)
@@ -187,7 +197,7 @@ class PerSignal:
 
         self.lifetime_pave = ROOT.TPaveText(-3, y_tau, -0.01, y_tau + 0.07*self.y_span)
         self.lifetime_pave.SetTextFont(42)
-        self.lifetime_pave.SetTextSize(0.048)
+        self.lifetime_pave.SetTextSize(0.03) #0.048
         self.lifetime_pave.AddText('#tau')
         self.lifetime_pave.SetFillColor(ROOT.kWhite)
         self.lifetime_pave.SetBorderSize(0)

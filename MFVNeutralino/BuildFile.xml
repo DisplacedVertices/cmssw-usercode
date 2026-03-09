@@ -3,9 +3,11 @@
 <use name="DataFormats/Common"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/VertexReco"/>
+<use name="DataFormats/TrackReco"/>
 <use name="JMTucker/MFVNeutralinoFormats"/>
 <use name="JMTucker/Tools"/>
 <use name="RecoVertex/VertexTools"/>
+<use name="correctionlib"/> <!-- Abby change -->
 <export>
   <lib name="1"/>
 </export>

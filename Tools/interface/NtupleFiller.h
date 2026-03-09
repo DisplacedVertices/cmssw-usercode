@@ -20,6 +20,14 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/Tools/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
+
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+
 
 namespace jmt {
   class BaseSubNtupleFiller {
@@ -28,6 +36,8 @@ namespace jmt {
     const edm::EDGetTokenT<std::vector<PileupSummaryInfo>> pileup_token_;
     const edm::EDGetTokenT<reco::VertexCollection> pvs_token_;
     const edm::EDGetTokenT<double> rho_token_;
+    
+   
   public:
     BaseSubNtupleFiller(BaseSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
       : nt_(nt),
@@ -35,6 +45,7 @@ namespace jmt {
         pileup_token_(cc.consumes<std::vector<PileupSummaryInfo>>(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
         pvs_token_(cc.consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
         rho_token_(cc.consumes<double>(cfg.getParameter<edm::InputTag>("rho_src")))
+	
     {}
     void operator()(const edm::Event&);
   };
@@ -120,18 +131,75 @@ namespace jmt {
     PFSubNtuple& nt_;
     const edm::InputTag tag_;
     const edm::EDGetTokenT<pat::METCollection> token_;
-    //edm::Handle<pat::METCollection> mets_;
+    edm::Handle<pat::METCollection> mets_;
+    const edm::InputTag triggerfloats_tag_;
+    bool triggerfloats_available_;
+    const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token_;
+    edm::Handle<mfv::TriggerFloats> triggerfloats_;
   public:
     PFSubNtupleFiller(PFSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
-      : nt_(nt)
-        //tag_(cfg.getParameter<edm::InputTag>("mets_src")),
-        //token_(cc.consumes<pat::METCollection>(tag_))
+      : nt_(nt),
+        tag_(cfg.getParameter<edm::InputTag>("mets_src")),
+        token_(cc.consumes<pat::METCollection>(tag_)),
+        triggerfloats_tag_(cfg.getParameter<edm::InputTag>("triggerfloats_src")),
+        triggerfloats_available_(triggerfloats_tag_.label() != ""),
+        triggerfloats_token_( triggerfloats_available_ ? cc.consumes<mfv::TriggerFloats>(triggerfloats_tag_) : edm::EDGetTokenT<mfv::TriggerFloats>() )
     {}
     void operator()(const edm::Event&);
     //const pat::METCollection& mets() const { return *mets_; }
   };
 
-  void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, int which_sv=-1, unsigned misc=0);
+  void NtupleAdd(MuonsSubNtuple&, const pat::Muon&);
+
+  class MuonsSubNtupleFiller {
+    MuonsSubNtuple& nt_;
+    const edm::InputTag tag_;
+    const edm::EDGetTokenT<pat::MuonCollection> token_;
+    edm::Handle<pat::MuonCollection> muons_;
+    std::vector<int> i2nti_;
+  public:
+    MuonsSubNtupleFiller(MuonsSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
+      : nt_(nt),
+	tag_(cfg.getParameter<edm::InputTag>("muons_src")),
+	token_(cc.consumes<pat::MuonCollection>(tag_))
+    {}
+    const edm::Handle<pat::MuonCollection>& hmuons(const edm::Event& e) { e.getByToken(token_, muons_); return muons_; }
+    const pat::MuonCollection& muons(const edm::Event& e) { return *hmuons(e); }
+    void operator()(const edm::Event&);
+    int i2nti(size_t i) const { return i2nti_[i]; }
+  };
+  
+  void NtupleAdd(ElectronsSubNtuple&, const pat::Electron&);
+
+  class ElectronsSubNtupleFiller {
+    ElectronsSubNtuple& nt_;
+    const edm::InputTag tag_;
+    const edm::EDGetTokenT<pat::ElectronCollection> token_;
+    edm::Handle<pat::ElectronCollection> electrons_;
+    const edm::EDGetTokenT<double> rho_token_;
+    std::vector<int> i2nti_;
+    edm::Handle<double> rho_;
+    EffectiveAreas electron_effective_areas;
+
+    
+  public:
+    ElectronsSubNtupleFiller(ElectronsSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
+      : nt_(nt),
+	tag_(cfg.getParameter<edm::InputTag>("electrons_src")),
+	token_(cc.consumes<pat::ElectronCollection>(tag_)),
+	rho_token_(cc.consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+	electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath())
+    {}
+
+    const edm::Handle<pat::ElectronCollection>& helectrons(const edm::Event& e) {e.getByToken(token_, electrons_); return electrons_; }
+    const edm::Handle<double>& rho(const edm::Event& e) {e.getByToken(rho_token_, rho_); return rho_; }
+    const pat::ElectronCollection& electrons(const edm::Event& e) { return *helectrons(e); }
+    void operator()(const edm::Event&);
+    int i2nti(size_t i) const { return i2nti_[i]; }
+  };
+
+  
+  void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, bool ismu=false, bool isel=false, bool isgoodmu=false, bool isgoodel=false, int which_sv=-1, unsigned misc=0);
   typedef bool (*tracks_cut_fcn)(const reco::Track&);
 
   class TracksSubNtupleFiller {
@@ -142,6 +210,11 @@ namespace jmt {
     tracks_cut_fcn cut_;
     edm::Handle<reco::TrackCollection> tracks_;
     jmt::TrackRefGetter trg_;
+    const edm::EDGetTokenT<double> rho_token_;
+    edm::Handle<double> rho_;
+    EffectiveAreas electron_effective_areas;
+
+    
   public:
     TracksSubNtupleFiller(TracksSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, int cut_level = -1, tracks_cut_fcn cut=0)
       : nt_(nt),
@@ -149,14 +222,22 @@ namespace jmt {
         token_(cc.consumes<reco::TrackCollection>(tag_)),
         cut_level_(cut_level),
         cut_(cut),
-        trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc))
+        trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc)),
+	rho_token_(cc.consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+	electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath())
+
     {}
     bool cut(const reco::Track&, const edm::Event&, BeamspotSubNtupleFiller* =0) const;
     const edm::Handle<reco::TrackCollection>& htracks(const edm::Event& e) { e.getByToken(token_, tracks_); return tracks_; }
     const reco::TrackCollection& tracks(const edm::Event& e) { return *htracks(e); }
     int which_jet(const edm::Event&, JetsSubNtupleFiller*, reco::TrackRef&);
     int which_pv(const edm::Event&, PrimaryVerticesSubNtupleFiller*, reco::TrackRef&);
-    void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0, BeamspotSubNtupleFiller* =0);
+    bool ismu(const edm::Event&, MuonsSubNtupleFiller*, reco::TrackRef&);
+    bool isel(const edm::Event&, ElectronsSubNtupleFiller*, reco::TrackRef&);
+    bool isGoodMu(const edm::Event&, MuonsSubNtupleFiller*, reco::TrackRef&);
+    const edm::Handle<double>& rho(const edm::Event& e) {e.getByToken(rho_token_, rho_); return rho_; }
+    bool isGoodEl(const edm::Event&, ElectronsSubNtupleFiller*, reco::TrackRef&);
+    void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0, BeamspotSubNtupleFiller* =0, MuonsSubNtupleFiller* =0, ElectronsSubNtupleFiller* =0);
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -197,6 +278,7 @@ namespace jmt {
     bool fill_tracks_;
     int tracks_cut_level_;
     tracks_cut_fcn tracks_cut_;
+    bool use_separated_leptons_;
   public:
     TrackingAndJetsNtupleFillerParams()
       : pvs_subtract_bs_(false),
@@ -205,7 +287,8 @@ namespace jmt {
         jets_cut_(nullptr),
         fill_tracks_(true),
         tracks_cut_level_(-1),
-        tracks_cut_(nullptr)
+        tracks_cut_(nullptr),
+        use_separated_leptons_(false) // true if use_displaced_lepton 
     {}
 
     bool pvs_subtract_bs() const { return pvs_subtract_bs_; }
@@ -215,6 +298,7 @@ namespace jmt {
     bool fill_tracks() const { return fill_tracks_; }
     int tracks_cut_level() const { return tracks_cut_level_; }
     tracks_cut_fcn tracks_cut() const { return tracks_cut_; }
+    bool use_separated_leptons() const { return use_separated_leptons_; }
 
     TrackingAndJetsNtupleFillerParams pvs_subtract_bs           (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.pvs_subtract_bs_  = x; return y; }
     TrackingAndJetsNtupleFillerParams pvs_filter                (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.pvs_filter_       = x; return y; }
@@ -223,11 +307,12 @@ namespace jmt {
     TrackingAndJetsNtupleFillerParams fill_tracks               (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.fill_tracks_      = x; return y; }
     TrackingAndJetsNtupleFillerParams tracks_cut_level           (int x) { TrackingAndJetsNtupleFillerParams y(*this); y.tracks_cut_level_ = x; return y; }
     TrackingAndJetsNtupleFillerParams tracks_cut      (tracks_cut_fcn x) { TrackingAndJetsNtupleFillerParams y(*this); y.tracks_cut_       = x; return y; }
+    TrackingAndJetsNtupleFillerParams use_separated_leptons      (bool x) { TrackingAndJetsNtupleFillerParams y(*this); y.use_separated_leptons_      = x; return y; }
   };
-
-// this is not great but I didn't want to spend time figuring out how to share a single ConsumesCollector instance
-#define NF_CC_TrackingAndJets_p edm::ConsumesCollector&& cc0, edm::ConsumesCollector&& cc1, edm::ConsumesCollector&& cc2, edm::ConsumesCollector&& cc3, edm::ConsumesCollector&& cc4, edm::ConsumesCollector&& cc5
-#define NF_CC_TrackingAndJets_v consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector()
+    
+    // this is not great but I didn't want to spend time figuring out how to share a single ConsumesCollector instance
+#define NF_CC_TrackingAndJets_p edm::ConsumesCollector&& cc0, edm::ConsumesCollector&& cc1, edm::ConsumesCollector&& cc2, edm::ConsumesCollector&& cc3, edm::ConsumesCollector&& cc4, edm::ConsumesCollector&& cc5, edm::ConsumesCollector&& cc6, edm::ConsumesCollector&& cc7
+#define NF_CC_TrackingAndJets_v consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector()
 
   class TrackingAndJetsNtupleFiller : public INtupleFiller {
     TrackingAndJetsNtuple& nt_;
@@ -237,6 +322,8 @@ namespace jmt {
     PrimaryVerticesSubNtupleFiller pvs_filler_;
     JetsSubNtupleFiller jets_filler_;
     PFSubNtupleFiller pf_filler_;
+    MuonsSubNtupleFiller muons_filler_;
+    ElectronsSubNtupleFiller electrons_filler_;
     TracksSubNtupleFiller tracks_filler_;
   public:
     TrackingAndJetsNtupleFiller(TrackingAndJetsNtuple& nt, const edm::ParameterSet& cfg, NF_CC_TrackingAndJets_p, TrackingAndJetsNtupleFillerParams p)
@@ -248,21 +335,25 @@ namespace jmt {
         pvs_filler_(nt.pvs(), cfg, std::move(cc2), p.pvs_filter(), p.pvs_first_only()),
         jets_filler_(nt.jets(), cfg, std::move(cc3), p.jets_cut()),
         pf_filler_(nt.pf(), cfg, std::move(cc4)),
-        tracks_filler_(nt.tracks(), cfg, std::move(cc5), p.tracks_cut_level(), p.tracks_cut())
+	muons_filler_(nt.muons(), cfg, std::move(cc5)),
+	electrons_filler_(nt.electrons(), cfg, std::move(cc6)),
+	tracks_filler_(nt.tracks(), cfg, std::move(cc7), p.tracks_cut_level(), p.tracks_cut())
     {}
-
+    
     BaseSubNtupleFiller base_filler() { return base_filler_; }
     BeamspotSubNtupleFiller bs_filler() { return bs_filler_; }
     PrimaryVerticesSubNtupleFiller pvs_filler() { return pvs_filler_; }
     JetsSubNtupleFiller jets_filler() { return jets_filler_; }
     PFSubNtupleFiller pf_filler() { return pf_filler_; }
     TracksSubNtupleFiller tracks_filler() { return tracks_filler_; }
+    MuonsSubNtupleFiller muons_filler() { return muons_filler_; }
+    ElectronsSubNtupleFiller electrons_filler() { return electrons_filler_; }
 
     const reco::BeamSpot& bs() { return bs_filler_.bs(); }
     const reco::Vertex* pv() const { return pvs_filler_.pv(); }
 
     virtual void operator()(const edm::Event&);
   };
-}
+  }
 
 #endif

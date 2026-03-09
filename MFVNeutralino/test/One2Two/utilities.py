@@ -4,7 +4,7 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 from f2_vals import dict_of_f2_tuples
 ####
 
-_version = 'V27m'
+_version = 'ULV30Lepm'
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017', '2018'] :
@@ -13,7 +13,7 @@ def cmd_merge_bquarks_nobquarks():
         elif year == '2018' :
             weights = '0.81,0.19'
         for ntracks in 3,4,5,7:
-            files = ['2v_from_jets_%s_%dtrack_bquarks_%s.root' % (year, ntracks, _version), '2v_from_jets_%s_%dtrack_nobquarks_%s.root' % (year, ntracks, _version)]
+            files = ['/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_bquarks_%s.root' % (year, ntracks, _version), '/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_nobquarks_%s.root' % (year, ntracks, _version)]
             for fn in files:
                 if not os.path.isfile(fn):
                     raise RuntimeError('%s not found' % fn)
@@ -22,11 +22,11 @@ def cmd_merge_bquarks_nobquarks():
             os.system(cmd)
 
 def cmd_merge_btags_nobtags():
-    for is_data in False, True:
-        for year in ['2017', '2018', '2017p8']:
+    for is_data in False,: #FIXME False, True:
+        for year in ['2017', '2018',]:# FIXME '2017p8']:
             if is_data:
                 year = 'data_%s' % year
-            for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down', 'vary_dphi', 'vary_eff']:
+            for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down',]: # FIXME 'vary_dphi', 'vary_eff']:
                 tuple_ntracks_weights = dict_of_f2_tuples.get('%s_%s' % (year, sys_var), ())
 
                 frac_variation = 1
@@ -47,9 +47,9 @@ def cmd_merge_btags_nobtags():
                     frac_variation = (btag_frac_fivetrk / btag_frac_fourtrk) - 1
 
                 for ntracks,weights in tuple_ntracks_weights :
-                    files = ['2v_from_jets_%s_%dtrack_btags_%s.root' % (year, ntracks, _version), '2v_from_jets_%s_%dtrack_nobtags_%s.root' % (year, ntracks, _version)]
+                    files = ['/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_btags_%s.root' % (year, ntracks, _version), '/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_nobtags_%s.root' % (year, ntracks, _version)]
                     if sys_var in ['vary_dphi', 'vary_eff']:
-                        files = ['2v_from_jets_%s_%dtrack_%s_btags_%s.root' % (year, ntracks, sys_var, _version), '2v_from_jets_%s_%dtrack_%s_nobtags_%s.root' % (year, ntracks, sys_var, _version)]
+                        files = ['/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_%s_btags_%s.root' % (year, ntracks, sys_var, _version), '/afs/cern.ch/user/p/pekotamn/crabdirs/2v_from_jets_lep/2v_from_jets_%s_%dtrack_%s_nobtags_%s.root' % (year, ntracks, sys_var, _version)]
                     for fn in files:
                         if not os.path.isfile(fn):
                             raise RuntimeError('%s not found' % fn)

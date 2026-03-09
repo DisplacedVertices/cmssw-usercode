@@ -22,6 +22,8 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "JMTucker/Tools/interface/Year.h" //Alec added
+#include <TRandom3.h>
 
 class MFVVertexTracks : public edm::EDFilter {
 public:
@@ -30,15 +32,22 @@ public:
 
 private:
   bool match_track_jet(const reco::Track& tk, const pat::Jet& jet);
+
+  struct order_seed_tks_pt {
+    int operator()(const reco::TrackRef& a, const reco::TrackRef& b) {
+      return a->pt() > b->pt();
+    };
+  };
+
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const bool use_primary_vertices;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const bool disregard_event;
   const bool use_tracks;
-  //const bool use_separated_leptons;
+  const bool use_separated_leptons;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
-  //const edm::EDGetTokenT<reco::TrackCollection> electron_tracks_token;
-  //const edm::EDGetTokenT<reco::TrackCollection> muon_tracks_token;
+  const edm::EDGetTokenT<reco::TrackCollection> electron_tracks_token;
+  const edm::EDGetTokenT<reco::TrackCollection> muon_tracks_token;
   const bool save_quality_tracks;
   const bool match_jets;
   const edm::EDGetTokenT<pat::JetCollection> match_jet_token;
@@ -56,6 +65,7 @@ private:
   const bool no_track_cuts;
   const double min_seed_jet_pt;
   const double min_track_pt;
+  const double min_leptrack_pt;
   const double min_track_pt_loose;
   const double min_track_dxy;
   const double min_track_sigmadxy;
@@ -64,7 +74,6 @@ private:
   const double min_track_rescaled_sigmadxy_loose;
   const double min_track_sigmadxypv;
   const int min_track_hit_r;
-  const int min_leptrack_hit_r;
   const int min_track_nhits;
   const int min_track_npxhits;
   const int min_track_npxlayers;
@@ -83,6 +92,7 @@ private:
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pars[7];
   TH1F* h_all_track_errs[7];
+  TH1F* h_all_track_absdxybs; //Alec added
   TH1F* h_all_track_p;
   TH1F* h_all_track_pt_barrel;
   TH1F* h_all_track_pt_endcap;
@@ -124,8 +134,6 @@ private:
   TH1F* h_all_eletrack_pt_barrel;
   TH1F* h_all_eletrack_pt_endcap;
   TH1F* h_all_eletrack_errdxybs;
-  // TH2F* h_all_eletrack_pt_errdxybs;
-  // TH2F* h_all_eletrack_pt_dxybs;
   TH1F* h_all_eletrack_sigmadxybs;
   TH1F* h_all_eletrack_sigmadxypv;
   TH1F* h_all_eletrack_nhits;
@@ -141,8 +149,6 @@ private:
   TH1F* h_seed_eletrack_pt_barrel;
   TH1F* h_seed_eletrack_pt_endcap;
   TH1F* h_seed_eletrack_errdxybs;
-  // TH2F* h_seed_eletrack_pt_errdxybs;
-  // TH2F* h_seed_eletrack_pt_dxybs;
   TH1F* h_seed_eletrack_sigmadxybs;
   TH1F* h_seed_eletrack_sigmadxypv;
   TH1F* h_seed_eletrack_nhits;
@@ -168,7 +174,6 @@ private:
   TH2F* h_all_eletrack_minr_vs_pt;
   TH2F* h_all_eletrack_npxlayers_vs_pt;
   TH2F* h_all_eletrack_nstlayers_vs_pt;
-
   TH2F* h_seed_eletrack_sigmadxybs_vs_pt;
   TH2F* h_seed_eletrack_dxybs_vs_pt;
   TH2F* h_seed_eletrack_dxyerr_vs_pt;
@@ -181,7 +186,6 @@ private:
   TH2F* h_all_eletrack_npxlayers_vs_dxy;
   TH2F* h_all_eletrack_nstlayers_vs_dxy;
   TH2F* h_all_eletrack_dxyerr_vs_dxy;
-
   TH2F* h_seed_eletrack_sigmadxybs_vs_dxy;
   TH2F* h_seed_eletrack_minr_vs_dxy;
   TH2F* h_seed_eletrack_npxlayers_vs_dxy;
@@ -195,8 +199,6 @@ private:
   TH1F* h_all_mutrack_pt_barrel;
   TH1F* h_all_mutrack_pt_endcap;
   TH1F* h_all_mutrack_errdxybs;
-  // TH2F* h_all_mutrack_pt_errdxybs;
-  // TH2F* h_all_mutrack_pt_dxybs;
   TH1F* h_all_mutrack_sigmadxybs;
   TH1F* h_all_mutrack_sigmadxypv;
   TH1F* h_all_mutrack_nhits;
@@ -235,7 +237,6 @@ private:
   TH2F* h_all_mutrack_minr_vs_pt;
   TH2F* h_all_mutrack_npxlayers_vs_pt;
   TH2F* h_all_mutrack_nstlayers_vs_pt;
-
   TH2F* h_seed_mutrack_sigmadxybs_vs_pt;
   TH2F* h_seed_mutrack_dxybs_vs_pt;
   TH2F* h_seed_mutrack_dxyerr_vs_pt;
@@ -248,10 +249,7 @@ private:
   TH2F* h_all_mutrack_npxlayers_vs_dxy;
   TH2F* h_all_mutrack_nstlayers_vs_dxy;
   TH2F* h_all_mutrack_dxyerr_vs_dxy;
-
   TH2F* h_seed_mutrack_sigmadxybs_vs_dxy;
-  // TH2F* h_seed_mutrack_dxybs_vs_dxy;
-  // TH2F* h_seed_mutrack_dxyerr_vs_pt;
   TH2F* h_seed_mutrack_minr_vs_dxy;
   TH2F* h_seed_mutrack_npxlayers_vs_dxy;
   TH2F* h_seed_mutrack_nstlayers_vs_dxy; 
@@ -265,10 +263,10 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
-    //use_separated_leptons(cfg.getParameter<bool>("use_separated_leptons")),
+    use_separated_leptons(cfg.getParameter<bool>("use_separated_leptons")),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
-    //electron_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("electron_tracks_src"))),
-    //muon_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("muon_tracks_src"))),
+    electron_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("electron_tracks_src"))),
+    muon_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("muon_tracks_src"))),
     save_quality_tracks(cfg.getParameter<bool>("save_quality_tracks")),
     match_jets(cfg.getParameter<bool>("match_jets")),
     match_jet_token(match_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("match_jet_src")) : edm::EDGetTokenT<pat::JetCollection>()),
@@ -286,6 +284,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
+    min_leptrack_pt(cfg.getParameter<double>("min_leptrack_pt")),
     min_track_pt_loose(cfg.getParameter<double>("min_track_pt_loose")),
     min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
     min_track_sigmadxy(cfg.getParameter<double>("min_track_sigmadxy")),
@@ -294,7 +293,6 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     min_track_rescaled_sigmadxy_loose(cfg.getParameter<double>("min_track_rescaled_sigmadxy_loose")),
     min_track_sigmadxypv(cfg.getParameter<double>("min_track_sigmadxypv")),
     min_track_hit_r(cfg.getParameter<int>("min_track_hit_r")),
-    min_leptrack_hit_r(cfg.getParameter<int>("min_leptrack_hit_r")),
     min_track_nhits(cfg.getParameter<int>("min_track_nhits")),
     min_track_npxhits(cfg.getParameter<int>("min_track_npxhits")),
     min_track_npxlayers(cfg.getParameter<int>("min_track_npxlayers")),
@@ -356,6 +354,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
       h_all_mutrack_pars[i] = fs->make<TH1F>(TString::Format("h_all_mutrack_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
       h_all_mutrack_errs[i] = fs->make<TH1F>(TString::Format("h_all_mutrack_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
     }
+    h_all_track_absdxybs = fs->make<TH1F>("h_all_track_absdxybs", ";all track's |dxybs| (cm)", 500, 0, 1); //Alec added
 
     h_all_track_p = fs->make<TH1F>("h_all_track_p", ";all track's p (GeV)", 50, 0, 10);
     h_all_track_pt_barrel = fs->make<TH1F>("h_all_track_pt_barrel", ";all track's p_{T} in barrel (GeV)", 50, 0, 10);
@@ -374,8 +373,6 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_all_eletrack_pt_barrel = fs->make<TH1F>("h_all_eletrack_pt_barrel", "", 400, 0, 2000);
     h_all_eletrack_pt_endcap = fs->make<TH1F>("h_all_eletrack_pt_endcap", "", 400, 0, 2000);
     h_all_eletrack_sigmadxybs = fs->make<TH1F>("h_all_eletrack_sigmadxybs", "", 40, 0, 20);
-    // h_all_eletrack_pt_dxybs = fs->make<TH2F>("h_all_eletrack_pt_dxybs", "", 500, 0, 100, 500, 0, 2);
-    // h_all_eletrack_pt_errdxybs = fs->make<TH2F>("h_all_eletrack_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_all_eletrack_sigmadxypv = fs->make<TH1F>("h_all_eletrack_sigmadxypv", "", 40, 0, 20);
     h_all_eletrack_nhits      = fs->make<TH1F>("h_all_eletrack_nhits",      "", 40,   0, 40);
     h_all_eletrack_npxhits    = fs->make<TH1F>("h_all_eletrack_npxhits",    "", 12,   0, 12);
@@ -388,8 +385,6 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_all_mutrack_pt_barrel = fs->make<TH1F>("h_all_mutrack_pt_barrel", "", 400, 0, 2000);
     h_all_mutrack_pt_endcap = fs->make<TH1F>("h_all_mutrack_pt_endcap", "", 400, 0, 2000);
     h_all_mutrack_sigmadxybs = fs->make<TH1F>("h_all_mutrack_sigmadxybs", "", 40, 0, 20);
-    // h_all_mutrack_pt_dxybs = fs->make<TH2F>("h_all_mutrack_pt_dxybs", "", 500, 0, 100, 500, 0, 2);
-    // h_all_mutrack_pt_errdxybs = fs->make<TH2F>("h_all_mutrack_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_all_mutrack_sigmadxypv = fs->make<TH1F>("h_all_mutrack_sigmadxypv", "", 40, 0, 20);
     h_all_mutrack_nhits      = fs->make<TH1F>("h_all_mutrack_nhits",      "", 40,   0, 40);
     h_all_mutrack_npxhits    = fs->make<TH1F>("h_all_mutrack_npxhits",    "", 12,   0, 12);
@@ -430,8 +425,6 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_seed_eletrack_pt_endcap = fs->make<TH1F>("h_seed_eletrack_pt_endcap", "", 400, 0, 2000);
     h_seed_eletrack_sigmadxybs = fs->make<TH1F>("h_seed_eletrack_sigmadxybs", "", 40, 0, 20);
     h_seed_eletrack_sigmadxypv = fs->make<TH1F>("h_seed_eletrack_sigmadxypv", "", 40, 0, 20);
-    // h_seed_eletrack_pt_dxybs = fs->make<TH2F>("h_seed_eletrack_pt_dxybs", "", 500, 0, 100, 500, 0, 2);
-    // h_seed_eletrack_pt_errdxybs = fs->make<TH2F>("h_seed_eletrack_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_seed_eletrack_nhits      = fs->make<TH1F>("h_seed_eletrack_nhits",      "", 40,   0, 40);
     h_seed_eletrack_npxhits    = fs->make<TH1F>("h_seed_eletrack_npxhits",    "", 12,   0, 12);
     h_seed_eletrack_nsthits    = fs->make<TH1F>("h_seed_eletrack_nsthits",    "", 28,   0, 28);
@@ -481,8 +474,6 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_seed_mutrack_pt_endcap = fs->make<TH1F>("h_seed_mutrack_pt_endcap", "", 400, 0, 2000);
     h_seed_mutrack_sigmadxybs = fs->make<TH1F>("h_seed_mutrack_sigmadxybs", "", 40, 0, 20);
     h_seed_mutrack_sigmadxypv = fs->make<TH1F>("h_seed_mutrack_sigmadxypv", "", 40, 0, 20);
-    // h_seed_mutrack_pt_dxybs = fs->make<TH2F>("h_seed_mutrack_pt_dxybs", "", 500, 0, 100, 500, 0, 2);
-    // h_seed_mutrack_pt_errdxybs = fs->make<TH2F>("h_seed_mutrack_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_seed_mutrack_nhits      = fs->make<TH1F>("h_seed_mutrack_nhits",      "", 40,   0, 40);
     h_seed_mutrack_npxhits    = fs->make<TH1F>("h_seed_mutrack_npxhits",    "", 12,   0, 12);
     h_seed_mutrack_nsthits    = fs->make<TH1F>("h_seed_mutrack_nsthits",    "", 28,   0, 28);
@@ -528,11 +519,18 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
 bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose)
     std::cout << "MFVVertexTracks " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+  
+//  const int track_rescaler_which = jmt::TrackRescaler::w_SingleLep; //FIXME Abby
+    const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; //FIXME Alec
+// const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
+  // track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1 && min_track_rescaled_sigmadxy > 0,
+  //                      jmt::AnalysisEras::pick(event, this),
+  //                      track_rescaler_which);
 
-  const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1 && min_track_rescaled_sigmadxy > 0,
                        jmt::AnalysisEras::pick(event, this),
-                       track_rescaler_which);
+                       track_rescaler_which,
+                       "");
 
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
@@ -550,10 +548,10 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   std::unique_ptr<std::vector<reco::TrackRef>> all_tracks (new std::vector<reco::TrackRef>);
   std::unique_ptr<std::vector<reco::TrackRef>> seed_tracks(new std::vector<reco::TrackRef>);
-  //std::unique_ptr<std::vector<reco::TrackRef>> all_electron_tracks (new std::vector<reco::TrackRef>);
-  //std::unique_ptr<std::vector<reco::TrackRef>> all_muon_tracks (new std::vector<reco::TrackRef>);
-  //std::unique_ptr<std::vector<reco::TrackRef>> electron_seed_tracks(new std::vector<reco::TrackRef>);
-  //std::unique_ptr<std::vector<reco::TrackRef>> muon_seed_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> all_electron_tracks (new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> all_muon_tracks (new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> electron_seed_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> muon_seed_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> seed_tracks_copy(new reco::TrackCollection);
   std::unique_ptr<std::vector<reco::TrackRef>> quality_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> quality_tracks_copy(new reco::TrackCollection);
@@ -567,7 +565,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
         all_tracks->push_back(reco::TrackRef(tracks, i));
     }
-    /*
     if (use_separated_leptons) { 
       edm::Handle<reco::TrackCollection> muon_tracks;
       event.getByToken(muon_tracks_token, muon_tracks);
@@ -579,7 +576,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       for (size_t i = 0, ie = electron_tracks->size(); i < ie; ++i) 
         all_electron_tracks->push_back(reco::TrackRef(electron_tracks, i));
     }
-    */
+    
     
     else if (use_non_pv_tracks || use_non_pvs_tracks) {
       std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
@@ -665,16 +662,17 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     std::random_shuffle(all_tracks->begin(), all_tracks->end(), random_converter);
   }
 
+  //TRandom3 *r3 = new TRandom3(); //Alec added
   for (size_t i = 0, ie = all_tracks->size(); i < ie; ++i) {
     const reco::TrackRef& tk = (*all_tracks)[i];
-    const auto rs = track_rescaler.scale(*tk);
+    // only jmt::TrackRescaler::w_SingleLep needs the second argument for general vs. ele vs. mu tracks
+    const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*tk, "")
+                  :  track_rescaler.scale(*tk);
     const bool is_second_track = i >= second_tracks_start_at;
 
     // copy/calculate cheap things, which may be used later in histos
     const double p = tk->p();
     const double pt = tk->pt();
-    const double eta = tk->eta();
-    const double phi = tk->phi();
     const double dxybs = tk->dxy(*beamspot);
     const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
     const double dxyerr = tk->dxyError();
@@ -687,14 +685,44 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const int nsthits = tk->hitPattern().numberOfValidStripHits();
     const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
-    const auto trackLostInnerHits = tk->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
+    //if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added from here
+    //2016 tracking uncertainty: -1.26 +- 0.21
+    //2017 and 2018 tracking uncertainty: -1.12 +- 0.11
+    /*double track_recon_eff_coef;
+    const int year_cmon = MFVNEUTRALINO_YEAR;
+    if (year_cmon == 20161 || year_cmon == 20162) {
+      track_recon_eff_coef = 1.26;
+      //std::cout << "DISCARDING TRACKS BASED ON 2016 TRACKING INEFFICIENCY STUDY" << std::endl;
+    }
+    else if (year_cmon == 2017 || year_cmon == 2018) {
+      //track_recon_eff_coef = 1.12;
+      track_recon_eff_coef = 1.23; //varied up by 1sigma
+      //std::cout << "DISCARDING TRACKS BASED ON 2017p8 TRACKING INEFFICIENCY STUDY" << std::endl;
+    }
+    else {
+      std::cout << "Error: data year was not properly defined." << std::endl;
+    }
+    const double track_recon_eff = 1-track_recon_eff_coef*fabs(dxybs)*fabs(dxybs);
+    const double rand_0to1 = r3->Uniform(0,1);
+    if (fabs(dxybs) < .3) {
+      if (rand_0to1 > track_recon_eff) {
+       continue;
+      }
+    }
+    else {
+      if (rand_0to1 > (1-track_recon_eff_coef*.3*.3)) {
+       continue;
+      }
+    }*/
+    //Alec added to here
+    
     int min_r = 2000000000;
     for (int i = 1; i <= 4; ++i)
       if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
         min_r = i;
         break;
       }
-
+    int losthits = tk->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
     bool use = no_track_cuts || is_second_track || [&]() {
 
       //this is for low pt leptons & general tracks 
@@ -709,9 +737,11 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         npxhits >= min_track_npxhits &&
         npxlayers >= min_track_npxlayers &&
         nstlayers >= min_track_nstlayers &&
-        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && trackLostInnerHits == 0 ));
+        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && losthits == 0 ));
       
       if (!use_cheap) return false;
+
+      //if (r3->Uniform(0,1) > 1-1.11786*dxybs*dxybs) return false; //Alec added
       
       if (primary_vertex && (max_track_dxyipverr > 0 || max_track_d3dipverr > 0)) {
         reco::TransientTrack ttk = tt_builder->build(tk);
@@ -757,6 +787,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           { 0.04, 0.05, 0.03, 0.03, 0.08, 0.12, 0.09 }  // propagate error bars then add in quad shift and unc
         };
         prob = probs[remove_tracks_frac >= 50][ieta];
+	std::cout << "track with remove_track_frac 1 to 100" << std::endl;
       }
       else if (100 <= remove_tracks_frac) {
         const double N[2][7] = { { 160, 194, 104, 264, 303, 450, 414 },   // mc
@@ -766,6 +797,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         CLHEP::RandBinomial rr(rng_engine);
         const double mc   = rr.shoot(N[0][ieta], p[0][ieta]) / N[0][ieta];
         const double data = rr.shoot(N[1][ieta], p[1][ieta]) / N[1][ieta];
+        std::cout << "mc shoot:" << mc << ", data shoot:" << data << ", ieta:" << ieta << std::endl;
         prob = mc > data ? mc/data - 1 : 0;
       }
 
@@ -791,7 +823,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         npxhits >= min_track_npxhits &&
         npxlayers >= min_track_npxlayers &&
         nstlayers >= min_track_nstlayers &&
-        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && trackLostInnerHits == 0));
+        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && losthits == 0));
       if (use_loose){
         seed_track_loose.push_back(tk);
       }
@@ -808,7 +840,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         npxhits >= min_track_npxhits &&
         npxlayers >= min_track_npxlayers &&
         nstlayers >= min_track_nstlayers &&
-        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && trackLostInnerHits == 0));
+        (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && losthits == 0));
       if (use_loose){
         quality_tracks->push_back(tk);
         quality_tracks_copy->push_back(*tk);
@@ -823,13 +855,14 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     if (histos) {
-      const double pars[7] = {pt, tk->eta(), tk->phi(), dxybs, dxybs, dxypv, tk->dz(beamspot->position()) };
+      const double pars[7] = {pt, tk->eta(), tk->phi(), fabs(dxybs), fabs(dxybs), fabs(dxypv), tk->dz(beamspot->position()) };
       const double errs[7] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), rescaled_dxyerr, tk->dxyError(), tk->dzError() };
 
       for (int i = 0; i < 7; ++i) {
         h_all_track_pars[i]->Fill(pars[i]);
         h_all_track_errs[i]->Fill(errs[i]);
       }
+      h_all_track_absdxybs->Fill(fabs(dxybs)); //Alec added
 
       h_all_track_p->Fill(p);
       if (abs(tk->eta())<1.4){
@@ -854,7 +887,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         nstlayers >= min_track_nstlayers,
         fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy, // JMTBAD rescaled_sigmadxybs
       };
-      if (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && trackLostInnerHits == 0)){
+      if (min_track_hit_r == 999 || min_r <= min_track_hit_r || (min_r == 2.0 && losthits == 0)){
           if (nm1[1] && nm1[2] && nm1[3]) h_seed_nm1_pt->Fill(pt);
           if (nm1[0] && nm1[2] && nm1[3]) h_seed_nm1_npxlayers->Fill(npxlayers);
           if (nm1[0] && nm1[1] && nm1[3]) h_seed_nm1_nstlayers->Fill(nstlayers);
@@ -934,14 +967,12 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
   // now we get to do this all over for lepton tracks ... (with electrons and muons separate) 
-  /*
   if (use_separated_leptons) {
     for (size_t i = 0, im = all_muon_tracks->size(); i < im; ++i) {
       const reco::TrackRef& mtk = (*all_muon_tracks)[i];
-      //this will need to be changed once we have a different(?) track rescaler for leptons ... 
-      const auto rs = track_rescaler.scale(*mtk);
-      //copy/calculate the cheap things but now for muons ... 
-      const double p = mtk->p(); //don't need it yet 
+      const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*mtk, "muon")
+                  :  track_rescaler.scale(*mtk);
+      const double p = mtk->p();
       const double pt = mtk->pt();
       const double dxybs = mtk->dxy(*beamspot);
       const double dxypv = primary_vertex ? mtk->dxy(primary_vertex->position()) : 1e99;
@@ -966,7 +997,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
         //this min lep pt is hard coded during the split -- hence hard coded here
         const bool use_cheap =
-          pt >= 20.0 &&
+          pt >= min_leptrack_pt &&
           fabs(dxybs) > min_track_dxy &&
           dxyerr < max_track_dxyerr &&
           fabs(sigmadxybs) > min_track_sigmadxy &&
@@ -976,7 +1007,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           npxhits >= min_track_npxhits &&
           npxlayers >= min_track_npxlayers &&
           nstlayers >= min_track_nstlayers &&
-          (min_track_hit_r == 999 || (min_r <= min_leptrack_hit_r && losthits == 0) || min_r <= min_track_hit_r);
+          (min_track_hit_r == 999 || (min_r <= 2 && losthits == 0) || min_r <= min_track_hit_r);
           
         if (!use_cheap) return false;
 
@@ -997,7 +1028,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         seed_tracks->push_back(mtk);
         muon_seed_tracks->push_back(mtk);
         seed_tracks_copy->push_back(*mtk);
-        
       }  
 
       if (verbose) {
@@ -1025,8 +1055,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         }
         h_all_mutrack_sigmadxybs->Fill(fabs(sigmadxybs));
         h_all_mutrack_sigmadxypv->Fill(fabs(sigmadxypv));
-        // h_all_mutrack_pt_dxybs->Fill(pt, dxybs);
-        // h_all_mutrack_pt_errdxybs->Fill(pt, mtk->dxyError());
         h_all_mutrack_nhits->Fill(nhits);
         h_all_mutrack_npxhits->Fill(npxhits);
         h_all_mutrack_nsthits->Fill(nsthits);
@@ -1049,8 +1077,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           pt > min_track_pt,
           npxlayers >= min_track_npxlayers,
           nstlayers >= min_track_nstlayers,
-          fabs(sigmadxybs) > 3, // JMTBAD rescaled_sigmadxybs
-          (min_r <= min_leptrack_hit_r && losthits == 0) || min_r <= min_track_hit_r
+          fabs(sigmadxybs) > min_leptrack_rescaled_sigmadxy,
+          (min_r <= 2 && losthits == 0) || min_r <= min_track_hit_r
         };
 
         if (nm1[1] && nm1[2] && nm1[3] && nm1[4]) h_seed_nm1_mupt->Fill(pt);
@@ -1097,8 +1125,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           }
           h_seed_mutrack_sigmadxybs->Fill(fabs(sigmadxybs));
           h_seed_mutrack_sigmadxypv->Fill(fabs(sigmadxypv));
-          // h_seed_mutrack_pt_dxybs->Fill(pt, fabs(dxybs));
-          // h_seed_mutrack_pt_errdxybs->Fill(pt, mtk->dxyError());
           h_seed_mutrack_nhits->Fill(nhits);
           h_seed_mutrack_npxhits->Fill(npxhits);
           h_seed_mutrack_nsthits->Fill(nsthits);
@@ -1110,11 +1136,10 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
     for (size_t i = 0, ie = all_electron_tracks->size(); i < ie; ++i) {
       const reco::TrackRef& etk = (*all_electron_tracks)[i];
-      //this will need to be changed once we have a different(?) track rescaler for leptons ... ?
-      const auto rs = track_rescaler.scale(*etk);
-
+      const auto rs = (track_rescaler_which == jmt::TrackRescaler::w_SingleLep) ? track_rescaler.scale(*etk, "electron")
+                  :  track_rescaler.scale(*etk);
       //copy/calculate the cheap things but now for electrons ... 
-      const double p = etk->p(); //don't need it yet
+      const double p = etk->p();
       const double pt = etk->pt();
       const double dxybs = etk->dxy(*beamspot);
       const double dxypv = primary_vertex ? etk->dxy(primary_vertex->position()) : 1e99;
@@ -1138,21 +1163,18 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       int losthits = etk->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
       bool use_ele = no_track_cuts || [&]() {
 
-        //this min lep pt is hard coded during the split -- hence hard coded here
         const bool use_cheap =
-          pt >= 20.0 &&
+          pt >= min_leptrack_pt &&
           fabs(dxybs) > min_track_dxy &&
           dxyerr < max_track_dxyerr &&
           fabs(sigmadxybs) > min_track_sigmadxy &&
-          fabs(rescaled_sigmadxybs) > 3 &&
-          //fabs(rescaled_sigmadxybs) > min_leptrack_rescaled_sigmadxy &&
+          fabs(rescaled_sigmadxybs) > min_leptrack_rescaled_sigmadxy &&
           fabs(sigmadxypv) > min_track_sigmadxypv &&
           nhits >= min_track_nhits &&
           npxhits >= min_track_npxhits &&
           npxlayers >= min_track_npxlayers &&
           nstlayers >= min_track_nstlayers &&
-          (min_track_hit_r == 999 || (min_r <= min_leptrack_hit_r && losthits == 0) || min_r <= min_track_hit_r);
-          //(min_track_hit_r == 999 || (min_r <= 3));
+          (min_track_hit_r == 999 || (min_r <= 2 && losthits == 0) || min_r <= min_track_hit_r);
 
         if (!use_cheap) return false;
 
@@ -1198,8 +1220,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         }
         h_all_eletrack_sigmadxybs->Fill(fabs(sigmadxybs));
         h_all_eletrack_sigmadxypv->Fill(fabs(sigmadxypv));
-        // h_all_eletrack_pt_dxybs->Fill(pt, fabs(dxybs));
-        // h_all_eletrack_pt_errdxybs->Fill(pt, etk->dxyError());
         h_all_eletrack_nhits->Fill(nhits);
         h_all_eletrack_npxhits->Fill(npxhits);
         h_all_eletrack_nsthits->Fill(nsthits);
@@ -1224,8 +1244,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           pt > min_track_pt,
           npxlayers >= min_track_npxlayers,
           nstlayers >= min_track_nstlayers,
-          fabs(sigmadxybs) > 3, // JMTBAD rescaled_sigmadxybs
-          (min_r <= min_leptrack_hit_r && losthits == 0) || min_r <= min_track_hit_r
+          fabs(sigmadxybs) > 3,
+          (min_r <= 2 && losthits == 0) || min_r <= min_track_hit_r
         };
 
         if (nm1[1] && nm1[2] && nm1[3] && nm1[4]) h_seed_nm1_elept->Fill(pt);
@@ -1273,8 +1293,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           }
           h_seed_eletrack_sigmadxybs->Fill(fabs(sigmadxybs));
           h_seed_eletrack_sigmadxypv->Fill(fabs(sigmadxypv));
-          // h_seed_eletrack_pt_dxybs->Fill(pt, fabs(dxybs));
-          // h_seed_eletrack_pt_errdxybs->Fill(pt, etk->dxyError());
           h_seed_eletrack_nhits->Fill(nhits);
           h_seed_eletrack_npxhits->Fill(npxhits);
           h_seed_eletrack_nsthits->Fill(nsthits);
@@ -1301,24 +1319,25 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     
   }
-  */
 
   const bool pass_min_n_seed_tracks = int(seed_tracks->size()) >= min_n_seed_tracks;
+
+  //sort the seed tracks by pt
+  //std::sort(seed_tracks->begin(), seed_tracks->end(), order_seed_tks_pt());
 
   event.put(std::move(all_tracks), "all");
   event.put(std::move(seed_tracks), "seed");
   event.put(std::move(seed_tracks_copy), "seed");
   event.put(std::move(quality_tracks), "quality");
   event.put(std::move(quality_tracks_copy), "quality");
-  
-  /*
+
   if (use_separated_leptons) {
     event.put(std::move(all_electron_tracks), "allele");
     event.put(std::move(all_muon_tracks), "allmu");
     event.put(std::move(electron_seed_tracks), "eleseed");
     event.put(std::move(muon_seed_tracks), "museed");
   }
-  */
+
   return pass_min_n_seed_tracks;
 }
 
