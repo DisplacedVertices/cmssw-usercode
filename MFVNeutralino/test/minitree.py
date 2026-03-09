@@ -15,7 +15,6 @@ process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :
-#    del process.pMiniTreeNtk3
     del process.pMiniTreeNtk4
     del process.pMiniTreeNtk3or4
     del process.pMiniTree
@@ -24,33 +23,27 @@ if not is_mc :
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
+    if use_Muon_triggers or use_Electron_triggers :
+        sys.exit('In minitree.py, use_Muon_triggers and use_Electron_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). Instead, do use_Lepton_triggers.')
+
+    if  use_btag_vetoLepHT_triggers:
+        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif  use_btag_vetoLepHT_triggers:
-        samples = pick_samples(dataset, qcd=True, data = False, all_signal = False, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif use_MET_triggers :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, leptonic=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
     elif use_Lepton_triggers :
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=False, leptonic=True, ttbar=False, diboson=False, Lepton_data=False)
+        samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif use_Muon_triggers :
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep = False, leptonic=False, met=False, diboson=False)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif use_Electron_triggers :
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep = True, leptonic=True, met=True, diboson=True)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
     else :
+        print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
 
-    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
     set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('MiniTree_LepIPCut_' + version,
+    cs = CondorSubmitter('MiniTree_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

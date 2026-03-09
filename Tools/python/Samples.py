@@ -520,9 +520,9 @@ ggHToSSTodddd_samples_20161 = [
     MCSample('ggHToSSTodddd_tau10mm_M55_20161',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM',  270736),
 ]
 
-#FIXME
-all_signal_samples_20161 =  mfv_signal_samples_20161 + mfv_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161 
-#all_signal_samples_20161 = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161
+all_bjet_signal_samples_20161 = mfv_signal_samples_20161 + mfv_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161 
+all_lep_signal_samples_20161  = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161
+all_signal_samples_20161 = all_bjet_signal_samples_20161 + all_lep_signal_samples_20161
 
 #######
 #2016 2 MC
@@ -939,9 +939,10 @@ ggHToSSTodddd_samples_20162 = [
     MCSample('ggHToSSTodddd_tau10mm_M55_20162',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM',  259184),
 ]
 
-#FIXME 
-#all_signal_samples_20162 = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162
-all_signal_samples_20162 =  mfv_signal_samples_20162 + mfv_stopdbardbar_samples_20162 + mfv_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 
+all_bjet_signal_samples_20162 = mfv_signal_samples_20162 + mfv_stopdbardbar_samples_20162 + mfv_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 
+all_lep_signal_samples_20162  = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162
+all_signal_samples_20162 = all_bjet_signal_samples_20162 + all_lep_signal_samples_20162
+
 ########
 # 2017 MC 
 ########
@@ -1461,9 +1462,9 @@ ggHToSSTodddd_samples_2017 = [
 
 ]
 
-#FIXME 
-all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017
-#all_signal_samples_2017 =  ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017  
+all_bjet_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017
+all_lep_signal_samples_2017  = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017  
+all_signal_samples_2017 = all_bjet_signal_samples_2017 + all_lep_signal_samples_2017
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
 
@@ -1928,10 +1929,10 @@ ggHToSSTodddd_samples_2018 = [
   
 ]
 
-#FIXME
-all_signal_samples_2018 =  mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018  
-#all_signal_samples_2018 = mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018  
-#all_signal_samples_2018 = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 
+all_bjet_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018  
+all_lep_signal_samples_2018  = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 
+all_signal_samples_2018 = all_bjet_signal_samples_2018 + all_lep_signal_samples_2018
+
 ########
 # data
 ########
@@ -1952,18 +1953,24 @@ DisplacedJet_data_samples_20161 = [
     DataSample('DisplacedJet20161F', '/DisplacedJet/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD'),
     ]
 
-Lepton_data_samples_20161 = [
+Muon_data_samples_20161 = [
     DataSample('SingleMuon20161B', '/SingleMuon/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161C',  '/SingleMuon/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161D',  '/SingleMuon/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161E',  '/SingleMuon/Run2016E-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20161F',  '/SingleMuon/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
+]
+
+Electron_data_samples_20161 = [
     DataSample('SingleElectron20161B', '/SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20161C',  '/SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20161D',  '/SingleElectron/Run2016D-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20161E',  '/SingleElectron/Run2016E-HIPM_UL2016_MiniAODv2-v5/MINIAOD'),
     DataSample('SingleElectron20161F',  '/SingleElectron/Run2016F-HIPM_UL2016_MiniAODv2-v2/MINIAOD'),
 ]
+
+Lepton_data_samples_20161 = Muon_data_samples_20161 + Electron_data_samples_20161
+
 
 BTagCSV_data_samples_20162 = [
     DataSample('BTagCSV20162F', '/BTagCSV/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'), 
@@ -1977,22 +1984,20 @@ DisplacedJet_data_samples_20162 = [
     DataSample('DisplacedJet20162H', '/DisplacedJet/Run2016H-UL2016_MiniAODv2-v1/MINIAOD'),
 ]
 
-Lepton_data_samples_20162 = [
+Muon_data_samples_20162 = [
     DataSample('SingleMuon20162F', '/SingleMuon/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162G', '/SingleMuon/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleMuon20162H', '/SingleMuon/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
+]
+
+Electron_data_samples_20162 = [
     DataSample('SingleElectron20162F', '/SingleElectron/Run2016F-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20162G', '/SingleElectron/Run2016G-UL2016_MiniAODv2-v2/MINIAOD'),
     DataSample('SingleElectron20162H', '/SingleElectron/Run2016H-UL2016_MiniAODv2-v2/MINIAOD'),
 ]
 
-#auxiliary_data_samples_2017 = [                                                       # in dataset      in json          int lumi avail (/fb)
-#    DataSample('MET2017B', '/MET/Run2017B-09Aug2019_UL2017_rsb-v1/AOD'),  
-#    DataSample('MET2017C', '/MET/Run2017C-09Aug2019_UL2017_rsb-v1/AOD'),  
-#    DataSample('MET2017D', '/MET/Run2017D-09Aug2019_UL2017_rsb-v1/AOD'),  
-#    DataSample('MET2017E', '/MET/Run2017E-09Aug2019_UL2017_rsb-v1/AOD'),  
-#    DataSample('MET2017F', '/MET/Run2017F-09Aug2019_UL2017_rsb-v1/AOD'),  
-#    ]
+Lepton_data_samples_20162 = Muon_data_samples_20162 + Electron_data_samples_20162
+
 
 JetHT_data_samples_2017 = [
    DataSample('JetHT2017B', '/JetHT/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
@@ -2019,19 +2024,25 @@ DisplacedJet_data_samples_2017 = [
     DataSample('DisplacedJet2017F', '/DisplacedJet/Run2017F-UL2017_MiniAODv2-v1/MINIAOD'),
     ]
 
-Lepton_data_samples_2017 = [
+Muon_data_samples_2017 = [
     DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'), 
     DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-UL2017_MiniAODv2-v1/MINIAOD'), 
     DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-UL2017_MiniAODv2-v1/MINIAOD'), 
     DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-UL2017_MiniAODv2-v1/MINIAOD'), 
     DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-UL2017_MiniAODv2-v1/MINIAOD'), 
+]
+
+Electron_data_samples_2017 = [
     DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-UL2017_MiniAODv2-v1/MINIAOD'),
-    ]    
+]    
 
+Lepton_data_samples_2017 = Muon_data_samples_2017 + Electron_data_samples_2017
+
+# probably no longer needed and can be dropped?
 singleelectron_data_samples_2017 = [
     DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-UL2017_MiniAODv2-v1/MINIAOD'),
     DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-UL2017_MiniAODv2-v1/MINIAOD'),
@@ -2064,16 +2075,21 @@ DisplacedJet_data_samples_2018 = [
     DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
 ]
 
-Lepton_data_samples_2018 = [
+Muon_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-UL2018_MiniAODv2_GT36-v3/MINIAOD'),
     DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-UL2018_MiniAODv2_GT36-v2/MINIAOD'),
+]
+
+Electron_data_samples_2018 = [
     DataSample('EGamma2018A', '/EGamma/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
     DataSample('EGamma2018B', '/EGamma/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
     DataSample('EGamma2018C', '/EGamma/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD'),
     DataSample('EGamma2018D', '/EGamma/Run2018D-UL2018_MiniAODv2_GT36-v3/MINIAOD'),
 ]
+
+Lepton_data_samples_2018 = Muon_data_samples_2018 + Electron_data_samples_2018
 
 ########################################################################
 
@@ -2200,10 +2216,14 @@ span_signal_samples_2018 = [
 ]
 
 _alls = [
-    'all_signal_samples_20161',
-    'all_signal_samples_20162',
-    'all_signal_samples_2017',
-    'all_signal_samples_2018',
+    'all_bjet_signal_samples_20161',
+    'all_bjet_signal_samples_20162',
+    'all_bjet_signal_samples_2017',
+    'all_bjet_signal_samples_2018',
+    'all_lep_signal_samples_20161',
+    'all_lep_signal_samples_20162',
+    'all_lep_signal_samples_2017',
+    'all_lep_signal_samples_2018',
     'span_signal_samples_2017',
     'span_signal_samples_2018',
     ]
@@ -3189,7 +3209,7 @@ for s in registry.all():
 # be careful about the list, some samples are distributed at different samples so it won't work
 condorable = {
     "T2_DE_DESY": {
-        "miniaod": [] # [MET2017E, MET2018A, MET2018B, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018], #EGamma2018D
+        "miniaod": []
         },
     "T3_US_FNALLPC": {
         "miniaod": mfv_splitSUSY_samples_2017
@@ -3197,23 +3217,15 @@ condorable = {
         },
     "T1_US_FNAL_Disk": {
         "miniaod": Lepton_data_samples_20161 + DisplacedJet_data_samples_20161 + BTagCSV_data_samples_20161 + all_signal_samples_20161 + diboson_samples_20161 + ttbar_samples_20161 + leptonic_samples_20161 + qcd_lep_samples_20161 + met_samples_20161 + Lepton_data_samples_20162 + DisplacedJet_data_samples_20162 + BTagCSV_data_samples_20162 + all_signal_samples_20162 + diboson_samples_20162 + ttbar_samples_20162 + leptonic_samples_20162 + qcd_lep_samples_20162 + met_samples_20162 + Lepton_data_samples_2017 + DisplacedJet_data_samples_2017 + BTagCSV_data_samples_2017 +  all_signal_samples_2017 + diboson_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + qcd_lep_samples_2017 +  qcd_samples_2017 + Lepton_data_samples_2018 + DisplacedJet_data_samples_2018 + BTagCSV_data_samples_2018 +  all_signal_samples_2018 + diboson_samples_2018 + ttbar_samples_2018 + leptonic_samples_2018 + qcd_lep_samples_2018 + met_samples_2018 + qcd_samples_20161 + qcd_samples_20162 + qcd_samples_2018
-            #mfv_stoplb_tau010000um_M1000_2017, mfv_stoplb_tau000300um_M1200_2017, mfv_stoplb_tau010000um_M1200_2017, mfv_stoplb_tau001000um_M1200_2017, mfv_stoplb_tau000300um_M1600_2017, mfv_stoplb_tau001000um_M1600_2017, mfv_stoplb_tau000100um_M0300_2017, mfv_stoplb_tau000300um_M0300_2017, mfv_stoplb_tau001000um_M0300_2017, mfv_stoplb_tau001000um_M0400_2017, mfv_stoplb_tau010000um_M0600_2017, mfv_stopld_tau000300um_M1000_2017, mfv_stopld_tau010000um_M1000_2017, mfv_stopld_tau010000um_M1200_2017, mfv_stopld_tau001000um_M1400_2017, mfv_stopld_tau000300um_M1600_2017, mfv_stopld_tau010000um_M0200_2017, mfv_stopld_tau000300um_M0300_2017, mfv_stopld_tau001000um_M0400_2017, mfv_stopld_tau000300um_M0600_2017, mfv_stopld_tau010000um_M0600_2017, mfv_stopld_tau001000um_M0600_2017, mfv_stopld_tau010000um_M0800_2017, mfv_stoplb_tau010000um_M1200_2018, mfv_stoplb_tau001000um_M1200_2018, mfv_stoplb_tau010000um_M1400_2018, mfv_stoplb_tau001000um_M1400_2018, mfv_stoplb_tau010000um_M1600_2018, mfv_stoplb_tau001000um_M1600_2018, mfv_stoplb_tau001000um_M0200_2018, mfv_stoplb_tau010000um_M0300_2018, mfv_stoplb_tau010000um_M0400_2018, mfv_stoplb_tau001000um_M0400_2018, mfv_stoplb_tau001000um_M0600_2018, mfv_stoplb_tau000300um_M0800_2018, mfv_stoplb_tau001000um_M0800_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000300um_M1200_2018, mfv_stopld_tau000100um_M1400_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau010000um_M1600_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau001000um_M0200_2018, mfv_stopld_tau001000um_M0300_2018, mfv_stopld_tau000300um_M0400_2018, mfv_stopld_tau001000um_M0600_2018],
         },
     "T2_US_Wisconsin": {
-       # "miniaod": mfv_stopld_samples_2018 + [mfv_stopld_tau010000um_M0400_2018],
-       # "miniaod": [mfv_stopld_tau010000um_M0400_2018],
         },
     "T2_US_MIT": {
-      #"miniaod": all_signal_samples_2017 + all_signal_samples_2018
         },
     "T2_US_Purdue": {
         },
     "T2_US_UCSD": {
-       # "miniaod" : [mfv_stoplb_tau000300um_M1000_2017, mfv_stoplb_tau000100um_M1200_2017, mfv_stoplb_tau030000um_M1200_2017, mfv_stoplb_tau030000um_M1400_2017, mfv_stoplb_tau000300um_M1800_2017, mfv_stoplb_tau000100um_M0200_2017, mfv_stoplb_tau000300um_M0200_2017, mfv_stoplb_tau001000um_M0200_2017, mfv_stoplb_tau030000um_M0200_2017, mfv_stoplb_tau010000um_M0300_2017, mfv_stoplb_tau030000um_M0300_2017, mfv_stoplb_tau000100um_M0400_2017, mfv_stoplb_tau000300um_M0400_2017, mfv_stoplb_tau030000um_M0400_2017, mfv_stoplb_tau000100um_M0800_2017, mfv_stoplb_tau000300um_M0800_2017, mfv_stoplb_tau001000um_M0800_2017, mfv_stoplb_tau030000um_M0800_2017, mfv_stopld_tau030000um_M1000_2017, mfv_stopld_tau030000um_M1200_2017, mfv_stopld_tau000100um_M1400_2017, mfv_stopld_tau030000um_M1600_2017, mfv_stopld_tau000300um_M1800_2017, mfv_stopld_tau030000um_M1800_2017, mfv_stopld_tau001000um_M0200_2017, mfv_stopld_tau000100um_M0300_2017, mfv_stopld_tau030000um_M0300_2017, mfv_stopld_tau000100um_M0400_2017, mfv_stopld_tau000300um_M0400_2017, mfv_stopld_tau010000um_M0400_2017, mfv_stopld_tau030000um_M0400_2017, mfv_stopld_tau030000um_M0600_2017, mfv_stopld_tau001000um_M0800_2017, mfv_stopld_tau030000um_M0800_2017, mfv_stoplb_tau000100um_M1000_2018, mfv_stoplb_tau001000um_M1000_2018, mfv_stoplb_tau000100um_M1200_2018, mfv_stoplb_tau030000um_M1600_2018, mfv_stoplb_tau010000um_M1800_2018, mfv_stoplb_tau000300um_M0200_2018, mfv_stoplb_tau010000um_M0200_2018, mfv_stoplb_tau000300um_M0300_2018, mfv_stoplb_tau030000um_M0400_2018, mfv_stoplb_tau000300um_M0600_2018, mfv_stoplb_tau000100um_M0800_2018, mfv_stopld_tau000100um_M1200_2018, mfv_stopld_tau010000um_M1200_2018, mfv_stopld_tau030000um_M1200_2018, mfv_stopld_tau030000um_M1400_2018, mfv_stopld_tau010000um_M1800_2018, mfv_stopld_tau001000um_M1800_2018, mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau010000um_M0200_2018, mfv_stopld_tau000100um_M0300_2018, mfv_stopld_tau001000um_M0400_2018, mfv_stopld_tau001000um_M0800_2018, mfv_stopld_tau030000um_M0800_2018],
         },
-    # "T2_US_Caltech": {
-    #     "miniaod" : [mfv_stoplb_tau001000um_M1000_2017, mfv_stoplb_tau030000um_M1000_2017, mfv_stoplb_tau010000um_M0400_2017, mfv_stoplb_tau030000um_M0600_2017, mfv_stoplb_tau010000um_M0800_2017, mfv_stopld_tau030000um_M1400_2017, mfv_stopld_tau001000um_M1600_2017, mfv_stopld_tau000100um_M1800_2017, mfv_stopld_tau030000um_M0200_2017, mfv_stopld_tau000100um_M0600_2017, mfv_stopld_tau000100um_M0800_2017, mfv_stopld_tau001000um_M1000_2018, mfv_stopld_tau001000um_M1600_2018, mfv_stopld_tau000100um_M1800_2018, mfv_stopld_tau030000um_M0200_2018, mfv_stopld_tau030000um_M0300_2018, mfv_stopld_tau000100um_M0600_2018],
-    #     },
 }
 
 _seen = set()

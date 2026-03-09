@@ -1,16 +1,24 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-#ntuple_version_ = 'fixrecreatePeace_norevtxinef_OnnormdzULV30'
-ntuple_version_ = 'wjets_bkgtemplate'
-lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
-use_btag_triggers = False
-use_btag_vetoLepHT_triggers = False
-use_MET_triggers = False
-use_Lepton_triggers = True
+ntuple_version_ = '_tagTest' # we'll replace Test with a number like 001 for our real ntuple production, and will tag the code accordingly
+
+# trigger schemes we are currently using
+use_btag_vetoLepHT_triggers = True
+use_Lepton_triggers = False
+
+# trigger schemes for data, to avoid double counting of PDs
 use_Muon_triggers = False
 use_Electron_triggers = False
+
+# trigger schemes we aren't currently using
+use_btag_triggers = False
+use_MET_triggers = False
 use_DisplacedLepton_triggers = False
+
+# for gen-level studies of our LLPs
+lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
+
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_btag_vetoLepHT_triggers : 
@@ -24,13 +32,18 @@ elif use_Muon_triggers :
     ntuple_version_ += "LepMu"
 elif use_Electron_triggers :
     ntuple_version_ += "LepEle"
-ntuple_version_use = ntuple_version_ + 'm_noef' #FIXME only used for signal MC
+ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
+
+# old stuff from Peace:
 #dataset = "ntupleonnormdzulv30lepm_noef"
 #dataset = "NtuplerecreatePeacentupleOnnormdzULV30Lepm_NoEF_2018" might have implemented track inef accidentally
 #dataset = "NtupleOnnormdzULV30BvetoLHTm_NoEF_trkinef"
 #dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
 #dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
+
+if use_btag_triggers :
+    sys.exit('use_btag_triggers is deprecated, please use use_btag_vetoLepHT_triggers instead. Exiting.')
 
 if sum([use_btag_triggers,use_btag_vetoLepHT_triggers,use_MET_triggers,use_Lepton_triggers,use_Muon_triggers,use_Electron_triggers,use_DisplacedLepton_triggers]) != 1 :
     sys.exit("Must set exactly one trigger scheme to be on. Exiting.")
