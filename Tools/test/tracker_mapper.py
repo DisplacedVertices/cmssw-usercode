@@ -1,6 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_btag_vetoLepHT_triggers
 from JMTucker.MFVNeutralino.NtupleCommon import use_Muon_triggers, use_Electron_triggers
 
 settings = CMSSWSettings()
@@ -56,6 +56,14 @@ if use_btag_triggers :
                               event_filter_jes_mult = 0,
                               event_filter_require_vertex = False,
                               input_is_miniaod = True)
+elif use_btag_vetoLepHT_triggers :
+    event_filter = setup_event_filter(process,
+                              path_name = '',
+                              trigger_filter = 'bjets OR displaced dijet veto leptons and HT',
+                              event_filter = 'bjets OR displaced dijet veto leptons and HT',
+                              event_filter_jes_mult = 0,
+                              event_filter_require_vertex = False,
+                              input_is_miniaod = True)
 elif use_Muon_triggers :
     event_filter = setup_event_filter(process,
                               path_name = '',
@@ -103,7 +111,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     dataset = 'miniaod'
 
-    if use_btag_triggers :
+    if use_btag_triggers or use_btag_vetoLepHT_triggers :
 #        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=False, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
         samples = Samples.qcd_samples_2016APV
         #samples = Samples.BTagCSV_data_samples_2017 + Samples.DisplacedJet_data_samples_2017
@@ -118,7 +126,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_10pc.json'), 16)
 
     outputname = 'TrackerMapper'
-    if use_btag_triggers :
+    if use_btag_triggers or use_btag_vetoLepHT_triggers :
         outputname += 'Test'
     outputname += 'ULV4'
     ms = MetaSubmitter(outputname, dataset=dataset)

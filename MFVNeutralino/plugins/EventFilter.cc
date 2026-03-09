@@ -139,9 +139,6 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   bool muons_pass = false; //to safeguard against double counting of events that fires both muon trigger and electron trigger 
 
   for (const pat::Muon& muon : *muons) {
-    reco::TrackRef mtk = muon.track();
-    if (mtk.isNull()) continue;
- 
     if (muon.pt() > min_muon_pt && abs(muon.eta()) < 2.4) {
       bool isMedMuon = muon.passed(reco::Muon::CutBasedIdMedium);
       const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt -0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
@@ -159,18 +156,10 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   if (debug) printf("MFVEventFilter: nmuons: %i nelectrons: %i pass? %i\n", nmuons, nelectrons, leptons_pass);
    
   for (const pat::Electron& electron : *electrons) {
-    reco::GsfTrackRef etk = electron.gsfTrack();
-    if (etk.isNull()) continue;
-
     if (electron.pt() > min_electron_pt && abs(electron.eta()) < 2.4) {
-      bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");
-      //const auto pfIso = electron.pfIsolationVariables();
-      //const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-      //const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
-      const bool passveto = electron.passConversionVeto();
-
-      if (isTightEl && passveto) {
-  	    ++nelectrons;
+      bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-tight");
+      if (isTightEl) {
+        ++nelectrons;
       } 
     } 
     leptons_pass = nmuons + nelectrons >= min_nleptons;

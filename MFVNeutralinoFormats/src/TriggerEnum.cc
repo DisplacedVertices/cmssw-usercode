@@ -15,11 +15,11 @@ namespace mfv {
     "HLT_IsoMu27_v",
     "HLT_Mu50_v",
 
-    // // displaced lepton triggers 
-    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v",
-    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v",
-    "HLT_DoublePhoton70_v",
-    "HLT_DoubleMu43NoFiltersNoVtx_v",
+    // HT triggers for 2016
+    "HLT_PFHT800_v", 
+    "HLT_PFHT900_v", 
+    "HLT_PFJet450_v", 
+    "HLT_AK8PFJet450_v", 
     
     // // di-lepton triggers
     // "HLT_Ele15_IsoVVVL_PFHT450_v",

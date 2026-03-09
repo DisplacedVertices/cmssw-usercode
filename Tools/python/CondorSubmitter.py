@@ -106,7 +106,8 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-RequestMemory = 4000
+# Default memory request is 2100 MB. Request more only when needed, otherwise our priority drops faster and it takes longer to get a slot!
+#RequestMemory = 4000
 transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 +SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el7:x86_64"
 x509userproxy = $ENV(X509_USER_PROXY)

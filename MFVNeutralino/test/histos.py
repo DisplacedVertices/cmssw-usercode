@@ -41,6 +41,11 @@ nm1s = [
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
 
+# blind data events with >= 4 tracks per vertex until we're ready
+if not is_mc :
+    ntks = [3]
+    nvs = [0,1,2]
+
 for ntk in ntks:
     if ntk == 5:
         EX1 = EX2 = EX3 = ''
@@ -130,22 +135,26 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=False) # no data currently; no sliced ttbar since inclusive is used
+    if use_Muon_triggers or use_Electron_triggers :
+        sys.exit('In histos.py, use_Muon_triggers and use_Electron_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). Instead, do use_Lepton_triggers.')
+
+    if  use_btag_vetoLepHT_triggers:
+        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif  use_btag_vetoLepHT_triggers:
-        samples = pick_samples(dataset, qcd=True, data = False, all_signal = True, qcd_lep=False, leptonic=False, ttbar=True, diboson=False, Lepton_data=False)
+
+    elif use_Lepton_triggers :
+        samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    elif  use_Lepton_triggers:
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+
     else :
-        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, ttbar=True, diboson=True, Lepton_data=False)
+        print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
+        samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
-    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
+    json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
+    set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('Histos_LepIPCut_' + version,
+    cs = CondorSubmitter('Histos_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

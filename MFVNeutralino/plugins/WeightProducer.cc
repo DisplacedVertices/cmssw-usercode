@@ -24,7 +24,6 @@ private:
   const edm::EDGetTokenT<jmt::MergeableFloat> sumweight_token;
   const bool throw_if_no_mcstat;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
-  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const bool enable;
   const bool prints;
   const bool histos;
@@ -72,7 +71,6 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     sumweight_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
     throw_if_no_mcstat(cfg.getParameter<bool>("throw_if_no_mcstat")),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
@@ -99,21 +97,18 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
   produces<double>();
 
-  //FIXME way to turn off?
+  // NOTE the lepton-specific weights are not filled when apply_lepsf is false in the python configuration
   produces<double>("lepsfup"); //syst up 
   produces<double>("lepsfdown"); //syst down 
   
-  std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
+  int year = int(MFVNEUTRALINO_YEAR);
+  assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
-  if (year == "20161") rc.init(edm::FileInPath("RoccoR/RoccoR2016aUL.txt").fullPath()); //FIXME year is hardcoded
-  else if (year == "20162") rc.init(edm::FileInPath("RoccoR/RoccoR2016bUL.txt").fullPath()); //FIXME year is hardcoded
-  else if (year == "2017")  { 
-    rc.init(edm::FileInPath("RoccoR/RoccoR2017UL.txt").fullPath()); //FIXME year is hardcoded
-
-  }
-  else if (year == "2018")  {
-    rc.init(edm::FileInPath("RoccoR/RoccoR2018UL.txt").fullPath()); //FIXME year is hardcoded
-  }
+  if      (year == 20161) rc.init(edm::FileInPath("RoccoR/RoccoR2016aUL.txt").fullPath()); 
+  else if (year == 20162) rc.init(edm::FileInPath("RoccoR/RoccoR2016bUL.txt").fullPath()); 
+  else if (year == 2017)  rc.init(edm::FileInPath("RoccoR/RoccoR2017UL.txt").fullPath()); 
+  else if (year == 2018)  rc.init(edm::FileInPath("RoccoR/RoccoR2018UL.txt").fullPath()); 
+  else    throw cms::Exception("Configuration", "invalid year!");
 
 
   pu_cset = correction::CorrectionSet::from_file(pujson); 
@@ -211,6 +206,12 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     edm::Handle<MFVEvent> mevent;
     event.getByToken(mevent_token, mevent);
 
+    int year = int(MFVNEUTRALINO_YEAR);
+    assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
+
+    // for use in some of the correction maps
+    std::string year_str = std::to_string(int(MFVNEUTRALINO_YEAR));
+
     if (!event.isRealData()) {
       if (weight_gen || weight_gen_sign_only) {
         if (prints)
@@ -256,9 +257,8 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           {"NumTrueInteractions", mevent->npu}, 
           {"weights", "down"}, // variation
         };
-        // //PU UL SF from Central 
-        int year = int(MFVNEUTRALINO_YEAR);
 
+        // //PU UL SF from Central 
         if (year == 20161 || year == 20162) { 
           PUsf = run(pu_cset, "Collisions16_UltraLegacy_goldenJSON", values);
           PUsf_up = run(pu_cset, "Collisions16_UltraLegacy_goldenJSON", values_up);
@@ -365,8 +365,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	//int leading_lepid;
 	int leading_leptype; //0 == mu, 1 == ele
 
-	int year_int = int(MFVNEUTRALINO_YEAR);
-	if (year_int == 2017) {
+	if (year == 2017) {
 	  if (leading_muonpt > 30.) {
 	    leading_leppt = leading_muonpt;
 	    leading_lepeta = leading_muoneta;
@@ -460,7 +459,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  };
 
 	  //std::cout << "After Yuqing muon SF map" << std::endl;
-	  int year = int(MFVNEUTRALINO_YEAR);
 	  if (year == 2017) {
 	    //std::cout << "Before calling from Yuqing Muon jsons with: " << std::endl;
 	    //std::cout << leading_leppt << std::endl;
@@ -506,11 +504,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	}
 	else { //lepinSV is an electron
 	  //std::cout << "After defining leading leptype == 1" << std::endl;
-	  // int year = 2017;
-	  std::string year = std::to_string(int(MFVNEUTRALINO_YEAR));
 
 	  std::map<std::string, correction::Variable::Type> values {
-	    {"year", year}, //year
+	    {"year", year_str}, //year
             {"ValType", "sf"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
@@ -518,14 +514,14 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  };
 	  //std::cout << "After setting values map" << std::endl;
 	  std::map<std::string, correction::Variable::Type> values_up {
-	    {"year", year}, //year
+	    {"year", year_str}, //year
             {"ValType", "sfup"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
 	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
 	  };
 	  std::map<std::string, correction::Variable::Type> values_down {
-	    {"year", year}, //year
+	    {"year", year_str}, //year
             {"ValType", "sfdown"}, // variation
 	    {"WorkingPoint",  "Tight"}, //working point
 	    {"pt", leading_leppt}, // electron transverse momentum
@@ -549,19 +545,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
 	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
 	  std::map<std::string, correction::Variable::Type> trigvalues {
-            {"year", year}, //year
+            {"year", year_str}, //year
             {"ValType", "nominal"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity
           };
           std::map<std::string, correction::Variable::Type> trigvalues_up {
-            {"year", year}, //year
+            {"year", year_str}, //year
             {"ValType", "systup"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity
           };
           std::map<std::string, correction::Variable::Type> trigvalues_down {
-            {"year", year}, //year
+            {"year", year_str}, //year
             {"ValType", "systdown"}, // variation
             {"pt", leading_leppt}, // electron transverse momentum
             {"eta", leading_lepeta}, // electron absolute pseudorapidity

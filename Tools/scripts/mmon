@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime, optparse, os, sys, time, shutil
+import datetime, optparse, os, sys, time, shutil, select, termios
 from collections import defaultdict
 from CRABClient.ClientExceptions import ConfigurationException as CRABConfigurationException
 from JMTucker.Tools.CRAB3Tools import *
@@ -50,7 +50,7 @@ parser.add_option('-a', '--hadd', action='store_true', default=False,
 parser.add_option('-b', '--hadd-rm', action='store_true', default=False,
                   help='Like --hadd, but remove the originals (passes -r to mhadd).')
 parser.add_option('-p', '--publicweb', action='store_true', default=False,
-                  help='Write results of continuous mmon to publicweb area (if it is set up properly!)')
+                  help='Write results of continuous mmon to publicweb area (if it is set up properly! Disabled at FNAL a few years ago...)')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -60,6 +60,56 @@ def print_header(s):
     print '\033[1m%s\033[0m' % s
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
+
+# Flush stdin rather than loop ten times if I hit enter ten times when I think my terminal is frozen. Thanks ChatGPT for this.
+def flush_stdin():
+    if sys.stdin.isatty():
+        try:
+            termios.tcflush(sys.stdin.fileno(), termios.TCIFLUSH)
+        except:
+            pass
+
+# Thanks ChatGPT for this too.
+def wait_or_input(timeout):
+    """Wait up to `timeout` seconds.
+    - If user presses Enter: return 'continue' (and clear any queued input)
+    - If user types 'q' + Enter: return 'quit' (and clear any queued input)
+    - If timeout elapses: return 'continue'
+    """
+
+    # ---- Flush BEFORE waiting (clears accidental queued Enters) ----
+    flush_stdin()
+
+    sys.stdout.write(
+        "Press Enter to start next iteration immediately. "
+        "Type 'q' + Enter to quit.\n"
+    )
+    sys.stdout.flush()
+
+    start = time.time()
+
+    while True:
+        remaining = timeout - (time.time() - start)
+        if remaining <= 0:
+            return 'continue'
+
+        rlist, _, _ = select.select([sys.stdin], [], [], min(1, remaining))
+        if not rlist:
+            continue
+
+        user_input = sys.stdin.readline()
+        if not user_input:
+            return 'continue'
+
+        user_input = user_input.strip()
+
+        # ---- Flush AFTER first accepted input ----
+        flush_stdin()
+
+        if user_input.lower() == 'q':
+            return 'quit'
+        else:
+            return 'continue'
 
 #if options.resub_white_list and options.resub_black_list:
 #    raise ValueError('cannot have both --resub-white-list and --resub-black-list')
@@ -489,8 +539,9 @@ while 1:
     now = datetime.datetime.now()
     then = now + datetime.timedelta(seconds=options.wait_time)
     print colors.bold('That was pass #%i string %s. Going to sleep for %i seconds at %s. Will wake up at %s.' % (pass_count, pass_string, options.wait_time, now, then))
-    print '(Hit Ctrl-C, then enter to immediately start the next iteration. Or, hit Ctrl-C, then Ctrl-C to quit.)'
+    #print '(Hit Ctrl-C, then enter to immediately start the next iteration. Or, hit Ctrl-C, then Ctrl-C to quit.)'
 
+    # publicweb was disabled at the LPC a few years ago
     if options.publicweb :
         logfile.write('That was pass #%i string %s. Going to sleep for %i seconds at %s. Will wake up at %s.' % (pass_count, pass_string, options.wait_time, now, then))
         logfile.close()
@@ -498,7 +549,16 @@ while 1:
 
     pass_count += 1
 
-    try:
-        time.sleep(options.wait_time)
-    except KeyboardInterrupt:
-        raw_input('quit?')
+
+    #try:
+    #    time.sleep(options.wait_time)
+    #except KeyboardInterrupt:
+    #    raw_input('quit?')
+
+
+    # new version, since the container / lpc-scripts disable ctrl+C:
+    action = wait_or_input(options.wait_time)
+
+    if action == 'quit':
+        print("Quitting.")
+        sys.exit(0)

@@ -218,9 +218,17 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
     if (use_mevent) {
         event.getByToken(mevent_token, mevent);
 
-        // FIXME add 2016 HT triggers 
-        if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets(20) < 4))
-            return false;
+        // HT trigger + offline selection (including multiple trigger paths in 2016)
+        if (apply_presel == 1) {
+          bool success = false;
+          for(size_t trig : mfv::HTTriggers) {
+            if(satisfiesTrigger(mevent, trig, setup)) {
+              success = true;
+              break;
+            }
+          }
+          if(!success) return false;
+        }
 
     //Lepton Trigger && offline preselection
     // if use_DisplacedLepton_triggers is True, also consider Displaced Lepton && offline preselection
@@ -257,30 +265,16 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
       else success = (pass_muon_events || pass_ele_events); // both 
 
       if (apply_displacedlepton_triggers) {
-	for(size_t trig : mfv::DisplacedLeptonTriggers){
-	  if(satisfiesDispLepTrigger(mevent, trig, setup)) { 
-	    success = true;
-	    break;
-	  }
-	}
-      }
-      // if we want to consider displaced lepton triggers, to make it a logical OR, we need the single lepton triggers to fail. 
-      if (apply_displacedlepton_triggers && success == false) {
-	      for(size_t trig : mfv::DisplacedLeptonTriggers){
-	        if(satisfiesDispLepTrigger(mevent, trig, setup)) { 
-	          success = true;
-	          break;
-          }
-	      } 
-	    } 
+        throw std::invalid_argument("displaced dilepton triggers are no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
+      } 
       if(!success) return false;
     } 
 
-        // HT or Bjet or DisplacedDijet trigger && offline presel
+        // Bjet or DisplacedDijet trigger && offline presel
         if (apply_presel == 3) {
 
             bool success = false;
-            for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+            for(size_t trig : mfv::BjetOrDisplacedDijetTriggers){
                 if(satisfiesTrigger(mevent, trig, setup)){
                     success = true;
                     break;
@@ -292,12 +286,15 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
         // Bjet or DisplacedDijet trigger && offline presel orthogonal with HT trigger && offline
         if (apply_presel == 4) {
 
-            // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-            // FIXME add 2016 HT triggers 
-            if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
+            // Veto events which pass HT trigger and offline HT, to keep orthogonal with apply_presel == 1
+            for(size_t trig : mfv::HTTriggers) {
+              if(satisfiesTrigger(mevent, trig, setup)) {
+                return false;
+              }
+            }
 
             bool success = false;
-            for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+            for(size_t trig : mfv::BjetOrDisplacedDijetTriggers){
 
                 if(satisfiesTrigger(mevent, trig, setup)){
                     success = true;
@@ -331,12 +328,13 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
 
 
             if (leptonht_veto){
-              
-              // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-              // FIXME add 2016 HT triggers 
-              if( satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050, setup)) return false;
-              // FIXME try offline cuts only for now
-              if( (int(MFVNEUTRALINO_YEAR) == 20161 || int(MFVNEUTRALINO_YEAR) == 20162) && (mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4)  ) return false;
+
+              // Veto events which pass HT trigger and offline HT, to keep orthogonal with apply_presel == 1
+              for(size_t trig : mfv::HTTriggers) {
+                if(satisfiesTrigger(mevent, trig, setup)) {
+                  return false;
+                }
+              }
 
               bool pass_lep_events = false; 
               for(size_t trig : mfv::MuonTriggers){
@@ -359,10 +357,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
               if (pass_lep_events) return false;
             }
 
-            for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+            for(size_t trig : mfv::BjetOrDisplacedDijetTriggers){
 
-                // remain agnostic to the HT1050/HT900/HT800 trigger - FIXME 
-                if (trig == mfv::b_HLT_PFHT1050 ) continue;
                 if (trigbit_tostudy < 999 and int(trig) != trigbit_tostudy) continue;
 
                 if (bjet_agnostic and trig == mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) continue;
@@ -395,9 +391,17 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
         if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
             return false;
 
-        // FIXME add 2016 HT triggers 
-        if (apply_trigger == 1 && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
-            return false;
+        if (apply_trigger == 1) {
+          bool success = false;
+          for(size_t trig : mfv::HTTriggers) {
+            if(mevent->pass_hlt(trig)) {
+              success = true;
+              break;
+            }
+          }
+          if(!success) return false;
+        }
+
 
         if (apply_trigger == 2) {
             bool at_least_one_trigger_passed = false;
@@ -429,12 +433,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
               }
             }
             if(apply_displacedlepton_triggers){
-                    for(size_t trig : mfv::DisplacedLeptonTriggers){
-                      if(mevent->pass_hlt(trig)){
-                        at_least_one_trigger_passed = true;
-                         break;
-                      }
-                    }
+              throw std::invalid_argument("displaced dilepton triggers are no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
             }
             if(!at_least_one_trigger_passed) return false;
         }
@@ -442,7 +441,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
         
         if (apply_trigger == 3){
             bool at_least_one_trigger_passed = false;
-            for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+            for(size_t trig : mfv::BjetOrDisplacedDijetTriggers){
                 if(mevent->pass_hlt(trig)){
                     at_least_one_trigger_passed = true;
                     break;
@@ -453,11 +452,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup& setup) {
 
         if (apply_trigger == 4){
             bool at_least_one_trigger_passed = false;
-            for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
-
-                // skip HT trigger
-                // FIXME add 2016 HT triggers 
-                if(trig == mfv::b_HLT_PFHT1050) continue;
+            for(size_t trig : mfv::BjetOrDisplacedDijetTriggers){
 
                 if(mevent->pass_hlt(trig)){
                     at_least_one_trigger_passed = true;
@@ -777,15 +772,30 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
   switch(trig){
     case mfv::b_HLT_PFHT1050 :
+      {
+        if(year != 2017 && year != 2018) return false;
         return mevent->jet_ht(40) >= 1200 && mevent->njets(20) >= 4;
-
-    //FIXME add 2016 HT triggers     
-    //case mfv::b_HLT_PFHT900 :
-    //    return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
-
-    //case mfv::b_HLT_PFHT800 :
-    //    return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
-
+      }
+    case mfv::b_HLT_PFHT800 :
+      {
+        if(year != 20161 && year != 20162) return false;
+        return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+      }
+    case mfv::b_HLT_PFHT900 :
+      {
+        if(year != 20161 && year != 20162) return false;
+        return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+      }
+    case mfv::b_HLT_PFJet450 :
+      {
+        if(year != 20161 && year != 20162) return false;
+        return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+      }
+    case mfv::b_HLT_AK8PFJet450 :
+      {
+        if(year != 20161 && year != 20162) return false;
+        return mevent->jet_ht(40) >= 1000 && mevent->njets(20) >= 4;
+      }
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
         {
             if(year != 2017) return false;
@@ -1195,83 +1205,7 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
                     
 //displaced lepton trigger & per trigger preselection 
 bool MFVAnalysisCuts::satisfiesDispLepTrigger(edm::Handle<MFVEvent> mevent, size_t trig, const edm::EventSetup& setup) { 
-  if(!mevent->pass_hlt(trig)) return false;
-  int nmuons     = mevent->nmuons();
-  int nelectrons = mevent->nelectrons();
-
-  bool passed_kinematics = false;
-
-  switch(trig){
-  case mfv::b_HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL :
-    {
-      for(int ie =0; ie < nelectrons; ++ie){
-      if (mevent->electron_pt[ie] < 45) continue;
-      if (mevent->electron_ID[ie][3] == 1) {
-        if (abs(mevent->electron_eta[ie]) < 2.4) { 
-          for(int im=0; im < nmuons; ++im){
-            if (mevent->muon_pt[im] < 45) continue;
-              if (mevent->muon_ID[im][1] == 1) {
-                if (abs(mevent->muon_eta[im]) < 2.4) {
-                  if (mevent->muon_iso[im] < 0.15) {
-                    passed_kinematics = true;
-                  }
-                }
-              }
-            }
-          }
-  	}
-      }
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 :
-    {
-      int pass_ele = 0;
-      for(int ie=0; ie < nelectrons; ++ie){
-  	    if (mevent->electron_pt[ie] < 75) continue;
-        if (mevent->electron_ID[ie][3] == 1) {
-          if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            pass_ele +=1;
-          }
-        }
-      }
-      if (pass_ele > 1) passed_kinematics = true;
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_DoublePhoton70 :
-    {
-      int pass_ele = 0;
-      for(int ie=0; ie < nelectrons; ++ie){
-  	    if (mevent->electron_pt[ie] < 75) continue;
-        if (mevent->electron_ID[ie][3] == 1) {
-          if (abs(mevent->electron_eta[ie]) < 2.4) { 
-            pass_ele +=1;
-          }
-        }
-      }
-      if (pass_ele > 1) passed_kinematics = true;
-      return passed_kinematics;
-    }
-  case mfv::b_HLT_DoubleMu43NoFiltersNoVtx :
-    {
-      int pass_mu = 0;
-      for(int im=0; im < nmuons; ++im){
-  	    if (mevent->muon_pt[im] < 45) continue;
-  	      if (mevent->muon_ID[im][1] == 1) {
-  	        if (abs(mevent->muon_eta[im]) < 2.4) {
-  	          if (mevent->muon_iso[im] < 0.15) {
-  	            pass_mu +=1;
-  	          }
-  	        }
-  	      }
-      }
-     if (pass_mu > 1) passed_kinematics = true;
-     return passed_kinematics;
-   }
-  default :
-    {
-      throw std::invalid_argument(std::string(mfv::hlt_paths[trig]) + " not implemented in satisfiesTrigger");
-    }
-  }
+  throw std::invalid_argument("satisfiesDispLepTrigger is no longer implemented! See https://github.com/DisplacedVertices/cmssw-usercode/tree/25e0467e0710493d8bace2becdd84b8f01b34a4d for how it had been");
 
   return false;
 }

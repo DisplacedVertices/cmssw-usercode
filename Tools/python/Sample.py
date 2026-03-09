@@ -8,8 +8,8 @@ from JMTucker.Tools import DBS
 ########################################################################
 
 xrootd_sites = {
-    'T3_US_FNALLPC': 'root://cmsxrootd.fnal.gov/', #'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd-site.fnal.gov/',
+    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', # use 'root://cmsxrootd-site.fnal.gov/', if files are truly on the T1, but be careful since we currently use this regional redirector rather than find things at a per-site level
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
