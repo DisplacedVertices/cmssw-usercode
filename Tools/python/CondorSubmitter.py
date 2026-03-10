@@ -46,8 +46,63 @@ scram b -j 2 2>&1 > /dev/null
 mkdir $workdir/subworkdir
 cd $workdir/subworkdir
 
-cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
+cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp,cs_split_by_events__INPUT_BNS__} .
 echo $job > cs_job
+ 
+# Always stage input ROOT files locally to avoid remote xrootd reads
+echo "Staging input files locally"
+
+export CS_SPLIT_BY_EVENTS=$(<cs_split_by_events)
+
+echo "CS_SPLIT_BY_EVENTS=${CS_SPLIT_BY_EVENTS}"
+
+# Figure out which file group this job should read, and stage them as input_<i>.root
+python - <<'PY'
+import cs_filelist
+import os, subprocess, sys
+
+job = int(open('cs_job').read())
+
+# Mirror the logic in the pset: if split-by-events, everyone reads group 0; else group=job
+split_by_events = os.environ.get('CS_SPLIT_BY_EVENTS', '0') == '1'
+group_idx = 0 if split_by_events else job
+
+fns = cs_filelist.get(group_idx)
+
+local_names = []
+for i, src in enumerate(fns):
+    dst = 'input_%d.root' % i
+    local_names.append(dst)
+    # xrdcp cannot read bare /store paths; add a redirector if needed
+    src_full = src
+    if src_full.startswith('/store'):
+        src_full = 'root://cmsxrootd.fnal.gov/' + src_full
+
+    cmd = ['xrdcp', '-f', '-s', src_full, dst]
+    sys.stdout.write('Stage-in: %s -> %s\\n' % (src_full, dst))
+    sys.stdout.flush()
+    ret = subprocess.call(cmd)
+    if ret != 0:
+        sys.stderr.write('Stage-in failed with code %d for %s\\n' % (ret, src_full))
+        sys.exit(ret)
+
+with open('cs_local_files.txt', 'w') as out:
+    for n in local_names:
+        out.write(n + '\\n')
+
+sys.stdout.write('Wrote cs_local_files.txt with %d files\\n' % len(local_names))
+PY
+
+stageinexit=$?
+if [[ $stageinexit -ne 0 ]]; then
+    echo "Stage-in exited with code $stageinexit"
+    exit $stageinexit
+fi
+
+echo "Stage-in complete; staged files:"
+ls -l input_*.root cs_local_files.txt || true
+echo "cs_local_files.txt contents:"
+cat cs_local_files.txt || true
 
 echo meat start at $(date)
 __MEAT__
@@ -113,7 +168,7 @@ notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 RequestMemory = 4000
-transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp,cs_split_by_events__INPUT_FNS__
 +SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el7:x86_64"
 x509userproxy = $ENV(X509_USER_PROXY)
 __EXTRAS__
@@ -134,12 +189,22 @@ assert cs_job not in cs_fail
 import cs_filelist
 if __SPLIT_BY_EVENTS__:
     if process.source.type_() != 'EmptySource':
-        process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
+        # Prefer locally staged-in files if present
+        if os.path.exists('cs_local_files.txt'):
+            local_files = ['file:' + l.strip() for l in open('cs_local_files.txt') if l.strip()]
+            process.source.fileNames = local_files
+        else:
+            process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
         process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__ if __MAX_EVENTS__ != -1 else __EVENTS_PER__))
 else:
     if process.source.type_() != 'EmptySource':
-        process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
+        # Prefer locally staged-in files if present
+        if os.path.exists('cs_local_files.txt'):
+            local_files = ['file:' + l.strip() for l in open('cs_local_files.txt') if l.strip()]
+            process.source.fileNames = local_files
+        else:
+            process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
 
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -399,6 +464,7 @@ def get(i): return _l[i]
             ('cs_stageoutfiles', self.stageout_files),
             ('cs_filelist.py',   self.filelist_py_template.replace('__FILELIST__', encoded_filelist)),
             ('cs_njobs',         str(njobs)),
+            ('cs_split_by_events', '1' if sample.split_by == 'events' else '0'),
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
             ('cs_samplename',    sample.name),
@@ -435,14 +501,17 @@ def get(i): return _l[i]
             if to_add:
                 pset += '\n' + '\n'.join(to_add) + '\n'
 
+        split_by_events = (sample.split_by == 'events')
+
         pset_end_template = self.pset_end_template \
             .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
             .replace('__EVENTS_PER__', str(sample.events_per)) \
-            .replace('__SPLIT_BY_EVENTS__', str(sample.split_by == 'events'))
+            .replace('__SPLIT_BY_EVENTS__', str(split_by_events))
 
         pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
         open(pset_fn, 'wt').write(pset)
+
         return pset_fn
 
     @classmethod

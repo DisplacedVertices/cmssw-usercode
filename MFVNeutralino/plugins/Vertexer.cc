@@ -604,6 +604,10 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 }
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
+  std::cout << "[MFVVertexer] run " << event.id().run()
+            << " lumi " << event.luminosityBlock()
+            << " event " << event.id().event()
+            << std::endl;
   if (verbose)
     std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
@@ -634,6 +638,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   const size_t ntk = seed_tracks.size();
+  std::cout << "[MFVVertexer] number of seed tracks: " << ntk << std::endl;
   if (verbose){
     printf("n_seed_tracks: %5lu\n", ntk);
     if (track_attachment)
@@ -1041,6 +1046,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  std::cout << "[MFVVertexer] track-sharing iterations (resets): " << n_resets << std::endl;
   if (verbose)
     printf("n_resets: %i  n_onetracks: %i  n_noshare_vertices: %lu\n", n_resets, n_onetracks, vertices->size());
   if (histos) {

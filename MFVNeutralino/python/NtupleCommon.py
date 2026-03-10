@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'fixrecreatePeace_norevtxinef_OnnormdzULV30'
-ntuple_version_ = '_PUStudy'
+ntuple_version_ = '_Table28Validation_Corrected'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_btag_vetoLepHT_triggers = False
