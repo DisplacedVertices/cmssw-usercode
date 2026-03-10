@@ -97,9 +97,13 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
   produces<double>();
 
-  // NOTE the lepton-specific weights are not filled when apply_lepsf is false in the python configuration
-  produces<double>("lepsfup"); //syst up 
-  produces<double>("lepsfdown"); //syst down 
+  // lepton SF systematic variations (only)
+  produces<double>("lepsfup");
+  produces<double>("lepsfdown");
+
+  // pileup systematic variations (only)
+  produces<double>("puup");
+  produces<double>("pudown");
   
   int year = int(MFVNEUTRALINO_YEAR);
   assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
@@ -139,25 +143,23 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
-  if (lumi.run() == 1) { // no lumi.isRealData()
-    edm::Handle<jmt::MergeableInt> nEvents;
-    edm::Handle<jmt::MergeableFloat> sumWeight;
-    lumi.getByToken(nevents_token, nEvents);
-    lumi.getByToken(sumweight_token, sumWeight);
+  edm::Handle<jmt::MergeableInt> nEvents;
+  edm::Handle<jmt::MergeableFloat> sumWeight;
+  lumi.getByToken(nevents_token, nEvents);
+  lumi.getByToken(sumweight_token, sumWeight);
 
-    if (nEvents.isValid() && sumWeight.isValid()) {
-      if (prints)
-        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get());
-      
-      if (histos) {
-        h_sums->Fill(sum_nevents_total,        partial_mc_stats_weight * nEvents->get());
-        h_sums->Fill(sum_gen_weight_total,     partial_mc_stats_weight * sumWeight->get());
-	h_lepsums->Fill(lsum_nevents_total,     partial_mc_stats_weight * nEvents->get());
-      }
+  if (nEvents.isValid() && sumWeight.isValid()) {
+    if (prints)
+      printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get());
+    
+    if (histos) {
+      h_sums->Fill(sum_nevents_total,        partial_mc_stats_weight * nEvents->get());
+      h_sums->Fill(sum_gen_weight_total,     partial_mc_stats_weight * sumWeight->get());
+      h_lepsums->Fill(lsum_nevents_total,     partial_mc_stats_weight * nEvents->get());
     }
-    else if (throw_if_no_mcstat)
-      throw cms::Exception("ProductNotFound", "MCStatProducer luminosity branch products not found!");
   }
+  else if (throw_if_no_mcstat)
+    throw cms::Exception("ProductNotFound", "MCStatProducer luminosity branch products not found!");
 }
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
@@ -189,7 +191,7 @@ double MFVWeightProducer::run (const std::unique_ptr<correction::CorrectionSet>&
 
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
-  if (event.isRealData() != (event.id().run() != 1))
+  if (event.isRealData() && (event.id().run() == 1))
     throw cms::Exception("BadAssumption") << "isRealData = " << event.isRealData() << " and run = " << event.id().run();
 
   if (histos)
@@ -199,8 +201,18 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
   std::unique_ptr<double> weight(new double(1.));
-  std::unique_ptr<double> weight_up(new double(1.));
-  std::unique_ptr<double> weight_down(new double(1.));
+  std::unique_ptr<double> weight_lepsfup(new double(1.));
+  std::unique_ptr<double> weight_lepsfdown(new double(1.));
+  std::unique_ptr<double> weight_puup(new double(1.));
+  std::unique_ptr<double> weight_pudown(new double(1.));
+
+  double PUsf = 1.0;
+  double PUsf_up = 1.0;
+  double PUsf_down = 1.0;
+
+  double total_lepsf = 1.0;
+  double total_lepsf_up = 1.0;
+  double total_lepsf_down = 1.0;
 
   if (enable) {
     edm::Handle<MFVEvent> mevent;
@@ -220,23 +232,16 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_gensign->Fill(mevent->gen_weight > 0 ? 1 : -1);
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
         }
-        if (weight_gen_sign_only) {
+      if (weight_gen_sign_only) {
           if (mevent->gen_weight < 0) {
             *weight *= -1;
-	    *weight_up *= -1;
-            *weight_down *= -1;
-	  }
+          }
         }
         else {
           *weight *= mevent->gen_weight;
-	  *weight_up *= mevent->gen_weight;
-          *weight_down *= mevent->gen_weight;
-	}
+        }
       }
 
-      double PUsf = 1.0;
-      double PUsf_up = 1.0;
-      double PUsf_down = 1.0;
       //pulling from json
       if (weight_pileup) {
 
@@ -282,8 +287,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_sums->Fill(sum_pileup_weight, PUsf);
         }
         *weight *= PUsf;
-        *weight_up *= PUsf_up;
-        *weight_down *= PUsf_down;
       }
 
       if (weight_npv) {
@@ -295,9 +298,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_sums->Fill(sum_npv_weight, npv_w);
         }
         *weight *= npv_w;
-	*weight_up *= npv_w;
-        *weight_down *= npv_w;
-	
       }
 
       for (int mwi : misc_weight_indices) {
@@ -305,13 +305,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         if (prints)
           printf("misc weight %i: %g  ", mwi, w);
         *weight *= w;
-	*weight_up *= w;
-        *weight_down *= w;
       }
       //std::cout << "Before Lepton SFs" << std::endl;
       //Lepton SF workspace
       if (apply_lepsf) {
-	double total_lepsf = 1;
+        // use function-scope total_lepsf, total_lepsf_up, total_lepsf_down
         double total_lepIDsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepIDsf = 1;
         double lepRECOsf = 1;
@@ -321,13 +319,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         double lepTRsf = 1;
         double total_lepTRsf = 1; //for histos; in case there are > 1 SV with a leading lepton
 
-        double total_lepsf_down = 1;
         double lepIDsf_down = 1;
         double lepRECOsf_down = 1;
         double lepISOsf_down = 1;
-	double lepTRsf_down = 1;
+        double lepTRsf_down = 1;
 
-        double total_lepsf_up = 1;
         double lepIDsf_up = 1;
         double lepRECOsf_up = 1;
         double lepISOsf_up = 1;
@@ -468,7 +464,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             lepSF_stat = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
 	    lepSF = lepSF_nominal;
 	    lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
+	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
 	  }
 	  else if (year == 2018) {
 	    lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
@@ -476,7 +472,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	    lepSF_stat = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
 	    lepSF = lepSF_nominal;
             lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
+	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
 	  }
 	  else {
 	    lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
@@ -484,7 +480,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             lepSF_stat = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
 	    lepSF = lepSF_nominal;
             lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_syst;
+	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
 	  }
 	  
 	  // // Trigger UL systematic uncertainty only
@@ -503,29 +499,37 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  //}
 	}
 	else { //lepinSV is an electron
-	  //std::cout << "After defining leading leptype == 1" << std::endl;
+	  int y = int(MFVNEUTRALINO_YEAR);
+
+	  std::string year_id;
+	  if (y == 20161) year_id = "2016preVFP";
+	  else if (y == 20162) year_id = "2016postVFP";
+	  else if (y == 2017)  year_id = "2017";
+	  else if (y == 2018)  year_id = "2018";
+	  else year_id = std::to_string(y);
+
+	  std::string year_trig = std::to_string(y);
 
 	  std::map<std::string, correction::Variable::Type> values {
-	    {"year", year_str}, //year
-            {"ValType", "sf"}, // variation
-	    {"WorkingPoint",  "Tight"}, //working point
-	    {"pt", leading_leppt}, // electron transverse momentum
-	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	    {"year", year_id},
+            {"ValType", "sf"},
+	    {"WorkingPoint",  "Tight"},
+	    {"pt", leading_leppt},
+	    {"eta", leading_lepeta},
 	  };
-	  //std::cout << "After setting values map" << std::endl;
 	  std::map<std::string, correction::Variable::Type> values_up {
-	    {"year", year_str}, //year
-            {"ValType", "sfup"}, // variation
-	    {"WorkingPoint",  "Tight"}, //working point
-	    {"pt", leading_leppt}, // electron transverse momentum
-	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	    {"year", year_id},
+            {"ValType", "sfup"},
+	    {"WorkingPoint",  "Tight"},
+	    {"pt", leading_leppt},
+	    {"eta", leading_lepeta},
 	  };
 	  std::map<std::string, correction::Variable::Type> values_down {
-	    {"year", year_str}, //year
-            {"ValType", "sfdown"}, // variation
-	    {"WorkingPoint",  "Tight"}, //working point
-	    {"pt", leading_leppt}, // electron transverse momentum
-	    {"eta", leading_lepeta}, // electron absolute pseudorapidity
+	    {"year", year_id},
+            {"ValType", "sfdown"},
+	    {"WorkingPoint",  "Tight"},
+	    {"pt", leading_leppt},
+	    {"eta", leading_lepeta},
 	  };
 	  //std::cout << "Before calling e ID SFs" << std::endl;
 	  if (leading_leppt > 10.0) { 
@@ -545,50 +549,47 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
 	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
 	  std::map<std::string, correction::Variable::Type> trigvalues {
-            {"year", year_str}, //year
-            {"ValType", "nominal"}, // variation
-            {"pt", leading_leppt}, // electron transverse momentum
-            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+            {"year", year_trig},
+            {"ValType", "nominal"},
+            {"pt", leading_leppt},
+            {"eta", leading_lepeta},
           };
           std::map<std::string, correction::Variable::Type> trigvalues_up {
-            {"year", year_str}, //year
-            {"ValType", "systup"}, // variation
-            {"pt", leading_leppt}, // electron transverse momentum
-            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+            {"year", year_trig},
+            {"ValType", "systup"},
+            {"pt", leading_leppt},
+            {"eta", leading_lepeta},
           };
           std::map<std::string, correction::Variable::Type> trigvalues_down {
-            {"year", year_str}, //year
-            {"ValType", "systdown"}, // variation
-            {"pt", leading_leppt}, // electron transverse momentum
-            {"eta", leading_lepeta}, // electron absolute pseudorapidity
+            {"year", year_trig},
+            {"ValType", "systdown"},
+            {"pt", leading_leppt},
+            {"eta", leading_lepeta},
           };
 	  lepSF = run(eleSF_cset, "scale_factor", trigvalues);
 	  lepSF_up = run(eleSF_cset, "scale_factor", trigvalues_up);
 	  lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
 	  //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
 	}
-	total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
-	//std::cout << "lep ID sf: " << lepIDsf << ", total_lepsf: " << total_lepsf << ", leading lep pt: " << leading_leppt << ", leading lep eta: " << leading_lepeta << ", pileup sf: " << PUsf << ", number of pileup events: " << mevent->npu << std::endl;
-	total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up*lepSF_up;
-	total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down*lepSF_down;
+        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
+        total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up*lepSF_up;
+        total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down*lepSF_down;
 
-	//to be used in histos primarily 
-	total_lepRECOsf *= lepRECOsf;
-	total_lepISOsf *= lepISOsf;
-	total_lepIDsf *= lepIDsf;
-	total_lepTRsf *= lepTRsf;
+        //to be used in histos primarily 
+        total_lepRECOsf *= lepRECOsf;
+        total_lepISOsf *= lepISOsf;
+        total_lepIDsf *= lepIDsf;
+        total_lepTRsf *= lepTRsf;
 
-	if (histos) {
-	  h_lepsums->Fill(sum_leprecoSF, total_lepRECOsf);
-	  h_lepsums->Fill(sum_lepidSF, total_lepIDsf);
-	  h_lepsums->Fill(sum_lepisoSF, total_lepISOsf);
-	  h_lepsums->Fill(sum_leptriggerSF, total_lepTRsf);
-	  h_lepsums->Fill(sum_leptotalSF, total_lepsf);
-	}
-	
-	*weight *= total_lepsf;
-	*weight_up *= total_lepsf_up;
-	*weight_down *= total_lepsf_down;
+        if (histos) {
+          h_lepsums->Fill(sum_leprecoSF, total_lepRECOsf);
+          h_lepsums->Fill(sum_lepidSF, total_lepIDsf);
+          h_lepsums->Fill(sum_lepisoSF, total_lepISOsf);
+          h_lepsums->Fill(sum_leptriggerSF, total_lepTRsf);
+          h_lepsums->Fill(sum_leptotalSF, total_lepsf);
+        }
+
+        *weight *= total_lepsf;
       } //end if (leading_leptype == 0)
 
       // Fill in sumw entries for renormalization / factorization scale uncertainty
@@ -662,6 +663,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     }
     
   }
+  *weight_lepsfup = *weight;
+  *weight_lepsfdown = *weight;
+  if (apply_lepsf && total_lepsf != 0.0) {
+    *weight_lepsfup   = (*weight / total_lepsf) * total_lepsf_up;
+    *weight_lepsfdown = (*weight / total_lepsf) * total_lepsf_down;
+  }
+
+  *weight_puup = *weight;
+  *weight_pudown = *weight;
+  if (weight_pileup && PUsf != 0.0) {
+    *weight_puup   = (*weight / PUsf) * PUsf_up;
+    *weight_pudown = (*weight / PUsf) * PUsf_down;
+  }
 
   if (histos) {
     h_sums->Fill(sum_weight, *weight);
@@ -671,10 +685,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   if (prints)
     printf("total weight: %g\n", *weight);
 
-  
   event.put(std::move(weight));
-  event.put(std::move(weight_up), "lepsfup"); //specific for leptoninSV
-  event.put(std::move(weight_down), "lepsfdown"); //specific for leptoninSV
+  event.put(std::move(weight_lepsfup), "lepsfup");
+  event.put(std::move(weight_lepsfdown), "lepsfdown");
+  event.put(std::move(weight_puup), "puup");
+  event.put(std::move(weight_pudown), "pudown");
 
 }
 
