@@ -523,11 +523,11 @@ ggHToSSTodddd_samples_20161 = [
 ]
 
 ttHToLLPs_bbbb_samples_20161 = [
-    MCSample('ttHToLLPs_bbbb_tau10mm_M0055_20161', '/ttHToLLPs_bbbb_tau10mm_M0055_20161/None/USER', 150000),
+    MCSample('ttHToLLPs_bbbb_tau10mm_M55_20161', '/ttHToLLPs_bbbb_tau10mm_M55_20161/None/USER', 150000),
 ]
 
 ttHToLLPs_dddd_samples_20161 = [
-    MCSample('ttHToLLPs_dddd_tau10mm_M0055_20161', '/ttHToLLPs_dddd_tau10mm_M0055_20161/None/USER', 149015),
+    MCSample('ttHToLLPs_dddd_tau10mm_M55_20161', '/ttHToLLPs_dddd_tau10mm_M55_20161/None/USER', 149015),
 ]
 
 all_bjet_signal_samples_20161 = mfv_signal_samples_20161 + mfv_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161 + ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161
@@ -959,11 +959,11 @@ ggHToSSTodddd_samples_20162 = [
 ]
 
 ttHToLLPs_bbbb_samples_20162 = [
-    MCSample('ttHToLLPs_bbbb_tau10mm_M0055_20162', '/ttHToLLPs_bbbb_tau10mm_M0055_20162/None/USER', 147528),
+    MCSample('ttHToLLPs_bbbb_tau10mm_M55_20162', '/ttHToLLPs_bbbb_tau10mm_M55_20162/None/USER', 147528),
 ]
 
 ttHToLLPs_dddd_samples_20162 = [
-    MCSample('ttHToLLPs_dddd_tau10mm_M0055_20162', '/ttHToLLPs_dddd_tau10mm_M0055_20162/None/USER', 148886),
+    MCSample('ttHToLLPs_dddd_tau10mm_M55_20162', '/ttHToLLPs_dddd_tau10mm_M55_20162/None/USER', 148886),
 ]
 
 all_bjet_signal_samples_20162 = mfv_signal_samples_20162 + mfv_stopdbardbar_samples_20162 + mfv_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 + ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162
@@ -1501,11 +1501,11 @@ ggHToSSTodddd_samples_2017 = [
 ]
 
 ttHToLLPs_bbbb_samples_2017 = [
-    MCSample('ttHToLLPs_bbbb_tau10mm_M0055_2017', '/ttHToLLPs_bbbb_tau10mm_M0055_2017/None/USER', 223901),
+    MCSample('ttHToLLPs_bbbb_tau10mm_M55_2017', '/ttHToLLPs_bbbb_tau10mm_M55_2017/None/USER', 223901),
 ]
 
 ttHToLLPs_dddd_samples_2017 = [
-    MCSample('ttHToLLPs_dddd_tau10mm_M0055_2017', '/ttHToLLPs_dddd_tau10mm_M0055_2017/None/USER', 223329),
+    MCSample('ttHToLLPs_dddd_tau10mm_M55_2017', '/ttHToLLPs_dddd_tau10mm_M55_2017/None/USER', 223329),
 ]
 
 all_bjet_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017
@@ -1979,11 +1979,11 @@ ggHToSSTodddd_samples_2018 = [
 ]
 
 ttHToLLPs_bbbb_samples_2018 = [
-    MCSample('ttHToLLPs_bbbb_tau10mm_M0055_2018', '/ttHToLLPs_bbbb_tau10mm_M0055_2018/None/USER', 222557),
+    MCSample('ttHToLLPs_bbbb_tau10mm_M55_2018', '/ttHToLLPs_bbbb_tau10mm_M55_2018/None/USER', 222557),
 ]
 
 ttHToLLPs_dddd_samples_2018 = [
-    MCSample('ttHToLLPs_dddd_tau10mm_M0055_2018', '/ttHToLLPs_dddd_tau10mm_M0055_2018/None/USER', 224736),
+    MCSample('ttHToLLPs_dddd_tau10mm_M55_2018', '/ttHToLLPs_dddd_tau10mm_M55_2018/None/USER', 224736),
 ]
 
 all_bjet_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018 + ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018
