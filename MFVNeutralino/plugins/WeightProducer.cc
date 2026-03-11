@@ -222,7 +222,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
     // for use in some of the correction maps
-    std::string year_str = std::to_string(int(MFVNEUTRALINO_YEAR));
+    std::string year_str = std::to_string(jmt::Year::get());
 
     if (!event.isRealData()) {
       if (weight_gen || weight_gen_sign_only) {
@@ -504,9 +504,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  else if (year == 20162) year_id = "2016postVFP";
 	  else if (year == 2017)  year_id = "2017";
 	  else if (year == 2018)  year_id = "2018";
-	  else throw cms::Exception("Configuration", "invalid year!");
-
-	  std::string year_trig = std::to_string(year);
+	  else throw cms::Exception("Configuration", "Invalid year!");
 
 	  std::map<std::string, correction::Variable::Type> values {
 	    {"year", year_id},
@@ -547,19 +545,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
 	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
 	  std::map<std::string, correction::Variable::Type> trigvalues {
-            {"year", year_trig},
+            {"year", year_str},
             {"ValType", "nominal"},
             {"pt", leading_leppt},
             {"eta", leading_lepeta},
           };
           std::map<std::string, correction::Variable::Type> trigvalues_up {
-            {"year", year_trig},
+            {"year", year_str},
             {"ValType", "systup"},
             {"pt", leading_leppt},
             {"eta", leading_lepeta},
           };
           std::map<std::string, correction::Variable::Type> trigvalues_down {
-            {"year", year_trig},
+            {"year", year_str},
             {"ValType", "systdown"},
             {"pt", leading_leppt},
             {"eta", leading_lepeta},

@@ -41,7 +41,7 @@ scram b -j 2 2>&1 > /dev/null
 mkdir $workdir/subworkdir
 cd $workdir/subworkdir
 
-cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp,cs_split_by_events__INPUT_BNS__} .
+cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp,cs_split_by_events,cs_xrootd_url__INPUT_BNS__} .
 echo $job > cs_job
 
 if [[ __LOCAL_STAGE__ -eq 1 ]]; then
@@ -72,7 +72,8 @@ for i, src in enumerate(fns):
     # xrdcp cannot read bare /store paths; add a redirector if needed
     src_full = src
     if src_full.startswith('/store'):
-        src_full = 'root://cmsxrootd.fnal.gov/' + src_full
+        xrootd_url = open('cs_xrootd_url').read().strip()
+        src_full = xrootd_url + src_full
 
     cmd = ['xrdcp', '-f', '-s', src_full, dst]
     sys.stdout.write('Stage-in: %s -> %s\\n' % (src_full, dst))
@@ -471,6 +472,7 @@ def get(i): return _l[i]
             ('cs_primaryds',     sample.primary_dataset),
             ('cs_samplename',    sample.name),
             ('cs_timestamp',     (self.timestamp + timedelta(seconds=self.nsubmits)).strftime('%y%m%d_%H%M%S')),
+            ('cs_xrootd_url',    sample.xrootd_url),
             ]
 
         for fn, content in files_to_write:
