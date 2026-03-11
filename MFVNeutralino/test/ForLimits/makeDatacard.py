@@ -33,7 +33,7 @@ nbins = config.datacard["nbins"]
 bins = np.array(config.datacard["bins"])
 sig_type = config.sig["type"]
 
-year_to_tag = {"20161": "5", "20162": "6", "2017": "7", "2018": "8"} # used when we e.g. call background bkg5 to bkg8
+year_to_tag = config.datacard["year_to_tag"]
 year_tag = year_to_tag[year]
 
 
@@ -68,7 +68,8 @@ def make_nuis_dcnm(nuis, siginfo, force_no_CADItag=False):
     """
     nuis_rootname = nuis.nuis_name
     if nuis.add_anaID==True and not(force_no_CADItag): nuis_rootname = ns_conf.nuis_names["CMS-CADI-tag"] + nuis_rootname
-    if nuis.sep_yrs==True: nuis_rootname += year_tag
+    if (nuis.sep_yrs or not(nuis.corr)) and not(force_no_CADItag): nuis_rootname = nuis_rootname + "_"
+    if nuis.sep_yrs==True and not(force_no_CADItag): nuis_rootname += year_tag
 
     if nuis.corr==True:
         return nuis_rootname
@@ -154,6 +155,9 @@ kmax """
 
     for nuis in nuis_ls+nuis_bkg_ls:
         if nuis.corr==True: # I think code logic forces these to agree, but need to check
+            if nuis.nuis_type=="special":
+                if nuis.extra_info[0]=="updn_pair":
+                    if nuis.extra_info[1]=="dn": continue # skip one of the pairs
             k_ct += 1
         elif nuis.corr==False:
             k_ct += nbins
@@ -292,24 +296,23 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
     for nuis in ns_ls:
         if nuis.nuis_type != "shape": continue
 
-        dc_name = make_nuis_dcnm(nuis, siginfo, force_no_CADItag=True)
+        dc_name_for_h = make_nuis_dcnm(nuis, siginfo)
+        dc_name = make_nuis_dcnm(nuis, siginfo)
         if write_sig: process_htag = sig_nm(sig_id).replace(" ","")
         else: process_htag = bkg_nm().replace(" ","")
 
-        hname_up = process_htag + "_"+dc_name+"Up"
-        hname_dn = process_htag + "_"+dc_name+"Down"
+        hname_up = process_htag + "_"+dc_name_for_h+"Up"
+        hname_dn = process_htag + "_"+dc_name_for_h+"Down"
 
         h_central = f.Get(process_htag)
         h_shape_up = f.Get(hname_up)
         h_shape_dn = f.Get(hname_dn)
-        print(hname_up)
         #h_updn_ls = [h_shape_up, h_shape_dn]
         
 
         strls = []
         
         for i in range(nbins):
-            print(h_shape_dn.GetBinContent(i+1))
             try:
                 strls.append(str(h_shape_dn.GetBinContent(i+1) / h_central.GetBinContent(i+1)) + "/" + str(h_shape_up.GetBinContent(i+1) / h_central.GetBinContent(i+1)))
             except:
@@ -363,7 +366,10 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
                             strls.append(sig_norm_ls[j] / h_sig_cts.GetBinContent(j+1))
                         except:
                             print "Warning: division by 0 encountered in Gamma-N. Filling mean sumw as a placeholder. Error in", siginfo.fn, "bin", i, "."
-                            strls.append(sum(sig_norm_ls) / h_sig_cts.Integral())
+                            if h_sig_cts.Integral()==0.0:
+                                strls.append(0.0005)
+                            else:
+                                strls.append(sum(sig_norm_ls) / h_sig_cts.Integral())
 
                 new_lines += turn_info_to_line(dc_names[i], "gmN "+pad(str(int(h_sig_cts.GetBinContent(i+1))),5), strls, write_sig)
             continue
@@ -372,6 +378,26 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
         
         elif nuis.nuis_type == "special":
 
+            if (nuis.extra_info[0]=="updn_pair"):
+                if nuis.extra_info[1]=="up": #not processing down
+                    pair_found = False
+                    for n2 in ns_ls:
+                        if (n2.nuis_name==nuis.nuis_name) and (n2.nuis_type==nuis.nuis_type):
+                            if (n2.extra_info[1]=="dn"):
+                                npair = n2
+                                pair_found = True
+                                break
+                    if not(pair_found): raise Exception("The up-down pair marked UP has no corresponding pair")
+                    dc_name = make_nuis_dcnm(nuis, siginfo)
+
+                    strls = []
+                    for i in range(nbins):
+                        strls.append(str(n2.nuis_val[i]) + "/" + str(nuis.nuis_val[i]))
+                    new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
+                elif nuis.extra_info[1]!="dn": raise Exception("Bad extra_info field, use up or dn")
+        
+        
+        
             if (nuis.extra_info[0]=="anti-lnN"):
                 if (nuis.corr!=True): raise Exception("Anti-correlated lnN does not have un-correlated bins implemented")
 
@@ -453,7 +479,10 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
 
 
     dc_dict = config.datacard_out_loc
-    out_dc_fn = dc_dict["out_folder"] + dc_dict["out_fn_prefix"] + siginfo.return_nuis_key() + dc_dict["out_fn_suffix"]
+    out_dc_fn = dc_dict["out_folder"] + dc_dict["out_fn_prefix"] + siginfo.trig_type + "_" + siginfo.return_nuis_key()
+    if config.debug_settings["scale_bkg_fake"]: out_dc_fn += "_fakebkg"
+    out_dc_fn += dc_dict["out_fn_suffix"]
+
 
     datacard = open(out_dc_fn, "w")
     if debug_mode: print "Writing datacard to:", out_dc_fn

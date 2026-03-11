@@ -9,6 +9,7 @@ import nuisance_configs as ns_conf
 
 
 proc_nm = set([
+    "VH",
     "mfv_neu",
     "mfv_stopbbarbbar",
     "mfv_stopdbardbar",

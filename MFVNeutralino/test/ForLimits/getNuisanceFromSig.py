@@ -56,6 +56,29 @@ nuis_bkg_replacements = { # not to be confused with nuis_replacements (about sig
 
 
 
+nominal_corr_sig = set([
+    "reco_effi",])
+
+
+
+
+
+
+def get_nominal_corr_sig_fromname(label, siginfo, debug_mode=False):
+    """
+    -OUTPUT-
+    Numpy array of length #bins
+    """
+    factor = np.ones(siginfo.nbins)
+
+    if label == "reco_effi": factor = nsfc.get_nominal_reco_effi_sig(siginfo, debug_mode=debug_mode)
+
+    else: print "Error: signal multiplicative factor not implemented for", label
+
+    return factor
+
+
+
 
 
 
@@ -74,9 +97,9 @@ def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
 
     elif nuis_name == "vtx_reco_TM": new_nuis = nsfc.get_vtx_reco_TM(nuis_name, siginfo, debug_mode=debug_mode)
 
-    elif nuis_name == "pileup": new_nuis = nsfc.get_pileup("CMS_pileup_", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "pileup": new_nuis = nsfc.get_pileup("CMS_pileup_13TeV", siginfo, debug_mode=debug_mode)
     
-    elif nuis_name == "int_lumi": new_nuis = nsfc.get_int_lumi("lumi_", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "int_lumi": new_nuis = nsfc.get_int_lumi("lumi", siginfo, debug_mode=debug_mode)
 
     elif nuis_name == "lep_effi": new_nuis = nsfc.get_lep_effi("CMS_eff_lep", siginfo, debug_mode=debug_mode)
 
@@ -99,7 +122,7 @@ def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
 
     if nuis_name == "sum_dbvc": new_nuis = nsfc.get_bkg_sum_dbvc(nuis_name, debug_mode=debug_mode)
 
-    elif nuis_name == "pileup": new_nuis = nsfc.get_bkg_pileup("bkg_pu", debug_mode=debug_mode)
+    elif nuis_name == "pileup": new_nuis = nsfc.get_bkg_pileup("CMS_pileup", debug_mode=debug_mode)
 
     elif nuis_name == "sig_cont": new_nuis = nsfc.get_bkg_sig_cont(nuis_name, debug_mode=debug_mode)
 
@@ -109,6 +132,33 @@ def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
 
     nuis_bkg_ls += new_nuis
     return
+
+
+
+
+
+
+def get_nominal_corr_fromsig(siginfo, debug_mode=False):
+    """
+    Given a siginfo object, give corrections to nominal values.
+
+    -OUTPUT-
+    Array-like of float, size #bins: multiplicative correction
+    """
+    corr_ls = []
+
+    for label in sorted(nominal_corr_sig):
+        corr_ls.append(get_nominal_corr_sig_fromname(label, siginfo, debug_mode=debug_mode))
+
+    total_factor = np.ones(siginfo.nbins)
+    for cor in corr_ls:
+        total_factor *= cor
+
+
+    if debug_mode:
+        print "Queried multiplicative corrections to Signal, multiplying by:", total_factor
+
+    return total_factor
 
 
 

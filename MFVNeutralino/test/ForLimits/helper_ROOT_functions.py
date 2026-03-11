@@ -113,6 +113,19 @@ def move_overflow_into_last_bin(h):
 
 
 
+def mult_hist_w_array(h, arr):
+    """
+    Multiply an n-bin histogram by an array
+    """
+    if (h.GetNbinsX() != len(arr)): raise Exception("Bad multiplicative array dimensions for ROOT histogram")
+
+    for i in range(h.GetNbinsX()):
+        h.SetBinContent(i+1, h.GetBinContent(i+1) * arr[i])
+        h.SetBinError(i+1, h.GetBinError(i+1) * arr[i])
+    return
+
+
+
 
 
 

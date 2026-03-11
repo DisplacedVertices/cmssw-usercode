@@ -4,7 +4,7 @@ import numpy as np
 import helper_PyStorage_objects as sth
 
 import nuisance_configs as ns_conf # dictionaries to make this ad-hoc code work
-import uncerts_trigger as trig_unc # Python dictionaries
+import sig_and_bkg_configs as sb_conf
 import script_configs as config
 
 
@@ -33,6 +33,20 @@ debugging = True
 
 
 
+"""
+Nominal Corrections: SIGNAL
+"""
+
+def get_nominal_reco_effi_sig(siginfo, debug_mode=False):
+
+    nominals = 0.85 * np.ones(nbins)
+
+    return nominals
+
+
+
+
+
 
 """
 SIGNAL Nuisances
@@ -45,9 +59,19 @@ def get_mc_stat(nuis_name, siginfo, debug_mode=False):
 
 
 def get_reco_effi(nuis_name, siginfo, debug_mode=False):
-    # FIXME This is Alec's study
-    nuis = sth.NuisanceInfo("fake-shape", 1.2, make_updn=True, sep_yrs=True, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=True) # Dummy
-    return [nuis]
+
+    nominals = get_nominal_reco_effi_sig(siginfo, debug_mode=debug_mode) # If this is dummy, 0.85s
+    up_arr = 0.90 * np.ones(nbins)
+    dn_arr = 0.80 * np.ones(nbins)
+
+    up_lnN = np.round(up_arr/nominals, decimals=4)
+    dn_lnN = np.round(dn_arr/nominals, decimals=4)
+
+
+    up_nuis = sth.NuisanceInfo(nuis_name, up_lnN, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "up"])
+    dn_nuis = sth.NuisanceInfo(nuis_name, dn_lnN, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
+
+    return [up_nuis, dn_nuis]
 
 
 
@@ -56,31 +80,38 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
     frac_unc = ntab.get_point_from_fn(siginfo, overrides={"yr": ns_conf.year_remaps[nuis_name][siginfo.year]})
 
     if debug_mode: print "Identified TM fractional uncertainty:", frac_unc
-    if not np.isfinite(frac_unc):
-        print "Warning: value not sensible. Skipping value."
-        return []
+    if frac_unc is None:
+        print "Warning: value not sensible. Write fake value"
+        frac_unc = 0.5
+        nuis_name += "_PointNotFound"
+        # return []
     
     return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins) #FIXME need shape
+    nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=False, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
+
+    # nuis = sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins) # If you want a non-shape fake nuisance
     return [nuis]
 
 
 
 def get_int_lumi(nuis_name, siginfo, debug_mode=False):
-    # FIXME this is a dummy
-    return [sth.NuisanceInfo("lumi", 1.01, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins),
-            sth.NuisanceInfo("lumi_17", 1.01, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"])
-        ]
+    
+    frac_unc = sb_conf.lumi_uncs[year]
+    
+    nuis = sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins)
+    #sth.NuisanceInfo("lumi_17", 1.01, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"]) # If you want something anti-correlated
+
+    return [nuis]
 
 
 
 def get_lep_effi(nuis_name, siginfo, debug_mode=False):
-    # FIXME
-    return []
+    nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=True, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
+    return [nuis]
 
 
 

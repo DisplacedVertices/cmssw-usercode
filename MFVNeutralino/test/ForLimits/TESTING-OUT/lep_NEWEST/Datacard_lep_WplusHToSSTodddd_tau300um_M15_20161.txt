@@ -1,0 +1,38 @@
+# sample id in ROOT file 27
+# filename = WplusHToSSTodddd_tau300um_M15_20161.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2
+observation       0      0      0
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2            b2016preAPV0    b2016preAPV1    b2016preAPV2
+process       sig2016preAPV27  sig2016preAPV27  sig2016preAPV27           bkg2016preAPV   bkg2016preAPV   bkg2016preAPV
+process           0      0      0              1      1      1
+rate         0.0 0.0 0.0         0.000104793984241 0.000172667098227 0.000722538917532
+________
+
+lumi_2016preAPV               lnN     1.02   1.02   1.02              -      -      -
+
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016preAPVb1 lnN      1.5      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016preAPVb2 lnN        -    1.5      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016preAPVb3 lnN        -      -    1.5              -      -      -
+
+fake_fact_CMS_eff_lep_2016preAPV lnN   1.0/1.0 1.0/1.0 1.0/1.0              -      -      -
+fake_fact_CMS_pileup_13TeV    lnN   1.0/1.0 1.0/1.0 1.0/1.0              -      -      -
+
+CMS_EXO24035_mc_stat_2016preAPVb1 gmN 0      0.0005      -      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb2 gmN 0           - 0.0005      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb3 gmN 0           -      - 0.0005              -      -      -
+CMS_EXO24035_tk_reco_eff_2016preAPV lnN   0.9412/1.0588 0.9412/1.0588 0.9412/1.0588              -      -      -
+
+CMS_pileup_2016preAPV         lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont_2016preAPV lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg_2016preAPV lnN        -      -      -            1.1    1.1    1.1
+
+CMS_EXO24035_bkg_norm_2016preAPVb1 lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm_2016preAPVb2 lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm_2016preAPVb3 lnN        -      -      -              -      -   1.15
+

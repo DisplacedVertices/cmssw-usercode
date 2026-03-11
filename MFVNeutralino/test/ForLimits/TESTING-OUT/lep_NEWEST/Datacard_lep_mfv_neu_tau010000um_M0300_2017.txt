@@ -1,0 +1,38 @@
+# sample id in ROOT file 77
+# filename = mfv_neu_tau010000um_M0300_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b20170    b20171    b20172
+observation       0      0      0
+________
+bin             b20170    b20171    b20172            b20170    b20171    b20172
+process       sig201777  sig201777  sig201777           bkg2017   bkg2017   bkg2017
+process           0      0      0              1      1      1
+rate         0.00106416927544 0.015976884449 0.192200484803         4.96742725267e-06 2.75376005348e-05 0.00196749497221
+________
+
+lumi_2017                     lnN   1.0082 1.0082 1.0082              -      -      -
+
+CMS_EXO24035_vtx_reco_TM_2017b1 lnN   1.0770117300051922      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2017b2 lnN        - 1.0770117300051922      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2017b3 lnN        -      - 1.0770117300051922              -      -      -
+
+fake_fact_CMS_eff_lep_2017    lnN   1.09727156162/0.914425075054 1.09986926171/0.913919768456 1.11811284569/0.900547017738              -      -      -
+fake_fact_CMS_pileup_13TeV    lnN   1.09727156162/0.914425075054 1.09986926171/0.913919768456 1.11811284569/0.900547017738              -      -      -
+
+CMS_EXO24035_mc_stat_2017b1   gmN 1      0.00106416927544      -      -              -      -      -
+CMS_EXO24035_mc_stat_2017b2   gmN 15          - 0.00106512562993      -              -      -      -
+CMS_EXO24035_mc_stat_2017b3   gmN 175         -      - 0.00109828848459              -      -      -
+CMS_EXO24035_tk_reco_eff_2017 lnN   0.9412/1.0588 0.9412/1.0588 0.9412/1.0588              -      -      -
+
+CMS_pileup_2017               lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont_2017    lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg_2017    lnN        -      -      -            1.1    1.1    1.1
+
+CMS_EXO24035_bkg_norm_2017b1  lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm_2017b2  lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm_2017b3  lnN        -      -      -              -      -   1.15
+

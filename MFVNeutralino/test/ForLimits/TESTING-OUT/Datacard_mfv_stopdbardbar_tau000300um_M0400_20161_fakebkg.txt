@@ -1,0 +1,43 @@
+# sample id in ROOT file 2
+# filename = mfv_stopdbardbar_tau000300um_M0400_20161.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 21
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2
+observation       0      0      0
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2            b2016preAPV0    b2016preAPV1    b2016preAPV2
+process       sig2016preAPV2  sig2016preAPV2  sig2016preAPV2           bkg2016preAPV   bkg2016preAPV   bkg2016preAPV
+process           0      0      0              1      1      1
+rate         0.427698554707 0.277121537562 0.0366971785778         14.5900681374 6.89518857693 4.31474328571
+________
+
+lumi_2016preAPV               lnN     1.02   1.02   1.02              -      -      -
+
+CMS_EXO24035_calo_ineff_2016preAPVb1 lnN     1.01      -      -              -      -      -
+CMS_EXO24035_calo_ineff_2016preAPVb2 lnN        -   1.01      -              -      -      -
+CMS_EXO24035_calo_ineff_2016preAPVb3 lnN        -      -   1.01              -      -      -
+CMS_EXO24035_disp_trig_uncerts_2016preAPVb1 lnN   1.0216      -      -              -      -      -
+CMS_EXO24035_disp_trig_uncerts_2016preAPVb2 lnN        - 1.0216      -              -      -      -
+CMS_EXO24035_disp_trig_uncerts_2016preAPVb3 lnN        -      - 1.0216              -      -      -
+CMS_EXO24035_vtx_reco_TM_2016preAPVb1 lnN   1.3118      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2016preAPVb2 lnN        - 1.3118      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2016preAPVb3 lnN        -      - 1.3118              -      -      -
+
+fake_fact_CMS_pileup_13TeV    lnN   1.12474793662/0.896462752396 1.12035586549/0.900020480732 1.11688663591/0.903269213828              -      -      -
+
+CMS_EXO24035_mc_stat_2016preAPVb1 gmN 1054   0.000405786105035      -      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb2 gmN 681         - 0.000406933241647      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb3 gmN 92          -      - 0.000398882375846              -      -      -
+CMS_EXO24035_tk_reco_eff_2016preAPV lnN   0.9412/1.0588 0.9412/1.0588 0.9412/1.0588              -      -      -
+
+CMS_pileup_2016preAPV         lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont_2016preAPV lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg_2016preAPV lnN        -      -      -            1.1    1.1    1.1
+
+CMS_EXO24035_bkg_norm_2016preAPVb1 lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm_2016preAPVb2 lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm_2016preAPVb3 lnN        -      -      -              -      -   1.15
+

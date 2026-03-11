@@ -1,0 +1,38 @@
+# sample id in ROOT file 66
+# filename = mfv_neu_tau000300um_M1200_20162.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b2016postAPV0    b2016postAPV1    b2016postAPV2
+observation       0      0      0
+________
+bin             b2016postAPV0    b2016postAPV1    b2016postAPV2            b2016postAPV0    b2016postAPV1    b2016postAPV2
+process       sig2016postAPV66  sig2016postAPV66  sig2016postAPV66           bkg2016postAPV   bkg2016postAPV   bkg2016postAPV
+process           0      0      0              1      1      1
+rate         0.156732565365 0.0505447468926 0.00468239958718         0.00149168072368 0.00221574323259 0.00829257604373
+________
+
+lumi_2016postAPV              lnN     1.02   1.02   1.02              -      -      -
+
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016postAPVb1 lnN      1.5      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016postAPVb2 lnN        -    1.5      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2016postAPVb3 lnN        -      -    1.5              -      -      -
+
+fake_fact_CMS_eff_lep_2016postAPV lnN   1.18900477826/0.853944562115 1.19383233601/0.850779974115 1.20163835651/0.845830674605              -      -      -
+fake_fact_CMS_pileup_13TeV    lnN   1.18900477826/0.853944562115 1.19383233601/0.850779974115 1.20163835651/0.845830674605              -      -      -
+
+CMS_EXO24035_mc_stat_2016postAPVb1 gmN 354    0.000442747359787      -      -              -      -      -
+CMS_EXO24035_mc_stat_2016postAPVb2 gmN 121         - 0.00041772518093      -              -      -      -
+CMS_EXO24035_mc_stat_2016postAPVb3 gmN 10          -      - 0.000468239958718              -      -      -
+CMS_EXO24035_tk_reco_eff_2016postAPV lnN   0.9412/1.0588 0.9412/1.0588 0.9412/1.0588              -      -      -
+
+CMS_pileup_2016postAPV        lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont_2016postAPV lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg_2016postAPV lnN        -      -      -            1.1    1.1    1.1
+
+CMS_EXO24035_bkg_norm_2016postAPVb1 lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm_2016postAPVb2 lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm_2016postAPVb3 lnN        -      -      -              -      -   1.15
+

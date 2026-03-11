@@ -7,9 +7,10 @@ import numpy as np
 import os
 import pickle # save stuff
 
+import JMTucker.Tools.Samples as Samples
 from JMTucker.Tools.Sample import MCSample, nevents_from_file
 from JMTucker.Tools.ROOTTools import lerp, bilerp
-import JMTucker.Tools.Samples as jmtsamples
+#import JMTucker.Tools.Samples as jmtsamples
 
 import helper_ROOT_functions as ROOThelper
 import script_configs as config
@@ -52,9 +53,12 @@ class SignalROOTInfo(object):
         if root_exists:
             self.sample_file = ROOT.TFile.Open(self.full_fn)
             self.nevents = nevents_from_file(self.sample_file)
-            self.mcsample = MCSample(self.return_nuis_key(), self.return_nuis_key(), self.nevents)
-            print "DEBUG:", self.mcsample.name
-            jmtsamples._set_signal_stuff(self.mcsample)
+            try:
+                self.mcsample = eval("Samples." + self.return_nuis_key())
+                #self.mcsample = MCSample(self.return_nuis_key(), self.return_nuis_key(), self.nevents)
+                Samples._set_signal_stuff(self.mcsample)
+            except: #There's a chance there's no Samples.py entry
+                raise ValueError("No Samples.py entry")
         return
 
     
@@ -75,11 +79,16 @@ class SignalROOTInfo(object):
 
     
     def get_type(self):
-        if self.proc in config.sig["bjet_sigs"]:
+        if (self.proc in config.sig["bjet_sigs"]) and (self.proc in config.sig["lep_sigs"]):
+            print "Note: this signal can be bjet or lep. Setting to match script_config."
+            self.trig_type = config.sig["type"]
+        elif self.proc in config.sig["bjet_sigs"]:
             self.trig_type = "bjet"
         elif self.proc in config.sig["lep_sigs"]:
             self.trig_type = "lep"
-        else: print "Signal not found in either bjet or lep lists."
+        else:
+            print "Signal not found in either bjet or lep lists."
+            self.trig_type = "none"
         return
 
 
@@ -206,7 +215,10 @@ class NuisanceInfo(object):
             corr = True # This becomes one line on the datacard, not N lines
         if (nuis_type=="GammaN" and corr==True):
             print "Warning: The following pipeline is written assuming GammaN has corr=False. Please double-check the input"
-        
+        if (nuis_type=="special"):
+            if (extra_info[0]=="updn_pair"):
+                corr = True
+
         self.nuis_name = nuis_name
         self.make_updn = bool(make_updn)
         self.sep_yrs = sep_yrs
@@ -278,11 +290,26 @@ class NuisanceTable(object):
 
         else:
             pickle_loc_tosearch = pickle_loc
-            if make_pickle_fn:
-                pickle_loc_tosearch += "_"+proc+".pkl"
-            
-            with open(pickle_loc_tosearch, 'rb') as file:
-                use_dict = pickle.load(file)
+            try:
+                if make_pickle_fn:
+                    pickle_loc_tosearch += "_"+proc+".pkl"
+                with open(pickle_loc_tosearch, 'rb') as file:
+                    use_dict = pickle.load(file) # This will fail for stuff needing re-mapping
+            except:
+                could_find_pickle=False
+                for alias in config.sig["aliases"][proc]:
+                    try:
+                        pickle_loc_tosearch = pickle_loc
+                        if make_pickle_fn:
+                            pickle_loc_tosearch += "_"+alias+".pkl"
+                        with open(pickle_loc_tosearch, 'rb') as file:
+                            use_dict = pickle.load(file)
+                        could_find_pickle=True
+                        break
+                    except:
+                        pass
+                if not(could_find_pickle): raise Exception("Did not find any valid pickle to read, for " + proc)
+
             self.nuis_dict = use_dict
             self.proc = self.nuis_dict["proc"]
             self.perc = self.nuis_dict["perc"]

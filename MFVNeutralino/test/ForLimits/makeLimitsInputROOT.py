@@ -14,6 +14,7 @@ import getNuisanceFromSig as getns
 import makeDatacard as mkdat
 import helper_PyStorage_objects as sth # Tracks signal and nuisance info. I called it sth to mean "storage helper", for no reason
 import helper_ROOT_functions as ROOThelper
+from makeDatacard import make_nuis_dcnm as mk_dcnm 
 
 
 
@@ -33,7 +34,7 @@ nbins = config.datacard["nbins"]
 bins = np.array(config.datacard["bins"])
 sig_type = config.sig["type"]
 
-year_to_tag = {"20161": "5", "20162": "6", "2017": "7", "2018": "8"} # used when we e.g. call background bkg5 to bkg8
+year_to_tag = config.datacard["year_to_tag"]
 year_tag = year_to_tag[year]
 
 
@@ -56,6 +57,8 @@ def check_config():
 
     if len(config.obs[config.datacard["year"]])!=config.datacard["nbins"]:
         raise Exception("Length of observations must match nbins")
+
+    if config.debug_settings["scale_bkg_fake"]: print "Will scale bkg by FAKE values"
     return
 
 
@@ -88,8 +91,8 @@ def make_bkg(f, **kwargs):
     
     
     h_int_lumi = ROOT.TH1D('h_int_lumi_%s' % year, '', 1, 0, 1) #historical
-    h_int_lumi.SetBinContent(1, sb_conf.template_norms["lumi"][year_id])
-    if debug: print "Lumi: ", sb_conf.template_norms["lumi"][year_id], "\n"
+    h_int_lumi.SetBinContent(1, sb_conf.template_norms["lumi"][sig_type][year_id])
+    if debug: print "Lumi: ", sb_conf.template_norms["lumi"][sig_type][year_id], "\n"
     new_bkg_hs.append(h_int_lumi)
     
 
@@ -106,7 +109,10 @@ def make_bkg(f, **kwargs):
     h_bkg_sumdbv = to_TH1D(bkg_f.Get("h_c1v_sumdbv"), "h_bkg_sumdbv_%s" %year)
     scale_num, scale_den = sb_conf.template_norms["n2v"][sig_type][year_id], h_bkg_sumdbv.Integral()
     h_bkg_sumdbv.Scale(scale_num / scale_den) #FIXME: does Integral() add the over and under-flows?
-    if debug: print "Old Sum_dBV integral %.3g" %scale_den, " was scaled to %.3g" %scale_num, "\n"
+    if debug: print "Old Sum_dBV integral %.3g" %scale_den, " was scaled to %.3g" %scale_num
+    if config.debug_settings["scale_bkg_fake"]:
+        h_bkg_sumdbv.Scale(config.debug_settings["bkg_fake_sf"])
+        print "Warning: scaled background again by", config.debug_settings["bkg_fake_sf"], "to make FAKE bkg", "\n"
     
     h_bkg_sumdbv_rebin = h_bkg_sumdbv.Rebin(nbins, "bkg" + year_tag, bins)
     move_overflow_into_last_bin(h_bkg_sumdbv_rebin)
@@ -135,10 +141,6 @@ def make_sigs(f, sig_nums, sig_scales, **kwargs):
     f: ROOT object to write into
     sig_nums: dictionary. Code will fill {SigInfo object : int}
     sig_scales: dictionary. Code will fill (SigInfo object: scaling from hist integral -> actual integral)
-    #year: string, like config.datacard["year"]
-    #year_id: int, to index the year
-    #year_tag: the sig histogram will be called sig+tag+N, e.g. sig89 for sig 2018, 9th
-    #sig_type: string, either "lep" or "bjet"
     
     -OUTPUTS-
     f will store new histograms
@@ -151,7 +153,12 @@ def make_sigs(f, sig_nums, sig_scales, **kwargs):
 
     for cand in candidate_files:
         if os.path.basename(cand).find(year) != -1:
-            siginfo = sth.SignalROOTInfo(cand, root_exists=True, nbins=nbins)
+            if debug: print ""
+            try:
+                siginfo = sth.SignalROOTInfo(cand, root_exists=True, nbins=nbins)
+            except ValueError as e:
+                if str(e)=="No Samples.py entry": print "Signal name not in Samples.py, skipping", os.path.basename(cand)
+                else: raise Exception("Creating siginfo threw unknown error")
             if debug: print "Queried file:", os.path.basename(cand), ". Type identified: ", siginfo.trig_type
             if siginfo.trig_type != sig_type: continue
             sig_nums.update({siginfo: str(sig_id)})
@@ -187,7 +194,7 @@ def make_sigs(f, sig_nums, sig_scales, **kwargs):
         # Rescale signal
         xsec = sigfn.get_xsec()
         if debug: print "X-Sec:", xsec
-        sigyield = xsec * sb_conf.template_norms["lumi"][year_id]
+        sigyield = xsec * sb_conf.template_norms["lumi"][sigfn.trig_type][year_id]
 
         scale = sigyield / sumw
         sig_scales.update({sigfn : scale})
@@ -210,9 +217,12 @@ def make_sigs(f, sig_nums, sig_scales, **kwargs):
             h.SetDirectory(0)
             h.Scale(scale)
         h_sumdbv_nw.SetDirectory(0) # historical, idk what this does
-            
+          
         h_sig = h_sumdbv.Rebin(nbins, "sig"+year_tag+sig_id, bins)
         move_overflow_into_last_bin(h_sig)
+
+        nominal_corr_sig = getns.get_nominal_corr_fromsig(sigfn, debug_mode=debug)
+        ROOThelper.mult_hist_w_array(h_sig, nominal_corr_sig)
         if debug: print "Made signal: ", h_sig.GetName()
         new_sig_hs.append(h_sig)
 
@@ -252,8 +262,6 @@ def write_sig_updown(f, nuis_ls, siginfo, sig_scales, sig_id, **kwargs):
     siginfo: SigInfo object
     sig_scales: mapping of SigInfo objects to scales (scale := MiniTree to signal model)
     sig_id: integer describing the signal
-    #year: string, describing year number
-    #year_tag: string/char, one digit describing the year (5 for 20161, etc)
     
     -OUTPUTS-
     f: will be written to
@@ -271,19 +279,21 @@ def write_sig_updown(f, nuis_ls, siginfo, sig_scales, sig_id, **kwargs):
     for nuis in nuis_ls:
         if nuis.make_updn == False: continue
 
-        nname = nuis.nuis_name
-        if nuis.sep_yrs==True: nn_yrtg = year_tag # In the datacard-writing phase, nuis_name will have year_tag appended to it if year-dependent
-        else: nn_yrtg = ""
+        nname = mk_dcnm(nuis, siginfo)
+        nname_dict = mk_dcnm(nuis, siginfo, force_no_CADItag=True) # for searching config
+        #nname = nuis.nuis_name
+        #if nuis.sep_yrs==True: nn_yrtg = year_tag # In the datacard-writing phase, nuis_name will have year_tag appended to it if year-dependent
+        #else: nn_yrtg = ""
 
-        hname_up = "sig"+year_tag+sig_id + "_"+nname+nn_yrtg+"Up"
-        hname_dn = "sig"+year_tag+sig_id + "_"+nname+nn_yrtg+"Down"
+        hname_up = "sig"+year_tag+sig_id + "_"+nname+"Up"
+        hname_dn = "sig"+year_tag+sig_id + "_"+nname+"Down"
 
         ROOT.TH1.AddDirectory(1)
         h_sumdbv_up = ROOT.TH1D(hname_up+"_orig", '', 800, 0, 8)
         h_sumdbv_dn = ROOT.TH1D(hname_dn+"_orig", '', 800, 0, 8)
 
-        t.Draw('sumdbv>>%s' % hname_up+"_orig",  'weight*(limitsinput_pass && nvtx>=2)'.replace('weight', sb_conf.updn_wt_dict[nname][0]))
-        t.Draw('sumdbv>>%s' % hname_dn+"_orig",  'weight*(limitsinput_pass && nvtx>=2)'.replace('weight', sb_conf.updn_wt_dict[nname][1]))
+        t.Draw('sumdbv>>%s' % hname_up+"_orig",  'weight*(limitsinput_pass && nvtx>=2)'.replace('weight', sb_conf.updn_wt_dict[nname_dict][0]))
+        t.Draw('sumdbv>>%s' % hname_dn+"_orig",  'weight*(limitsinput_pass && nvtx>=2)'.replace('weight', sb_conf.updn_wt_dict[nname_dict][1]))
         
 
         ROOT.TH1.AddDirectory(0)
@@ -291,9 +301,12 @@ def write_sig_updown(f, nuis_ls, siginfo, sig_scales, sig_id, **kwargs):
         h_sig_dn = h_sumdbv_dn.Rebin(nbins, hname_dn, bins)
         hs_updn = [h_sig_up, h_sig_dn]
 
+        nominal_corr_sig = getns.get_nominal_corr_fromsig(siginfo, debug_mode=False)
+
         for h in hs_updn:
             h.Scale(scale)
             move_overflow_into_last_bin(h)
+            ROOThelper.mult_hist_w_array(h, nominal_corr_sig)
             h.SetDirectory(0)
 
 
@@ -322,7 +335,9 @@ def make():
     """
     if debug: print "Year is ", year, ", type ", sig_type
     
-    out_loc = config.output["out_folder"] + config.output["out_fn"] +"_"+sig_type +"_"+year + ".ROOT"
+    out_loc = config.output["out_folder"] + config.output["out_fn"] +"_"+sig_type +"_"+year
+    if config.debug_settings["scale_bkg_fake"]: out_loc += "_fakebkg"
+    out_loc += ".ROOT"
     if debug: print "Making and writing ", out_loc, "\n"
     #assert not os.path.exists(out_loc)
     ROOT.TH1.AddDirectory(0)

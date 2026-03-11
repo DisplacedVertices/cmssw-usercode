@@ -9,7 +9,7 @@ Need transposing
 #from __future__ import absolute_import
 TM_Tables = {
     
-    "vh" : { #FIXME, what's the name
+    "VH" : { #FIXME, what's the name
         
         "20161-2" : np.array([[np.nan , 100, 100, 100, 100, 100],
                 [np.nan , 60.34, 29.14, 23.44, 19.38, 22.58],
