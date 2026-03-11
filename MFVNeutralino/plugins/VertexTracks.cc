@@ -689,7 +689,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     //2016 tracking uncertainty: -1.26 +- 0.21
     //2017 and 2018 tracking uncertainty: -1.12 +- 0.11
     /*double track_recon_eff_coef;
-    const int year_cmon = MFVNEUTRALINO_YEAR;
+    const int year_cmon = jmt::Year::get();
     if (year_cmon == 20161 || year_cmon == 20162) {
       track_recon_eff_coef = 1.26;
       //std::cout << "DISCARDING TRACKS BASED ON 2016 TRACKING INEFFICIENCY STUDY" << std::endl;

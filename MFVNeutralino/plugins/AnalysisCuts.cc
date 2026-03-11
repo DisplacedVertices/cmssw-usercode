@@ -642,7 +642,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   std::vector<float> jet_pt_checks;
 
   // Get a shorthand for the current year
-  int year = int(MFVNEUTRALINO_YEAR);
+  int year = jmt::Year::get();
   assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
@@ -1039,7 +1039,7 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
   
   if(!mevent->pass_hlt(trig)) return false;
 
-  int year = int(MFVNEUTRALINO_YEAR);
+  int year = jmt::Year::get();
   assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
   int nmuons     = mevent->nmuons();

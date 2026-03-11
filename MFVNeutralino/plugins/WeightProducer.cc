@@ -101,8 +101,8 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   produces<double>("lepsfup"); //syst up 
   produces<double>("lepsfdown"); //syst down 
   
-  int year = int(MFVNEUTRALINO_YEAR);
-  assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
+  int year = jmt::Year::get();
+  assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid... (3/10/2026: now working towards a runtime setting)
 
   if      (year == 20161) rc.init(edm::FileInPath("RoccoR/RoccoR2016aUL.txt").fullPath()); 
   else if (year == 20162) rc.init(edm::FileInPath("RoccoR/RoccoR2016bUL.txt").fullPath()); 
@@ -129,7 +129,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "sum_weight_ren_up", "sum_weight_ren_dn", "sum_weight_fac_up", "sum_weight_fac_dn", "sum_weight_ren_fac_up", "sum_weight_ren_fac_dn", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
-    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEARCODE);
+    h_sums->Fill(yearcode_x_nfiles, jmt::Year::get_yearcode());
 
     h_lepsums = fs->make<TH1D>("h_lepsums", "partial_mc_stats_weight = 1", 8, 0, 8);
     int xbin = 1;
@@ -206,11 +206,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     edm::Handle<MFVEvent> mevent;
     event.getByToken(mevent_token, mevent);
 
-    int year = int(MFVNEUTRALINO_YEAR);
+    int year = jmt::Year::get();
     assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
     // for use in some of the correction maps
-    std::string year_str = std::to_string(int(MFVNEUTRALINO_YEAR));
+    std::string year_str = std::to_string(year);
 
     if (!event.isRealData()) {
       if (weight_gen || weight_gen_sign_only) {

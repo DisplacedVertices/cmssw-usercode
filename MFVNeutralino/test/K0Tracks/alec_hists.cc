@@ -13,7 +13,7 @@ bool satisfies_offline(jmt::JetsSubNtuple jets) {
   int njets = jets.n();
   int medcsvtags = 0;
   int hardmedcsvtags = 0;
-  int year = int(MFVNEUTRALINO_YEAR);
+  int year = jmt::Year::get();
   bool passed_kinematics = false;
 
   for(int j0 = 0; j0 < njets; j0++) {
@@ -484,7 +484,7 @@ int main(int argc, char** argv) {
 //  int njets = jets.n();
 //  int medcsvtags = 0;
 //  int hardmedcsvtags = 0;
-//  int year = int(MFVNEUTRALINO_YEAR);
+//  int year = jmt::Year::get();
 //  bool passed_kinematics = false;
 //
 //  for(int j0 = 0; j0 < njets; j0++) {

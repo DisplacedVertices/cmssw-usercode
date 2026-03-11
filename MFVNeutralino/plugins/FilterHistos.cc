@@ -323,7 +323,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     edm::Handle<reco::TrackCollection> tracks;
 
     // Get a shorthand for the current year
-    int ul_year = int(MFVNEUTRALINO_YEAR);
+    //int ul_year = jmt::Year::get();
     /*
     if (require_two_good_leptons) {
         bool has_nice_muon = false;

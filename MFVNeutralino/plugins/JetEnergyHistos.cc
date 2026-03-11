@@ -18,6 +18,8 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
  public:
   explicit MFVJetEnergyHistos(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
+  double get_sf(int index, int year);
+  double get_un(int index, int year);
 
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
@@ -54,6 +56,19 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
 
   TH1D* h_scale_up;
   TH1D* h_scale_down;
+
+  // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+  const double sf2017[14] = {1.1082, 1.1285, 1.0916, 1.1352, 1.2116, 1.0637, 1.0489, 1.1170, 1.1952, 1.0792, 1.3141, 1.4113, 1.2679, 1.0378};
+  const double un2017[14] = {0.0563, 0.0252, 0.0247, 0.0617, 0.0686, 0.0812, 0.0789, 0.0871, 0.0912, 0.1314, 0.0967, 0.2315, 0.0547, 0.0668};
+
+  const double sf2018[14] = {1.1436, 1.1538, 1.1481, 1.1304, 1.1590, 1.1628, 1.1423, 1.1479, 1.1360, 1.1911, 1.2919, 1.3851, 1.2670, 1.0367};
+  const double un2018[14] = {0.0104, 0.0347, 0.0363, 0.0687, 0.0141, 0.0554, 0.0447, 0.1086, 0.0619, 0.0870, 0.0732, 0.1504, 0.0607, 0.1575};
+
+  const double sf20161[14] = {1.0910, 1.1084, 1.0833, 1.0684, 1.0556, 1.0155, 0.9889, 1.0213, 1.0084, 1.1146, 1.1637, 1.1994, 1.2023, 1.0063};
+  const double un20161[14] = {0.0227, 0.0176, 0.0215, 0.0347, 0.0340, 0.0249, 0.0211, 0.0393, 0.0492, 0.0987, 0.0687, 0.1063, 0.0347, 0.0458};
+
+  const double sf20162[14] = {1.0993, 1.1228, 1.1000, 1.0881, 1.0761, 1.0452, 1.0670, 1.0352, 1.0471, 1.1365, 1.2011, 1.1662, 1.1599, 1.0672};
+  const double un20162[14] = {0.0132, 0.0317, 0.0267, 0.0933, 0.0382, 0.0538, 0.0344, 0.0477, 0.0488, 0.0672, 0.1996, 0.1008, 0.0316, 0.0453};
 };
 
 MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
@@ -158,26 +173,11 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
       else
 	throw cms::Exception("BadJet") << "JER jet with pt " << mevent->jet_pt[i] << " eta " << mevent->jet_eta[i] << " out of range?";
 
-      // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-#ifdef MFVNEUTRALINO_2017
-      const double sf[14] = {1.1082, 1.1285, 1.0916, 1.1352, 1.2116, 1.0637, 1.0489, 1.1170, 1.1952, 1.0792, 1.3141, 1.4113, 1.2679, 1.0378};
-      const double un[14] = {0.0563, 0.0252, 0.0247, 0.0617, 0.0686, 0.0812, 0.0789, 0.0871, 0.0912, 0.1314, 0.0967, 0.2315, 0.0547, 0.0668};
-#elif defined(MFVNEUTRALINO_2018)
-      const double sf[14] = {1.1436, 1.1538, 1.1481, 1.1304, 1.1590, 1.1628, 1.1423, 1.1479, 1.1360, 1.1911, 1.2919, 1.3851, 1.2670, 1.0367};
-      const double un[14] = {0.0104, 0.0347, 0.0363, 0.0687, 0.0141, 0.0554, 0.0447, 0.1086, 0.0619, 0.0870, 0.0732, 0.1504, 0.0607, 0.1575};
-#elif defined(MFVNEUTRALINO_20161)
-      const double sf[14] = {1.0910, 1.1084, 1.0833, 1.0684, 1.0556, 1.0155, 0.9889, 1.0213, 1.0084, 1.1146, 1.1637, 1.1994, 1.2023, 1.0063};
-      const double un[14] = {0.0227, 0.0176, 0.0215, 0.0347, 0.0340, 0.0249, 0.0211, 0.0393, 0.0492, 0.0987, 0.0687, 0.1063, 0.0347, 0.0458};
-#elif defined(MFVNEUTRALINO_20162)
-      const double sf[14] = {1.0993, 1.1228, 1.1000, 1.0881, 1.0761, 1.0452, 1.0670, 1.0352, 1.0471, 1.1365, 1.2011, 1.1662, 1.1599, 1.0672};
-      const double un[14] = {0.0132, 0.0317, 0.0267, 0.0933, 0.0382, 0.0538, 0.0344, 0.0477, 0.0488, 0.0672, 0.1996, 0.1008, 0.0316, 0.0453};
-#else
-#error bad year
-#endif
+      int year = jmt::Year::get();
 
       if (mevent->jet_gen_energy[i] > 0) {
-        const double up = sf[ind] + un[ind];
-        const double dn = sf[ind] - un[ind];
+        const double up = get_sf(ind,year) + get_un(ind,year);
+        const double dn = get_sf(ind,year) - get_un(ind,year);
         scale_up   = (mevent->jet_gen_energy[i] + up * (mevent->jet_energy[i] - mevent->jet_gen_energy[i])) / mevent->jet_energy[i];
         scale_down = (mevent->jet_gen_energy[i] + dn * (mevent->jet_energy[i] - mevent->jet_gen_energy[i])) / mevent->jet_energy[i];
       }
@@ -212,6 +212,29 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
 
   if (ht_40_up > 1200) h_jet_ht_40_up_1200cut->Fill(ht_40_up, w);
   if (ht_40_down > 1200) h_jet_ht_40_down_1200cut->Fill(ht_40_down, w);
+}
+
+double MFVJetEnergyHistos::get_sf(int index, int year)
+{
+  switch(year)
+  {
+    case 2017:  return sf2017[index];
+    case 2018:  return sf2018[index];
+    case 20161: return sf20161[index];
+    case 20162: return sf20162[index];
+    default: throw std::runtime_error("unknown year in MFVJetEnergyHistos::get_sf");
+  }
+}
+double MFVJetEnergyHistos::get_un(int index, int year)
+{
+  switch(year)
+  {
+    case 2017:  return un2017[index];
+    case 2018:  return un2018[index];
+    case 20161: return un20161[index];
+    case 20162: return un20162[index];
+    default: throw std::runtime_error("unknown year in MFVJetEnergyHistos::get_un");
+  }
 }
 
 DEFINE_FWK_MODULE(MFVJetEnergyHistos);

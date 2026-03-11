@@ -44,22 +44,35 @@ namespace jmt {
 
     static int pick(unsigned long long event) {
       std::mt19937_64 g(event);
-#if defined(MFVNEUTRALINO_2017)
-      std::discrete_distribution<> d(std::begin(int_lumi_)+e_2017B, std::begin(int_lumi_)+e_2017F+1);
-      return d(g)+e_2017B;
-#elif defined(MFVNEUTRALINO_2018)
-      std::discrete_distribution<> d(std::begin(int_lumi_)+e_2018A, std::begin(int_lumi_)+e_2018D+1);
-      return d(g)+e_2018A;
-#elif defined(MFVNEUTRALINO_20161)
-      std::discrete_distribution<> d(std::begin(int_lumi_)+e_20161B1, std::begin(int_lumi_)+e_20161F+1);
-      return d(g)+e_20161B1;
-#elif defined(MFVNEUTRALINO_20162)
-      std::discrete_distribution<> d(std::begin(int_lumi_)+e_20162F, std::begin(int_lumi_)+e_20162H+1);
-      return d(g)+e_20162F;
-#else
-      std::discrete_distribution<> d(std::begin(int_lumi_), std::end(int_lumi_));
-      return d(g);
-#endif
+      int year = jmt::Year::get();
+
+      switch(year) {
+        case 2017 : 
+        {
+          std::discrete_distribution<> d(std::begin(int_lumi_)+e_2017B, std::begin(int_lumi_)+e_2017F+1);
+          return d(g)+e_2017B;
+        }
+        case 2018 : 
+        {
+          std::discrete_distribution<> d(std::begin(int_lumi_)+e_2018A, std::begin(int_lumi_)+e_2018D+1);
+          return d(g)+e_2018A;
+        }
+        case 20161 :
+        {
+          std::discrete_distribution<> d(std::begin(int_lumi_)+e_20161B1, std::begin(int_lumi_)+e_20161F+1);
+          return d(g)+e_20161B1;
+        }
+        case 20162 :
+        {
+          std::discrete_distribution<> d(std::begin(int_lumi_)+e_20162F, std::begin(int_lumi_)+e_20162H+1);
+          return d(g)+e_20162F;
+        }
+        default :
+        {
+          std::discrete_distribution<> d(std::begin(int_lumi_), std::end(int_lumi_));
+          return d(g);
+        }
+      }
     }
 
 #ifndef JMT_STANDALONE

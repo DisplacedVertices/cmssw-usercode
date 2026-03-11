@@ -20,7 +20,7 @@ namespace jmt {
     // tagger indicates CSV (0), DeepCSV (1), or DeepFlavour (2)
     float discriminator_min(int wp, int tagger) {
       assert(wp >= 0 && wp <= 2);
-      int my_year = int(MFVNEUTRALINO_YEAR);
+      int my_year = jmt::Year::get();
       int idx = my_year == 20161 ? 0 : my_year == 20162 ? 1 : my_year == 2017 ? 2 : 3;
 
       //                                           2016(APV)                   2016                     2017                      2018

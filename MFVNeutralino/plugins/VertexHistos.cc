@@ -826,7 +826,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////
 
   if (nsv >= 2) {
-    int this_year = int(MFVNEUTRALINO_YEAR);
+    int this_year = jmt::Year::get();
     bool pass_dd = false;
     bool pass_bjet = false;
     bool pass_trig = false;

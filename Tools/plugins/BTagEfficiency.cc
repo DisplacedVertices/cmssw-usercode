@@ -84,88 +84,100 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
     // JMTBAD move to BTagging class?
     double x = jet.pt(); 
     assert(x >= 20); if (x > 1000) x = 1000;
-#ifdef MFVNEUTRALINO_2017
-    if (old) { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepCSV_106XUL17SF_WPonly_V2p1.csv
-      if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
-        h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
-      } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
-        h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
-      } else {
-        h_scalefactor[kind][0]->Fill(1.02103+0.00020673*x+-1.37579e-07*x*x+5.45282/x, *w);
-        h_scalefactor[kind][1]->Fill(1.09411+-0.000277731*x+2.47948e-07*x*x+-0.65943/x, *w);
-        h_scalefactor[kind][2]->Fill(0.817821+1.44089/sqrt(x), *w);
-      }
-    }
-    else { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepJet_106XUL17SF_WPonly_V2p1.csv
-      if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
-        h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
-      } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
-        h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
-      } else {
-        h_scalefactor[kind][0]->Fill(1.34198+-0.000555031*x+3.20633e-07*x*x+0.888495/x, *w);
-        h_scalefactor[kind][1]->Fill(1.35875+-0.000916722*x+6.33425e-07*x*x+-2.07301/x, *w);
-        h_scalefactor[kind][2]->Fill(0.850069+1.99726/sqrt(x), *w);
-      }
-    }
-#elif defined(MFVNEUTRALINO_2018)
-    { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL18/DeepJet_106XUL18SF_WPonly_V1p1.csv
-      if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
-        h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
-        h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
-      } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
-        h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
-        h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
-      } else {
-        h_scalefactor[kind][0]->Fill(1.46193+-0.000605595*x+3.30224e-07*x*x+-0.367873/x, *w);
-        h_scalefactor[kind][1]->Fill(1.46818+-0.00104385*x+8.01998e-07*x*x+-2.02643/x, *w);
-        h_scalefactor[kind][2]->Fill(0.864506+2.79354/sqrt(x), *w);
-      }
-    }
-#elif defined(MFVNEUTRALINO_20161)
+
+    int year = jmt::Year::get();
+
+    switch(year)
     {
-      if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
-        h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
-        h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
-      } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
-        h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
-        h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
-      } else {
-        h_scalefactor[kind][0]->Fill(1.33091+6.62324e-05*x+-1.19411e-07*x*x+-1.84379/x, *w);
-        h_scalefactor[kind][1]->Fill(1.33806+0.000233452*x+9.35591e-09*x*x+2.43996/x, *w);
-        h_scalefactor[kind][2]->Fill(1.41865+92.0563/(pow(x,1.5))+-9.85825/x, *w);
-      }
+      case 2017 : 
+        {
+          if (old) { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepCSV_106XUL17SF_WPonly_V2p1.csv
+            if (kind == 2) {
+              h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
+              h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
+              h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
+            } else if (kind == 1) {
+              h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
+              h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
+              h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
+            } else {
+              h_scalefactor[kind][0]->Fill(1.02103+0.00020673*x+-1.37579e-07*x*x+5.45282/x, *w);
+              h_scalefactor[kind][1]->Fill(1.09411+-0.000277731*x+2.47948e-07*x*x+-0.65943/x, *w);
+              h_scalefactor[kind][2]->Fill(0.817821+1.44089/sqrt(x), *w);
+            }
+          }
+          else { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepJet_106XUL17SF_WPonly_V2p1.csv
+            if (kind == 2) {
+              h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
+              h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
+              h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
+            } else if (kind == 1) {
+              h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
+              h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
+              h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
+            } else {
+              h_scalefactor[kind][0]->Fill(1.34198+-0.000555031*x+3.20633e-07*x*x+0.888495/x, *w);
+              h_scalefactor[kind][1]->Fill(1.35875+-0.000916722*x+6.33425e-07*x*x+-2.07301/x, *w);
+              h_scalefactor[kind][2]->Fill(0.850069+1.99726/sqrt(x), *w);
+            }
+          }
+        }
+      case 2018 : 
+        {
+          { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL18/DeepJet_106XUL18SF_WPonly_V1p1.csv
+            if (kind == 2) {
+              h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
+              h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
+              h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
+            } else if (kind == 1) {
+              h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
+              h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
+              h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
+            } else {
+              h_scalefactor[kind][0]->Fill(1.46193+-0.000605595*x+3.30224e-07*x*x+-0.367873/x, *w);
+              h_scalefactor[kind][1]->Fill(1.46818+-0.00104385*x+8.01998e-07*x*x+-2.02643/x, *w);
+              h_scalefactor[kind][2]->Fill(0.864506+2.79354/sqrt(x), *w);
+            }
+          }
+        }
+      case 20161 : 
+        {
+          {
+            if (kind == 2) {
+              h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
+              h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
+              h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
+            } else if (kind == 1) {
+              h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
+              h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
+              h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
+            } else {
+              h_scalefactor[kind][0]->Fill(1.33091+6.62324e-05*x+-1.19411e-07*x*x+-1.84379/x, *w);
+              h_scalefactor[kind][1]->Fill(1.33806+0.000233452*x+9.35591e-09*x*x+2.43996/x, *w);
+              h_scalefactor[kind][2]->Fill(1.41865+92.0563/(pow(x,1.5))+-9.85825/x, *w);
+            }
+          }
+        }
+      case 20162 : 
+        {
+          {
+            if (kind == 2) {
+              h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
+              h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
+              h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
+            } else if (kind == 1) {
+              h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
+              h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
+              h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
+            } else {
+              h_scalefactor[kind][0]->Fill(0.433232+0.000825257*x+-2.47629e-07*x*x+11.4121/x, *w);
+              h_scalefactor[kind][1]->Fill(0.452033+0.000974984*x+-4.12462e-07*x*x+9.68473/x, *w);
+              h_scalefactor[kind][2]->Fill(1.17135+321.802/(pow(x,1.5))+-70.4986/x, *w);
+            }
+          }  
+        }
+      default : throw std::runtime_error("unknown year in JMTBTagEfficiency::analyze");
     }
-#elif defined(MFVNEUTRALINO_20162)
-    {
-      if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
-        h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
-        h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
-      } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
-        h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
-        h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
-      } else {
-        h_scalefactor[kind][0]->Fill(0.433232+0.000825257*x+-2.47629e-07*x*x+11.4121/x, *w);
-        h_scalefactor[kind][1]->Fill(0.452033+0.000974984*x+-4.12462e-07*x*x+9.68473/x, *w);
-        h_scalefactor[kind][2]->Fill(1.17135+321.802/(pow(x,1.5))+-70.4986/x, *w);
-      }
-    }  
-#else
-#error bad year
-#endif
   }
 
   h_nlcb->Fill(nlcb[0], nlcb[1], nlcb[2], *w);
