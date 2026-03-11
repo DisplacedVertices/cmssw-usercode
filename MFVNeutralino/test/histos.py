@@ -169,6 +169,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
-                         pset_template_fn = '/uscms_data/d3/gdecastr/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/histos.py',
                          )
     cs.submit_all(samples)
