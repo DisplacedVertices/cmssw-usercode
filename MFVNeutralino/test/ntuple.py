@@ -92,4 +92,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier)
     ms.condor.stageout_files = 'all'
+    ms.condor.local_stage = False # By default do not copy remote files to local. Switch to True for primarily high mass signals, or any sample timing out via xRootD
     ms.submit(samples)

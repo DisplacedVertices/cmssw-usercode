@@ -105,7 +105,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   produces<double>("puup");
   produces<double>("pudown");
   
-  int year = int(MFVNEUTRALINO_YEAR);
+  int year = jmt::Year::get();
   assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
   if      (year == 20161) rc.init(edm::FileInPath("RoccoR/RoccoR2016aUL.txt").fullPath()); 
@@ -218,7 +218,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     edm::Handle<MFVEvent> mevent;
     event.getByToken(mevent_token, mevent);
 
-    int year = int(MFVNEUTRALINO_YEAR);
+    int year = jmt::Year::get();
     assert(year == 20161 || year == 20162 || year == 2017 || year == 2018); // in case of race conditions where the compiled macro is invalid...
 
     // for use in some of the correction maps
@@ -499,16 +499,14 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  //}
 	}
 	else { //lepinSV is an electron
-	  int y = int(MFVNEUTRALINO_YEAR);
-
 	  std::string year_id;
-	  if (y == 20161) year_id = "2016preVFP";
-	  else if (y == 20162) year_id = "2016postVFP";
-	  else if (y == 2017)  year_id = "2017";
-	  else if (y == 2018)  year_id = "2018";
-	  else year_id = std::to_string(y);
+	  if (year == 20161) year_id = "2016preVFP";
+	  else if (year == 20162) year_id = "2016postVFP";
+	  else if (year == 2017)  year_id = "2017";
+	  else if (year == 2018)  year_id = "2018";
+	  else throw cms::Exception("Configuration", "invalid year!");
 
-	  std::string year_trig = std::to_string(y);
+	  std::string year_trig = std::to_string(year);
 
 	  std::map<std::string, correction::Variable::Type> values {
 	    {"year", year_id},
