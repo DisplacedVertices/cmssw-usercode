@@ -100,6 +100,18 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   // lepton SF systematic variations (only)
   produces<double>("lepsfup");
   produces<double>("lepsfdown");
+  produces<double>("lepreco");
+  produces<double>("leprecoup");
+  produces<double>("leprecodown");
+  produces<double>("lepid");
+  produces<double>("lepidup");
+  produces<double>("lepiddown");
+  produces<double>("lepiso");
+  produces<double>("lepisoup");
+  produces<double>("lepisodown");
+  produces<double>("leptrig");
+  produces<double>("leptrigup");
+  produces<double>("leptrigdown");
 
   // pileup systematic variations (only)
   produces<double>("puup");
@@ -205,6 +217,18 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   std::unique_ptr<double> weight_lepsfdown(new double(1.));
   std::unique_ptr<double> weight_puup(new double(1.));
   std::unique_ptr<double> weight_pudown(new double(1.));
+  std::unique_ptr<double> weight_lepreco(new double(1.));
+  std::unique_ptr<double> weight_leprecoup(new double(1.));
+  std::unique_ptr<double> weight_leprecodown(new double(1.));
+  std::unique_ptr<double> weight_lepid(new double(1.));
+  std::unique_ptr<double> weight_lepidup(new double(1.));
+  std::unique_ptr<double> weight_lepiddown(new double(1.));
+  std::unique_ptr<double> weight_lepiso(new double(1.));
+  std::unique_ptr<double> weight_lepisoup(new double(1.));
+  std::unique_ptr<double> weight_lepisodown(new double(1.));
+  std::unique_ptr<double> weight_leptrig(new double(1.));
+  std::unique_ptr<double> weight_leptrigup(new double(1.));
+  std::unique_ptr<double> weight_leptrigdown(new double(1.));
 
   double PUsf = 1.0;
   double PUsf_up = 1.0;
@@ -213,6 +237,18 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   double total_lepsf = 1.0;
   double total_lepsf_up = 1.0;
   double total_lepsf_down = 1.0;
+  double total_lepreco = 1.0;
+  double total_lepreco_up = 1.0;
+  double total_lepreco_down = 1.0;
+  double total_lepid = 1.0;
+  double total_lepid_up = 1.0;
+  double total_lepid_down = 1.0;
+  double total_lepiso = 1.0;
+  double total_lepiso_up = 1.0;
+  double total_lepiso_down = 1.0;
+  double total_leptrig = 1.0;
+  double total_leptrig_up = 1.0;
+  double total_leptrig_down = 1.0;
 
   if (enable) {
     edm::Handle<MFVEvent> mevent;
@@ -310,14 +346,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
       //Lepton SF workspace
       if (apply_lepsf) {
         // use function-scope total_lepsf, total_lepsf_up, total_lepsf_down
-        double total_lepIDsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepIDsf = 1;
         double lepRECOsf = 1;
-        double total_lepRECOsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepISOsf = 1;
-        double total_lepISOsf = 1; //for histos; in case there are > 1 SV with a leading lepton
         double lepTRsf = 1;
-        double total_lepTRsf = 1; //for histos; in case there are > 1 SV with a leading lepton
 
         double lepIDsf_down = 1;
         double lepRECOsf_down = 1;
@@ -561,29 +593,40 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
             {"ValType", "systdown"},
             {"pt", leading_leppt},
             {"eta", leading_lepeta},
-          };
-	  lepSF = run(eleSF_cset, "scale_factor", trigvalues);
-	  lepSF_up = run(eleSF_cset, "scale_factor", trigvalues_up);
-	  lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
-	  //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
-	}
-        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
-        total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up*lepSF_up;
-        total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down*lepSF_down;
+	          };
+		  lepSF = run(eleSF_cset, "scale_factor", trigvalues);
+		  lepSF_up = run(eleSF_cset, "scale_factor", trigvalues_up);
+		  lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
+		  //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
+		}
+                const double lepTriggerComponent = lepTRsf * lepSF;
+                const double lepTriggerComponent_up = lepTRsf_up * lepSF_up;
+                const double lepTriggerComponent_down = lepTRsf_down * lepSF_down;
 
-        //to be used in histos primarily 
-        total_lepRECOsf *= lepRECOsf;
-        total_lepISOsf *= lepISOsf;
-        total_lepIDsf *= lepIDsf;
-        total_lepTRsf *= lepTRsf;
+	        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
+	        total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up*lepSF_up;
+	        total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down*lepSF_down;
 
-        if (histos) {
-          h_lepsums->Fill(sum_leprecoSF, total_lepRECOsf);
-          h_lepsums->Fill(sum_lepidSF, total_lepIDsf);
-          h_lepsums->Fill(sum_lepisoSF, total_lepISOsf);
-          h_lepsums->Fill(sum_leptriggerSF, total_lepTRsf);
-          h_lepsums->Fill(sum_leptotalSF, total_lepsf);
-        }
+	        total_lepreco *= lepRECOsf;
+	        total_lepreco_up *= lepRECOsf_up;
+	        total_lepreco_down *= lepRECOsf_down;
+	        total_lepid *= lepIDsf;
+	        total_lepid_up *= lepIDsf_up;
+	        total_lepid_down *= lepIDsf_down;
+	        total_lepiso *= lepISOsf;
+	        total_lepiso_up *= lepISOsf_up;
+	        total_lepiso_down *= lepISOsf_down;
+	        total_leptrig *= lepTriggerComponent;
+	        total_leptrig_up *= lepTriggerComponent_up;
+	        total_leptrig_down *= lepTriggerComponent_down;
+
+	        if (histos) {
+	          h_lepsums->Fill(sum_leprecoSF, total_lepreco);
+	          h_lepsums->Fill(sum_lepidSF, total_lepid);
+	          h_lepsums->Fill(sum_lepisoSF, total_lepiso);
+	          h_lepsums->Fill(sum_leptriggerSF, total_leptrig);
+	          h_lepsums->Fill(sum_leptotalSF, total_lepsf);
+	        }
 
         *weight *= total_lepsf;
       } //end if (leading_leptype == 0)
@@ -666,6 +709,19 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     *weight_lepsfdown = (*weight / total_lepsf) * total_lepsf_down;
   }
 
+  *weight_lepreco = total_lepreco;
+  *weight_leprecoup = total_lepreco_up;
+  *weight_leprecodown = total_lepreco_down;
+  *weight_lepid = total_lepid;
+  *weight_lepidup = total_lepid_up;
+  *weight_lepiddown = total_lepid_down;
+  *weight_lepiso = total_lepiso;
+  *weight_lepisoup = total_lepiso_up;
+  *weight_lepisodown = total_lepiso_down;
+  *weight_leptrig = total_leptrig;
+  *weight_leptrigup = total_leptrig_up;
+  *weight_leptrigdown = total_leptrig_down;
+
   *weight_puup = *weight;
   *weight_pudown = *weight;
   if (weight_pileup && PUsf != 0.0) {
@@ -684,6 +740,18 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(std::move(weight));
   event.put(std::move(weight_lepsfup), "lepsfup");
   event.put(std::move(weight_lepsfdown), "lepsfdown");
+  event.put(std::move(weight_lepreco), "lepreco");
+  event.put(std::move(weight_leprecoup), "leprecoup");
+  event.put(std::move(weight_leprecodown), "leprecodown");
+  event.put(std::move(weight_lepid), "lepid");
+  event.put(std::move(weight_lepidup), "lepidup");
+  event.put(std::move(weight_lepiddown), "lepiddown");
+  event.put(std::move(weight_lepiso), "lepiso");
+  event.put(std::move(weight_lepisoup), "lepisoup");
+  event.put(std::move(weight_lepisodown), "lepisodown");
+  event.put(std::move(weight_leptrig), "leptrig");
+  event.put(std::move(weight_leptrigup), "leptrigup");
+  event.put(std::move(weight_leptrigdown), "leptrigdown");
   event.put(std::move(weight_puup), "puup");
   event.put(std::move(weight_pudown), "pudown");
 
