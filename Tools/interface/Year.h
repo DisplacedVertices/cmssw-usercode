@@ -22,6 +22,8 @@
 #define MFVNEUTRALINO_YEARCODE_MULT 2371ULL
 #define MFVNEUTRALINO_YEARCODE (MFVNEUTRALINO_YEAR * MFVNEUTRALINO_YEARCODE_MULT)
 
+#include <vector>
+
 namespace jmt {
   // for standalone code where we don't want to have to have two environments and we read the year out of the input file
   class Year {
@@ -31,8 +33,13 @@ namespace jmt {
     static void set(int y, bool chk=true) { if (chk) check(y); year_ = y; }
     static int get() { return year_; }
     static bool is(int y) { return y == year_; }
+
+    const static std::vector<int> valid_years;
+    const static unsigned long long yearcode_mult = 2371ULL;
+    const static unsigned long long get_yearcode() { return get() * yearcode_mult; }
   };
 
+  // this is to extract year from yearcode
   class yearcode {
   public:
     yearcode() = delete;

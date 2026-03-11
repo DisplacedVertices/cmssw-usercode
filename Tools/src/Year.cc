@@ -6,10 +6,11 @@
 
 namespace jmt {
   int Year::year_ = MFVNEUTRALINO_YEAR;
+  const std::vector<int> Year::valid_years = {2017, 2018, 20161, 20162};
 
   void Year::check(int y) {
     bool ok = false;
-    for (int y2 : MFVNEUTRALINO_YEARS)
+    for (int y2 : valid_years)
       if (y == y2)
         ok = true;
     if (!ok)
@@ -25,8 +26,8 @@ namespace jmt {
         std::modf(cc, &ip) != 0.)
       throw std::invalid_argument("bad double yearcode");
     const ull c(cc);
-    for (int y : MFVNEUTRALINO_YEARS) {
-      const ull cd = y * MFVNEUTRALINO_YEARCODE_MULT;
+    for (int y : Year::valid_years) {
+      const ull cd = y * Year::yearcode_mult;
       if (c % cd == 0) {
         Year::set(year_ = y, false);
         const ull nf = c / cd;
