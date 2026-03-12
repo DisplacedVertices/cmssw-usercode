@@ -537,9 +537,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	  };
 	  //std::cout << "Before calling e ID SFs" << std::endl;
 	  if (leading_leppt > 10.0) { 
-	    lepRECOsf = run(ele_cset, "UL-Electron-ID-SF", values);
-	    lepRECOsf_up = run(ele_cset, "UL-Electron-ID-SF", values_up);
-	    lepRECOsf_down = run(ele_cset, "UL-Electron-ID-SF", values_down);
+	    lepIDsf = run(ele_cset, "UL-Electron-ID-SF", values);
+	    lepIDsf_up = run(ele_cset, "UL-Electron-ID-SF", values_up);
+	    lepIDsf_down = run(ele_cset, "UL-Electron-ID-SF", values_down);
   
 	  }
 	  //std::cout << "After calling e ID SFs" << std::endl;
