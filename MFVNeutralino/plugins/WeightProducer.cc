@@ -97,9 +97,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
   produces<double>();
 
-  // lepton SF systematic variations (only)
-  produces<double>("lepsfup");
-  produces<double>("lepsfdown");
+  // lepton SF nominal factors and systematic variations
   produces<double>("lepreco");
   produces<double>("leprecoup");
   produces<double>("leprecodown");
@@ -213,8 +211,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
   std::unique_ptr<double> weight(new double(1.));
-  std::unique_ptr<double> weight_lepsfup(new double(1.));
-  std::unique_ptr<double> weight_lepsfdown(new double(1.));
   std::unique_ptr<double> weight_puup(new double(1.));
   std::unique_ptr<double> weight_pudown(new double(1.));
   std::unique_ptr<double> weight_lepreco(new double(1.));
@@ -235,8 +231,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   double PUsf_down = 1.0;
 
   double total_lepsf = 1.0;
-  double total_lepsf_up = 1.0;
-  double total_lepsf_down = 1.0;
   double total_lepreco = 1.0;
   double total_lepreco_up = 1.0;
   double total_lepreco_down = 1.0;
@@ -345,21 +339,17 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
       //std::cout << "Before Lepton SFs" << std::endl;
       //Lepton SF workspace
       if (apply_lepsf) {
-        // use function-scope total_lepsf, total_lepsf_up, total_lepsf_down
         double lepIDsf = 1;
         double lepRECOsf = 1;
         double lepISOsf = 1;
-        double lepTRsf = 1;
 
         double lepIDsf_down = 1;
         double lepRECOsf_down = 1;
         double lepISOsf_down = 1;
-        double lepTRsf_down = 1;
 
         double lepIDsf_up = 1;
         double lepRECOsf_up = 1;
         double lepISOsf_up = 1;
-        double lepTRsf_up = 1;
 
 	double lepSF_nominal = 1;
 	double lepSF_syst = 0;
@@ -515,20 +505,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 	    lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
 	  }
 	  
-	  // // Trigger UL systematic uncertainty only
-	  // if (lepinSV_pt[ilep] > 26.0) { //lower limit is 26GeV for Trigger SF 
-	  //   lepTRsf = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values);
-	  //   lepTRsf_up = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_up);
-	  //   lepTRsf_down = run(mu_cset, "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight", values_down);
-	  // } 
-            
-	  //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements); 
-	  // also, just apply it to one lepton per event; not per SV 
-	  //if (ilep < 1) { 
-	  lepTRsf = 0.99;
-	  lepTRsf_up = 0.995;
-	  lepTRsf_down = 0.985;
-	  //}
 	}
 	else { //lepinSV is an electron
 	  std::string year_id;
@@ -567,14 +543,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   
 	  }
 	  //std::cout << "After calling e ID SFs" << std::endl;
-	  //placeholder trigger SF : 0.99 +- 0.05 (for leptons passing the minimum pT requirements)
-	  // also, just apply it to one lepton per event; not per SV 
-	  //if (ilep < 1) { 
-	  lepTRsf = 0.99;
-	  lepTRsf_up = 0.995;
-	  lepTRsf_down = 0.985;
-	  //}
-
 	  //Yuqing's Lepton Scale Factors (electron)     PROBLEM HERE!!!!!!!!!!
 	  std::map<std::string, correction::Variable::Type> trigvalues {
             {"year", year_str},
@@ -599,13 +567,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 		  lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
 		  //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
 		}
-                const double lepTriggerComponent = lepTRsf * lepSF;
-                const double lepTriggerComponent_up = lepTRsf_up * lepSF_up;
-                const double lepTriggerComponent_down = lepTRsf_down * lepSF_down;
+          const double lepTriggerComponent = lepSF;
+          const double lepTriggerComponent_up = lepSF_up;
+          const double lepTriggerComponent_down = lepSF_down;
 
-	        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRsf*lepSF;
-	        total_lepsf_up *= lepRECOsf_up*lepISOsf_up*lepIDsf_up*lepTRsf_up*lepSF_up;
-	        total_lepsf_down *= lepRECOsf_down*lepISOsf_down*lepIDsf_down*lepTRsf_down*lepSF_down;
+	        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTriggerComponent;
 
 	        total_lepreco *= lepRECOsf;
 	        total_lepreco_up *= lepRECOsf_up;
@@ -702,25 +668,34 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     }
     
   }
-  *weight_lepsfup = *weight;
-  *weight_lepsfdown = *weight;
-  if (apply_lepsf && total_lepsf != 0.0) {
-    *weight_lepsfup   = (*weight / total_lepsf) * total_lepsf_up;
-    *weight_lepsfdown = (*weight / total_lepsf) * total_lepsf_down;
-  }
-
   *weight_lepreco = total_lepreco;
-  *weight_leprecoup = total_lepreco_up;
-  *weight_leprecodown = total_lepreco_down;
   *weight_lepid = total_lepid;
-  *weight_lepidup = total_lepid_up;
-  *weight_lepiddown = total_lepid_down;
   *weight_lepiso = total_lepiso;
-  *weight_lepisoup = total_lepiso_up;
-  *weight_lepisodown = total_lepiso_down;
   *weight_leptrig = total_leptrig;
-  *weight_leptrigup = total_leptrig_up;
-  *weight_leptrigdown = total_leptrig_down;
+  *weight_leprecoup = *weight;
+  *weight_leprecodown = *weight;
+  if (apply_lepsf && total_lepreco != 0.0) {
+    *weight_leprecoup = (*weight / total_lepreco) * total_lepreco_up;
+    *weight_leprecodown = (*weight / total_lepreco) * total_lepreco_down;
+  }
+  *weight_lepidup = *weight;
+  *weight_lepiddown = *weight;
+  if (apply_lepsf && total_lepid != 0.0) {
+    *weight_lepidup = (*weight / total_lepid) * total_lepid_up;
+    *weight_lepiddown = (*weight / total_lepid) * total_lepid_down;
+  }
+  *weight_lepisoup = *weight;
+  *weight_lepisodown = *weight;
+  if (apply_lepsf && total_lepiso != 0.0) {
+    *weight_lepisoup = (*weight / total_lepiso) * total_lepiso_up;
+    *weight_lepisodown = (*weight / total_lepiso) * total_lepiso_down;
+  }
+  *weight_leptrigup = *weight;
+  *weight_leptrigdown = *weight;
+  if (apply_lepsf && total_leptrig != 0.0) {
+    *weight_leptrigup = (*weight / total_leptrig) * total_leptrig_up;
+    *weight_leptrigdown = (*weight / total_leptrig) * total_leptrig_down;
+  }
 
   *weight_puup = *weight;
   *weight_pudown = *weight;
@@ -738,8 +713,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("total weight: %g\n", *weight);
 
   event.put(std::move(weight));
-  event.put(std::move(weight_lepsfup), "lepsfup");
-  event.put(std::move(weight_lepsfdown), "lepsfdown");
   event.put(std::move(weight_lepreco), "lepreco");
   event.put(std::move(weight_leprecoup), "leprecoup");
   event.put(std::move(weight_leprecodown), "leprecodown");
