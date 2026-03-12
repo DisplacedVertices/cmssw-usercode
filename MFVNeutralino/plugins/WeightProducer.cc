@@ -351,12 +351,12 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         double lepRECOsf_up = 1;
         double lepISOsf_up = 1;
 
-        double lepSF_nominal = 1;
-        double lepSF_syst = 0;
-        double lepSF_stat =0;
-        double lepSF = 1;
-        double lepSF_up = 1;
-        double lepSF_down = 1;
+        double lepTRIGsf_nominal = 1;
+        double lepTRIGsf_syst = 0;
+        double lepTRIGsf_stat =0;
+        double lepTRIGsf = 1;
+        double lepTRIGsf_up = 1;
+        double lepTRIGsf_down = 1;
         //step 1 : get the leading selected lepton (the one that passes all selections; hltmatched, ID, iso, pT, eta)
         float leading_muonpt = -1;
         float leading_muoneta = -1;
@@ -409,7 +409,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         }
         //std::cout << "Before get SF depending on the lepton" << std::endl;
         //step 2 : depending on the lepton, get the SFs 
-        if (leading_leptype == 0) { //leading_leptype is mu;
+        if (leading_leptype == 0) { // leading lepton is a muon;
           //std::cout << "After defining leading leptype == 0" << std::endl;
 
           std::map<std::string, correction::Variable::Type> values {
@@ -480,33 +480,33 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           if (year == 2017) {
             //std::cout << "Before calling from Yuqing Muon jsons with: " << std::endl;
             //std::cout << leading_leppt << std::endl;
-            lepSF_nominal = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+            lepTRIGsf_nominal = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
             //std::cout << "After calling nominal from Yuqing Muon jsons" << std::endl;
-            lepSF_syst = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
-            lepSF_stat = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
-            lepSF = lepSF_nominal;
-            lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
+            lepTRIGsf_syst = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+            lepTRIGsf_stat = run(muSF_cset, "NUM_IsoMu27_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+            lepTRIGsf = lepTRIGsf_nominal;
+            lepTRIGsf_up = lepTRIGsf_nominal + lepTRIGsf_syst + lepTRIGsf_stat;
+            lepTRIGsf_down = lepTRIGsf_nominal - lepTRIGsf_syst - lepTRIGsf_stat;
           }
           else if (year == 2018) {
-            lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
-            lepSF_syst = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
-            lepSF_stat = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
-            lepSF = lepSF_nominal;
-            lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
+            lepTRIGsf_nominal = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+            lepTRIGsf_syst = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+            lepTRIGsf_stat = run(muSF_cset, "NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+            lepTRIGsf = lepTRIGsf_nominal;
+            lepTRIGsf_up = lepTRIGsf_nominal + lepTRIGsf_syst + lepTRIGsf_stat;
+            lepTRIGsf_down = lepTRIGsf_nominal - lepTRIGsf_syst - lepTRIGsf_stat;
           }
           else {
-            lepSF_nominal = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
-            lepSF_syst = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
-            lepSF_stat = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
-            lepSF = lepSF_nominal;
-            lepSF_up = lepSF_nominal + lepSF_syst + lepSF_stat;
-            lepSF_down = lepSF_nominal - lepSF_syst - lepSF_stat;
+            lepTRIGsf_nominal = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues);
+            lepTRIGsf_syst = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_syst);
+            lepTRIGsf_stat = run(muSF_cset, "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdMedium_and_PFIsoMedium", trigvalues_stat);
+            lepTRIGsf = lepTRIGsf_nominal;
+            lepTRIGsf_up = lepTRIGsf_nominal + lepTRIGsf_syst + lepTRIGsf_stat;
+            lepTRIGsf_down = lepTRIGsf_nominal - lepTRIGsf_syst - lepTRIGsf_stat;
           }
 
         }
-        else { //lepinSV is an electron
+        else { // leading lepton is an electron
           std::string year_id;
           if (year == 20161) year_id = "2016preVFP";
           else if (year == 20162) year_id = "2016postVFP";
@@ -562,16 +562,13 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
               {"pt", leading_leppt},
               {"eta", leading_lepeta},
           };
-          lepSF = run(eleSF_cset, "scale_factor", trigvalues);
-          lepSF_up = run(eleSF_cset, "scale_factor", trigvalues_up);
-          lepSF_down = run(eleSF_cset, "scale_factor", trigvalues_down);
+          lepTRIGsf = run(eleSF_cset, "scale_factor", trigvalues);
+          lepTRIGsf_up = run(eleSF_cset, "scale_factor", trigvalues_up);
+          lepTRIGsf_down = run(eleSF_cset, "scale_factor", trigvalues_down);
           //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
         }
-        const double lepTriggerComponent = lepSF;
-        const double lepTriggerComponent_up = lepSF_up;
-        const double lepTriggerComponent_down = lepSF_down;
 
-        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTriggerComponent;
+        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRIGsf_down;
 
         total_lepreco *= lepRECOsf;
         total_lepreco_up *= lepRECOsf_up;
@@ -582,9 +579,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         total_lepiso *= lepISOsf;
         total_lepiso_up *= lepISOsf_up;
         total_lepiso_down *= lepISOsf_down;
-        total_leptrig *= lepTriggerComponent;
-        total_leptrig_up *= lepTriggerComponent_up;
-        total_leptrig_down *= lepTriggerComponent_down;
+        total_leptrig *= lepTRIGsf;
+        total_leptrig_up *= lepTRIGsf_up;
+        total_leptrig_down *= lepTRIGsf_down;
 
         if (histos) {
           h_lepsums->Fill(sum_leprecoSF, total_lepreco);
