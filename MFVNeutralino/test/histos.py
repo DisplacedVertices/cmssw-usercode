@@ -11,6 +11,17 @@ input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNe
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
+# Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
+'''
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True),
+    SkipEvent = cms.untracked.vstring("ProductNotFound"),
+)
+
+# Explicitly skip the bad event (run:lumi:event)
+process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
+'''
+
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')

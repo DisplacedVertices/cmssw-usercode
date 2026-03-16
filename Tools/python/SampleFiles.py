@@ -143,6 +143,36 @@ for name, ds, fns in _removed:
 
 ################################################################################
 
+## ttH
+
+# bbbb
+_add_ds("miniaod", {
+'ttHToLLPs_bbbb_tau10mm_M55_20161': (150, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTobbbb_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL16wmLHEGENAPV-RunIISummer20UL16NanoAODAPVv9/20260212_122759/RunIISummer20UL16MiniAODAPVv2_%i.root' % i for i in xrange(150)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_bbbb_tau10mm_M55_20162': (150, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTobbbb_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL16wmLHEGEN-RunIISummer20UL16NanoAODv9/20260212_122805/RunIISummer20UL16MiniAODv2_%i.root' % i for i in xrange(150)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_bbbb_tau10mm_M55_2017': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTobbbb_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL17wmLHEGEN-RunIISummer20UL17NanoAODv9/20260212_122810/RunIISummer20UL17MiniAODv2_%i.root' % i for i in xrange(225)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_bbbb_tau10mm_M55_2018': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTobbbb_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL18wmLHEGEN-RunIISummer20UL18NanoAODv9/20260212_122815/RunIISummer20UL18MiniAODv2_%i.root' % i for i in xrange(225)]),
+})
+
+# dddd
+_add_ds("miniaod", {
+'ttHToLLPs_dddd_tau10mm_M55_20161': (150, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL16wmLHEGENAPV-RunIISummer20UL16NanoAODAPVv9/20260212_122802/RunIISummer20UL16MiniAODAPVv2_%i.root' % i for i in xrange(150)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_dddd_tau10mm_M55_20162': (150, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL16wmLHEGEN-RunIISummer20UL16NanoAODv9/20260212_122807/RunIISummer20UL16MiniAODv2_%i.root' % i for i in xrange(150)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_dddd_tau10mm_M55_2017': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL17wmLHEGEN-RunIISummer20UL17NanoAODv9/20260212_122813/RunIISummer20UL17MiniAODv2_%i.root' % i for i in xrange(225)]),
+})
+_add_ds("miniaod", {
+'ttHToLLPs_dddd_tau10mm_M55_2018': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL18wmLHEGEN-RunIISummer20UL18NanoAODv9/20260212_122818/RunIISummer20UL18MiniAODv2_%i.root' % i for i in xrange(225)]),
+})
+
 _add_ds("miniaod", {
     'qcdmupt15_2017': (1, ['/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root'])
 })

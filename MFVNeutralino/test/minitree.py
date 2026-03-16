@@ -13,6 +13,17 @@ cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
+# Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
+'''
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True),
+    SkipEvent = cms.untracked.vstring("ProductNotFound"),
+)
+
+# Explicitly skip the bad event (run:lumi:event)
+process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
+'''
+
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :
     del process.pMiniTreeNtk4
