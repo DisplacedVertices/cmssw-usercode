@@ -51,6 +51,7 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            misc_weight_indices = cms.vint32(),
                            apply_lepsf = cms.bool(True) if (use_Lepton_triggers or use_Muon_triggers or use_Electron_triggers) else cms.bool(False),
                            apply_roccor = cms.bool(False), # cms.bool(True) if use_Lepton_triggers else cms.bool(False), #rochester corrections for muons: we turned this off after seeing large weights; we're insensitive to muon momentum anyway
+                           produce_variation_weights = cms.bool(False),
                            pujson = cms.string(pujson_path),
                            elejson = cms.string(elejson_path),
                            mujson = cms.string(mujson_path),
