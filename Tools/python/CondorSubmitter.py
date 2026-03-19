@@ -48,16 +48,17 @@ cd $workdir/subworkdir
 
 cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp,cs_split_by_events__INPUT_BNS__} .
 echo $job > cs_job
- 
-# Always stage input ROOT files locally to avoid remote xrootd reads
-echo "Staging input files locally"
 
-export CS_SPLIT_BY_EVENTS=$(<cs_split_by_events)
+if [[ __LOCAL_STAGE__ -eq 1 ]]; then
+    # Stage input ROOT files locally to avoid remote xrootd reads
+    echo "Staging input files locally"
 
-echo "CS_SPLIT_BY_EVENTS=${CS_SPLIT_BY_EVENTS}"
+    export CS_SPLIT_BY_EVENTS=$(<cs_split_by_events)
 
-# Figure out which file group this job should read, and stage them as input_<i>.root
-python - <<'PY'
+    echo "CS_SPLIT_BY_EVENTS=${CS_SPLIT_BY_EVENTS}"
+
+    # Figure out which file group this job should read, and stage them as input_<i>.root
+    python - <<'PY'
 import cs_filelist
 import os, subprocess, sys
 
@@ -93,16 +94,19 @@ with open('cs_local_files.txt', 'w') as out:
 sys.stdout.write('Wrote cs_local_files.txt with %d files\\n' % len(local_names))
 PY
 
-stageinexit=$?
-if [[ $stageinexit -ne 0 ]]; then
-    echo "Stage-in exited with code $stageinexit"
-    exit $stageinexit
-fi
+    stageinexit=$?
+    if [[ $stageinexit -ne 0 ]]; then
+        echo "Stage-in exited with code $stageinexit"
+        exit $stageinexit
+    fi
 
-echo "Stage-in complete; staged files:"
-ls -l input_*.root cs_local_files.txt || true
-echo "cs_local_files.txt contents:"
-cat cs_local_files.txt || true
+    echo "Stage-in complete; staged files:"
+    ls -l input_*.root cs_local_files.txt || true
+    echo "cs_local_files.txt contents:"
+    cat cs_local_files.txt || true
+else
+    echo "Local stage-in disabled; cmsRun will read input files remotely"
+fi
 
 echo meat start at $(date)
 __MEAT__
@@ -258,6 +262,7 @@ def get(i): return _l[i]
                  _events = -1,
                  _njobs = None,
                  _fail = [],
+                 local_stage = False,
                  ):
 
         self.nsubmits = -1
@@ -272,6 +277,7 @@ def get(i): return _l[i]
             raise ValueError('meatexit not set in meat?')
         self.meat = meat
         self.is_cmsRun = meat == self.cmsRun_meat
+        self.local_stage = local_stage
 
         if '$' in pset_template_fn:
             pset_template_fn =  os.path.expandvars(pset_template_fn)
@@ -408,6 +414,7 @@ def get(i): return _l[i]
 
         self.sh_template = self.sh_template \
             .replace('__INPUT_BNS__',  input_bns) \
+            .replace('__LOCAL_STAGE__', '1' if self.local_stage else '0') \
             .replace('__MEAT__', self.meat) \
             .replace('__OUTPUT_SNIPPET__', output_snippet)
 

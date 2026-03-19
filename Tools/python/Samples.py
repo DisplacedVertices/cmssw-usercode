@@ -2228,7 +2228,7 @@ __all__ = [
     'WplusHToSSTodddd_samples_20162',
     'WminusHToSSTodddd_samples_20162',
     'ggHToSSTodddd_samples_20162',
-    #'HToSSTobbbb_samples_2017',
+    #'ggHToSSTobbbb_samples_2017',
     'ggHToSSTodddd_samples_2017',
     'ZHToSSTodddd_samples_2017',
     'WplusHToSSTodddd_samples_2017',
