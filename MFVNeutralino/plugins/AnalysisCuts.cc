@@ -922,10 +922,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(alt_calo_ht < 350 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
-                if(mevent->calo_jet_pt[j0] < 50) continue;
+                if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
 
                 for(int j1 = j0+1; j1 < ncalojets; ++j1){
-                    if(mevent->calo_jet_pt[j1] < 50) continue;
+                    if(mevent->calo_jet_pt[j1] < 50 || fabs(mevent->calo_jet_eta[j1]) > 2.0) continue;
                     passed_kinematics = true;
                 }
             }
@@ -937,10 +937,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(alt_calo_ht < 650 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
-                if(mevent->calo_jet_pt[j0] < 100) continue;
+                if(mevent->calo_jet_pt[j0] < 100 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
 
                 for(int j1 = j0+1; j1 < ncalojets; ++j1){
-                    if(mevent->calo_jet_pt[j1] < 100) continue;
+                    if(mevent->calo_jet_pt[j1] < 100 || fabs(mevent->calo_jet_eta[j1]) > 2.0) continue;
                     passed_kinematics = true;
                 }
             }
