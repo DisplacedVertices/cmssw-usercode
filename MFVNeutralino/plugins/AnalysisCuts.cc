@@ -897,7 +897,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             //std::cout << "\nTesting b_HLT_HT430_DisplacedDijet40_DisplacedTrack" << std::endl;
             //printf("year: %i   jet_ht_check: %f   pfjet_ngood[0]: %i  \n", year, jet_ht_check_40, pfjet_ngood[0]);
             if(year != 2018 && year != 2017) return false;
-            if(jet_ht_check_40 < 557 || pfjet_ngood[0] < 2) return false;
+            if(alt_calo_ht < 430 || ncalojets < 2 || calojet_ngood[0] < 2) return false;
 
             passed_kinematics = true;
             //std::cout << "passed_kinematics: " << passed_kinematics << std::endl;
@@ -908,8 +908,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             //std::cout << "\nTesting b_HLT_HT650_DisplacedDijet60_Inclusive" << std::endl;
             //printf("year: %i   jet_ht_check: %f   pfjet_ngood[1]: %i  \n", year, jet_ht_check_40, pfjet_ngood[1]);
             if(year != 2018 && year != 2017) return false;
-            if(jet_ht_check_40 < 846 || pfjet_ngood[1] < 2) return false;
-            //if(jet_ht_check_40 < 750 || pfjet_ngood[1] < 2) return false;
+            if(alt_calo_ht < 650 || ncalojets < 2 || calojet_ngood[1] < 2) return false;
 
             passed_kinematics = true;
             //std::cout << "passed_kinematics: " << passed_kinematics << std::endl;
@@ -920,13 +919,13 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
        {
             if(year != 20161 && year != 20162) return false;
-            if(jet_ht_check_40 < 470 || njets < 2 || pfjet_ngood[1] < -2 || jet_ht_check_30 < -2) return false; // Can delete the pfjet_ngood part... it's a dummy thing for now
+            if(alt_calo_ht < 350 || ncalojets < 2) return false;
 
-            for(int j0 = 0; j0 < njets; ++j0){
-                if(mevent->jet_pt[j0] < 50) continue;
+            for(int j0 = 0; j0 < ncalojets; ++j0){
+                if(mevent->calo_jet_pt[j0] < 50) continue;
 
-                for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(mevent->jet_pt[j1] < 50) continue;
+                for(int j1 = j0+1; j1 < ncalojets; ++j1){
+                    if(mevent->calo_jet_pt[j1] < 50) continue;
                     passed_kinematics = true;
                 }
             }
@@ -935,13 +934,13 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT650_DisplacedDijet80_Inclusive :
        {
             if(year != 20161 && year != 20162) return false;
-            if(jet_ht_check_40 < 800 || njets < 2) return false;
+            if(alt_calo_ht < 650 || ncalojets < 2) return false;
 
-            for(int j0 = 0; j0 < njets; ++j0){
-                if(mevent->jet_pt[j0] < 100) continue;
+            for(int j0 = 0; j0 < ncalojets; ++j0){
+                if(mevent->calo_jet_pt[j0] < 100) continue;
 
-                for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(mevent->jet_pt[j1] < 100) continue;
+                for(int j1 = j0+1; j1 < ncalojets; ++j1){
+                    if(mevent->calo_jet_pt[j1] < 100) continue;
                     passed_kinematics = true;
                 }
             }
