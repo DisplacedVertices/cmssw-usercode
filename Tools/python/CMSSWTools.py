@@ -528,40 +528,28 @@ def want_summary(process, val=True):
 def which_global_tag(settings=None):
     if not settings:
         settings = CMSSWSettings()
-    # if settings.year == 2017:
-    #     print 'year is 2017'
-    #     if settings.is_mc:
-    #         #qcdleptenriched is v6
-    #         return '106X_mc2017_realistic_v8'
-    #     else:
-    #         return '106X_dataRun2_v32'
-    # elif settings.year == 2018:
-    #     print 'year is 2018'
-    #     if settings.is_mc:
-    #         return '106X_upgrade2018_realistic_v15_L1v1'
-    #         #return '106X_upgrade2018_realistic_v4'
-    #     else:
-    #         return '106X_dataRun2_v32'
+
+    # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun2LegacyAnalysis
     if settings.year == 2017:
         if settings.is_mc:
-            return '106X_mc2017_realistic_v8'
+            return '106X_mc2017_realistic_v10'
         else:
-            return '106X_dataRun2_v32'
+            return '106X_dataRun2_v37'
     elif settings.year == 2018:
         if settings.is_mc:
-            return '106X_upgrade2018_realistic_v15_L1v1'
+            return '106X_upgrade2018_realistic_v16_L1v1'
         else:
-            return '106X_dataRun2_v32'
+            return '106X_dataRun2_v37'
     elif settings.year == 20161:    # 2016APV
         if settings.is_mc:
             return '106X_mcRun2_asymptotic_preVFP_v11'
         else:
-            return '106X_dataRun2_v32'
+            return '106X_dataRun2_v37'
     elif settings.year == 20162:    # "Normal" 2016
         if settings.is_mc:
             return '106X_mcRun2_asymptotic_v17'
         else:
-            return '106X_dataRun2_v32'
+            return '106X_dataRun2_v37'
     else:
         raise ValueError('what year is it')
 
