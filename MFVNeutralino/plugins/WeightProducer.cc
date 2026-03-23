@@ -100,23 +100,23 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   produces<double>();
 
   // Nominal lepton outputs are raw scale factors, not event weights.
-  produces<double>("lepreco_sf");
-  produces<double>("lepid_sf");
-  produces<double>("lepiso_sf");
-  produces<double>("leptrig_sf");
+  produces<double>("leprecoSF");
+  produces<double>("lepidSF");
+  produces<double>("lepisoSF");
+  produces<double>("leptrigSF");
 
   // Variation outputs are full event weights with the corresponding variation applied.
   if (produce_variation_weights) {
-    produces<double>("weight_lepreco_up");
-    produces<double>("weight_lepreco_down");
-    produces<double>("weight_lepid_up");
-    produces<double>("weight_lepid_down");
-    produces<double>("weight_lepiso_up");
-    produces<double>("weight_lepiso_down");
-    produces<double>("weight_leptrig_up");
-    produces<double>("weight_leptrig_down");
-    produces<double>("weight_pu_up");
-    produces<double>("weight_pu_down");
+    produces<double>("weightLeprecoUp");
+    produces<double>("weightLeprecoDown");
+    produces<double>("weightLepidUp");
+    produces<double>("weightLepidDown");
+    produces<double>("weightLepisoUp");
+    produces<double>("weightLepisoDown");
+    produces<double>("weightLeptrigUp");
+    produces<double>("weightLeptrigDown");
+    produces<double>("weightPUUp");
+    produces<double>("weightPUDown");
   }
 
   int year = jmt::Year::get();
@@ -215,20 +215,20 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
   std::unique_ptr<double> weight(new double(1.));
-  std::unique_ptr<double> weight_pu_up(new double(1.));
-  std::unique_ptr<double> weight_pu_down(new double(1.));
-  std::unique_ptr<double> lepreco_sf(new double(1.));
-  std::unique_ptr<double> weight_lepreco_up(new double(1.));
-  std::unique_ptr<double> weight_lepreco_down(new double(1.));
-  std::unique_ptr<double> lepid_sf(new double(1.));
-  std::unique_ptr<double> weight_lepid_up(new double(1.));
-  std::unique_ptr<double> weight_lepid_down(new double(1.));
-  std::unique_ptr<double> lepiso_sf(new double(1.));
-  std::unique_ptr<double> weight_lepiso_up(new double(1.));
-  std::unique_ptr<double> weight_lepiso_down(new double(1.));
-  std::unique_ptr<double> leptrig_sf(new double(1.));
-  std::unique_ptr<double> weight_leptrig_up(new double(1.));
-  std::unique_ptr<double> weight_leptrig_down(new double(1.));
+  std::unique_ptr<double> weightPUUp(new double(1.));
+  std::unique_ptr<double> weightPUDown(new double(1.));
+  std::unique_ptr<double> leprecoSF(new double(1.));
+  std::unique_ptr<double> weightLeprecoUp(new double(1.));
+  std::unique_ptr<double> weightLeprecoDown(new double(1.));
+  std::unique_ptr<double> lepidSF(new double(1.));
+  std::unique_ptr<double> weightLepidUp(new double(1.));
+  std::unique_ptr<double> weightLepidDown(new double(1.));
+  std::unique_ptr<double> lepisoSF(new double(1.));
+  std::unique_ptr<double> weightLepisoUp(new double(1.));
+  std::unique_ptr<double> weightLepisoDown(new double(1.));
+  std::unique_ptr<double> leptrigSF(new double(1.));
+  std::unique_ptr<double> weightLeptrigUp(new double(1.));
+  std::unique_ptr<double> weightLeptrigDown(new double(1.));
 
   double PUsf = 1.0;
   double PUsf_up = 1.0;
@@ -572,7 +572,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           //std::cout << "After calling Yuqing's lepton SFs" << std::endl;
         }
 
-        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRIGsf_down;
+        total_lepsf *= lepRECOsf*lepISOsf*lepIDsf*lepTRIGsf;
 
         total_lepreco *= lepRECOsf;
         total_lepreco_up *= lepRECOsf_up;
@@ -669,40 +669,40 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     }
 
   }
-  *lepreco_sf = total_lepreco;
-  *lepid_sf = total_lepid;
-  *lepiso_sf = total_lepiso;
-  *leptrig_sf = total_leptrig;
-  *weight_lepreco_up = *weight;
-  *weight_lepreco_down = *weight;
+  *leprecoSF = total_lepreco;
+  *lepidSF = total_lepid;
+  *lepisoSF = total_lepiso;
+  *leptrigSF = total_leptrig;
+  *weightLeprecoUp = *weight;
+  *weightLeprecoDown = *weight;
   if (apply_lepsf && total_lepreco != 0.0) {
-    *weight_lepreco_up = (*weight / total_lepreco) * total_lepreco_up;
-    *weight_lepreco_down = (*weight / total_lepreco) * total_lepreco_down;
+    *weightLeprecoUp = (*weight / total_lepreco) * total_lepreco_up;
+    *weightLeprecoDown = (*weight / total_lepreco) * total_lepreco_down;
   }
-  *weight_lepid_up = *weight;
-  *weight_lepid_down = *weight;
+  *weightLepidUp = *weight;
+  *weightLepidDown = *weight;
   if (apply_lepsf && total_lepid != 0.0) {
-    *weight_lepid_up = (*weight / total_lepid) * total_lepid_up;
-    *weight_lepid_down = (*weight / total_lepid) * total_lepid_down;
+    *weightLepidUp = (*weight / total_lepid) * total_lepid_up;
+    *weightLepidDown = (*weight / total_lepid) * total_lepid_down;
   }
-  *weight_lepiso_up = *weight;
-  *weight_lepiso_down = *weight;
+  *weightLepisoUp = *weight;
+  *weightLepisoDown = *weight;
   if (apply_lepsf && total_lepiso != 0.0) {
-    *weight_lepiso_up = (*weight / total_lepiso) * total_lepiso_up;
-    *weight_lepiso_down = (*weight / total_lepiso) * total_lepiso_down;
+    *weightLepisoUp = (*weight / total_lepiso) * total_lepiso_up;
+    *weightLepisoDown = (*weight / total_lepiso) * total_lepiso_down;
   }
-  *weight_leptrig_up = *weight;
-  *weight_leptrig_down = *weight;
+  *weightLeptrigUp = *weight;
+  *weightLeptrigDown = *weight;
   if (apply_lepsf && total_leptrig != 0.0) {
-    *weight_leptrig_up = (*weight / total_leptrig) * total_leptrig_up;
-    *weight_leptrig_down = (*weight / total_leptrig) * total_leptrig_down;
+    *weightLeptrigUp = (*weight / total_leptrig) * total_leptrig_up;
+    *weightLeptrigDown = (*weight / total_leptrig) * total_leptrig_down;
   }
 
-  *weight_pu_up = *weight;
-  *weight_pu_down = *weight;
+  *weightPUUp = *weight;
+  *weightPUDown = *weight;
   if (weight_pileup && PUsf != 0.0) {
-    *weight_pu_up   = (*weight / PUsf) * PUsf_up;
-    *weight_pu_down = (*weight / PUsf) * PUsf_down;
+    *weightPUUp   = (*weight / PUsf) * PUsf_up;
+    *weightPUDown = (*weight / PUsf) * PUsf_down;
   }
 
   if (histos) {
@@ -714,21 +714,21 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("total weight: %g\n", *weight);
 
   event.put(std::move(weight));
-  event.put(std::move(lepreco_sf), "lepreco_sf");
-  event.put(std::move(lepid_sf), "lepid_sf");
-  event.put(std::move(lepiso_sf), "lepiso_sf");
-  event.put(std::move(leptrig_sf), "leptrig_sf");
+  event.put(std::move(leprecoSF), "leprecoSF");
+  event.put(std::move(lepidSF), "lepidSF");
+  event.put(std::move(lepisoSF), "lepisoSF");
+  event.put(std::move(leptrigSF), "leptrigSF");
   if (produce_variation_weights) {
-    event.put(std::move(weight_lepreco_up), "weight_lepreco_up");
-    event.put(std::move(weight_lepreco_down), "weight_lepreco_down");
-    event.put(std::move(weight_lepid_up), "weight_lepid_up");
-    event.put(std::move(weight_lepid_down), "weight_lepid_down");
-    event.put(std::move(weight_lepiso_up), "weight_lepiso_up");
-    event.put(std::move(weight_lepiso_down), "weight_lepiso_down");
-    event.put(std::move(weight_leptrig_up), "weight_leptrig_up");
-    event.put(std::move(weight_leptrig_down), "weight_leptrig_down");
-    event.put(std::move(weight_pu_up), "weight_pu_up");
-    event.put(std::move(weight_pu_down), "weight_pu_down");
+    event.put(std::move(weightLeprecoUp), "weightLeprecoUp");
+    event.put(std::move(weightLeprecoDown), "weightLeprecoDown");
+    event.put(std::move(weightLepidUp), "weightLepidUp");
+    event.put(std::move(weightLepidDown), "weightLepidDown");
+    event.put(std::move(weightLepisoUp), "weightLepisoUp");
+    event.put(std::move(weightLepisoDown), "weightLepisoDown");
+    event.put(std::move(weightLeptrigUp), "weightLeptrigUp");
+    event.put(std::move(weightLeptrigDown), "weightLeptrigDown");
+    event.put(std::move(weightPUUp), "weightPUUp");
+    event.put(std::move(weightPUDown), "weightPUDown");
   }
 
 }
