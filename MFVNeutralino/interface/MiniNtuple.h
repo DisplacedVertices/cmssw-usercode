@@ -51,23 +51,38 @@ namespace mfv {
     float jet_bdisc_csv[50];
     float jet_bdisc_deepcsv[50];
     float jet_bdisc_deepflav[50];
-    float jet_hlt_pt[50];
-    float jet_hlt_eta[50];
-    float jet_hlt_phi[50];
-    float jet_hlt_energy[50];
-    bool jet_hlt_match(int i, float min_jet_pt=20.) const {
-      // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
+    float pf_offline_jet_hlt_pt[50];
+    float pf_offline_jet_hlt_eta[50];
+    float pf_offline_jet_hlt_phi[50];
+    float pf_offline_jet_hlt_energy[50];
+    bool pf_offline_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero pf_offline_jet_hlt_pt;
       // all others have the default value of 0
-      return jet_hlt_pt[i] > min_jet_pt;
+      return pf_offline_jet_hlt_pt[i] > min_jet_pt;
     }
-    float displaced_jet_hlt_pt[50];
-    float displaced_jet_hlt_eta[50];
-    float displaced_jet_hlt_phi[50];
-    float displaced_jet_hlt_energy[50];
-    bool displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
-      // an offline jet with a successful HLT match will have a nonzero displaced_jet_hlt_pt;
+    float pf_offline_displaced_jet_hlt_pt[50];
+    float pf_offline_displaced_jet_hlt_eta[50];
+    float pf_offline_displaced_jet_hlt_phi[50];
+    float pf_offline_displaced_jet_hlt_energy[50];
+    bool pf_offline_displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero pf_offline_displaced_jet_hlt_pt;
       // all others have the default value of 0
-      return displaced_jet_hlt_pt[i] > min_jet_pt;
+      return pf_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
+    }
+    unsigned char ncalojets;
+    float calo_jet_pt[50];
+    float calo_jet_eta[50];
+    float calo_jet_phi[50];
+    float calo_jet_energy[50];
+    float calo_offline_displaced_jet_hlt_pt[50];
+    float calo_offline_displaced_jet_hlt_eta[50];
+    float calo_offline_displaced_jet_hlt_phi[50];
+    float calo_offline_displaced_jet_hlt_energy[50];
+    bool calo_offline_displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero calo_offline_displaced_jet_hlt_pt;
+      // all others have the default value of 0
+      // NOTE be sure to keep the calojet and PF jet indices separate! mixing them up will be a big problem
+      return calo_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
     }
     float ht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;

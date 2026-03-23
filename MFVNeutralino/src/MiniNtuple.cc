@@ -34,9 +34,13 @@ namespace mfv {
     gen_jet_ht = gen_jet_ht40 = 0;
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc_deepflav[i] = jet_bdisc_deepcsv[i] = jet_bdisc_csv[i] = 0;
-      jet_hlt_pt[i] = jet_hlt_eta[i] = jet_hlt_phi[i] = jet_hlt_energy[i] = 0;
-      displaced_jet_hlt_pt[i] = displaced_jet_hlt_eta[i] = displaced_jet_hlt_phi[i] = displaced_jet_hlt_energy[i] = 0;
+      pf_offline_jet_hlt_pt[i] = pf_offline_jet_hlt_eta[i] = pf_offline_jet_hlt_phi[i] = pf_offline_jet_hlt_energy[i] = 0;
+      pf_offline_displaced_jet_hlt_pt[i] = pf_offline_displaced_jet_hlt_eta[i] = pf_offline_displaced_jet_hlt_phi[i] = pf_offline_displaced_jet_hlt_energy[i] = 0;
       jet_id[i] = 0;
+    }
+    for (int i = 0; i < 50; ++i) {
+      calo_jet_pt[i] = calo_jet_eta[i] = calo_jet_phi[i] = calo_jet_energy[i] = 0;
+      calo_offline_displaced_jet_hlt_pt[i] = calo_offline_displaced_jet_hlt_eta[i] = calo_offline_displaced_jet_hlt_phi[i] = calo_offline_displaced_jet_hlt_energy[i] = 0;
     }
     tk0_qchi2.clear();
     tk0_ndof.clear();
@@ -112,10 +116,10 @@ namespace mfv {
         if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 140) continue;
+          if(!pf_offline_jet_hlt_match(j0) || jet_pt[j0] < 140) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 140) continue;
+            if(!pf_offline_jet_hlt_match(j1) || jet_pt[j1] < 140) continue;
 
             if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
               passed_kinematics = true;
@@ -130,16 +134,16 @@ namespace mfv {
         if(nbtaggedjets < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
+          if(!pf_offline_jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+            if(!pf_offline_jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
+              if(!pf_offline_jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
+                if(!pf_offline_jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
 
                 passed_kinematics = true;
               }
@@ -155,10 +159,10 @@ namespace mfv {
         if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 156) continue;
+          if(!pf_offline_jet_hlt_match(j0) || jet_pt[j0] < 156) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 156) continue;
+            if(!pf_offline_jet_hlt_match(j1) || jet_pt[j1] < 156) continue;
 
             if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
               passed_kinematics = true;
@@ -173,16 +177,16 @@ namespace mfv {
         if(nbtaggedjets < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
+          if(!pf_offline_jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+            if(!pf_offline_jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
+              if(!pf_offline_jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
+                if(!pf_offline_jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
 
                 passed_kinematics = true;
               }
@@ -191,15 +195,16 @@ namespace mfv {
         }
         return passed_kinematics;
       }
+      // FIXME!!! At minimum must be calo_offline_displaced_jet_hlt_pt and looping over calo jets. But check all the rest of the things done here. The njet cut makes no sense. I bet others are equally odd?? and likely missing some triggers
       case b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
       {
         if(ht(40) < 580 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 80) continue;
+          if(!pf_offline_displaced_jet_hlt_match(j0) || jet_pt[j0] < 80) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 80) continue;
+            if(!pf_offline_displaced_jet_hlt_match(j1) || jet_pt[j1] < 80) continue;
             passed_kinematics = true;
           }
         }
@@ -210,10 +215,10 @@ namespace mfv {
         if(ht(40) < 800 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
+          if(!pf_offline_displaced_jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+            if(!pf_offline_displaced_jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
             passed_kinematics = true;
           }
         }
@@ -291,14 +296,23 @@ namespace mfv {
     tree->Branch("jet_bdisc_csv", nt.jet_bdisc_csv, "jet_bdisc_csv[njets]/F");
     tree->Branch("jet_bdisc_deepcsv", nt.jet_bdisc_deepcsv, "jet_bdisc_deepcsv[njets]/F");
     tree->Branch("jet_bdisc_deepflav", nt.jet_bdisc_deepflav, "jet_bdisc_deepflav[njets]/F");
-    tree->Branch("jet_hlt_pt", nt.jet_hlt_pt, "jet_hlt_pt[njets]/F");
-    tree->Branch("jet_hlt_eta", nt.jet_hlt_eta, "jet_hlt_eta[njets]/F");
-    tree->Branch("jet_hlt_phi", nt.jet_hlt_phi, "jet_hlt_phi[njets]/F");
-    tree->Branch("jet_hlt_energy", nt.jet_hlt_energy, "jet_hlt_energy[njets]/F");
-    tree->Branch("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt, "displaced_jet_hlt_pt[njets]/F");
-    tree->Branch("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta, "displaced_jet_hlt_eta[njets]/F");
-    tree->Branch("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi, "displaced_jet_hlt_phi[njets]/F");
-    tree->Branch("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy, "displaced_jet_hlt_energy[njets]/F");
+    tree->Branch("pf_offline_jet_hlt_pt", nt.pf_offline_jet_hlt_pt, "pf_offline_jet_hlt_pt[njets]/F");
+    tree->Branch("pf_offline_jet_hlt_eta", nt.pf_offline_jet_hlt_eta, "pf_offline_jet_hlt_eta[njets]/F");
+    tree->Branch("pf_offline_jet_hlt_phi", nt.pf_offline_jet_hlt_phi, "pf_offline_jet_hlt_phi[njets]/F");
+    tree->Branch("pf_offline_jet_hlt_energy", nt.pf_offline_jet_hlt_energy, "pf_offline_jet_hlt_energy[njets]/F");
+    tree->Branch("pf_offline_displaced_jet_hlt_pt", nt.pf_offline_displaced_jet_hlt_pt, "pf_offline_displaced_jet_hlt_pt[njets]/F");
+    tree->Branch("pf_offline_displaced_jet_hlt_eta", nt.pf_offline_displaced_jet_hlt_eta, "pf_offline_displaced_jet_hlt_eta[njets]/F");
+    tree->Branch("pf_offline_displaced_jet_hlt_phi", nt.pf_offline_displaced_jet_hlt_phi, "pf_offline_displaced_jet_hlt_phi[njets]/F");
+    tree->Branch("pf_offline_displaced_jet_hlt_energy", nt.pf_offline_displaced_jet_hlt_energy, "pf_offline_displaced_jet_hlt_energy[njets]/F");
+    tree->Branch("ncalojets", &nt.ncalojets);
+    tree->Branch("calo_jet_pt", nt.calo_jet_pt, "calo_jet_pt[ncalo_jets]/F");
+    tree->Branch("calo_jet_eta", nt.calo_jet_eta, "calo_jet_eta[ncalo_jets]/F");
+    tree->Branch("calo_jet_phi", nt.calo_jet_phi, "calo_jet_phi[ncalo_jets]/F");
+    tree->Branch("calo_jet_energy", nt.calo_jet_energy, "calo_jet_energy[ncalo_jets]/F");
+    tree->Branch("calo_offline_displaced_jet_hlt_pt", nt.calo_offline_displaced_jet_hlt_pt, "calo_offline_displaced_jet_hlt_pt[njets]/F");
+    tree->Branch("calo_offline_displaced_jet_hlt_eta", nt.calo_offline_displaced_jet_hlt_eta, "calo_offline_displaced_jet_hlt_eta[njets]/F");
+    tree->Branch("calo_offline_displaced_jet_hlt_phi", nt.calo_offline_displaced_jet_hlt_phi, "calo_offline_displaced_jet_hlt_phi[njets]/F");
+    tree->Branch("calo_offline_displaced_jet_hlt_energy", nt.calo_offline_displaced_jet_hlt_energy, "calo_offline_displaced_jet_hlt_energy[njets]/F");
     tree->Branch("gen_pv_x0", &nt.gen_pv_x0);
     tree->Branch("gen_pv_y0", &nt.gen_pv_y0);
     tree->Branch("gen_pv_z0", &nt.gen_pv_z0);
@@ -399,14 +413,23 @@ namespace mfv {
     tree->SetBranchAddress("jet_bdisc_csv", nt.jet_bdisc_csv);
     tree->SetBranchAddress("jet_bdisc_deepcsv", nt.jet_bdisc_deepcsv);
     tree->SetBranchAddress("jet_bdisc_deepflav", nt.jet_bdisc_deepflav);
-    tree->SetBranchAddress("jet_hlt_pt", nt.jet_hlt_pt);
-    tree->SetBranchAddress("jet_hlt_eta", nt.jet_hlt_eta);
-    tree->SetBranchAddress("jet_hlt_phi", nt.jet_hlt_phi);
-    tree->SetBranchAddress("jet_hlt_energy", nt.jet_hlt_energy);
-    tree->SetBranchAddress("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt);
-    tree->SetBranchAddress("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta);
-    tree->SetBranchAddress("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi);
-    tree->SetBranchAddress("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy);
+    tree->SetBranchAddress("pf_offline_jet_hlt_pt", nt.pf_offline_jet_hlt_pt);
+    tree->SetBranchAddress("pf_offline_jet_hlt_eta", nt.pf_offline_jet_hlt_eta);
+    tree->SetBranchAddress("pf_offline_jet_hlt_phi", nt.pf_offline_jet_hlt_phi);
+    tree->SetBranchAddress("pf_offline_jet_hlt_energy", nt.pf_offline_jet_hlt_energy);
+    tree->SetBranchAddress("pf_offline_displaced_jet_hlt_pt", nt.pf_offline_displaced_jet_hlt_pt);
+    tree->SetBranchAddress("pf_offline_displaced_jet_hlt_eta", nt.pf_offline_displaced_jet_hlt_eta);
+    tree->SetBranchAddress("pf_offline_displaced_jet_hlt_phi", nt.pf_offline_displaced_jet_hlt_phi);
+    tree->SetBranchAddress("pf_offline_displaced_jet_hlt_energy", nt.pf_offline_displaced_jet_hlt_energy);
+    tree->SetBranchAddress("ncalojets", &nt.ncalojets);
+    tree->SetBranchAddress("calo_jet_pt", nt.calo_jet_pt);
+    tree->SetBranchAddress("calo_jet_eta", nt.calo_jet_eta);
+    tree->SetBranchAddress("calo_jet_phi", nt.calo_jet_phi);
+    tree->SetBranchAddress("calo_jet_energy", nt.calo_jet_energy);
+    tree->SetBranchAddress("calo_offline_displaced_jet_hlt_pt", nt.calo_offline_displaced_jet_hlt_pt);
+    tree->SetBranchAddress("calo_offline_displaced_jet_hlt_eta", nt.calo_offline_displaced_jet_hlt_eta);
+    tree->SetBranchAddress("calo_offline_displaced_jet_hlt_phi", nt.calo_offline_displaced_jet_hlt_phi);
+    tree->SetBranchAddress("calo_offline_displaced_jet_hlt_energy", nt.calo_offline_displaced_jet_hlt_energy);
     tree->SetBranchAddress("gen_pv_x0", &nt.gen_pv_x0);
     tree->SetBranchAddress("gen_pv_y0", &nt.gen_pv_y0);
     tree->SetBranchAddress("gen_pv_z0", &nt.gen_pv_z0);

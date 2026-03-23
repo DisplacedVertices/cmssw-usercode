@@ -114,26 +114,53 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_bdisc_deepcsv[i] = mevent->jet_bdisc_deepcsv[i];
     nt.jet_bdisc_deepflav[i] = mevent->jet_bdisc_deepflav[i];
 
-    if (mevent->jet_hlt_pt.size() > size_t(i)) {
-      nt.jet_hlt_pt[i] = mevent->jet_hlt_pt[i];
-      nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
-      nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
-      nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
-      nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
-      nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
-      nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
-      nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
+    if (mevent->pf_offline_jet_hlt_pt.size() > size_t(i)) {
+      nt.pf_offline_jet_hlt_pt[i] = mevent->pf_offline_jet_hlt_pt[i];
+      nt.pf_offline_jet_hlt_eta[i] = mevent->pf_offline_jet_hlt_eta[i];
+      nt.pf_offline_jet_hlt_phi[i] = mevent->pf_offline_jet_hlt_phi[i];
+      nt.pf_offline_jet_hlt_energy[i] = mevent->pf_offline_jet_hlt_energy[i];
+      nt.pf_offline_displaced_jet_hlt_pt[i] = mevent->pf_offline_displaced_jet_hlt_pt[i];
+      nt.pf_offline_displaced_jet_hlt_eta[i] = mevent->pf_offline_displaced_jet_hlt_eta[i];
+      nt.pf_offline_displaced_jet_hlt_phi[i] = mevent->pf_offline_displaced_jet_hlt_phi[i];
+      nt.pf_offline_displaced_jet_hlt_energy[i] = mevent->pf_offline_displaced_jet_hlt_energy[i];
     }
     else {
-      assert(mevent->jet_hlt_pt.size() == 0);
-      nt.jet_hlt_pt[i] = -1;
-      nt.jet_hlt_eta[i] = -1;
-      nt.jet_hlt_phi[i] = -1;
-      nt.jet_hlt_energy[i] = -1;
-      nt.displaced_jet_hlt_pt[i] = -1;
-      nt.displaced_jet_hlt_eta[i] = -1;
-      nt.displaced_jet_hlt_phi[i] = -1;
-      nt.displaced_jet_hlt_energy[i] = -1;
+      assert(mevent->pf_offline_jet_hlt_pt.size() == 0);
+      nt.pf_offline_jet_hlt_pt[i] = -1;
+      nt.pf_offline_jet_hlt_eta[i] = -1;
+      nt.pf_offline_jet_hlt_phi[i] = -1;
+      nt.pf_offline_jet_hlt_energy[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_pt[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_eta[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_phi[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_energy[i] = -1;
+    }
+  }
+
+  nt.ncalojets = int2uchar(mevent->ncalojets(mfv::min_jet_pt));
+  if (nt.ncalojets > 50)
+    throw cms::Exception("CheckYourPremises") << "too many calojets in event: " << nt.ncalojets;
+
+  for (int i = 0; i < mevent->ncalojets(); ++i) {
+    if (mevent->calo_jet_pt[i] < mfv::min_jet_pt)
+      continue;
+    nt.calo_jet_pt[i] = mevent->calo_jet_pt[i];
+    nt.calo_jet_eta[i] = mevent->calo_jet_eta[i];
+    nt.calo_jet_phi[i] = mevent->calo_jet_phi[i];
+    nt.calo_jet_energy[i] = mevent->calo_jet_energy[i];
+
+    if (mevent->calo_offline_displaced_jet_hlt_pt.size() > size_t(i)) {
+      nt.calo_offline_displaced_jet_hlt_pt[i] = mevent->calo_offline_displaced_jet_hlt_pt[i];
+      nt.calo_offline_displaced_jet_hlt_eta[i] = mevent->calo_offline_displaced_jet_hlt_eta[i];
+      nt.calo_offline_displaced_jet_hlt_phi[i] = mevent->calo_offline_displaced_jet_hlt_phi[i];
+      nt.calo_offline_displaced_jet_hlt_energy[i] = mevent->calo_offline_displaced_jet_hlt_energy[i];
+    }
+    else {
+      assert(mevent->calo_offline_displaced_jet_hlt_pt.size() == 0);
+      nt.calo_offline_displaced_jet_hlt_pt[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_eta[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_phi[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_energy[i] = -1;
     }
   }
 

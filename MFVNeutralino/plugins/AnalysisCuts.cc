@@ -30,15 +30,21 @@ private:
   bool satisfiesLepTrigger(edm::Handle<MFVEvent>, size_t, const edm::EventSetup&);
   bool satisfiesDispLepTrigger(edm::Handle<MFVEvent>, size_t, const edm::EventSetup&);
 
-  bool jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
-    // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
+  bool pf_offline_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
+    // an offline jet with a successful HLT match will have a nonzero pf_offline_jet_hlt_pt;
     // all others have the default value of 0
-    return mevent->jet_hlt_pt.at(i) > min_jet_pt;
+    return mevent->pf_offline_jet_hlt_pt.at(i) > min_jet_pt;
   }
-  bool displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
-    // an offline jet with a successful HLT match will have a nonzero displaced_jet_hlt_pt;
+  bool pf_offline_displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
+    // an offline jet with a successful HLT match will have a nonzero pf_offline_displaced_jet_hlt_pt;
     // all others have the default value of 0
-    return mevent->displaced_jet_hlt_pt.at(i) > min_jet_pt;
+    return mevent->pf_offline_displaced_jet_hlt_pt.at(i) > min_jet_pt;
+  }
+  bool calo_offline_displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
+    // an offline calojet with a successful HLT match will have a nonzero calo_offline_displaced_jet_hlt_pt;
+    // all others have the default value of 0
+    // NOTE be sure to keep the calojet and PF jet indices separate! mixing them up will be a big problem
+    return mevent->calo_offline_displaced_jet_hlt_pt.at(i) > min_jet_pt;
   }
 
 // Helper function to see whether a MC btag would've been rejected if it was in data
@@ -802,10 +808,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(require_bjet_psel and sel_btags_hard < 2) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125) continue;
 
                     if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
                         passed_kinematics = true;
@@ -821,16 +827,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(require_bjet_psel and sel_btags < 3) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 90) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 90) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 75) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 75) continue;
 
                     for(int j2 = j1+1; j2 < njets; ++j2){
-                        if(!jet_hlt_match(mevent, j2) || jet_pt_checks[j2] < 55) continue;
+                        if(!pf_offline_jet_hlt_match(mevent, j2) || jet_pt_checks[j2] < 55) continue;
 
                         for(int j3 = j2+1; j3 < njets; ++j3){
-                            if(!jet_hlt_match(mevent, j3) || jet_pt_checks[j3] < 55) continue;
+                            if(!pf_offline_jet_hlt_match(mevent, j3) || jet_pt_checks[j3] < 55) continue;
 
                             passed_kinematics = true;
                         }
@@ -848,10 +854,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(require_bjet_psel and sel_btags_hard < 2) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 140) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 140) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 140) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 140) continue;
 
                     if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
                         passed_kinematics = true;
@@ -872,16 +878,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(require_bjet_psel and sel_btags < 3) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 95) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || jet_pt_checks[j0] < 95) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 65) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || jet_pt_checks[j1] < 65) continue;
 
                     for(int j2 = j1+1; j2 < njets; ++j2){
-                        if(!jet_hlt_match(mevent, j2) || jet_pt_checks[j2] < 60) continue;
+                        if(!pf_offline_jet_hlt_match(mevent, j2) || jet_pt_checks[j2] < 60) continue;
 
                         for(int j3 = j2+1; j3 < njets; ++j3){
-                            if(!jet_hlt_match(mevent, j3) || jet_pt_checks[j3] < 55) continue;
+                            if(!pf_offline_jet_hlt_match(mevent, j3) || jet_pt_checks[j3] < 55) continue;
 
                             passed_kinematics = true;
                         }
@@ -892,6 +898,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             return passed_kinematics;
         }
 
+        // FIXME for the four trigger paths below, add in the calojet offline to calojet hlt matching!
     case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
        {
             //std::cout << "\nTesting b_HLT_HT430_DisplacedDijet40_DisplacedTrack" << std::endl;
@@ -953,16 +960,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(sel_btags < 3) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue;
 
                     for(int j2 = j1+1; j2 < njets; ++j2){
-                        if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 50) continue;
+                        if(!pf_offline_jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 50) continue;
 
                         for(int j3 = j2+1; j3 < njets; ++j3){
-                            if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 50) continue;
+                            if(!pf_offline_jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 50) continue;
 
                             passed_kinematics = true;
                         }
@@ -980,16 +987,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(sel_btags < 3) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
 
                     for(int j2 = j1+1; j2 < njets; ++j2){
-                        if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 35) continue;
+                        if(!pf_offline_jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 35) continue;
 
                         for(int j3 = j2+1; j3 < njets; ++j3){
-                            if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 35) continue;
+                            if(!pf_offline_jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 35) continue;
 
                             passed_kinematics = true;
                         }
@@ -1005,10 +1012,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(sel_btags_hard < 2) return false;
 
             for(int j0 = 0; j0 < njets; ++j0){
-                if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 110) continue;
+                if(!pf_offline_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 110) continue;
 
                 for(int j1 = j0+1; j1 < njets; ++j1){
-                    if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 110) continue;
+                    if(!pf_offline_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 110) continue;
 
                     if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
                         passed_kinematics = true;
@@ -1184,7 +1191,7 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t t
                 bool ele_IP_cut = abs(mevent->electron_eta[ie]) < 1.48 ? ele_absdxybs < 0.05 && ele_absdz < 0.1 : ele_absdxybs < 0.1 && ele_absdz < 0.2;
                 if (ele_IP_cut && abs(mevent->electron_eta[ie]) < 2.4) { 
                   for(int j0=0; j0 < njets; ++j0){
-                          if (!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
+                          if (!pf_offline_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
                           passed_kinematics = true;
                   }
 	        }
