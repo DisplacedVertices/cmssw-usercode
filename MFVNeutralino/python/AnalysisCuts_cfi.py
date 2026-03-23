@@ -23,6 +23,7 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                require_met_filters = cms.bool(False), # JPR 2/5/2026: I think we should turn this to True, but we should do a dedicated study first
                                require_bquarks  = cms.bool(False),
                                require_trigbit  = cms.bool(True),
+                               require_trig_obj_match = cms.bool(True), # FIXME study the impact of this one, note only implemented for PF/calo jets
                                require_gen_sumdbv  = cms.bool(False),
                                require_bjet_psel   = cms.bool(True) if use_btag_triggers or use_btag_vetoLepHT_triggers else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
                                require_isomu27 = cms.bool(False),

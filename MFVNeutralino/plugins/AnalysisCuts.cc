@@ -33,17 +33,20 @@ private:
   bool pf_offline_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
     // an offline jet with a successful HLT match will have a nonzero pf_offline_jet_hlt_pt;
     // all others have the default value of 0
+    if(!require_trig_obj_match) return true;
     return mevent->pf_offline_jet_hlt_pt.at(i) > min_jet_pt;
   }
   bool pf_offline_displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
     // an offline jet with a successful HLT match will have a nonzero pf_offline_displaced_jet_hlt_pt;
     // all others have the default value of 0
+    if(!require_trig_obj_match) return true;
     return mevent->pf_offline_displaced_jet_hlt_pt.at(i) > min_jet_pt;
   }
   bool calo_offline_displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
     // an offline calojet with a successful HLT match will have a nonzero calo_offline_displaced_jet_hlt_pt;
     // all others have the default value of 0
     // NOTE be sure to keep the calojet and PF jet indices separate! mixing them up will be a big problem
+    if(!require_trig_obj_match) return true;
     return mevent->calo_offline_displaced_jet_hlt_pt.at(i) > min_jet_pt;
   }
 
@@ -61,6 +64,7 @@ private:
   const bool require_met_filters;
   const bool require_bquarks;
   const bool require_trigbit;
+  const bool require_trig_obj_match;
   const bool require_gen_sumdbv;
   const bool require_bjet_psel;
   const bool require_isomu27;
@@ -137,6 +141,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     require_trigbit(cfg.getParameter<bool>("require_trigbit")),
+    require_trig_obj_match(cfg.getParameter<bool>("require_trig_obj_match")),
     require_gen_sumdbv(cfg.getParameter<bool>("require_gen_sumdbv")),
     require_bjet_psel(cfg.getParameter<bool>("require_bjet_psel")),
     require_isomu27(cfg.getParameter<bool>("require_isomu27")),
