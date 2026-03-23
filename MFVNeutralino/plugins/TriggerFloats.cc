@@ -531,7 +531,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
                     floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }
 
-
+                // FIXME are these the only objects we need to keep for the displaced jets?
                 if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
                     floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }
