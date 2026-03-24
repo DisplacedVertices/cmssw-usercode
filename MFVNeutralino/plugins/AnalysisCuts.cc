@@ -705,7 +705,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     if (cj_pt > 30.0 and cj_aeta < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
 
     // Don't do the following CPU-intensive for loop if it's not a relevant jet
-    if (cj_pt < 40.0 or fabs(mevent->calo_jet_eta[ic]) > 2.0) continue;
+    if (cj_pt < 40.0 or fabs(mevent->calo_jet_eta[ic]) > 2.0 or !calo_offline_displaced_jet_hlt_match(mevent, ic)) continue;
 
     // If you made it here, the CaloJet is good enough for the low HT trigger. Record this & check if it's good enough for High HT trig
     calojet_ngood[0]++;
@@ -903,7 +903,6 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             return passed_kinematics;
         }
 
-        // FIXME for the four trigger paths below, add in the calojet offline to calojet hlt matching!
     case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
        {
             //std::cout << "\nTesting b_HLT_HT430_DisplacedDijet40_DisplacedTrack" << std::endl;
@@ -934,10 +933,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(alt_calo_ht < 350 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
-                if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
+                if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j0)) continue;
 
                 for(int j1 = j0+1; j1 < ncalojets; ++j1){
-                    if(mevent->calo_jet_pt[j1] < 50 || fabs(mevent->calo_jet_eta[j1]) > 2.0) continue;
+                    if(mevent->calo_jet_pt[j1] < 50 || fabs(mevent->calo_jet_eta[j1]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j1)) continue;
                     passed_kinematics = true;
                 }
             }
@@ -949,10 +948,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
             if(alt_calo_ht < 650 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
-                if(mevent->calo_jet_pt[j0] < 100 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
+                if(mevent->calo_jet_pt[j0] < 100 || fabs(mevent->calo_jet_eta[j0]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j0)) continue;
 
                 for(int j1 = j0+1; j1 < ncalojets; ++j1){
-                    if(mevent->calo_jet_pt[j1] < 100 || fabs(mevent->calo_jet_eta[j1]) > 2.0) continue;
+                    if(mevent->calo_jet_pt[j1] < 100 || fabs(mevent->calo_jet_eta[j1]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j1)) continue;
                     passed_kinematics = true;
                 }
             }
