@@ -305,10 +305,10 @@ namespace mfv {
     tree->Branch("pf_offline_displaced_jet_hlt_phi", nt.pf_offline_displaced_jet_hlt_phi, "pf_offline_displaced_jet_hlt_phi[njets]/F");
     tree->Branch("pf_offline_displaced_jet_hlt_energy", nt.pf_offline_displaced_jet_hlt_energy, "pf_offline_displaced_jet_hlt_energy[njets]/F");
     tree->Branch("ncalojets", &nt.ncalojets);
-    tree->Branch("calo_jet_pt", nt.calo_jet_pt, "calo_jet_pt[ncalo_jets]/F");
-    tree->Branch("calo_jet_eta", nt.calo_jet_eta, "calo_jet_eta[ncalo_jets]/F");
-    tree->Branch("calo_jet_phi", nt.calo_jet_phi, "calo_jet_phi[ncalo_jets]/F");
-    tree->Branch("calo_jet_energy", nt.calo_jet_energy, "calo_jet_energy[ncalo_jets]/F");
+    tree->Branch("calo_jet_pt", nt.calo_jet_pt, "calo_jet_pt[ncalojets]/F");
+    tree->Branch("calo_jet_eta", nt.calo_jet_eta, "calo_jet_eta[ncalojets]/F");
+    tree->Branch("calo_jet_phi", nt.calo_jet_phi, "calo_jet_phi[ncalojets]/F");
+    tree->Branch("calo_jet_energy", nt.calo_jet_energy, "calo_jet_energy[ncalojets]/F");
     tree->Branch("calo_offline_displaced_jet_hlt_pt", nt.calo_offline_displaced_jet_hlt_pt, "calo_offline_displaced_jet_hlt_pt[njets]/F");
     tree->Branch("calo_offline_displaced_jet_hlt_eta", nt.calo_offline_displaced_jet_hlt_eta, "calo_offline_displaced_jet_hlt_eta[njets]/F");
     tree->Branch("calo_offline_displaced_jet_hlt_phi", nt.calo_offline_displaced_jet_hlt_phi, "calo_offline_displaced_jet_hlt_phi[njets]/F");
