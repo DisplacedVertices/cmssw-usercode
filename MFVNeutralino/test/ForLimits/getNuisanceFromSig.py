@@ -61,6 +61,18 @@ nominal_corr_sig = set([
 
 
 
+def replace_all_ones(new_nuis):
+    """ Little function that removes a nuisance list, if they're all 1.0's """
+    all_ones = True # Kill 1.0-nuis
+    for nuis in new_nuis:
+        if not np.prod(nuis.nuis_val == np.ones_like(nuis.nuis_val)):
+            all_ones = False
+            break
+    if all_ones: return []
+    else: return new_nuis
+
+
+
 
 
 
@@ -97,17 +109,19 @@ def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
 
     elif nuis_name == "vtx_reco_TM": new_nuis = nsfc.get_vtx_reco_TM(nuis_name, siginfo, debug_mode=debug_mode)
 
-    elif nuis_name == "pileup": new_nuis = nsfc.get_pileup("CMS_pileup_13TeV", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "pileup": new_nuis = nsfc.get_pileup("CMS_pileup", siginfo, debug_mode=debug_mode)
     
     elif nuis_name == "int_lumi": new_nuis = nsfc.get_int_lumi("lumi", siginfo, debug_mode=debug_mode)
 
-    elif nuis_name == "lep_effi": new_nuis = nsfc.get_lep_effi("CMS_eff_lep", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "lep_effi": new_nuis = nsfc.get_lep_effi("CMS_eff_e", siginfo, debug_mode=debug_mode)
 
     elif nuis_name == "trig_JESR_btag": new_nuis = nsfc.get_trig_JESR_btag("disp_trig_uncerts", siginfo, debug_mode=debug_mode)
 
     elif nuis_name == "calo_inef": new_nuis = nsfc.get_calo_inef("calo_ineff", siginfo, debug_mode=debug_mode)
 
     else: print "Error: nuisance name not implemented for", nuis_name
+
+    new_nuis = replace_all_ones(new_nuis)
 
     nuis_ls += new_nuis
     return
@@ -129,6 +143,8 @@ def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
     elif nuis_name == "bkg_norm": new_nuis = nsfc.get_bkg_bkg_norm("bkg_norm", debug_mode=debug_mode) # Note naming
 
     else: print "Error: background nuisance name not implemented for", nuis_name
+
+    new_nuis = replace_all_ones(new_nuis)
 
     nuis_bkg_ls += new_nuis
     return

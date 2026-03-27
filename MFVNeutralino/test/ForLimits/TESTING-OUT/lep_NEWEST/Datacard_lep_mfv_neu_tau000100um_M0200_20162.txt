@@ -1,4 +1,4 @@
-# sample id in ROOT file 54
+# sample id in ROOT file 18
 # filename = mfv_neu_tau000100um_M0200_20162.root
 # total sig rate = FIXME, not implemented
 imax 3
@@ -9,18 +9,18 @@ bin             b2016postAPV0    b2016postAPV1    b2016postAPV2
 observation       0      0      0
 ________
 bin             b2016postAPV0    b2016postAPV1    b2016postAPV2            b2016postAPV0    b2016postAPV1    b2016postAPV2
-process       sig2016postAPV54  sig2016postAPV54  sig2016postAPV54           bkg2016postAPV   bkg2016postAPV   bkg2016postAPV
+process       sig2016postAPV18  sig2016postAPV18  sig2016postAPV18           bkg2016postAPV   bkg2016postAPV   bkg2016postAPV
 process           0      0      0              1      1      1
 rate         3.24365440951e-05 0.000121240145471 0.0         0.00149168072368 0.00221574323259 0.00829257604373
 ________
 
 lumi_2016postAPV              lnN     1.02   1.02   1.02              -      -      -
+CMS_eff_e_13TeV               lnN     1.01   1.01   1.01              -      -      -
 
 CMS_EXO24035_vtx_reco_TM_2016postAPVb1 lnN   1.4508      -      -              -      -      -
 CMS_EXO24035_vtx_reco_TM_2016postAPVb2 lnN        - 1.4508      -              -      -      -
 CMS_EXO24035_vtx_reco_TM_2016postAPVb3 lnN        -      - 1.4508              -      -      -
 
-fake_fact_CMS_eff_lep_2016postAPV lnN   1.09620511532/0.914770841599 1.10220587254/0.910918414593 1.0/1.0              -      -      -
 fake_fact_CMS_pileup_13TeV    lnN   1.09620511532/0.914770841599 1.10220587254/0.910918414593 1.0/1.0              -      -      -
 
 CMS_EXO24035_mc_stat_2016postAPVb1 gmN 1      3.24365440951e-05      -      -              -      -      -

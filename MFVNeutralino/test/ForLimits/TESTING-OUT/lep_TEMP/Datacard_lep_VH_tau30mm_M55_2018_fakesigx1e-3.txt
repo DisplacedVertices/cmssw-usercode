@@ -1,0 +1,38 @@
+# sample id in ROOT file 14
+# filename = VH_tau30mm_M55_2018.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b20180    b20181    b20182
+observation       0      0      0
+________
+bin             b20180    b20181    b20182            b20180    b20181    b20182
+process       sig201814  sig201814  sig201814           bkg2018   bkg2018   bkg2018
+process           0      0      0              1      1      1
+rate         0.0 0.000991600769078 0.27113101805         0.000108226556515 0.0004098106721 0.0334819627714
+________
+
+lumi_2018                     lnN   1.0084 1.0084 1.0084              -      -      -
+CMS_eff_e_13TeV               lnN     1.01   1.01   1.01              -      -      -
+
+CMS_EXO24035_vtx_reco_TM_2018b1 lnN   1.2218      -      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2018b2 lnN        - 1.2218      -              -      -      -
+CMS_EXO24035_vtx_reco_TM_2018b3 lnN        -      - 1.2218              -      -      -
+
+fake_fact_CMS_pileup_13TeV    lnN   1.0/1.0 0.764794949847/1.22556488924 0.81732239392/2013967.95029              -      -      -
+
+CMS_EXO24035_mc_stat_2018b1   gmN 0      0.000161593004049      -      -              -      -      -
+CMS_EXO24035_mc_stat_2018b2   gmN 7           - 0.000141657252725      -              -      -      -
+CMS_EXO24035_mc_stat_2018b3   gmN 1677        -      - 0.000161676218276              -      -      -
+CMS_EXO24035_tk_reco_eff_2018 lnN   1.00464/0.991683 1.01221/0.963786 1.01623/0.947353              -      -      -
+
+CMS_pileup_2018               lnN        -      -      -         1.0001 1.0001 1.0001
+CMS_EXO24035_sig_cont_2018    lnN        -      -      -           1.05   1.05   1.05
+CMS_EXO24035_fake-bkg_2018    lnN        -      -      -            1.1    1.1    1.1
+
+CMS_EXO24035_bkg_norm_2018b1  lnN        -      -      -           1.15      -      -
+CMS_EXO24035_bkg_norm_2018b2  lnN        -      -      -              -   1.15      -
+CMS_EXO24035_bkg_norm_2018b3  lnN        -      -      -              -      -   1.15
+

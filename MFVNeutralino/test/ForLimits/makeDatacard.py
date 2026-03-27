@@ -59,7 +59,7 @@ def return_sep():
     return "        "
 
 
-def make_nuis_dcnm(nuis, siginfo, force_no_CADItag=False):
+def make_nuis_dcnm(nuis, siggrp, force_no_CADItag=False):
     """
     Given a nuisance, return the name/s it will show up as.
     -If analysis-specific, tag with CADI (unless forced not to)
@@ -67,9 +67,11 @@ def make_nuis_dcnm(nuis, siginfo, force_no_CADItag=False):
     -If separate bins (==corr/uncorr), tag b1, b2 etc
     """
     nuis_rootname = nuis.nuis_name
-    if nuis.add_anaID==True and not(force_no_CADItag): nuis_rootname = ns_conf.nuis_names["CMS-CADI-tag"] + nuis_rootname
-    if (nuis.sep_yrs or not(nuis.corr)) and not(force_no_CADItag): nuis_rootname = nuis_rootname + "_"
-    if nuis.sep_yrs==True and not(force_no_CADItag): nuis_rootname += year_tag
+    if not(force_no_CADItag):
+        if nuis.add_anaID==True: nuis_rootname = ns_conf.nuis_names["CMS-CADI-tag"] + nuis_rootname
+        nuis_rootname = nuis_rootname + "_"
+        if nuis.sep_yrs==True: nuis_rootname += year_tag
+        if nuis.sep_yrs==False: nuis_rootname += ns_conf.nuis_names["Run2-key"]
 
     if nuis.corr==True:
         return nuis_rootname
@@ -145,7 +147,7 @@ def return_no_dashes(template):
 
 # LONG FUNCTIONS
 
-def add_ijkmax(template, nuis_ls, nuis_bkg_ls, siginfo):
+def add_ijkmax(template, nuis_ls, nuis_bkg_ls, siggrp):
     new_template = template + """
 imax """ + str(nbins) + """
 jmax """ + "1" + """
@@ -173,7 +175,7 @@ kmax """
 
 
 
-def add_observations(template, f, siginfo, sig_id):
+def add_observations(template, f, siggrp, sig_id):
 
     new_template = template + pad("bin", 12)
     for i in range(nbins):
@@ -193,7 +195,7 @@ def add_observations(template, f, siginfo, sig_id):
 
 
 
-def add_central_vals(template, f, sig_norm_ls, siginfo, sig_id):
+def add_central_vals(template, f, sig_norm_ls, siggrp, sig_id):
     """
     -INPUTS-
     sig_norm_ls: list (probably empty), will store extracted signal values for Gamma-N
@@ -232,7 +234,7 @@ def add_central_vals(template, f, sig_norm_ls, siginfo, sig_id):
 
 
 
-def return_lnN_corr(f, ns_ls, siginfo, write_sig):
+def return_lnN_corr(f, ns_ls, siggrp, write_sig):
     """
     -Inputs-
     write_sig: Boolean. If true, it will write the first set, else it writes the second set
@@ -246,7 +248,7 @@ def return_lnN_corr(f, ns_ls, siginfo, write_sig):
         except:
             raise Exception("Failure: Nuisance object not complete")
 
-        dc_name = make_nuis_dcnm(nuis, siginfo)
+        dc_name = make_nuis_dcnm(nuis, siggrp)
         new_lines += turn_info_to_line(dc_name, "lnN", nuis.nuis_val, write_sig)
 
     new_lines += """
@@ -258,7 +260,7 @@ def return_lnN_corr(f, ns_ls, siginfo, write_sig):
 
 
 
-def return_lnN_uncorr(f, ns_ls, siginfo, write_sig):
+def return_lnN_uncorr(f, ns_ls, siggrp, write_sig):
     """
     -Inputs-
     write_sig: Boolean. If true, it will write the first set, else it writes the second set
@@ -272,7 +274,7 @@ def return_lnN_uncorr(f, ns_ls, siginfo, write_sig):
         except:
             raise Exception("Failure: Nuisance object not complete")
 
-        dc_names = make_nuis_dcnm(nuis, siginfo)
+        dc_names = make_nuis_dcnm(nuis, siggrp)
         new_lines += turn_info_to_nlines(dc_names, "lnN", nuis.nuis_val, write_sig)
 
     new_lines += """
@@ -284,7 +286,7 @@ def return_lnN_uncorr(f, ns_ls, siginfo, write_sig):
 
 
 
-def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
+def return_shape_lines(f, ns_ls, siggrp, sig_id, write_sig=True):
     """
     Searches for shape uncertainty ROOT histograms, and writes them out as text on the datacard
     
@@ -296,8 +298,8 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
     for nuis in ns_ls:
         if nuis.nuis_type != "shape": continue
 
-        dc_name_for_h = make_nuis_dcnm(nuis, siginfo)
-        dc_name = make_nuis_dcnm(nuis, siginfo)
+        dc_name_for_h = make_nuis_dcnm(nuis, siggrp)
+        dc_name = make_nuis_dcnm(nuis, siggrp)
         if write_sig: process_htag = sig_nm(sig_id).replace(" ","")
         else: process_htag = bkg_nm().replace(" ","")
 
@@ -317,7 +319,7 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
                 strls.append(str(h_shape_dn.GetBinContent(i+1) / h_central.GetBinContent(i+1)) + "/" + str(h_shape_up.GetBinContent(i+1) / h_central.GetBinContent(i+1)))
             except:
                 strls.append(str(1.0) + "/" + str(1.0))
-                print "Warning: division by 0 encountered in up/down variations. Filling fake 1.0 values. Error in", siginfo.fn, "bin", i, "."
+                print "Warning: division by 0 encountered in up/down variations. Filling fake 1.0 values. Error in", siggrp.fn, "bin", i, "."
 
         new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
 
@@ -330,7 +332,7 @@ def return_shape_lines(f, ns_ls, siginfo, sig_id, write_sig=True):
 
 
 
-def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True):
+def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
     """
     If the nuisance type is recorded as "special", this section will trigger. The triggering is extremely ad-hoc.
     
@@ -352,7 +354,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
         if nuis.nuis_type == "GammaN":
             if write_sig==False: raise Exception("GammaN not implemented for background")
 
-            dc_names = make_nuis_dcnm(nuis, siginfo)
+            dc_names = make_nuis_dcnm(nuis, siggrp)
 
             sig_cts_hname = "h_"+"sig"+sig_id+"_ngen_perbin_"+year
             h_sig_cts = f.Get(sig_cts_hname)
@@ -365,7 +367,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
                         try:
                             strls.append(sig_norm_ls[j] / h_sig_cts.GetBinContent(j+1))
                         except:
-                            print "Warning: division by 0 encountered in Gamma-N. Filling mean sumw as a placeholder. Error in", siginfo.fn, "bin", i, "."
+                            print "Warning: division by 0 encountered in Gamma-N. Filling mean sumw as a placeholder. Error in", siggrp.fn, "bin", i, "."
                             if h_sig_cts.Integral()==0.0:
                                 strls.append(0.0005)
                             else:
@@ -388,7 +390,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
                                 pair_found = True
                                 break
                     if not(pair_found): raise Exception("The up-down pair marked UP has no corresponding pair")
-                    dc_name = make_nuis_dcnm(nuis, siginfo)
+                    dc_name = make_nuis_dcnm(nuis, siggrp)
 
                     strls = []
                     for i in range(nbins):
@@ -401,7 +403,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
             if (nuis.extra_info[0]=="anti-lnN"):
                 if (nuis.corr!=True): raise Exception("Anti-correlated lnN does not have un-correlated bins implemented")
 
-                dc_name = make_nuis_dcnm(nuis, siginfo)
+                dc_name = make_nuis_dcnm(nuis, siggrp)
 
                 strls = []
                 for i in range(nbins):
@@ -426,12 +428,12 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siginfo, sig_id, write_sig=True)
 
 
 
-def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
+def make_datacard(f, nuis_ls, nuis_bkg_ls, siggrp, sig_fake_corrs, sig_id, debug_mode=False):
     """
     -INPUTS-
     nuis_ls: list of nuisance objects, for signal
     nuis_bkg_ls: list of nuisance objects, for background
-    siginfo: SigInfo object storing information about signal MiniTree
+    siggrp: SigGrp object storing information about signal MiniTree
     sig_id: string, the integer indexing the signal
     debug_mode: Bool, whether to make debug statements
     """
@@ -442,33 +444,33 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
 
     # INITIALIZATION
     template = """# sample id in ROOT file """ + sig_id + """
-# filename = """ + siginfo.fn + """
+# filename = """ + siggrp.fn + """
 # total sig rate = """ + """FIXME, not implemented"""
 
-    template = add_ijkmax(template=template, nuis_ls=nuis_ls, nuis_bkg_ls=nuis_bkg_ls, siginfo=siginfo)
+    template = add_ijkmax(template=template, nuis_ls=nuis_ls, nuis_bkg_ls=nuis_bkg_ls, siggrp=siggrp)
     template += return_newline()
 
-    template = add_observations(template=template, f=f, siginfo=siginfo, sig_id=sig_id)
+    template = add_observations(template=template, f=f, siggrp=siggrp, sig_id=sig_id)
     template += return_newline()
 
     sig_norm_ls = [] # store signal norms, for Gamma-N
-    template, sig_norm_ls = add_central_vals(template=template, f=f, sig_norm_ls=sig_norm_ls, siginfo=siginfo, sig_id=sig_id)
+    template, sig_norm_ls = add_central_vals(template=template, f=f, sig_norm_ls=sig_norm_ls, siggrp=siggrp, sig_id=sig_id)
     template += return_newline()
 
 
     # Nuis SIGNAL
-    template += return_lnN_corr(f=f, ns_ls=nuis_ls, siginfo=siginfo, write_sig=True)
-    template += return_lnN_uncorr(f=f, ns_ls=nuis_ls, siginfo=siginfo, write_sig=True)
+    template += return_lnN_corr(f=f, ns_ls=nuis_ls, siggrp=siggrp, write_sig=True)
+    template += return_lnN_uncorr(f=f, ns_ls=nuis_ls, siggrp=siggrp, write_sig=True)
 
-    template += return_shape_lines(f=f, ns_ls=nuis_ls, siginfo=siginfo, sig_id=sig_id, write_sig=True)
-    template += return_special_lines(f=f, ns_ls=nuis_ls, sig_norm_ls=sig_norm_ls, siginfo=siginfo, sig_id=sig_id, write_sig=True)
+    template += return_shape_lines(f=f, ns_ls=nuis_ls, siggrp=siggrp, sig_id=sig_id, write_sig=True)
+    template += return_special_lines(f=f, ns_ls=nuis_ls, sig_norm_ls=sig_norm_ls, siggrp=siggrp, sig_id=sig_id, write_sig=True)
 
 
     # Nuis BACKGROUND
-    template += return_lnN_corr(f=f, ns_ls=nuis_bkg_ls, siginfo=siginfo, write_sig=False)
-    template += return_lnN_uncorr(f=f, ns_ls=nuis_bkg_ls, siginfo=siginfo, write_sig=False)
+    template += return_lnN_corr(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, write_sig=False)
+    template += return_lnN_uncorr(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, write_sig=False)
 
-    template += return_shape_lines(f=f, ns_ls=nuis_bkg_ls, siginfo=siginfo, sig_id=sig_id, write_sig=False)
+    template += return_shape_lines(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, sig_id=sig_id, write_sig=False)
 
 
     #Tidy Template
@@ -479,8 +481,10 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siginfo, sig_id, debug_mode=False):
 
 
     dc_dict = config.datacard_out_loc
-    out_dc_fn = dc_dict["out_folder"] + dc_dict["out_fn_prefix"] + siginfo.trig_type + "_" + siginfo.return_nuis_key()
+    out_dc_fn = dc_dict[sig_type]["out_folder"] + dc_dict["out_fn_prefix"] + siggrp.trig_type + "_" + siggrp.return_nuis_key()
     if config.debug_settings["scale_bkg_fake"]: out_dc_fn += "_fakebkg"
+    r_f_corr = sig_fake_corrs[siggrp]
+    if (r_f_corr is not None): out_dc_fn += "_fakesigx" + r_f_corr
     out_dc_fn += dc_dict["out_fn_suffix"]
 
 

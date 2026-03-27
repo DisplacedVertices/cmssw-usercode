@@ -34,6 +34,21 @@ debugging = True
 
 
 """
+Small functions
+"""
+
+def interp_pickle_triple(nn):
+    """ Given nuisance name (ex. "tk_reco_eff"), make up+dn locations """
+    loc_dict = ns_conf.pickle_triple_prefixes[nn]
+    loc_base = loc_dict["base"]
+    return loc_base + loc_dict["up"], loc_base + loc_dict["dn"]
+
+
+
+
+
+
+"""
 Nominal Corrections: SIGNAL
 """
 
@@ -59,18 +74,29 @@ def get_mc_stat(nuis_name, siginfo, debug_mode=False):
 
 
 def get_reco_effi(nuis_name, siginfo, debug_mode=False):
+    pickle_locs = interp_pickle_triple(nuis_name)
 
-    nominals = get_nominal_reco_effi_sig(siginfo, debug_mode=debug_mode) # If this is dummy, 0.85s
-    up_arr = 0.90 * np.ones(nbins)
-    dn_arr = 0.80 * np.ones(nbins)
+    up_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[0]) # FIXME as of right now, only VH exists
+    # up_ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=pickle_locs[0])
+    up_arr = up_ntab.get_point_from_fn(siginfo)
+    if up_arr is None: up_arr = [1.0, 1.0, 1.0] # Needed because there's only VH, stupid fix
+    dn_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[1])
+    # dn_ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=pickle_locs[1])
+    dn_arr = dn_ntab.get_point_from_fn(siginfo)
+    if dn_arr is None: dn_arr = [1.0, 1.0, 1.0] # Stupid patch
 
-    up_lnN = np.round(up_arr/nominals, decimals=4)
-    dn_lnN = np.round(dn_arr/nominals, decimals=4)
+    # nominals = get_nominal_reco_effi_sig(siginfo, debug_mode=debug_mode) # That's if up/down numbers are absolute corrections (not current assumption)
+    # up_lnN = np.round(up_arr/nominals, decimals=4)
+    # dn_lnN = np.round(dn_arr/nominals, decimals=4)
 
+    # if np.array_equal(np.array(up_arr), np.ones(nbins)) and np.array_equal(np.array(dn_arr), np.ones(nbins)): return []
 
-    up_nuis = sth.NuisanceInfo(nuis_name, up_lnN, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "up"])
-    dn_nuis = sth.NuisanceInfo(nuis_name, dn_lnN, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
+    up_nuis = sth.NuisanceInfo(nuis_name, up_arr, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "up"])
+    dn_nuis = sth.NuisanceInfo(nuis_name, dn_arr, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
 
+    # REF
+    if debug_mode: print "Identified trk-reco fractional uncertainties:", up_arr, dn_arr
+    
     return [up_nuis, dn_nuis]
 
 
@@ -110,7 +136,7 @@ def get_int_lumi(nuis_name, siginfo, debug_mode=False):
 
 
 def get_lep_effi(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=True, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
+    nuis = sth.NuisanceInfo(nuis_name, 1+0.01, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=False)
     return [nuis]
 
 
@@ -123,7 +149,7 @@ def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
     if not np.isfinite(frac_unc):
         print "Warning: value not sensible. Skipping value."
         return []
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
 
 
 

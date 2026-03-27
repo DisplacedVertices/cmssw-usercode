@@ -14,6 +14,7 @@ from JMTucker.Tools.ROOTTools import lerp, bilerp
 
 import helper_ROOT_functions as ROOThelper
 import script_configs as config
+import sig_and_bkg_configs as sb_conf
 from io import open
 
 """
@@ -25,6 +26,10 @@ DEFINITION: NuisanceInfo
 
 DEFINITION: NuisanceTable
 """
+
+nbins = config.datacard["nbins"]
+
+prt_dt = sb_conf.printout_flags["PyStorage"] # Printout dict
 
 
 
@@ -80,7 +85,7 @@ class SignalROOTInfo(object):
     
     def get_type(self):
         if (self.proc in config.sig["bjet_sigs"]) and (self.proc in config.sig["lep_sigs"]):
-            print "Note: this signal can be bjet or lep. Setting to match script_config."
+            if prt_dt["sig_type_conflict"]: print "Note: this signal can be bjet or lep. Setting to match script_config."
             self.trig_type = config.sig["type"]
         elif self.proc in config.sig["bjet_sigs"]:
             self.trig_type = "bjet"
@@ -172,6 +177,85 @@ class SignalROOTInfo(object):
 
 
 
+class SigRInf_Grp(object):
+    """
+    Make a cluster of SignalROOTInfo objects, that behave like the first object of the group but with
+
+    This code defaults most things to the first item of the list. So it will fail if full_fn_ls entries don't have matching lifetime/mass/year etc.
+
+    -INPUTS-
+    full_fn: ls-like, full filenames
+    root_exists: Boolean. Should it search for the ROOT and MCSample()?
+    """
+
+    def __init__(self, full_fn_ls, root_exists=False, nbins=3, overwrite_proc=None):
+        assert len(full_fn_ls)>0
+        self.sig_ls = []
+        for full_fn in full_fn_ls:
+            self.sig_ls.append(SignalROOTInfo(full_fn, root_exists=root_exists, nbins=nbins))
+        
+        self.proc = overwrite_proc
+        if overwrite_proc is None: self.proc = self.sig_ls[0].proc
+
+        for s in self.sig_ls:
+            assert s.trig_type == self.trig_type
+
+        repl_ls = ["fn", "full_fn"] # Things I want to replace with 0th object data
+        for item in repl_ls:
+            old_val = getattr(self.sig_ls[0], item)
+            setattr(self, item, old_val.replace(self.sig_ls[0].proc, self.proc))
+            #getattr(self, item) = old_val.replace(self.sig_ls[0].proc, self.proc)
+        return
+
+
+
+    def return_nuis_key(self):
+        """Defining explicitly because it's not forwarded by getattribute"""
+        return self.sig_ls[0].return_nuis_key().replace(self.sig_ls[0].proc, self.proc)
+
+
+
+    def return_name2details(self, lifetime_unit="mm"):
+        ls = self.sig_ls[0].return_name2details(lifetime_unit=lifetime_unit)
+        ls[0] = ls[0].replace(self.sig_ls[0].proc, self.proc)
+        return ls
+
+
+
+    def print_diagnostics(self, lifetime_unit="mm"):
+        #print "Printing Signal Cluster:"
+        if len(self.sig_ls)>1: print "Overriding process name:", self.proc
+        for s in self.sig_ls:
+            s.print_diagnostics(lifetime_unit=lifetime_unit)
+        return
+
+    
+
+    def get_sumw(self):
+        return sum(s.get_sumw() for s in self.sig_ls)
+    def get_ngen(self):
+        return sum(s.get_ngen() for s in self.sig_ls)
+    def get_xsec(self):
+        return sum(s.get_xsec() for s in self.sig_ls)
+
+
+
+    def __getattr__(self, name):
+        """Every method not defined otherwise is delegated to the first list item"""
+        things_to_ignore = {}
+        if name in things_to_ignore:
+            return
+
+        result = getattr(self.sig_ls[0], name)
+        if isinstance(result, str):
+            result = result.replace(self.sig_ls[0].proc, self.proc)
+        return result
+
+
+
+
+
+
 class NuisanceInfo(object):
     """
     Object to store information to make a nuisance parameter. This object was defined assuming log-normal parameters, but it can be adjusted to non-log-normal parameters.
@@ -255,16 +339,20 @@ class NuisanceTable(object):
     Nuisance grid: Indexed by year (string). The values are ALWAYS interpreted as fractions (not percent).
     """
 
-    def __init__(self, proc="", x_vals=None, x_unit=None, y_vals=None, y_unit=None, as_percent=None, years=set(["20161", "20162", "2017", "2018"]), pickle_loc=None, make_pickle_fn=True):
+    def __init__(self, proc="", x_vals=None, x_unit=None, y_vals=None, y_unit=None, as_percent=None, years=set(["20161", "20162", "2017", "2018"]), nbin_len=False, dtype=float, pickle_loc=None, make_pickle_fn=True):
         """
         -INPUTS-
         as_percent: Boolean. If True, input 10 -> store 0.1. If False, stores exactly the input. The value stored is always interpreted as a FRACTION.
         years: array-like, must be strings
+        nbin_len: Boolean. If False, assumes Nuisances are integers. Else it assumes len-nbins arrays. Writes arr_len.
+        dtype: how the np.array should represent the data
         pickle_loc: if not None, it will un-pickle the specified dictionary, and construct itself.
         make_pickle_fn: if True, it will add pickle_loc + "_" + proc + ".pkl"
         """
         if pickle_loc is None:
             if (proc==None or x_vals==None or x_unit==None or y_vals==None or y_unit==None or as_percent==None): raise Exception("Missing inputs")
+            if not nbin_len: self.arr_len = 0
+            else: self.arr_len = nbins
             self.nuis_dict = {}
             try:
                 self.nuis_dict.update({
@@ -275,6 +363,8 @@ class NuisanceTable(object):
                     "y_unit" : str(y_unit),
                     "perc" : as_percent,
                     "years": years,
+                    "arr_len": self.arr_len,
+                    "dtype": dtype,
                 })
             except:
                 raise Exception("Error: input cannot be converted into arrays/strings")
@@ -282,7 +372,8 @@ class NuisanceTable(object):
             self.perc = as_percent
         
             for y in years:
-                initial_arr = np.ones((len(self.nuis_dict["x_vals"]), len(self.nuis_dict["y_vals"])))
+                if (self.arr_len==0): initial_arr = np.ones((len(self.nuis_dict["x_vals"]), len(self.nuis_dict["y_vals"])), dtype=dtype)
+                else: initial_arr = np.ones((len(self.nuis_dict["x_vals"]), len(self.nuis_dict["y_vals"]), self.arr_len), dtype=dtype)
                 initial_arr.fill(np.nan)
                 self.nuis_dict.update({y : initial_arr})
             return
@@ -313,6 +404,7 @@ class NuisanceTable(object):
             self.nuis_dict = use_dict
             self.proc = self.nuis_dict["proc"]
             self.perc = self.nuis_dict["perc"]
+            self.arr_len = self.nuis_dict["arr_len"]
 
 
 
@@ -325,6 +417,7 @@ class NuisanceTable(object):
         x_val: float or int
         y_val: float or int
         year: string
+        val: suitably-sized entry, i.e. number or len-nbin array
         x_unit, y_unit: string. If None, assumes is dictionary unit
         """
         if (proc!=self.proc): return # ignore everything not matching this process
@@ -468,9 +561,10 @@ class NuisanceTable(object):
             raise Exception("Error: coordinate list is not 1x1-2x2")
 
 
-        if not np.isfinite(interp_q):
-            print "Warning: unable to interpolate, likely missing grid value. Exiting code."
-            return
+        if self.arr_len == 0:
+            if not np.isfinite(interp_q):
+                print "Warning: unable to interpolate, likely missing grid value. Exiting code."
+                return
         return interp_q
 
 

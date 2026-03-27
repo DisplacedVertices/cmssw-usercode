@@ -44,7 +44,6 @@ sig_xsecs = {
 }
 """
 
-
 """
 sig_filtereffs = {
     "index_start": { # In Samples.py, some xsecs depend on the process name start
@@ -58,8 +57,14 @@ sig_filtereffs = {
 """ Instructions: if make_updn==True, add a list for what expression "weight" should be replaced with. Give in the order: up, down. """
 updn_wt_dict = {
     "fake_fact_CMS_eff_lep": ["weight*fac_weight_up", "weight*fac_weight_dn"],
-    "fake_fact_CMS_pileup_13TeV": ["weight*fac_weight_up", "weight*fac_weight_dn"],
+    "fake_fact_CMS_pileup": ["weight*fac_weight_up", "weight*fac_weight_dn"],
+}
 
+
+printout_flags = { # Convention: True for printing statements, False for silence
+    "PyStorage": {
+        "sig_type_conflict": False,
+    },
 }
 
 
