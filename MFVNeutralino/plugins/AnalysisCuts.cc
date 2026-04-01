@@ -930,7 +930,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
        {
             if(year != 20161 && year != 20162) return false;
-            if(alt_calo_ht < 350 || ncalojets < 2) return false;
+            if(alt_calo_ht < 470 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
                 if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j0)) continue;
@@ -945,7 +945,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT650_DisplacedDijet80_Inclusive :
        {
             if(year != 20161 && year != 20162) return false;
-            if(alt_calo_ht < 650 || ncalojets < 2) return false;
+            if(alt_calo_ht < 800 || ncalojets < 2) return false;
 
             for(int j0 = 0; j0 < ncalojets; ++j0){
                 if(mevent->calo_jet_pt[j0] < 100 || fabs(mevent->calo_jet_eta[j0]) > 2.0 || !calo_offline_displaced_jet_hlt_match(mevent, j0)) continue;

@@ -231,7 +231,7 @@ namespace mfv {
       }
       case b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
       {
-        if(caloht(30) < 350 || ncalojets < 2) return false;
+        if(caloht(30) < 470 || ncalojets < 2) return false;
 
         for(int j0 = 0; j0 < ncalojets; ++j0){
           if(!calo_offline_displaced_jet_hlt_match(j0) || calo_jet_pt[j0] < 50 || fabs(calo_jet_eta[j0]) > 2) continue;
@@ -245,7 +245,7 @@ namespace mfv {
       }
       case b_HLT_HT650_DisplacedDijet80_Inclusive :
       {
-        if(caloht(30) < 650 || ncalojets < 2) return false;
+        if(caloht(30) < 800 || ncalojets < 2) return false;
 
         for(int j0 = 0; j0 < ncalojets; ++j0){
           if(!calo_offline_displaced_jet_hlt_match(j0) || calo_jet_pt[j0] < 100 || fabs(calo_jet_eta[j0]) > 2) continue;
