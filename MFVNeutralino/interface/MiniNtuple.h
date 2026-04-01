@@ -85,14 +85,15 @@ namespace mfv {
       return calo_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
     }
     float ht(float min_jet_pt=40.) const;
+    float caloht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;
-    int nbtags_(float min_bdisc, int tagger) const;
-    int nbtags_old(float min_bdisc) const { return nbtags_(min_bdisc, true); }
-    int nbtags(float min_bdisc) const { return nbtags_(min_bdisc, false); }
+    int nbtags_(float min_bdisc, int tagger, float min_pt) const;
+    int nbtags_old(float min_bdisc, float min_pt) const { return nbtags_(min_bdisc, 2, min_pt); } // DeepJet
+    int nbtags(float min_bdisc, float min_pt) const { return nbtags_(min_bdisc, 0, min_pt); } // CSVv2
 
-    int nbtags_tight() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight)); }
-    int nbtags_medium() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium)); }
-    int nbtags_loose() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose)); }
+    int nbtags_tight(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight), min_pt); }
+    int nbtags_medium(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium), min_pt); }
+    int nbtags_loose(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose), min_pt); }
     
     float gen_pv_x0;
     float gen_pv_y0;
