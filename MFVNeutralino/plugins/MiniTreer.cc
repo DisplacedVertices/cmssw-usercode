@@ -100,7 +100,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   nt.njets = int2uchar(mevent->njets(mfv::min_jet_pt));
   if (nt.njets > 50)
-    throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
+    throw cms::Exception("CheckYourPremises") << "too many jets in event: " << int(nt.njets);
 
   for (int i = 0; i < mevent->njets(); ++i) {
     if (mevent->jet_pt[i] < mfv::min_jet_pt)
@@ -137,9 +137,11 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  nt.ncalojets = int2uchar(mevent->ncalojets(mfv::min_jet_pt));
-  if (nt.ncalojets > 50)
-    throw cms::Exception("CheckYourPremises") << "too many calojets in event: " << nt.ncalojets;
+  int total_ncalojets = mevent->ncalojets(mfv::min_jet_pt);
+  nt.ncalojets = int2uchar(total_ncalojets);
+  if (total_ncalojets > 100) {
+    throw cms::Exception("CheckYourPremises") << "too many calojets in event: " << total_ncalojets;
+  }
 
   for (int i = 0; i < mevent->ncalojets(); ++i) {
     if (mevent->calo_jet_pt[i] < mfv::min_jet_pt)

@@ -70,14 +70,14 @@ namespace mfv {
       return pf_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
     }
     unsigned char ncalojets;
-    float calo_jet_pt[50];
-    float calo_jet_eta[50];
-    float calo_jet_phi[50];
-    float calo_jet_energy[50];
-    float calo_offline_displaced_jet_hlt_pt[50];
-    float calo_offline_displaced_jet_hlt_eta[50];
-    float calo_offline_displaced_jet_hlt_phi[50];
-    float calo_offline_displaced_jet_hlt_energy[50];
+    float calo_jet_pt[100];
+    float calo_jet_eta[100];
+    float calo_jet_phi[100];
+    float calo_jet_energy[100];
+    float calo_offline_displaced_jet_hlt_pt[100];
+    float calo_offline_displaced_jet_hlt_eta[100];
+    float calo_offline_displaced_jet_hlt_phi[100];
+    float calo_offline_displaced_jet_hlt_energy[100];
     bool calo_offline_displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
       // an offline jet with a successful HLT match will have a nonzero calo_offline_displaced_jet_hlt_pt;
       // all others have the default value of 0

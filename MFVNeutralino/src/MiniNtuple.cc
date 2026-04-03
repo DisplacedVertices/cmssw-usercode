@@ -19,7 +19,7 @@ namespace mfv {
   void MiniNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
+    gen_flavor_code = pass_hlt = npv = npu = njets = ncalojets = nvtx = ntk0 = ntk1 = 0;
     l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = met = 0;
     genmatch0 = genmatch1 = 0;
     gen_pv_x0 = 0;
@@ -38,7 +38,7 @@ namespace mfv {
       pf_offline_displaced_jet_hlt_pt[i] = pf_offline_displaced_jet_hlt_eta[i] = pf_offline_displaced_jet_hlt_phi[i] = pf_offline_displaced_jet_hlt_energy[i] = 0;
       jet_id[i] = 0;
     }
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 100; ++i) {
       calo_jet_pt[i] = calo_jet_eta[i] = calo_jet_phi[i] = calo_jet_energy[i] = 0;
       calo_offline_displaced_jet_hlt_pt[i] = calo_offline_displaced_jet_hlt_eta[i] = calo_offline_displaced_jet_hlt_phi[i] = calo_offline_displaced_jet_hlt_energy[i] = 0;
     }
