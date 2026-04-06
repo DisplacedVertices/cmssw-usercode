@@ -52,7 +52,8 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 # /store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root
 input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
 cmssw_from_argv(process)
-
+if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
+    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

@@ -10,6 +10,8 @@ input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNe
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
+if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
+    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 # Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
 '''

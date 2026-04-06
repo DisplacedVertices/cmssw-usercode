@@ -10,6 +10,8 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 input_files(process, '/store/group/lpclonglived/joeyr/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30BvetoLHTm_20161/250222_142639/0000/ntuple_1.root')
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
+if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
+    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
