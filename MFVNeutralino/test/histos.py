@@ -10,8 +10,6 @@ input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNe
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
-if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
-    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 # Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
 '''
@@ -153,16 +151,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if  use_btag_vetoLepHT_triggers:
         samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     elif use_Lepton_triggers :
         samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     else :
         print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
     set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))

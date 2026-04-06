@@ -10,8 +10,6 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 input_files(process, '/store/group/lpclonglived/joeyr/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30BvetoLHTm_20161/250222_142639/0000/ntuple_1.root')
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
-if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
-    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
@@ -41,16 +39,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if  use_btag_vetoLepHT_triggers:
         samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     elif use_Lepton_triggers :
         samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     else :
         print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
 
     json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'

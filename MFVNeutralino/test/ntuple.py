@@ -52,9 +52,6 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 # /store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root
 input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
 cmssw_from_argv(process)
-if any(a.startswith('sample=ttHToLLPs') for a in sys.argv[1:]):
-    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
-
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
@@ -91,7 +88,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
     set_splitting(samples, dataset, 'ntuple', data_json=json_path(json_filename), limit_ttbar=True)
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier, ttH_duplicate_check_modifier)
     ms.condor.stageout_files = 'all'
     ms.condor.local_stage = False # By default do not copy remote files to local. Switch to True for primarily high mass signals, or any sample timing out via xRootD
     ms.submit(samples)
