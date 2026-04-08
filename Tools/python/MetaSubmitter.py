@@ -130,6 +130,14 @@ for mname in %r:
         else:
             return [], []
 
+def ttH_duplicate_check_modifier(sample):
+    '''ttHToLLPs samples are privately generated and contain duplicate events
+    across lumisections. This modifier disables the duplicate event check for
+    those samples so cmsRun does not abort.'''
+    if sample.name.startswith('ttHToLLPs'):
+        return ["process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')"], []
+    return [], []
+
 class event_veto_modifier:
     def __init__(self, d, filter_path):
         self.d = d
@@ -496,4 +504,5 @@ __all__ = [
     'event_veto_modifier',
     'chain_modifiers',
     'secondary_files_modifier',
+    'ttH_duplicate_check_modifier',
     ]
