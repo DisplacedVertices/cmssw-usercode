@@ -21,6 +21,10 @@ namespace mfv {
     event = 0;
     gen_flavor_code = pass_hlt = npv = npu = njets = ncalojets = nvtx = ntk0 = ntk1 = 0;
     l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = met = 0;
+    costhtkonlymombs0 = 0;
+    costhtkonlymombs1 = 0;
+    costhtksjetsntkmombs0 = 0;
+    costhtksjetsntkmombs1 = 0;
     genmatch0 = genmatch1 = 0;
     gen_pv_x0 = 0;
     gen_pv_y0 = 0;
@@ -441,6 +445,8 @@ namespace mfv {
     tree->Branch("tk0_inpv", &nt.tk0_inpv);
     tree->Branch("tk0_cov", &nt.tk0_cov);
     tree->Branch("genmatch0", &nt.genmatch0);
+    tree->Branch("costhtkonlymombs0", &nt.costhtkonlymombs0);
+    tree->Branch("costhtksjetsntkmombs0", &nt.costhtksjetsntkmombs0);
     tree->Branch("x0", &nt.x0);
     tree->Branch("y0", &nt.y0);
     tree->Branch("z0", &nt.z0);
@@ -458,6 +464,8 @@ namespace mfv {
     tree->Branch("tk1_inpv", &nt.tk1_inpv);
     tree->Branch("tk1_cov", &nt.tk1_cov);
     tree->Branch("genmatch1", &nt.genmatch1);
+    tree->Branch("costhtkonlymombs1", &nt.costhtkonlymombs1);
+    tree->Branch("costhtksjetsntkmombs1", &nt.costhtksjetsntkmombs1);
     tree->Branch("x1", &nt.x1);
     tree->Branch("y1", &nt.y1);
     tree->Branch("z1", &nt.z1);
@@ -558,6 +566,8 @@ namespace mfv {
     tree->SetBranchAddress("tk0_inpv", &nt.p_tk0_inpv);
     tree->SetBranchAddress("tk0_cov", &nt.p_tk0_cov);
     tree->SetBranchAddress("genmatch0", &nt.genmatch0);
+    tree->SetBranchAddress("costhtkonlymombs0", &nt.costhtkonlymombs0);
+    tree->SetBranchAddress("costhtksjetsntkmombs0", &nt.costhtksjetsntkmombs0);
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
@@ -575,6 +585,8 @@ namespace mfv {
     tree->SetBranchAddress("tk1_inpv", &nt.p_tk1_inpv);
     tree->SetBranchAddress("tk1_cov", &nt.p_tk1_cov);
     tree->SetBranchAddress("genmatch1", &nt.genmatch1);
+    tree->SetBranchAddress("costhtkonlymombs1", &nt.costhtkonlymombs1);
+    tree->SetBranchAddress("costhtksjetsntkmombs1", &nt.costhtksjetsntkmombs1);
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);

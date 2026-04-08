@@ -206,8 +206,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     vertices.push_back(xform_vertex(*mevent, v));
   }
 
-  h_nsv->Fill(input_vertices->size());
-  h_nsvsel->Fill(vertices.size());
+  h_nsv->Fill(input_vertices->size(), nt.weight);
+  h_nsvsel->Fill(vertices.size(), nt.weight);
 
   //nt.vertices = vertices;
 
@@ -229,6 +229,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
     nt.genmatch0 = gen_matches(v0);
+    nt.costhtkonlymombs0 = v0.costhmombs(mfv::PTracksOnly);
+    nt.costhtksjetsntkmombs0 = v0.costhmombs(mfv::PTracksPlusJetsByNtracks);
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
@@ -270,6 +272,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
     nt.genmatch0 = gen_matches(v0);
     nt.genmatch1 = gen_matches(v1);
+    nt.costhtkonlymombs0 = v0.costhmombs(mfv::PTracksOnly);
+    nt.costhtkonlymombs1 = v1.costhmombs(mfv::PTracksOnly);
+    nt.costhtksjetsntkmombs0 = v0.costhmombs(mfv::PTracksPlusJetsByNtracks);
+    nt.costhtksjetsntkmombs1 = v1.costhmombs(mfv::PTracksPlusJetsByNtracks);
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
     nt.bs2derr0 = v0.bs2derr;

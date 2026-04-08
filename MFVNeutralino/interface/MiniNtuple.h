@@ -141,6 +141,8 @@ namespace mfv {
     std::vector<short>*  p_tk0_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk0_cov;
     bool genmatch0;
+    float costhtkonlymombs0;
+    float costhtksjetsntkmombs0;
     float x0;
     float y0;
     float z0;
@@ -169,6 +171,8 @@ namespace mfv {
     std::vector<short>*  p_tk1_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk1_cov;
     bool genmatch1;
+    float costhtkonlymombs1;
+    float costhtksjetsntkmombs1;
     float x1;
     float y1;
     float z1;
