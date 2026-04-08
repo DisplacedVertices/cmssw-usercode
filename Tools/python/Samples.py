@@ -2764,6 +2764,14 @@ for sample in ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 for sample in ggHToSSTodddd_samples_2018 :
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in ggZHToSSTobbbb_samples_20161 + ggZHToSSTodddd_samples_20161:
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in ggZHToSSTobbbb_samples_20162 + ggZHToSSTodddd_samples_20162:
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in ggZHToSSTobbbb_samples_2017 + ggZHToSSTodddd_samples_2017:
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in ggZHToSSTobbbb_samples_2018 + ggZHToSSTodddd_samples_2018:
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
 for s in all_signal_samples_20161: 
     _set_signal_stuff(s)
