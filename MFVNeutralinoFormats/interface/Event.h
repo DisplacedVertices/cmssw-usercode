@@ -254,15 +254,25 @@ struct MFVEvent {
   float nth_jet_eta(int w) const { return njets() > w ? jet_eta[w] : -999.f; }
   float nth_jet_phi(int w) const { return njets() > w ? jet_phi[w] : -999.f; }
 
-  std::vector<float> jet_hlt_pt;
-  std::vector<float> jet_hlt_eta;
-  std::vector<float> jet_hlt_phi;
-  std::vector<float> jet_hlt_energy;
-  std::vector<float> displaced_jet_hlt_pt;
-  std::vector<float> displaced_jet_hlt_eta;
-  std::vector<float> displaced_jet_hlt_phi;
-  std::vector<float> displaced_jet_hlt_energy;
-  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets);
+  std::vector<float> pf_offline_jet_hlt_pt;
+  std::vector<float> pf_offline_jet_hlt_eta;
+  std::vector<float> pf_offline_jet_hlt_phi;
+  std::vector<float> pf_offline_jet_hlt_energy;
+  std::vector<float> pf_offline_displaced_jet_hlt_pt;
+  std::vector<float> pf_offline_displaced_jet_hlt_eta;
+  std::vector<float> pf_offline_displaced_jet_hlt_phi;
+  std::vector<float> pf_offline_displaced_jet_hlt_energy;
+  void pf_offline_jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets);
+
+
+  int ncalojets() const { return int(calo_jet_pt.size()); }
+  int ncalojets(float min_jet_pt) const { return std::count_if(calo_jet_pt.begin(), calo_jet_pt.end(),
+                                                           [min_jet_pt](float b) { return b > min_jet_pt; }); }
+  std::vector<float> calo_offline_displaced_jet_hlt_pt;
+  std::vector<float> calo_offline_displaced_jet_hlt_eta;
+  std::vector<float> calo_offline_displaced_jet_hlt_phi;
+  std::vector<float> calo_offline_displaced_jet_hlt_energy;
+  void calo_offline_jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets);
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }

@@ -531,7 +531,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
                     floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }
 
-
+                // FIXME JPR 3/23/2026: are these the only objects we need to keep for the displaced jets? Mainly wondering if hltIter02DisplacedHLTCaloJetCollectionProducerLowPt from above should be added here
+                // Check some of Shaun's notes to be sure, and check the efficiency of the matching
                 if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
                     floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
                 }

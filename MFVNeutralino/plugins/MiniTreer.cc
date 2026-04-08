@@ -100,7 +100,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   nt.njets = int2uchar(mevent->njets(mfv::min_jet_pt));
   if (nt.njets > 50)
-    throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
+    throw cms::Exception("CheckYourPremises") << "too many jets in event: " << int(nt.njets);
 
   for (int i = 0; i < mevent->njets(); ++i) {
     if (mevent->jet_pt[i] < mfv::min_jet_pt)
@@ -114,26 +114,55 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_bdisc_deepcsv[i] = mevent->jet_bdisc_deepcsv[i];
     nt.jet_bdisc_deepflav[i] = mevent->jet_bdisc_deepflav[i];
 
-    if (mevent->jet_hlt_pt.size() > size_t(i)) {
-      nt.jet_hlt_pt[i] = mevent->jet_hlt_pt[i];
-      nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
-      nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
-      nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
-      nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
-      nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
-      nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
-      nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
+    if (mevent->pf_offline_jet_hlt_pt.size() > size_t(i)) {
+      nt.pf_offline_jet_hlt_pt[i] = mevent->pf_offline_jet_hlt_pt[i];
+      nt.pf_offline_jet_hlt_eta[i] = mevent->pf_offline_jet_hlt_eta[i];
+      nt.pf_offline_jet_hlt_phi[i] = mevent->pf_offline_jet_hlt_phi[i];
+      nt.pf_offline_jet_hlt_energy[i] = mevent->pf_offline_jet_hlt_energy[i];
+      nt.pf_offline_displaced_jet_hlt_pt[i] = mevent->pf_offline_displaced_jet_hlt_pt[i];
+      nt.pf_offline_displaced_jet_hlt_eta[i] = mevent->pf_offline_displaced_jet_hlt_eta[i];
+      nt.pf_offline_displaced_jet_hlt_phi[i] = mevent->pf_offline_displaced_jet_hlt_phi[i];
+      nt.pf_offline_displaced_jet_hlt_energy[i] = mevent->pf_offline_displaced_jet_hlt_energy[i];
     }
     else {
-      assert(mevent->jet_hlt_pt.size() == 0);
-      nt.jet_hlt_pt[i] = -1;
-      nt.jet_hlt_eta[i] = -1;
-      nt.jet_hlt_phi[i] = -1;
-      nt.jet_hlt_energy[i] = -1;
-      nt.displaced_jet_hlt_pt[i] = -1;
-      nt.displaced_jet_hlt_eta[i] = -1;
-      nt.displaced_jet_hlt_phi[i] = -1;
-      nt.displaced_jet_hlt_energy[i] = -1;
+      assert(mevent->pf_offline_jet_hlt_pt.size() == 0);
+      nt.pf_offline_jet_hlt_pt[i] = -1;
+      nt.pf_offline_jet_hlt_eta[i] = -1;
+      nt.pf_offline_jet_hlt_phi[i] = -1;
+      nt.pf_offline_jet_hlt_energy[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_pt[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_eta[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_phi[i] = -1;
+      nt.pf_offline_displaced_jet_hlt_energy[i] = -1;
+    }
+  }
+
+  int total_ncalojets = mevent->ncalojets(mfv::min_jet_pt);
+  nt.ncalojets = int2uchar(total_ncalojets);
+  if (total_ncalojets > 100) {
+    throw cms::Exception("CheckYourPremises") << "too many calojets in event: " << total_ncalojets;
+  }
+
+  for (int i = 0; i < mevent->ncalojets(); ++i) {
+    if (mevent->calo_jet_pt[i] < mfv::min_jet_pt)
+      continue;
+    nt.calo_jet_pt[i] = mevent->calo_jet_pt[i];
+    nt.calo_jet_eta[i] = mevent->calo_jet_eta[i];
+    nt.calo_jet_phi[i] = mevent->calo_jet_phi[i];
+    nt.calo_jet_energy[i] = mevent->calo_jet_energy[i];
+
+    if (mevent->calo_offline_displaced_jet_hlt_pt.size() > size_t(i)) {
+      nt.calo_offline_displaced_jet_hlt_pt[i] = mevent->calo_offline_displaced_jet_hlt_pt[i];
+      nt.calo_offline_displaced_jet_hlt_eta[i] = mevent->calo_offline_displaced_jet_hlt_eta[i];
+      nt.calo_offline_displaced_jet_hlt_phi[i] = mevent->calo_offline_displaced_jet_hlt_phi[i];
+      nt.calo_offline_displaced_jet_hlt_energy[i] = mevent->calo_offline_displaced_jet_hlt_energy[i];
+    }
+    else {
+      assert(mevent->calo_offline_displaced_jet_hlt_pt.size() == 0);
+      nt.calo_offline_displaced_jet_hlt_pt[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_eta[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_phi[i] = -1;
+      nt.calo_offline_displaced_jet_hlt_energy[i] = -1;
     }
   }
 
@@ -177,8 +206,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     vertices.push_back(xform_vertex(*mevent, v));
   }
 
-  h_nsv->Fill(input_vertices->size());
-  h_nsvsel->Fill(vertices.size());
+  h_nsv->Fill(input_vertices->size(), nt.weight);
+  h_nsvsel->Fill(vertices.size(), nt.weight);
 
   //nt.vertices = vertices;
 
@@ -200,6 +229,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
     nt.genmatch0 = gen_matches(v0);
+    nt.costhtkonlymombs0 = v0.costhmombs(mfv::PTracksOnly);
+    nt.costhtksjetsntkmombs0 = v0.costhmombs(mfv::PTracksPlusJetsByNtracks);
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
@@ -241,6 +272,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
     nt.genmatch0 = gen_matches(v0);
     nt.genmatch1 = gen_matches(v1);
+    nt.costhtkonlymombs0 = v0.costhmombs(mfv::PTracksOnly);
+    nt.costhtkonlymombs1 = v1.costhmombs(mfv::PTracksOnly);
+    nt.costhtksjetsntkmombs0 = v0.costhmombs(mfv::PTracksPlusJetsByNtracks);
+    nt.costhtksjetsntkmombs1 = v1.costhmombs(mfv::PTracksPlusJetsByNtracks);
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
     nt.bs2derr0 = v0.bs2derr;

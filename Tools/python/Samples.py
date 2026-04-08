@@ -618,7 +618,7 @@ ggZHToSSTodddd_samples_20161 = [
 
 all_bjet_signal_samples_20161 = mfv_signal_samples_20161 + mfv_stopdbardbar_samples_20161 + mfv_stopbbarbbar_samples_20161 + ggHToSSTodddd_samples_20161 + ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161
 all_lep_signal_samples_20161  = ZHToSSTodddd_samples_20161 + WplusHToSSTodddd_samples_20161 + WminusHToSSTodddd_samples_20161 + ttHToLLPs_bbbb_samples_20161 + ttHToLLPs_dddd_samples_20161 + ggZHToSSTobbbb_samples_20161 + ggZHToSSTodddd_samples_20161
-all_signal_samples_20161 = all_bjet_signal_samples_20161 + all_lep_signal_samples_20161
+all_signal_samples_20161 = list(set(all_bjet_signal_samples_20161 + all_lep_signal_samples_20161)) # the list and set are needed to get the unique entries, to avoid double counting later on
 
 #######
 #2016 2 MC
@@ -1136,7 +1136,7 @@ ggZHToSSTodddd_samples_20162 = [
 
 all_bjet_signal_samples_20162 = mfv_signal_samples_20162 + mfv_stopdbardbar_samples_20162 + mfv_stopbbarbbar_samples_20162 + ggHToSSTodddd_samples_20162 + ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162
 all_lep_signal_samples_20162  = ZHToSSTodddd_samples_20162 + WplusHToSSTodddd_samples_20162 + WminusHToSSTodddd_samples_20162 + ttHToLLPs_bbbb_samples_20162 + ttHToLLPs_dddd_samples_20162 + ggZHToSSTobbbb_samples_20162 + ggZHToSSTodddd_samples_20162
-all_signal_samples_20162 = all_bjet_signal_samples_20162 + all_lep_signal_samples_20162
+all_signal_samples_20162 = list(set(all_bjet_signal_samples_20162 + all_lep_signal_samples_20162)) # the list and set are needed to get the unique entries, to avoid double counting later on
 
 ########
 # 2017 MC 
@@ -1760,7 +1760,7 @@ ggZHToSSTodddd_samples_2017 = [
 
 all_bjet_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + ggHToSSTodddd_samples_2017 + ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017
 all_lep_signal_samples_2017  = ZHToSSTodddd_samples_2017 + WplusHToSSTodddd_samples_2017 + WminusHToSSTodddd_samples_2017 + ttHToLLPs_bbbb_samples_2017 + ttHToLLPs_dddd_samples_2017 + ggZHToSSTobbbb_samples_2017 + ggZHToSSTodddd_samples_2017
-all_signal_samples_2017 = all_bjet_signal_samples_2017 + all_lep_signal_samples_2017
+all_signal_samples_2017 = list(set(all_bjet_signal_samples_2017 + all_lep_signal_samples_2017)) # the list and set are needed to get the unique entries, to avoid double counting later on
 
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
 
@@ -2320,7 +2320,7 @@ ggZHToSSTodddd_samples_2018 = [
 
 all_bjet_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + ggHToSSTodddd_samples_2018 + ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018
 all_lep_signal_samples_2018  = ZHToSSTodddd_samples_2018 + WplusHToSSTodddd_samples_2018 + WminusHToSSTodddd_samples_2018 + ttHToLLPs_bbbb_samples_2018 + ttHToLLPs_dddd_samples_2018 + ggZHToSSTobbbb_samples_2018 + ggZHToSSTodddd_samples_2018
-all_signal_samples_2018 = all_bjet_signal_samples_2018 + all_lep_signal_samples_2018
+all_signal_samples_2018 = list(set(all_bjet_signal_samples_2018 + all_lep_signal_samples_2018)) # the list and set are needed to get the unique entries, to avoid double counting later on
 
 ########
 # data
