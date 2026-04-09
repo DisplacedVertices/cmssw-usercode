@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = '_tagTest' # we'll replace Test with a number like 001 for our real ntuple production, and will tag the code accordingly
+ntuple_version_ = '_tagTestFixTrigThresholds' # we'll replace Test with a number like 001 for our real ntuple production, and will tag the code accordingly
 
 # trigger schemes we are currently using
 use_btag_vetoLepHT_triggers = True
