@@ -54,7 +54,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
     set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('MiniTree_' + version,
+    cs = CondorSubmitter('MiniTree' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
