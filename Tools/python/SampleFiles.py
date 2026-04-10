@@ -173,10 +173,6 @@ _add_ds("miniaod", {
 'ttHToLLPs_dddd_tau10mm_M55_2018': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL18wmLHEGEN-RunIISummer20UL18NanoAODv9/20260212_122818/RunIISummer20UL18MiniAODv2_%i.root' % i for i in xrange(225)]),
 })
 
-_add_ds("miniaod", {
-    'qcdmupt15_2017': (1, ['/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root'])
-})
-
 
 _add_ds("ntuple_tagtestfixtrigthresholdsbvetolhtm", {
     'qcdht0100_20161': _fromnum0("/store/user/joeyr/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_20161/260403_163732", 152),
@@ -561,6 +557,14 @@ _add_ds("ntuple_tagtestfixtrigthresholdsbvetolhtm", {
     'ggHToSSTodddd_tau1mm_M55_2018': _fromnum0("/store/user/joeyr/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2018/260402_112709", 73),
     'ggHToSSTodddd_tau10mm_M55_2018': _fromnum0("/store/user/joeyr/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2018/260402_112710", 71),
     'ggHToSSTodddd_tau100mm_M55_2018': _fromnum0("/store/user/joeyr/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2018/260402_112711", 68),
+    'ttHToLLPs_bbbb_tau10mm_M55_20161': _fromnum0("/store/user/joeyr/ttHToLLPs_bbbb_tau10mm_M55_20161/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_20161/260409_112908", 20),
+    'ttHToLLPs_dddd_tau10mm_M55_20161': _fromnum0("/store/user/joeyr/ttHToLLPs_dddd_tau10mm_M55_20161/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_20161/260409_112909", 20),
+    'ttHToLLPs_bbbb_tau10mm_M55_20162': _fromnum0("/store/user/joeyr/ttHToLLPs_bbbb_tau10mm_M55_20162/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_20162/260409_115141", 20),
+    'ttHToLLPs_dddd_tau10mm_M55_20162': _fromnum0("/store/user/joeyr/ttHToLLPs_dddd_tau10mm_M55_20162/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_20162/260409_115142", 20),
+    'ttHToLLPs_bbbb_tau10mm_M55_2017': _fromnum0("/store/user/joeyr/ttHToLLPs_bbbb_tau10mm_M55_2017/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2017/260409_112636", 30),
+    'ttHToLLPs_dddd_tau10mm_M55_2017': _fromnum0("/store/user/joeyr/ttHToLLPs_dddd_tau10mm_M55_2017/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2017/260409_112637", 30),
+    'ttHToLLPs_bbbb_tau10mm_M55_2018': _fromnum0("/store/user/joeyr/ttHToLLPs_bbbb_tau10mm_M55_2018/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2018/260409_112744", 30),
+    'ttHToLLPs_dddd_tau10mm_M55_2018': _fromnum0("/store/user/joeyr/ttHToLLPs_dddd_tau10mm_M55_2018/Ntuple_tagTestFixTrigThresholdsBvetoLHTm_2018/260409_112745", 30),
     })
 
 
