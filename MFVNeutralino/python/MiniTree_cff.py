@@ -12,6 +12,7 @@ mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                              vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                              weight_src = cms.InputTag('mfvWeight'),
                              save_tracks = cms.bool(True),
+                             no_tree = cms.bool(False)
                              )
 
 #pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCutsGE1Vtx * mfvMiniTree) #Alec commented
@@ -37,7 +38,8 @@ mfvMiniTreeNtk3or4exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTig
 mfvMiniTreeNtk3or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or5')
 mfvMiniTreeNtk4or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5')
 
-mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight')
+# we currently disable the presel tree to save on space (particularly important for backgrounds)
+mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight', no_tree = cms.bool(True))
 
 #pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
 #pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)

@@ -22,6 +22,7 @@ public:
   const edm::EDGetTokenT<double> weight_token;
 
   const bool save_tracks;
+  const bool no_tree;
 
   TH1F* h_nsv;
   TH1F* h_nsvsel;
@@ -34,7 +35,8 @@ MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    save_tracks(cfg.getParameter<bool>("save_tracks"))
+    save_tracks(cfg.getParameter<bool>("save_tracks")),
+    no_tree(cfg.getParameter<bool>("no_tree"))
 {
   edm::Service<TFileService> fs;
 
@@ -208,6 +210,9 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_nsv->Fill(input_vertices->size(), nt.weight);
   h_nsvsel->Fill(vertices.size(), nt.weight);
+
+  // Skip writing the MiniTree: mainly used for PreSel level studies, that can rely entirely on the h_nsv distribution
+  if(no_tree) return;
 
   //nt.vertices = vertices;
 
