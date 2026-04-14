@@ -89,7 +89,7 @@ def _set_signal_stuff(sample):
         sample.xsec = 3*(2.982e-02)*br_h_llps# same reasoning as above
     elif (sample.name.startswith('ttHToLLPs')):
         sample.xsec = 0.507 * br_h_llps #https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV?u#ttH_Process
-    elif (sample.name.startswith('ggHToLLPs')):
+    elif (sample.name.startswith('ggHToSS')):
         sample.xsec = 48.58 * br_h_llps #https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV
     else:
         #print(sample.name)
