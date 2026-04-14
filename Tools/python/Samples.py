@@ -87,12 +87,13 @@ def _set_signal_stuff(sample):
         sample.xsec = 3*(5.983e-02)*br_h_llps# same reasoning as above
     elif (sample.name.startswith('ZH')):
         sample.xsec = 3*(2.982e-02)*br_h_llps# same reasoning as above
-    elif sample.name.startswith('ttHToLLPs'):
+    elif (sample.name.startswith('ttHToLLPs')):
         sample.xsec = 0.507 * br_h_llps #https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV?u#ttH_Process
-
     else:
         #print(sample.name)
-        sample.xsec = 1e-3*sample.filter_eff
+        sample.xsec = 1e-3
+    sample.xsec *= sample.filter_eff
+
     sample.is_private = sample.dataset.startswith('/mfv_') and sample.dataset.endswith('/USER')
     if sample.is_private:
         sample.dbs_inst = 'phys03'
