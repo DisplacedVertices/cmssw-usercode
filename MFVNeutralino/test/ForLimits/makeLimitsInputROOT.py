@@ -268,8 +268,8 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs, **kwargs):
         h_sig = h_sumdbv_tot.Rebin(nbins, "sig"+year_tag+sig_id, bins)
         move_overflow_into_last_bin(h_sig)
 
-        nominal_corr_sig = getns.get_nominal_corr_fromsig(siggrp, debug_mode=debug)
-        ROOThelper.mult_hist_w_array(h_sig, nominal_corr_sig)
+        # nominal_corr_sig = getns.get_nominal_corr_fromsig(siggrp, debug_mode=debug) # Disabled code. This was when stuff was multiplied by central corrections.
+        # ROOThelper.mult_hist_w_array(h_sig, nominal_corr_sig)
 
         if (r_f_corr is not None):
             h_sig.Scale(float(r_f_corr))
@@ -367,11 +367,11 @@ def write_sig_updown(f, nuis_ls, siggrp, sig_scales, sig_fake_corrs, sig_id, **k
         h_sig_dn = h_sumdbv_dn_tot.Rebin(nbins, hname_dn, bins)
         hs_updn = [h_sig_up, h_sig_dn]
 
-        nominal_corr_sig = getns.get_nominal_corr_fromsig(siggrp, debug_mode=False)
+        # nominal_corr_sig = getns.get_nominal_corr_fromsig(siggrp, debug_mode=False)
 
         for h in hs_updn:
             move_overflow_into_last_bin(h)
-            ROOThelper.mult_hist_w_array(h, nominal_corr_sig)
+            # ROOThelper.mult_hist_w_array(h, nominal_corr_sig)
             if (r_f_corr is not None):
                 h.Scale(float(r_f_corr))
             h.SetDirectory(0)

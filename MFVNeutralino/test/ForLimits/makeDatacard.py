@@ -62,16 +62,17 @@ def return_sep():
 def make_nuis_dcnm(nuis, siggrp, force_no_CADItag=False):
     """
     Given a nuisance, return the name/s it will show up as.
-    -If analysis-specific, tag with CADI (unless forced not to)
+    -If analysis-specific, tag with CADI (unless forced not to). Due to shape-processing conventions, it currently affects era tags too.
     -If separate years, tag with year_tag
     -If separate bins (==corr/uncorr), tag b1, b2 etc
     """
     nuis_rootname = nuis.nuis_name
     if not(force_no_CADItag):
         if nuis.add_anaID==True: nuis_rootname = ns_conf.nuis_names["CMS-CADI-tag"] + nuis_rootname
-        nuis_rootname = nuis_rootname + "_"
-        if nuis.sep_yrs==True: nuis_rootname += year_tag
-        if nuis.sep_yrs==False: nuis_rootname += ns_conf.nuis_names["Run2-key"]
+        if nuis.add_era_tags:
+            nuis_rootname = nuis_rootname + "_"
+            if nuis.sep_yrs==True: nuis_rootname += year_tag
+            if nuis.sep_yrs==False: nuis_rootname += ns_conf.nuis_names["Run2-key"]
 
     if nuis.corr==True:
         return nuis_rootname
@@ -156,10 +157,10 @@ kmax """
     k_ct = 0
 
     for nuis in nuis_ls+nuis_bkg_ls:
+        if nuis.nuis_type=="special":
+            if nuis.extra_info[0]=="updn_pair":
+                if nuis.extra_info[1]=="dn": continue # skip one of the pairs
         if nuis.corr==True: # I think code logic forces these to agree, but need to check
-            if nuis.nuis_type=="special":
-                if nuis.extra_info[0]=="updn_pair":
-                    if nuis.extra_info[1]=="dn": continue # skip one of the pairs
             k_ct += 1
         elif nuis.corr==False:
             k_ct += nbins
@@ -390,12 +391,16 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                                 pair_found = True
                                 break
                     if not(pair_found): raise Exception("The up-down pair marked UP has no corresponding pair")
-                    dc_name = make_nuis_dcnm(nuis, siggrp)
 
                     strls = []
                     for i in range(nbins):
                         strls.append(str(n2.nuis_val[i]) + "/" + str(nuis.nuis_val[i]))
-                    new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
+                    if (nuis.corr==True):
+                        dc_name = make_nuis_dcnm(nuis, siggrp)
+                        new_lines += turn_info_to_line(dc_name, "lnN", strls, write_sig)
+                    else:
+                        dc_names = make_nuis_dcnm(nuis, siggrp)
+                        new_lines += turn_info_to_nlines(dc_names, "lnN", strls, write_sig)
                 elif nuis.extra_info[1]!="dn": raise Exception("Bad extra_info field, use up or dn")
         
         
@@ -470,7 +475,8 @@ def make_datacard(f, nuis_ls, nuis_bkg_ls, siggrp, sig_fake_corrs, sig_id, debug
     template += return_lnN_corr(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, write_sig=False)
     template += return_lnN_uncorr(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, write_sig=False)
 
-    template += return_shape_lines(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, sig_id=sig_id, write_sig=False)
+    #template += return_shape_lines(f=f, ns_ls=nuis_bkg_ls, siggrp=siggrp, sig_id=sig_id, write_sig=False)
+    template += return_special_lines(f=f, ns_ls=nuis_bkg_ls, sig_norm_ls=sig_norm_ls, siggrp=siggrp, sig_id=sig_id, write_sig=False) # sig_norm_ls should do nothing because it only affects Gamma-N
 
 
     #Tidy Template

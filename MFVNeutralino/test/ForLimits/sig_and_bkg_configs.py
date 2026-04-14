@@ -25,13 +25,28 @@ template_norms = {
     "old_lumis": [19664., 16978., 40610., 59683.], # Derived from AnalysisConstants.h. I feel like if these != new lumis, we need corrections.
 }
 
+
+n2v_uncs = {
+    "lep": [0.001, 0.005, 0.005, 0.03],
+    "bjet": [0.04, 0.01, 0.02, 0.02],
+}
+
+
+lumi_lit_corrs = {
+    "lumi_13TeV_1516_l": {"2016": 1.0118, "2017": None, "2018": None},
+    "lumi_13TeV_151617_l": {"2016": 1.0004, "2017": 1.0055, "2018": None},
+    "lumi_13TeV_15161718_l": {"2016": 1.0035, "2017": 1.0061, "2018": 1.0084},
+}
+
+
+""" # Replaced by recommended correlations
 lumi_uncs = {
     "20161": 0.02,
     "20162": 0.02,
     "2017": 0.0082,
     "2018": 0.0084,
 }
-
+"""
 
 """
 sig_xsecs = {

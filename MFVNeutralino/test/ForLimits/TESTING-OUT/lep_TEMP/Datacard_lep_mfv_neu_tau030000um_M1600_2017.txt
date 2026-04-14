@@ -3,7 +3,7 @@
 # total sig rate = FIXME, not implemented
 imax 3
 jmax 1
-kmax 16
+kmax 15
 ________
 bin             b20170    b20171    b20172
 observation       0      0      0
@@ -11,28 +11,27 @@ ________
 bin             b20170    b20171    b20172            b20170    b20171    b20172
 process       sig201753  sig201753  sig201753           bkg2017   bkg2017   bkg2017
 process           0      0      0              1      1      1
-rate         0.00665145523834 0.0177796298178 0.222031728072         4.96742725267e-06 2.75376005348e-05 0.00196749497221
+rate         0.00782524145687 0.0209172115504 0.261213797732         4.96742725267e-06 2.75376005348e-05 0.00196749497221
 ________
 
-lumi_2017                     lnN   1.0082 1.0082 1.0082              -      -      -
-CMS_eff_e_13TeV               lnN     1.01   1.01   1.01              -      -      -
+lumi_13TeV_15161718_l         lnN   1.0061 1.0061 1.0061              -      -      -
+lumi_13TeV_151617_l           lnN   1.0055 1.0055 1.0055              -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0              -      -      -
 
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2017b1 lnN      1.5      -      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2017b2 lnN        -    1.5      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2017b3 lnN        -      -    1.5              -      -      -
 
-fake_fact_CMS_pileup_13TeV    lnN   1.19156918588/0.85274521041 1.1579573214/0.874702841731 1.18037722779/0.859086630043              -      -      -
 
-CMS_EXO24035_mc_stat_2017b1   gmN 3      0.00221715174611      -      -              -      -      -
-CMS_EXO24035_mc_stat_2017b2   gmN 9           - 0.0019755144242      -              -      -      -
-CMS_EXO24035_mc_stat_2017b3   gmN 115         -      - 0.00193071067889              -      -      -
-CMS_EXO24035_tk_reco_eff_2017 lnN   0.9412/1.0588 0.9412/1.0588 0.9412/1.0588              -      -      -
+CMS_EXO24035_mc_stat_2017b1   gmN 3      0.00260841381896      -      -              -      -      -
+CMS_EXO24035_mc_stat_2017b2   gmN 9           - 0.00232413461671      -              -      -      -
+CMS_EXO24035_mc_stat_2017b3   gmN 115         -      - 0.0022714243281              -      -      -
 
-CMS_pileup_2017               lnN        -      -      -         1.0001 1.0001 1.0001
-CMS_EXO24035_sig_cont_2017    lnN        -      -      -           1.05   1.05   1.05
-CMS_EXO24035_fake-bkg_2017    lnN        -      -      -            1.1    1.1    1.1
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2017 lnN        -      -      -            3.5    3.5    3.5
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
 
-CMS_EXO24035_bkg_norm_2017b1  lnN        -      -      -           1.15      -      -
-CMS_EXO24035_bkg_norm_2017b2  lnN        -      -      -              -   1.15      -
-CMS_EXO24035_bkg_norm_2017b3  lnN        -      -      -              -      -   1.15
 
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05

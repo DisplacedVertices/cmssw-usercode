@@ -3,7 +3,7 @@
 # total sig rate = FIXME, not implemented
 imax 3
 jmax 1
-kmax 15
+kmax 13
 ________
 bin             b20180    b20181    b20182
 observation       0      0      0
@@ -16,10 +16,8 @@ ________
 
 lumi_2018                     lnN   1.0084 1.0084 1.0084              -      -      -
 CMS_eff_e_13TeV               lnN     1.01   1.01   1.01              -      -      -
+CMS_EXO24035_vtx_reco_TM_PointNotFound_2018 lnN      1.5    1.5    1.5              -      -      -
 
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b1 lnN      1.5      -      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b2 lnN        -    1.5      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b3 lnN        -      -    1.5              -      -      -
 
 fake_fact_CMS_pileup_13TeV    lnN   1.0/1.0 1.0/1.0 1.0/1.0              -      -      -
 
@@ -27,11 +25,11 @@ CMS_EXO24035_mc_stat_2018b1   gmN 0      0.0005      -      -              -    
 CMS_EXO24035_mc_stat_2018b2   gmN 0           - 0.0005      -              -      -      -
 CMS_EXO24035_mc_stat_2018b3   gmN 0           -      - 0.0005              -      -      -
 
+CMS_EXO24035_bkg_norm_2018    lnN        -      -      -           1.15   1.15   1.15
 CMS_pileup_2018               lnN        -      -      -         1.0001 1.0001 1.0001
-CMS_EXO24035_sig_cont_2018    lnN        -      -      -           1.05   1.05   1.05
 CMS_EXO24035_fake-bkg_2018    lnN        -      -      -            1.1    1.1    1.1
 
-CMS_EXO24035_bkg_norm_2018b1  lnN        -      -      -           1.15      -      -
-CMS_EXO24035_bkg_norm_2018b2  lnN        -      -      -              -   1.15      -
-CMS_EXO24035_bkg_norm_2018b3  lnN        -      -      -              -      -   1.15
+CMS_EXO24035_sig_cont_2018b1  lnN        -      -      -           1.05      -      -
+CMS_EXO24035_sig_cont_2018b2  lnN        -      -      -              -   1.05      -
+CMS_EXO24035_sig_cont_2018b3  lnN        -      -      -              -      -   1.05
 

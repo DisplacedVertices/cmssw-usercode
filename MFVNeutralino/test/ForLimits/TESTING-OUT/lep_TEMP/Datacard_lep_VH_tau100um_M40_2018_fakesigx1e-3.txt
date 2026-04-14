@@ -3,7 +3,7 @@
 # total sig rate = FIXME, not implemented
 imax 3
 jmax 1
-kmax 16
+kmax 14
 ________
 bin             b20180    b20181    b20182
 observation       0      0      0
@@ -11,28 +11,26 @@ ________
 bin             b20180    b20181    b20182            b20180    b20181    b20182
 process       sig20181  sig20181  sig20181           bkg2018   bkg2018   bkg2018
 process           0      0      0              1      1      1
-rate         0.000179040007194 0.00181318924038 0.000532654095841         0.000108226556515 0.0004098106721 0.0334819627714
+rate         0.000210635302581 0.00213316381221 0.000626651877461         0.000108226556515 0.0004098106721 0.0334819627714
 ________
 
 lumi_2018                     lnN   1.0084 1.0084 1.0084              -      -      -
 CMS_eff_e_13TeV               lnN     1.01   1.01   1.01              -      -      -
+CMS_EXO24035_vtx_reco_TM_2018 lnN      2.0    2.0    2.0              -      -      -
 
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b1 lnN      1.5      -      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b2 lnN        -    1.5      -              -      -      -
-CMS_EXO24035_vtx_reco_TM_PointNotFound_2018b3 lnN        -      -    1.5              -      -      -
 
 fake_fact_CMS_pileup_13TeV    lnN   1.00757408142/0.981417000294 0.861930740168/1.03893557978 1.05764269811/0.937904495755              -      -      -
 
-CMS_EXO24035_mc_stat_2018b1   gmN 1      0.000179040007194      -      -              -      -      -
-CMS_EXO24035_mc_stat_2018b2   gmN 11          - 0.000164835385489      -              -      -      -
-CMS_EXO24035_mc_stat_2018b3   gmN 5           -      - 0.000106530819168              -      -      -
+CMS_EXO24035_mc_stat_2018b1   gmN 1      0.000210635302581      -      -              -      -      -
+CMS_EXO24035_mc_stat_2018b2   gmN 11          - 0.000193923982928      -              -      -      -
+CMS_EXO24035_mc_stat_2018b3   gmN 5           -      - 0.000125330375492              -      -      -
 CMS_EXO24035_tk_reco_eff_2018 lnN   1.0002/1.0 1.0/1.0 1.0/1.0              -      -      -
 
+CMS_EXO24035_bkg_norm_2018    lnN        -      -      -           1.15   1.15   1.15
 CMS_pileup_2018               lnN        -      -      -         1.0001 1.0001 1.0001
-CMS_EXO24035_sig_cont_2018    lnN        -      -      -           1.05   1.05   1.05
 CMS_EXO24035_fake-bkg_2018    lnN        -      -      -            1.1    1.1    1.1
 
-CMS_EXO24035_bkg_norm_2018b1  lnN        -      -      -           1.15      -      -
-CMS_EXO24035_bkg_norm_2018b2  lnN        -      -      -              -   1.15      -
-CMS_EXO24035_bkg_norm_2018b3  lnN        -      -      -              -      -   1.15
+CMS_EXO24035_sig_cont_2018b1  lnN        -      -      -           1.05      -      -
+CMS_EXO24035_sig_cont_2018b2  lnN        -      -      -              -   1.05      -
+CMS_EXO24035_sig_cont_2018b3  lnN        -      -      -              -      -   1.05
 

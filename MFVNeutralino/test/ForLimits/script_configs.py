@@ -1,5 +1,5 @@
 datacard = {
-    "year": "2018",
+    "year": "2017",
     "year_key": ["20161", "20162", "2017", "2018"], # Any 4-element list is in this order
     "year_to_tag": {"20161": "2016preAPV", "20162": "2016postAPV", "2017": "2017", "2018": "2018"}, # Used when sig is called sig2017, or nuisance naming
     "bins": [0., 0.08, 0.16, 4.],

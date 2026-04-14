@@ -272,13 +272,14 @@ class NuisanceInfo(object):
     nuis_type: string. If make_updn is True, it MUST be "shape".
     nbins: int
     ana_spec: Boolean. Is this analysis-specific and gets tagged with CMS+CADI?
+    add_era_tags: if False, neither a year- nor Run2-tag will be added
     extra_info: list
 
     -Other Things Stored-
     """
 
     
-    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr, nuis_type="lnN", nbins=3, ana_spec=False, extra_info=[]):
+    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr, nuis_type="lnN", nbins=3, ana_spec=False, add_era_tags=True, extra_info=[]):
         """
         It will always expand one entry into an array of size nbins. If you don't want this behavior, give it e.g. [1, 1.05, 1] so some bins don't fluctuate.
         """
@@ -296,12 +297,12 @@ class NuisanceInfo(object):
         if (make_updn==True and nuis_type!="shape") or (make_updn!=True and nuis_type=="shape"):
             raise Exception("If make_updn is True, nuis_type must be shape (and vice versa)")
         if (nuis_type=="shape"):
+            if corr == False: raise Exception("Shape uncertainties should be initiated as bin-correlated") # Can comment out
             corr = True # This becomes one line on the datacard, not N lines
         if (nuis_type=="GammaN" and corr==True):
             print "Warning: The following pipeline is written assuming GammaN has corr=False. Please double-check the input"
-        if (nuis_type=="special"):
-            if (extra_info[0]=="updn_pair"):
-                corr = True
+        # if (nuis_type=="special"):
+            # if (extra_info[0]=="updn_pair"): corr = True # Not correct anymore
 
         self.nuis_name = nuis_name
         self.make_updn = bool(make_updn)
@@ -310,6 +311,7 @@ class NuisanceInfo(object):
         self.nuis_type = nuis_type
         self.nbins = int(nbins)
         self.add_anaID = ana_spec
+        self.add_era_tags = add_era_tags
         self.extra_info = extra_info
 
         if corr==False:
@@ -433,6 +435,7 @@ class NuisanceTable(object):
         if (self.perc): to_fill = val * 0.01
         else: to_fill = val
 
+        if np.prod(np.isfinite(self.nuis_dict[year][x_ind, y_ind])): raise Exception("Overwriting non-nan value") # Might want to turn this off, this is for catching catastrophic grid-patching errors
         self.nuis_dict[year][x_ind, y_ind] = to_fill
         if debug_mode: print "Filled", x_ind, ",", y_ind, "of", year
         return
@@ -476,7 +479,7 @@ class NuisanceTable(object):
 
 
 
-    def get_point(self, year, x_val, y_val, x_unit=None, y_unit=None, use_log=True, debug_mode=False):
+    def get_point(self, year, x_val, y_val, x_unit=None, y_unit=None, use_log=False, debug_mode=False):
         """
         Get nuisance value at a given tau-mass (x-y) parameter. Code will interpolate, if necessary. Currently rejects attempts to extrapolate.
         
@@ -569,7 +572,7 @@ class NuisanceTable(object):
 
 
 
-    def get_point_from_fn(self, file_info, overrides=None, use_log=True, debug_mode=False):
+    def get_point_from_fn(self, file_info, overrides=None, use_log=False, debug_mode=False):
         """
         Gets point corresponding to a filename
 

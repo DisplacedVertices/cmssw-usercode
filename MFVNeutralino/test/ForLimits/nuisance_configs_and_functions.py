@@ -44,6 +44,23 @@ def interp_pickle_triple(nn):
     return loc_base + loc_dict["up"], loc_base + loc_dict["dn"]
 
 
+def make_anticorr_bkg(val, dp=4, in_is_b1=True):
+    """
+    Anti-correlate bins 1, and 2+3
+    -INPUTS-
+    val: value, in the standard form 1+x where x is fractional uncertainty (e.g. 1.1 for 10%)
+    dp: if not None, will truncate everything to this many decimal points
+    in_is_b1: does the input represent b1 or b2/b3?
+    """
+    if in_is_b1: out_arr = val * np.ones(nbins)
+    else: out_arr = 1/val * np.ones(nbins)
+
+    out_arr[1:] = 1/out_arr[1:]
+    if dp is not None:
+        out_arr = np.round(out_arr, decimals=int(dp))
+    return out_arr
+
+
 
 
 
@@ -52,11 +69,13 @@ def interp_pickle_triple(nn):
 Nominal Corrections: SIGNAL
 """
 
+""" # Removed code
 def get_nominal_reco_effi_sig(siginfo, debug_mode=False):
 
     nominals = 0.85 * np.ones(nbins)
 
     return nominals
+"""
 
 
 
@@ -78,23 +97,21 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
 
     up_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[0]) # FIXME as of right now, only VH exists
     # up_ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=pickle_locs[0])
-    up_arr = up_ntab.get_point_from_fn(siginfo)
+    up_arr = up_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
     if up_arr is None: up_arr = [1.0, 1.0, 1.0] # Needed because there's only VH, stupid fix
     dn_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[1])
     # dn_ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=pickle_locs[1])
-    dn_arr = dn_ntab.get_point_from_fn(siginfo)
+    dn_arr = dn_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
     if dn_arr is None: dn_arr = [1.0, 1.0, 1.0] # Stupid patch
 
     # nominals = get_nominal_reco_effi_sig(siginfo, debug_mode=debug_mode) # That's if up/down numbers are absolute corrections (not current assumption)
     # up_lnN = np.round(up_arr/nominals, decimals=4)
     # dn_lnN = np.round(dn_arr/nominals, decimals=4)
-
     # if np.array_equal(np.array(up_arr), np.ones(nbins)) and np.array_equal(np.array(dn_arr), np.ones(nbins)): return []
 
-    up_nuis = sth.NuisanceInfo(nuis_name, up_arr, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "up"])
-    dn_nuis = sth.NuisanceInfo(nuis_name, dn_arr, make_updn=False, sep_yrs=True, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
+    up_nuis = sth.NuisanceInfo(nuis_name, up_arr, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "up"])
+    dn_nuis = sth.NuisanceInfo(nuis_name, dn_arr, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
 
-    # REF
     if debug_mode: print "Identified trk-reco fractional uncertainties:", up_arr, dn_arr
     
     return [up_nuis, dn_nuis]
@@ -108,36 +125,56 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
     if debug_mode: print "Identified TM fractional uncertainty:", frac_unc
     if frac_unc is None:
         print "Warning: value not sensible. Write fake value"
-        frac_unc = 0.5
-        nuis_name += "_PointNotFound"
-        # return []
+        frac_unc = 1.0
+        #nuis_name += "_PointNotFound"
+    if True: frac_unc = np.round(frac_unc, 7) # Because sometimes I get 1.xxx0000000001
     
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=False, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
 
-    # nuis = sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins) # If you want a non-shape fake nuisance
+    # Shape up/down uncertainty
+    nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06], make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins)
+    
+    # Used to be a shape+dummy
+    # nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=False, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
+    
     return [nuis]
 
 
 
 def get_int_lumi(nuis_name, siginfo, debug_mode=False):
-    
-    frac_unc = sb_conf.lumi_uncs[year]
-    
-    nuis = sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins)
-    #sth.NuisanceInfo("lumi_17", 1.01, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"]) # If you want something anti-correlated
 
-    return [nuis]
+    lumi_components = sb_conf.lumi_lit_corrs
+
+    if year in ["20161", "20162"]: year_tosearch = "2016"
+    else: year_tosearch = year
+
+    out_ls = []
+
+    for comp_name in sorted(lumi_components.keys()):
+        val = lumi_components[comp_name][year_tosearch]
+        if val is None:
+            continue
+        nuis = sth.NuisanceInfo(comp_name, val, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, add_era_tags=False)
+        out_ls.append(nuis)
+
+    #frac_unc = sb_conf.lumi_uncs[year] #nuis = sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins) #sth.NuisanceInfo("lumi_17", 1.01, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=siginfo.nbins, extra_info=["anti-lnN"]) # If you want something anti-correlated
+
+    return out_ls
 
 
 
 def get_lep_effi(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo(nuis_name, 1+0.01, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=False)
-    return [nuis]
+
+    # Electron
+    nuis_e_id = sth.NuisanceInfo(nuis_name+"e_id", 1+0.01, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=False)
+
+    # Muon - not implemented
+
+    return [nuis_e_id]
 
 
 
@@ -161,7 +198,7 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
     else:
         frac_unc = 0.01
     
-    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=False, nbins=siginfo.nbins, ana_spec=True)]
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
 
 
 
@@ -172,21 +209,48 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
 BACKGROUND Nuisances
 """
 
+def get_bkg_jet_ang(nuis_name, debug_mode=False):
+    return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.06), make_updn=False, sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+
+
+
+def get_bkg_vtx_arbi(nuis_name, debug_mode=False):
+    return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.37), make_updn=False, sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+
+
+
+def get_bkg_vtx_refi(nuis_name, debug_mode=False):
+    return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.1), make_updn=False, sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+
+
+
+"""
 def get_bkg_sum_dbvc(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo("fake-bkg", 1.10, make_updn=False, sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
-
+"""
+    
 
 
 def get_bkg_pileup(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.0001, make_updn=False, sep_yrs=True, corr=True, nbins=nbins)]
+    return [sth.NuisanceInfo(nuis_name, 1.0001, make_updn=False, sep_yrs=False, corr=True, nbins=nbins)]
 
 
 
 def get_bkg_sig_cont(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.05, make_updn=False, sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
+    up_nuis = sth.NuisanceInfo(nuis_name, 1.05, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=nbins, ana_spec=True, extra_info=["updn_pair", "up"])
+    dn_nuis = sth.NuisanceInfo(nuis_name, 1.00, make_updn=False, sep_yrs=False, corr=True, nuis_type="special", nbins=nbins, ana_spec=True, extra_info=["updn_pair", "dn"])
+
+    return [up_nuis, dn_nuis]
 
 
 
 def get_bkg_bkg_norm(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.15, make_updn=False, sep_yrs=True, corr=False, nbins=nbins, ana_spec=True)]
+    return [sth.NuisanceInfo(nuis_name, 1.15, make_updn=False, sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+
+
+
+def get_bkg_n2v_unc(nuis_name, debug_mode=False):
+    frac_unc = sb_conf.n2v_uncs[sig_type][year_id] / sb_conf.template_norms["n2v"][sig_type][year_id]
+
+    return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
 

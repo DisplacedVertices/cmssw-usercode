@@ -1,0 +1,35 @@
+# sample id in ROOT file 0
+# filename = ggHToSSTodddd_tau1mm_M55_2018.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 13
+________
+bin             b20180    b20181    b20182
+observation       0      0      0
+________
+bin             b20180    b20181    b20182            b20180    b20181    b20182
+process       sig20180  sig20180  sig20180           bkg2018   bkg2018   bkg2018
+process           0      0      0              1      1      1
+rate         3.10026556836e-06 3.97779618679e-05 0.00145426548736         0.0350261518873 0.0101716301091 0.0768022180036
+________
+
+CMS_EXO24035_calo_ineff_2018  lnN     1.01   1.01   1.01              -      -      -
+lumi_13TeV_15161718_l_13TeV   lnN   1.0084 1.0084 1.0084              -      -      -
+CMS_EXO24035_disp_trig_uncerts_13TeV lnN   1.1103 1.1103 1.1103              -      -      -
+CMS_EXO24035_vtx_reco_TM_2018 lnN   1.2516 1.2516 1.2516              -      -      -
+
+
+fake_fact_CMS_pileup_13TeV    lnN   1.02028155888/0.974281550694 1.07018810866/0.934688999942 1.08746154911/0.922622661576              -      -      -
+
+CMS_EXO24035_mc_stat_2018b1   gmN 4      7.75066392089e-07      -      -              -      -      -
+CMS_EXO24035_mc_stat_2018b2   gmN 41          - 9.701941919e-07      -              -      -      -
+CMS_EXO24035_mc_stat_2018b3   gmN 1547        -      - 9.40055260091e-07              -      -      -
+
+CMS_EXO24035_bkg_norm_2018    lnN        -      -      -           1.15   1.15   1.15
+CMS_pileup_2018               lnN        -      -      -         1.0001 1.0001 1.0001
+
+CMS_EXO24035_sig_cont_2018b1  lnN        -      -      -           1.05      -      -
+CMS_EXO24035_sig_cont_2018b2  lnN        -      -      -              -   1.05      -
+CMS_EXO24035_sig_cont_2018b3  lnN        -      -      -              -      -   1.05
+

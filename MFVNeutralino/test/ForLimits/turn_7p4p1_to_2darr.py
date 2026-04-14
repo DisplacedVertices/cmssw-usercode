@@ -4,6 +4,7 @@ import numpy as np
 import script_configs as config # everything hard-coded goes into config
 import helper_PyStorage_objects as sth
 import uncerts_trigger as trig_unc # Python dictionaries
+import uncerts_trigger_patch as trig_unc_patch # Extrapolation pack
 import nuisance_configs as ns_conf
 
 
@@ -38,6 +39,7 @@ for p in proc_nm:
     
     ntab = sth.NuisanceTable(p, x_vals, x_unit, y_vals, y_unit, as_percent=is_percent, years=set(["2016", "2016APV", "2017", "2018"]))
     ntab.add_dictionary(trig_unc.total_uncerts, debug_mode=False)
+    ntab.add_dictionary(trig_unc_patch.total_uncerts_patch, debug_mode=False)
 
 
     # Mess around with object
