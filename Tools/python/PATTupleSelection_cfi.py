@@ -1,12 +1,43 @@
 import FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.Year import year
 
-# https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2017
+# NOTE The only places where muon_cuts / jtupleParams.muonCuts / jtupleParams.muonCut (and similar for electrons)
+# in principle get used either have it commented out in the python or the C++ ignores it, and we implement our own cuts elsewhere (for better or for worse).
+# Exceptions are MFVNeutralino/test/TriggerStudies/eff.py and Tools/plugins/ResolutionsHistogrammer.cc, but we are not currently using these.
+
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Tight_Muon
 # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
 # impact parameter cuts not included on leptons, and conversion veto not included on electrons
 # electron H/E cut uses fixed rho number, MFVEventProducer does it right
 
-jet_cuts = (
+# https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVUL has different cuts for 2016 vs. 2017/2018
+# This is all using the LepVeto selection
+jet_cuts_2016 = (
+    'pt > 20',
+    'abs(eta) < 2.5',
+    'neutralHadronEnergyFraction < 0.9',
+    'neutralEmEnergyFraction < 0.99',
+    '(abs(eta) >= 2.4 || (neutralEmEnergyFraction < 0.9 && numberOfDaughters > 1 && muonEnergyFraction < 0.8 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0 && chargedEmEnergyFraction < 0.8))',
+)
+
+jet_cuts_2017p8 = (
+    'pt > 20',
+    'abs(eta) < 2.5',
+    'neutralHadronEnergyFraction < 0.9',
+    'neutralEmEnergyFraction < 0.9',
+    'numberOfDaughters > 1',
+    'muonEnergyFraction < 0.8',
+    'chargedHadronEnergyFraction > 0.',
+    'chargedMultiplicity > 0',
+    'chargedEmEnergyFraction < 0.8',
+)
+
+jet_cuts = jet_cuts_2017p8 if (year == 2017 or year == 2018) else jet_cuts_2016
+
+
+# These were the 2017 pre-UL JetID cuts for TightLepVeto. Only keeping them in the code to easily reference what we had been incorrectly using until Feb 2026 (but likely does not matter very much)
+# https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2017
+old_jet_cuts = (
     'pt > 20',
     'abs(eta) < 2.5',
     'numberOfDaughters > 1',

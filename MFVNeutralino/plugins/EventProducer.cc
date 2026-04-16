@@ -441,8 +441,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
     // match trigger and offline jets
-    mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
-    mevent->jet_hlt_push_back(jet, triggerfloats->hltdisplacedcalojets, true);
+    mevent->pf_offline_jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
+    mevent->pf_offline_jet_hlt_push_back(jet, triggerfloats->hltdisplacedcalojets, true);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
@@ -503,6 +503,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->calo_jet_eta.push_back(cjet.eta());
     mevent->calo_jet_phi.push_back(cjet.phi());
     mevent->calo_jet_energy.push_back(cjet.energy());
+
+    mevent->calo_offline_jet_hlt_push_back(cjet, triggerfloats->hltdisplacedcalojets);
   }
 
 //////////////////////////////////////////////////////////////////////
@@ -684,12 +686,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_raw_pt.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
-    mevent->jet_hlt_eta.clear();
-    mevent->jet_hlt_phi.clear();
-    mevent->jet_hlt_energy.clear();
-    mevent->displaced_jet_hlt_eta.clear();
-    mevent->displaced_jet_hlt_phi.clear();
-    mevent->displaced_jet_hlt_energy.clear();
+    mevent->pf_offline_jet_hlt_eta.clear();
+    mevent->pf_offline_jet_hlt_phi.clear();
+    mevent->pf_offline_jet_hlt_energy.clear();
+    mevent->pf_offline_displaced_jet_hlt_eta.clear();
+    mevent->pf_offline_displaced_jet_hlt_phi.clear();
+    mevent->pf_offline_displaced_jet_hlt_energy.clear();
+    mevent->calo_offline_displaced_jet_hlt_eta.clear();
+    mevent->calo_offline_displaced_jet_hlt_phi.clear();
+    mevent->calo_offline_displaced_jet_hlt_energy.clear();
     mevent->metx = 0;
     mevent->mety = 0;
     

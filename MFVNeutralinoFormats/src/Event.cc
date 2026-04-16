@@ -88,7 +88,7 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
   electron_q.push_back(electron.charge()); //Abby change
 }
 
-void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets){
+void MFVEvent::pf_offline_jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets){
 
   // use dR = 0.4 for the matching (in eta x phi)
   double hltmatchdist2 = 0.4*0.4;
@@ -102,17 +102,36 @@ void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<T
   }
 
   if(is_displaced_calojets){
-    displaced_jet_hlt_pt.push_back(hltmatch.Pt());
-    displaced_jet_hlt_eta.push_back(hltmatch.Eta());
-    displaced_jet_hlt_phi.push_back(hltmatch.Phi());
-    displaced_jet_hlt_energy.push_back(hltmatch.E());
+    pf_offline_displaced_jet_hlt_pt.push_back(hltmatch.Pt());
+    pf_offline_displaced_jet_hlt_eta.push_back(hltmatch.Eta());
+    pf_offline_displaced_jet_hlt_phi.push_back(hltmatch.Phi());
+    pf_offline_displaced_jet_hlt_energy.push_back(hltmatch.E());
   }
   else{
-    jet_hlt_pt.push_back(hltmatch.Pt());
-    jet_hlt_eta.push_back(hltmatch.Eta());
-    jet_hlt_phi.push_back(hltmatch.Phi());
-    jet_hlt_energy.push_back(hltmatch.E());
+    pf_offline_jet_hlt_pt.push_back(hltmatch.Pt());
+    pf_offline_jet_hlt_eta.push_back(hltmatch.Eta());
+    pf_offline_jet_hlt_phi.push_back(hltmatch.Phi());
+    pf_offline_jet_hlt_energy.push_back(hltmatch.E());
   }
+}
+
+void MFVEvent::calo_offline_jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets){
+
+  // use dR = 0.4 for the matching (in eta x phi)
+  double hltmatchdist2 = 0.4*0.4;
+  TLorentzVector hltmatch;
+  for (auto hlt : hltjets) {
+    const double dist2 = reco::deltaR2(jet.eta(), jet.phi(), hlt.Eta(), hlt.Phi());
+    if (dist2 < hltmatchdist2) {
+      hltmatchdist2 = dist2;
+      hltmatch = hlt;
+    }
+  }
+
+  calo_offline_displaced_jet_hlt_pt.push_back(hltmatch.Pt());
+  calo_offline_displaced_jet_hlt_eta.push_back(hltmatch.Eta());
+  calo_offline_displaced_jet_hlt_phi.push_back(hltmatch.Phi());
+  calo_offline_displaced_jet_hlt_energy.push_back(hltmatch.E());
 }
 
 void MFVEvent::mu_hlt_push_back(const reco::Muon& muon, const std::vector<TLorentzVector>& hlt_mu){ //Abby change begin

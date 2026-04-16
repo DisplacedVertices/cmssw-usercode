@@ -1,18 +1,19 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PileupWeights import get_pileup_weights
 from JMTucker.Tools.Year import year
+from JMTucker.MFVNeutralino.NtupleCommon import use_Lepton_triggers,use_Muon_triggers,use_Electron_triggers
 import os
 
 if (year == 20161) :
     # #20161 
-    pujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/PU_json/161UL/puWeights.json.gz')
+    pujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/PU_json/16preVFP_UL/puWeights.json.gz')
     mujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lep_eff/muon161UL_Z.json.gz')
     elejson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lep_eff/electron161UL.json.gz')
     muSFjson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lepSF_json/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_schemaV2.json')
     eleSFjson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lepSF_json/electron_trigsf_runII.json')
 elif (year == 20162) : 
     # #20162 
-    pujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/PU_json/162UL/puWeights.json.gz')
+    pujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/PU_json/16postVFP_UL/puWeights.json.gz')
     mujson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lep_eff/muon162UL_Z.json.gz')
     elejson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lep_eff/electron162UL.json.gz')
     muSFjson_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/python/central_jsons/lepSF_json/Efficiencies_muon_generalTracks_Z_Run2016_UL_SingleMuonTriggers_schemaV2.json')
@@ -37,7 +38,6 @@ else :
 mfvWeight = cms.EDProducer('MFVWeightProducer',
                            throw_if_no_mcstat = cms.bool(True),
                            mevent_src = cms.InputTag('mfvEvent'),
-                           vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                            enable = cms.bool(True),
                            prints = cms.untracked.bool(False),
                            histos = cms.untracked.bool(True),
@@ -49,8 +49,9 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            weight_npv = cms.bool(False),
                            npv_weights = cms.vdouble(),
                            misc_weight_indices = cms.vint32(),
-                           apply_lepsf = cms.bool(True),
-                           apply_roccor = cms.bool(True), #rocchester corrections for muons
+                           apply_lepsf = cms.bool(True) if (use_Lepton_triggers or use_Muon_triggers or use_Electron_triggers) else cms.bool(False),
+                           apply_roccor = cms.bool(False), # cms.bool(True) if use_Lepton_triggers else cms.bool(False), #rochester corrections for muons: we turned this off after seeing large weights; we're insensitive to muon momentum anyway
+                           produce_variation_weights = cms.bool(False),
                            pujson = cms.string(pujson_path),
                            elejson = cms.string(elejson_path),
                            mujson = cms.string(mujson_path),

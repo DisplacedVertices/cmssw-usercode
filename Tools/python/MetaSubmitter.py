@@ -130,6 +130,14 @@ for mname in %r:
         else:
             return [], []
 
+def ttH_duplicate_check_modifier(sample):
+    '''ttHToLLPs samples are privately generated and contain duplicate events
+    across lumisections. This modifier disables the duplicate event check for
+    those samples so cmsRun does not abort.'''
+    if sample.name.startswith('ttHToLLPs'):
+        return ["process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')"], []
+    return [], []
+
 class event_veto_modifier:
     def __init__(self, d, filter_path):
         self.d = d
@@ -293,7 +301,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'qcdht1000_2017':   ( 3,  551000),
                 'qcdht1500_2017':   ( 1,  186000),
                 'qcdht2000_2017':   ( 1,  202000),
-                'ttbar_2017':       (10, 3040000), #FIXME change from 50 to 10
+                'ttbar_2017':       ( 5, 3040000),
                 'ttbarht0600_2017': ( 5,   71500),
                 'ttbarht0800_2017': ( 3,   45000),
                 'ttbarht1200_2017': ( 3,   32500),
@@ -306,7 +314,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'qcdht1000_2018':   (11,  551000),
                 'qcdht1500_2018':   ( 4,  186000),
                 'qcdht2000_2018':   ( 5,  202000),
-                'ttbar_2018':       (50, 3040000),
+                'ttbar_2018':       ( 5, 3040000),
                 'ttbarht0600_2018': ( 5,   71500),
                 'ttbarht0800_2018': ( 3,   45000),
                 'ttbarht1200_2018': ( 3,   32500),
@@ -334,7 +342,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 name = 'signal'
                 sample.split_by = 'events'
 
-            sample.files_per, sample.events_per = d[dataset].get(name, (10, 100000))
+            sample.files_per, sample.events_per = d[dataset].get(name, (5, 100000))
 
             if jobtype == 'trackmover':
                 if name.startswith('ttbarht'):
@@ -381,14 +389,20 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, qcd_lep=False, ttbar=False, all_signal=False, span_signal=False, data=False, BTagCSV_data=False, Lepton_data=False, JetHT_data=False, DisplacedJet_data=False, leptonic=False, bjet=False,  
-                 splitSUSY=False, Zvv=False, met=False, diboson=False):
+                 qcd=False, qcd_lep=False, ttbar=False, all_signal=False, all_lep_signal=False, all_bjet_signal=False, span_signal=False, data=False, BTagCSV_data=False, Lepton_data=False, Muon_data=False, Electron_data=False, JetHT_data=False, DisplacedJet_data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, met=False, diboson=False):
+
+    if all_signal :
+        sys.exit('all_signal has been replaced with all_lep_signal and all_bjet_signal, please fix and try again. Exiting.')
+
+    if Lepton_data:
+        sys.exit('Lepton_data been replaced with Muon_data and Electron_data, please fix and try again. Exiting.')
 
     if span_signal:
-        print 'cannot use both span and all_signal, turning off the latter'
-        all_signal = False
+        print 'cannot use both span and (all_lep_signal or all_bjet_signal), turning off the latter'
+        all_lep_signal = False
+        all_bjet_signal = False
 
-    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_signal', 'span_signal', 'data', 'BTagCSV_data', 'Lepton_data', 'JetHT_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
+    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_lep_signal', 'all_bjet_signal', 'span_signal', 'data', 'BTagCSV_data', 'Lepton_data', 'Muon_data', 'Electron_data', 'JetHT_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -490,4 +504,5 @@ __all__ = [
     'event_veto_modifier',
     'chain_modifiers',
     'secondary_files_modifier',
+    'ttH_duplicate_check_modifier',
     ]

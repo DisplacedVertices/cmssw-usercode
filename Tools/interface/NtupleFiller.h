@@ -288,7 +288,7 @@ namespace jmt {
         fill_tracks_(true),
         tracks_cut_level_(-1),
         tracks_cut_(nullptr),
-        use_separated_leptons_(true) // true if use_displaced_lepton 
+        use_separated_leptons_(false) // true if use_displaced_lepton 
     {}
 
     bool pvs_subtract_bs() const { return pvs_subtract_bs_; }

@@ -41,7 +41,7 @@ if dataset == 'miniaod':
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
 
 #for met 
-process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles*process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats)
+process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles * process.fullPatMetSequence * process.mfvTriggerFloats)
 #for jet
 #process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles* process.mfvTriggerFloats)
 

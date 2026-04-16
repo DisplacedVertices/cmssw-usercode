@@ -11,16 +11,16 @@ sig = {
     "type": "lep", # This MUST be either "lep" or "bjet"
 
     "lep": {
-        "folder": "/uscms/home/yuqingwu/nobackup/DV-testing/25-12_CombineTemplates/MiniTree_Ex/26-03-07_MiniTree_Table28Validation_CorrectedLepm/",
+        "folder": "/uscms/home/yuqingwu/nobackup/DV-testing/25-12_CombineTemplates/MiniTree_Ex/26-04-16_MiniTree_tag001Lepm/",
         "file_key": "*tau*",
     },
     "bjet": {
-        "folder": "/uscms/home/yuqingwu/nobackup/DV-testing/25-12_CombineTemplates/MiniTree_Ex/25-12-29_MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/",
+        "folder": "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm/",
         "file_key": "*tau*", #"mfv_stopdbardbar_tau000300um*",
     },
     
-    "lep_sigs": ["WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd", "ttHToLLPs_bbbb", "ttHToLLPs_dddd", "mfv_neu"],
-    "bjet_sigs": ["ggHToSSTodddd", "mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"],
+    "lep_sigs": ["WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd", "ttHToLLPs_bbbb", "ttHToLLPs_dddd", "mfv_neu", "ggZHToSSTobbbb", "ggZHToSSTodddd"],
+    "bjet_sigs": ["ggHToSSTodddd", "mfv_neu", "mfv_stopbbarbbar", "mfv_stopdbardbar", "ttHToLLPs_bbbb", "ttHToLLPs_dddd"],
 
     "sig_grps": { # If it hits e.g. "ZHToSSTodddd", it'll sum 3 files. It ignores the other 2.
         "VH": ["ZHToSSTodddd", "WminusHToSSTodddd", "WplusHToSSTodddd"],
@@ -77,7 +77,7 @@ obs = {
 
 
 debug_settings = {
-    "scale_sig_fake": True,
+    "scale_sig_fake": False,
     "sig_fake_sf": { # write None for no correction. Leave as string, no underscores, no extra *.
         "lep": {
             "default": None,

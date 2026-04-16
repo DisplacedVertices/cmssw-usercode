@@ -36,7 +36,6 @@ process.mfvK0s = cms.EDAnalyzer('MFVK0Treer',
                                 )
 
 if use_MET_triggers: ###Alec added from this line
-  process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
   process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
   process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
   if not settings.is_mc:
@@ -51,16 +50,16 @@ if use_MET_triggers: ###Alec added from this line
   runMetCorAndUncFromMiniAOD(process,
                              isData = not settings.is_mc,
                              )
-  process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats * process.mfvK0s)
+  process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.fullPatMetSequence * process.mfvTriggerFloats * process.mfvK0s)
 else:
   #process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.mfvK0s)
-  #process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles*process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats) Alec later commented because not generating trees properly
+  #process.p = cms.Path(process.mfvEventFilterSequence *process.mfvGenParticles * process.fullPatMetSequence * process.mfvTriggerFloats) Alec later commented because not generating trees properly
   process.mfvEvent.vertex_seed_tracks_src = ''
   process.load('JMTucker.Tools.WeightProducer_cfi')
   process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
   process.mfvWeight.throw_if_no_mcstat = False
  
-  process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices* process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats * process.mfvK0s)
+  process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.fullPatMetSequence * process.mfvTriggerFloats * process.mfvK0s)
 ReferencedTagsTaskAdder(process)('p')  ###Alec to this line from btag branch
 
 #process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.mfvK0s)  Alec commented

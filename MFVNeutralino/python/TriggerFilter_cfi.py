@@ -30,8 +30,8 @@ bjet_paths = [
 
 displaced_dijet_paths = [
     # displaced dijet triggers 2016
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v*",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v*",
     # displaced dijet triggers 2017/2018
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
@@ -54,13 +54,6 @@ electron_paths = [
     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
 ]
-
-displaced_lepton_paths = [
-    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v*",
-    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v*",
-    "HLT_DoublePhoton70_v*",
-    "HLT_DoubleMu43NoFiltersNoVtx_v*",
-    ]
 
 dilepton_paths = [
     "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",

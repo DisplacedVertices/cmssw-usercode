@@ -74,8 +74,6 @@ runMetCorAndUncFromMiniAOD(process,
                            isData = not settings.is_mc,
                            )
 
-process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
-
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
@@ -108,7 +106,7 @@ else:
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.weightSeq * process.reftrig * process.updatedJetsSeqMiniAOD * process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
+process.p = cms.Path(process.weightSeq * process.reftrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
 
 for x in ['']:
     num = getattr(process, 'den%s' % x).clone(require_hlt = trig_id)

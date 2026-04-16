@@ -65,7 +65,7 @@ if not settings.is_mc:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
+    if use_btag_triggers or use_btag_vetoLepHT_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
 
         if year == 20161:
@@ -83,7 +83,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, all_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
 
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2016.json' if year in [20161, 20162] else 'ana_2017p8.json'), limit_ttbar=True)
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_btag_triggers or use_btag_vetoLepHT_triggers) else 'ana_run2.json'
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path(json_filename), limit_ttbar=True)
 
     ms = MetaSubmitter('PreselHistosFix' + settings.version, dataset=dataset)
     ms.common.pset_modifier = pset_modifier

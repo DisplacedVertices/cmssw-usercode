@@ -749,7 +749,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_n_seed_vertices->Fill(vertices->size());
   }
 
-  if (order_seed_vertex){ //FIXMENOW
+  if (order_seed_vertex){
     //order vertices by pt 
     std::sort(vertices->begin(), vertices->end(), order_seed_vtx_pt());
   }
@@ -1397,10 +1397,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       for (size_t i = 0; i < ntks; ++i) {
         float tkpt_todrop = tks[i]->pt();
         float tkphi_todrop = tks[i]->phi();
+
+        // JPR: Dropping lepton track instances, which this fork does not use.
+        /*
         float leptkpt_todrop = -1;
         if (tks[i].id().id() == 155 || tks[i].id().id() == 156) {
           leptkpt_todrop = tks[i]->pt();
         }
+        */
 
         std::vector<float> track_dphis;
         for (size_t j = 0; j < ntks; ++j) {
@@ -1458,7 +1462,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             h_dzstage_droppedtk_dz->Fill(fabs(distz)); 
             h_dzstage_droppedtk_sigma->Fill(fabs(distz_sig)); 
 
-            if (leptkpt_todrop > 0) {
+            // JPR: Dropping lepton track instances, which this fork does not use
+            /*if (leptkpt_todrop > 0) {
                h_dzstage_droppedleptk_pt_vs_sigma->Fill(leptkpt_todrop, fabs(distz_sig));
                h_dzstage_droppedleptk_pt_vs_dz->Fill(leptkpt_todrop, fabs(distz)); 
                h_dzstage_droppedleptk_dz_vs_sigma->Fill(fabs(distz), fabs(distz_sig));
@@ -1478,7 +1483,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                h_dzstage_droppedleptk_dz->Fill(fabs(distz)); 
                h_dzstage_droppedleptk_sigma->Fill(fabs(distz_sig));
                h_dzstage_droppedleptk_missdist->Fill(fabs(tk_vtx_dist.second.value()));
-            }
+            }*/
         }
 
         if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
@@ -1494,10 +1499,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
              if (abs(tks[i]->pt() >= 40.0 ))
                 h_dzstage_droppedtk_dphi_vs_sigma->Fill(dphi_avg, distz_sig);
 
+             // JPR: Dropping lepton track instances, which this fork does not use
+             /*
              //ignoring lepton tracks 
              if (ignore_lep_in_refit_distz && (tks[i].id().id() == 155 || tks[i].id().id() == 156) && fabs(tks[i]->pt()) >= 20.0 ) {
                 break;
              }
+             */
           }
           
           if (verbose) {
@@ -2206,6 +2214,8 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
     int nmu_tks = 0;
 
     for (const auto& tk : vertex_track_set(v)) {
+      // JPR: Dropping lepton track instances, which this fork does not use
+      /*
       if (tk.id().id() == 155) {
         nele_tks += 1;
         hs_output_vertex_elept[step]->Fill(tk->pt());
@@ -2218,6 +2228,8 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
         hs_output_vertex_leppt[step]->Fill(tk->pt());
         hs_output_vertex_mupt_vs_nsigma[step]->Fill(tk->pt(), fabs(tk->dxy()) / tk->dxyError());
       }
+      */
+
       if (track_use.find(tk) != track_use.end())
         track_use[tk] += 1;
       else

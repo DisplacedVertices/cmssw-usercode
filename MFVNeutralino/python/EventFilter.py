@@ -7,7 +7,7 @@ def setup_event_filter(process,
                        event_filter = False,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
-                       event_filter_require_vertex = False, #FIXME
+                       event_filter_require_vertex = False, #FIXME if file sizes are too large (we used to have this on)
                        rp_filter = False,
                        rp_mode = None,
                        rp_mass = -1,

@@ -267,14 +267,13 @@ class Sample(object):
 ########################################################################
 
 class MCSample(Sample):
-    def __init__(self, name, dataset, nevents_orig, filter_eff=1, **kwargs):
+    def __init__(self, name, dataset, nevents_orig, **kwargs):
         super(MCSample, self).__init__(name, dataset, nevents_orig, **kwargs)
 
         self.nice = kwargs.get('nice', '')
         self.color = kwargs.get('color', -1)
         self.syst_frac = float(kwargs.get('syst_frac', -1))
         self.xsec = float(kwargs.get('xsec', -1)) # assumed pb
-        self.filter_eff = float(filter_eff)
 
         self.join_info = (False, self.nice, self.color)
 

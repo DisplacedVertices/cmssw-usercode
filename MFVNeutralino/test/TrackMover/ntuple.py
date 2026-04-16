@@ -79,7 +79,7 @@ process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvWeight.throw_if_no_mcstat = False
 
-process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices* process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats)
+process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.fullPatMetSequence * process.mfvTriggerFloats)
 random_dict = {'jmtRescaledTracks': 1031}
 
 if version.endswith('ext1') :

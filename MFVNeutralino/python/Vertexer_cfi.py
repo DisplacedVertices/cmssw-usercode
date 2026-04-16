@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-#from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 kvr_params = cms.PSet(
     maxDistance = cms.double(0.01),
@@ -35,7 +34,7 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                disregard_event = cms.bool(False),
                                use_tracks = cms.bool(True),
-                               use_separated_leptons = cms.bool(True), #use lepton tracks -> if they were separated at unpackedcandidates
+                               use_separated_leptons = cms.bool(False), # Turning this off in this fork, but Abby uses this extensively. # use lepton tracks -> if they were separated at unpackedcandidates
                                tracks_src = cms.InputTag('jmtRescaledTracks'),
                                electron_tracks_src = cms.InputTag('jmtRescaledTracks', "electrons"),
                                muon_tracks_src = cms.InputTag('jmtRescaledTracks', "muons"),
@@ -79,7 +78,6 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                )
 
 mfvVertices = cms.EDProducer('MFVVertexer',
-                             #jmtNtupleFiller_pset(True, True, False),
                              kvr_params = kvr_params,
                              do_track_refinement = cms.bool(False), # remove tracks + trim out tracks with IP significance larger than trackrefine_sigmacut and trackrefine_trimmax, respectively   
                              resolve_split_vertices_loose = cms.bool(False), # an alternative merging routine with `loose` criteria, to merge any nearby vertices within a given dist or significance

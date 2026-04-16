@@ -51,33 +51,49 @@ namespace mfv {
     float jet_bdisc_csv[50];
     float jet_bdisc_deepcsv[50];
     float jet_bdisc_deepflav[50];
-    float jet_hlt_pt[50];
-    float jet_hlt_eta[50];
-    float jet_hlt_phi[50];
-    float jet_hlt_energy[50];
-    bool jet_hlt_match(int i, float min_jet_pt=20.) const {
-      // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
+    float pf_offline_jet_hlt_pt[50];
+    float pf_offline_jet_hlt_eta[50];
+    float pf_offline_jet_hlt_phi[50];
+    float pf_offline_jet_hlt_energy[50];
+    bool pf_offline_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero pf_offline_jet_hlt_pt;
       // all others have the default value of 0
-      return jet_hlt_pt[i] > min_jet_pt;
+      return pf_offline_jet_hlt_pt[i] > min_jet_pt;
     }
-    float displaced_jet_hlt_pt[50];
-    float displaced_jet_hlt_eta[50];
-    float displaced_jet_hlt_phi[50];
-    float displaced_jet_hlt_energy[50];
-    bool displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
-      // an offline jet with a successful HLT match will have a nonzero displaced_jet_hlt_pt;
+    float pf_offline_displaced_jet_hlt_pt[50];
+    float pf_offline_displaced_jet_hlt_eta[50];
+    float pf_offline_displaced_jet_hlt_phi[50];
+    float pf_offline_displaced_jet_hlt_energy[50];
+    bool pf_offline_displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero pf_offline_displaced_jet_hlt_pt;
       // all others have the default value of 0
-      return displaced_jet_hlt_pt[i] > min_jet_pt;
+      return pf_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
+    }
+    unsigned char ncalojets;
+    float calo_jet_pt[100];
+    float calo_jet_eta[100];
+    float calo_jet_phi[100];
+    float calo_jet_energy[100];
+    float calo_offline_displaced_jet_hlt_pt[100];
+    float calo_offline_displaced_jet_hlt_eta[100];
+    float calo_offline_displaced_jet_hlt_phi[100];
+    float calo_offline_displaced_jet_hlt_energy[100];
+    bool calo_offline_displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero calo_offline_displaced_jet_hlt_pt;
+      // all others have the default value of 0
+      // NOTE be sure to keep the calojet and PF jet indices separate! mixing them up will be a big problem
+      return calo_offline_displaced_jet_hlt_pt[i] > min_jet_pt;
     }
     float ht(float min_jet_pt=40.) const;
+    float caloht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;
-    int nbtags_(float min_bdisc, int tagger) const;
-    int nbtags_old(float min_bdisc) const { return nbtags_(min_bdisc, true); }
-    int nbtags(float min_bdisc) const { return nbtags_(min_bdisc, false); }
+    int nbtags_(float min_bdisc, int tagger, float min_pt) const;
+    int nbtags_old(float min_bdisc, float min_pt) const { return nbtags_(min_bdisc, 2, min_pt); } // DeepJet
+    int nbtags(float min_bdisc, float min_pt) const { return nbtags_(min_bdisc, 0, min_pt); } // CSVv2
 
-    int nbtags_tight() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight)); }
-    int nbtags_medium() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium)); }
-    int nbtags_loose() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose)); }
+    int nbtags_tight(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight), min_pt); }
+    int nbtags_medium(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium), min_pt); }
+    int nbtags_loose(float min_pt=-1) const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose), min_pt); }
     
     float gen_pv_x0;
     float gen_pv_y0;
@@ -125,6 +141,8 @@ namespace mfv {
     std::vector<short>*  p_tk0_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk0_cov;
     bool genmatch0;
+    float costhtkonlymombs0;
+    float costhtksjetsntkmombs0;
     float x0;
     float y0;
     float z0;
@@ -153,6 +171,8 @@ namespace mfv {
     std::vector<short>*  p_tk1_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk1_cov;
     bool genmatch1;
+    float costhtkonlymombs1;
+    float costhtksjetsntkmombs1;
     float x1;
     float y1;
     float z1;
@@ -164,8 +184,8 @@ namespace mfv {
 
     bool satisfiesTrigger(size_t trig) const;
     bool satisfiesTriggerAndOffline(size_t trig) const;
-    bool satisfiesHTOrBjetOrDisplacedDijetTrigger() const;
-    bool satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const;
+    bool satisfiesBjetOrDisplacedDijetTrigger() const;
+    bool satisfiesBjetOrDisplacedDijetTriggerAndOffline() const;
   };
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);
