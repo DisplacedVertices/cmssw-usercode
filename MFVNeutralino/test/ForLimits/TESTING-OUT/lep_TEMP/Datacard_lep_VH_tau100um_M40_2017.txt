@@ -11,7 +11,7 @@ ________
 bin             b20170    b20171    b20172            b20170    b20171    b20172
 process       sig20171  sig20171  sig20171           bkg2017   bkg2017   bkg2017
 process           0      0      0              1      1      1
-rate         0.0 0.00796241050814 0.0128684457945         4.96742725267e-06 2.75376005348e-05 0.00196749497221
+rate         0.0 0.774674149218 1.27589987898         4.96742725267e-06 2.75376005348e-05 0.00196749497221
 ________
 
 lumi_13TeV_15161718_l         lnN   1.0061 1.0061 1.0061              -      -      -
@@ -22,16 +22,16 @@ CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0              -      - 
 
 
 
-CMS_EXO24035_mc_stat_2017b1   gmN 0      0.00173590469189      -      -              -      -      -
-CMS_EXO24035_mc_stat_2017b2   gmN 5           - 0.00159248210163      -              -      -      -
-CMS_EXO24035_mc_stat_2017b3   gmN 7           -      - 0.00183834939922              -      -      -
+CMS_EXO24035_mc_stat_2017b1   gmN 0      0.170881169016      -      -              -      -      -
+CMS_EXO24035_mc_stat_2017b2   gmN 5           - 0.154934829844      -              -      -      -
+CMS_EXO24035_mc_stat_2017b3   gmN 7           -      - 0.182271411283              -      -      -
 CMS_EXO24035_tk_reco_eff_13TeV lnN   1.0/1.00037 1.0/1.0 1.0/1.0              -      -      -
 
 CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
 CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
 CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
 CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
-CMS_EXO24035_num_vtx_pair_unc_2017 lnN        -      -      -            3.5    3.5    3.5
+CMS_EXO24035_num_vtx_pair_unc_2017 lnN        -      -      -           1.05   1.05   1.05
 CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
 
 

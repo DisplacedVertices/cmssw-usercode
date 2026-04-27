@@ -1,0 +1,38 @@
+# sample id in ROOT file 86
+# filename = mfv_stopdbardbar_tau030000um_M0800_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b20170    b20171    b20172
+observation       0      0      0
+________
+bin             b20170    b20171    b20172            b20170    b20171    b20172
+process       sig201786  sig201786  sig201786           bkg2017   bkg2017   bkg2017
+process           0      0      0              1      1      1
+rate         0.0238398663571 0.0782908817229 4.28072324942         0.0130352259533 0.00244267508894 0.0625220989578
+________
+
+CMS_EXO24035_calo_ineff_2017  lnN     1.01   1.01   1.01              -      -      -
+lumi_13TeV_15161718_l         lnN   1.0061 1.0061 1.0061              -      -      -
+lumi_13TeV_151617_l           lnN   1.0055 1.0055 1.0055              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.03   1.03              -      -      -
+CMS_EXO24035_disp_trig_uncerts_13TeV lnN   1.0149 1.0149 1.0149              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN   1.0182 1.0182 1.0182              -      -      -
+
+
+
+CMS_EXO24035_mc_stat_2017b1   gmN 15     0.00158932442381      -      -              -      -      -
+CMS_EXO24035_mc_stat_2017b2   gmN 48          - 0.00163106003589      -              -      -      -
+CMS_EXO24035_mc_stat_2017b3   gmN 2642        -      - 0.00162025861068              -      -      -
+
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2017 lnN        -      -      -         1.0012820512820513 1.0012820512820513 1.0012820512820513
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
+
+
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05

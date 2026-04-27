@@ -8,8 +8,8 @@ from JMTucker.Tools import DBS
 ########################################################################
 
 xrootd_sites = {
-    'T3_US_FNALLPC': 'root://cmsxrootd.fnal.gov/', #'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd-site.fnal.gov/',
+    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', # use 'root://cmsxrootd-site.fnal.gov/', if files are truly on the T1, but be careful since we currently use this regional redirector rather than find things at a per-site level
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
@@ -267,13 +267,14 @@ class Sample(object):
 ########################################################################
 
 class MCSample(Sample):
-    def __init__(self, name, dataset, nevents_orig, **kwargs):
+    def __init__(self, name, dataset, nevents_orig, filter_eff=1, **kwargs):
         super(MCSample, self).__init__(name, dataset, nevents_orig, **kwargs)
 
         self.nice = kwargs.get('nice', '')
         self.color = kwargs.get('color', -1)
         self.syst_frac = float(kwargs.get('syst_frac', -1))
         self.xsec = float(kwargs.get('xsec', -1)) # assumed pb
+        self.filter_eff = float(filter_eff)
 
         self.join_info = (False, self.nice, self.color)
 

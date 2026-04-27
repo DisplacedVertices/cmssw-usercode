@@ -92,7 +92,7 @@ class SignalROOTInfo(object):
         elif self.proc in config.sig["lep_sigs"]:
             self.trig_type = "lep"
         else:
-            print "Signal not found in either bjet or lep lists."
+            print "Signal " + self.fn + " not found in either bjet or lep lists."
             self.trig_type = "none"
         return
 
@@ -341,7 +341,7 @@ class NuisanceTable(object):
     Nuisance grid: Indexed by year (string). The values are ALWAYS interpreted as fractions (not percent).
     """
 
-    def __init__(self, proc="", x_vals=None, x_unit=None, y_vals=None, y_unit=None, as_percent=None, years=set(["20161", "20162", "2017", "2018"]), nbin_len=False, dtype=float, pickle_loc=None, make_pickle_fn=True):
+    def __init__(self, proc="", x_vals=None, x_unit=None, y_vals=None, y_unit=None, as_percent=None, years=set(["20161", "20162", "2017", "2018"]), nbin_len=False, dtype=float, pickle_loc=None, make_pickle_fn=True, trig_for_pickle=None):
         """
         -INPUTS-
         as_percent: Boolean. If True, input 10 -> store 0.1. If False, stores exactly the input. The value stored is always interpreted as a FRACTION.
@@ -350,6 +350,8 @@ class NuisanceTable(object):
         dtype: how the np.array should represent the data
         pickle_loc: if not None, it will un-pickle the specified dictionary, and construct itself.
         make_pickle_fn: if True, it will add pickle_loc + "_" + proc + ".pkl"
+        trig_for_pickle: addresses the issue that aliases are needed for some processes, and these are trig-dependent
+                -Good practice: if you don't think it needs aliases, don't feed it one, so it catches errors
         """
         if pickle_loc is None:
             if (proc==None or x_vals==None or x_unit==None or y_vals==None or y_unit==None or as_percent==None): raise Exception("Missing inputs")
@@ -390,7 +392,7 @@ class NuisanceTable(object):
                     use_dict = pickle.load(file) # This will fail for stuff needing re-mapping
             except:
                 could_find_pickle=False
-                for alias in config.sig["aliases"][proc]:
+                for alias in config.sig["aliases"][trig_for_pickle][proc]:
                     try:
                         pickle_loc_tosearch = pickle_loc
                         if make_pickle_fn:
@@ -398,6 +400,7 @@ class NuisanceTable(object):
                         with open(pickle_loc_tosearch, 'rb') as file:
                             use_dict = pickle.load(file)
                         could_find_pickle=True
+                        print "Warning: redirected pickle name to "+alias
                         break
                     except:
                         pass

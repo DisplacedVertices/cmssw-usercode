@@ -119,7 +119,7 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
 
 
 def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
-    ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=ns_conf.pickle_prefixes[nuis_name]) # Get pickle
+    ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=ns_conf.pickle_prefixes[nuis_name], trig_for_pickle=siginfo.trig_type) # Get pickle
     frac_unc = ntab.get_point_from_fn(siginfo, overrides={"yr": ns_conf.year_remaps[nuis_name][siginfo.year]})
 
     if debug_mode: print "Identified TM fractional uncertainty:", frac_unc
@@ -136,8 +136,13 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
 def get_pileup(nuis_name, siginfo, debug_mode=False):
 
     # Shape up/down uncertainty
-    nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06], make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins)
-    
+    if siginfo.trig_type=="lep":
+        nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06], make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins)
+    elif siginfo.trig_type=="bjet":
+        nuis = sth.NuisanceInfo(nuis_name, 1.03, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins)
+    else:
+        raise Exception("Could not add pileup")
+
     # Used to be a shape+dummy
     # nuis = sth.NuisanceInfo("fake_fact_"+nuis_name, 1.2, make_updn=True, sep_yrs=False, corr=True, nuis_type="shape", nbins=siginfo.nbins, ana_spec=False)
     
@@ -179,13 +184,14 @@ def get_lep_effi(nuis_name, siginfo, debug_mode=False):
 
 
 def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
-    ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=ns_conf.pickle_prefixes[nuis_name]) # Get pickle
+    ntab = sth.NuisanceTable(proc=siginfo.proc, pickle_loc=ns_conf.pickle_prefixes[nuis_name], trig_for_pickle=siginfo.trig_type) # Get pickle
     frac_unc = ntab.get_point_from_fn(siginfo, overrides={"yr": ns_conf.year_remaps[nuis_name][siginfo.year]})
 
     if debug_mode: print "Identified b-tag fractional uncertainty:", frac_unc
-    if not np.isfinite(frac_unc):
-        print "Warning: value not sensible. Skipping value."
-        return []
+    #if not np.isfinite(frac_unc):
+    if frac_unc is None:
+        print "Warning: value not sensible. Writing arbitrary value."
+        return [sth.NuisanceInfo(nuis_name+"_fake", 1+0.1, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
     return [sth.NuisanceInfo(nuis_name, 1+frac_unc, make_updn=False, sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
 
 

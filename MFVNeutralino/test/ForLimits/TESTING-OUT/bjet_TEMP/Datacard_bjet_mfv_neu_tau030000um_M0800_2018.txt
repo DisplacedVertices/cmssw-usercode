@@ -1,0 +1,37 @@
+# sample id in ROOT file 36
+# filename = mfv_neu_tau030000um_M0800_2018.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 15
+________
+bin             b20180    b20181    b20182
+observation       0      0      0
+________
+bin             b20180    b20181    b20182            b20180    b20181    b20182
+process       sig201836  sig201836  sig201836           bkg2018   bkg2018   bkg2018
+process           0      0      0              1      1      1
+rate         0.0670062837407 0.22656856057 12.140618552         0.0350261518873 0.0101716301091 0.0768022180036
+________
+
+CMS_EXO24035_calo_ineff_2018  lnN     1.01   1.01   1.01              -      -      -
+lumi_13TeV_15161718_l         lnN   1.0084 1.0084 1.0084              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.03   1.03              -      -      -
+CMS_EXO24035_disp_trig_uncerts_13TeV lnN   1.0056 1.0056 1.0056              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN     1.06   1.06   1.06              -      -      -
+
+
+
+CMS_EXO24035_mc_stat_2018b1   gmN 24     0.0027919284892      -      -              -      -      -
+CMS_EXO24035_mc_stat_2018b2   gmN 80          - 0.00283210700712      -              -      -      -
+CMS_EXO24035_mc_stat_2018b3   gmN 4285        -      - 0.00283328320932              -      -      -
+
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2018 lnN        -      -      -         1.0008196721311475 1.0008196721311475 1.0008196721311475
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
+
+
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05

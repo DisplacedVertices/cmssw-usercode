@@ -1,0 +1,37 @@
+# sample id in ROOT file 29
+# filename = ggZHToSSTobbbb_tau10mm_M55_2018.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 15
+________
+bin             b20180    b20181    b20182
+observation       0      0      0
+________
+bin             b20180    b20181    b20182            b20180    b20181    b20182
+process       sig201829  sig201829  sig201829           bkg2018   bkg2018   bkg2018
+process           0      0      0              1      1      1
+rate         0.0 0.0151265293521 2.76482642465         0.000108226556515 0.0004098106721 0.0334819627714
+________
+
+lumi_13TeV_15161718_l         lnN   1.0084 1.0084 1.0084              -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0              -      -      -
+
+
+
+CMS_EXO24035_mc_stat_2018b1   gmN 0      0.0141834334388      -      -              -      -      -
+CMS_EXO24035_mc_stat_2018b2   gmN 1           - 0.0151265293521      -              -      -      -
+CMS_EXO24035_mc_stat_2018b3   gmN 195         -      - 0.0141785970495              -      -      -
+CMS_EXO24035_tk_reco_eff_13TeV lnN   1.0162/0.98697 1.04046/0.976131 1.01947/0.971271              -      -      -
+
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2018 lnN        -      -      -         1.0029411764705882 1.0029411764705882 1.0029411764705882
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
+
+
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05

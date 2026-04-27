@@ -223,7 +223,8 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
     for repl in nuis_replacements[trig_type].keys():
         nuis_set.update(repl)
         nuis_set = nuis_set.difference(nuis_replacements[trig_type][repl])
-    if debug_mode: print "\nNuisances identified: ", nuis_set, "\n"
+    if debug_mode: print "\n"+siginfo.return_nuis_key()
+    if debug_mode: print "Nuisances identified: ", nuis_set, "\n"
     
     
     for nuis in sorted(nuis_set):

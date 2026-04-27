@@ -151,10 +151,11 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs, **kwargs):
     candidate_files = sorted(glob(sig_fn_syntax)) # list of strings
     sig_id = int(0)
 
+    if debug: print ""
     for cand in candidate_files:
         if os.path.basename(cand).find(year) != -1:
-            if debug: print ""
             generated_siggrp = False
+            #if debug: print ""
             try:
                 siginfo = sth.SignalROOTInfo(cand, root_exists=True, nbins=nbins) # If it prints 2 warnings, this line is why
                 in_cluster = False
@@ -176,12 +177,13 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs, **kwargs):
                 if str(e)=="No Samples.py entry": print "Signal name not in Samples.py, skipping", os.path.basename(cand)
                 else: raise Exception("Creating siginfo threw unknown error")
             if generated_siggrp==False: continue
-            if debug: print "Queried file:", os.path.basename(cand), ". Type identified: ", siggrp.trig_type
             if siggrp.trig_type != sig_type: continue
+            if debug: print "Queried file:", os.path.basename(cand), ". Type identified: ", siggrp.trig_type
             sig_nums.update({siggrp: str(sig_id)})
             if debug: print "This is signal #", sig_id
             sig_id += int(1)
             siggrp.print_diagnostics()
+            if debug: print ""
     
     if print_mapping:
         print "\n\nMapping: "

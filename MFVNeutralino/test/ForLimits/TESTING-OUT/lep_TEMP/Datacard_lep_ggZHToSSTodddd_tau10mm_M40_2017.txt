@@ -1,0 +1,38 @@
+# sample id in ROOT file 58
+# filename = ggZHToSSTodddd_tau10mm_M40_2017.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 16
+________
+bin             b20170    b20171    b20172
+observation       0      0      0
+________
+bin             b20170    b20171    b20172            b20170    b20171    b20172
+process       sig201758  sig201758  sig201758           bkg2017   bkg2017   bkg2017
+process           0      0      0              1      1      1
+rate         0.010347165994 0.0 13.8600300428         4.96742725267e-06 2.75376005348e-05 0.00196749497221
+________
+
+lumi_13TeV_15161718_l         lnN   1.0061 1.0061 1.0061              -      -      -
+lumi_13TeV_151617_l           lnN   1.0055 1.0055 1.0055              -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0              -      -      -
+
+
+
+CMS_EXO24035_mc_stat_2017b1   gmN 1      0.010347165994      -      -              -      -      -
+CMS_EXO24035_mc_stat_2017b2   gmN 0           - 0.0100147127861      -              -      -      -
+CMS_EXO24035_mc_stat_2017b3   gmN 1384        -      - 0.0100144725742              -      -      -
+CMS_EXO24035_tk_reco_eff_13TeV lnN   1.0105/0.987749 1.01902/0.981613 1.02312/0.973105              -      -      -
+
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2017 lnN        -      -      -           1.05   1.05   1.05
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
+
+
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05

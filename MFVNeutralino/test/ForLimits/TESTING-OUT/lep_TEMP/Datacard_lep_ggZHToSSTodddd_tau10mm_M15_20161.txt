@@ -1,0 +1,39 @@
+# sample id in ROOT file 57
+# filename = ggZHToSSTodddd_tau10mm_M15_20161.root
+# total sig rate = FIXME, not implemented
+imax 3
+jmax 1
+kmax 17
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2
+observation       0      0      0
+________
+bin             b2016preAPV0    b2016preAPV1    b2016preAPV2            b2016preAPV0    b2016preAPV1    b2016preAPV2
+process       sig2016preAPV57  sig2016preAPV57  sig2016preAPV57           bkg2016preAPV   bkg2016preAPV   bkg2016preAPV
+process           0      0      0              1      1      1
+rate         0.0 0.0 0.0100363708047         0.000104793984241 0.000172667098227 0.000722538917532
+________
+
+lumi_13TeV_15161718_l         lnN   1.0035 1.0035 1.0035              -      -      -
+lumi_13TeV_151617_l           lnN   1.0004 1.0004 1.0004              -      -      -
+lumi_13TeV_1516_l             lnN   1.0118 1.0118 1.0118              -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01              -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06              -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0              -      -      -
+
+
+
+CMS_EXO24035_mc_stat_2016preAPVb1 gmN 0      0.0100363708047      -      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb2 gmN 0           - 0.0100363708047      -              -      -      -
+CMS_EXO24035_mc_stat_2016preAPVb3 gmN 1           -      - 0.0100363708047              -      -      -
+CMS_EXO24035_tk_reco_eff_13TeV lnN   1.01828/0.966141 1.04599/0.934601 1.0434/0.952049              -      -      -
+
+CMS_EXO24035_dphiVV_13TeV     lnN        -      -      -           1.06 0.9434 0.9434
+CMS_EXO24035_bkg_norm_13TeV   lnN        -      -      -           1.15   1.15   1.15
+CMS_EXO24035_vtx_pair_eff_NtkSeeds_13TeV lnN        -      -      -           1.37 0.7299 0.7299
+CMS_EXO24035_vtx_pair_eff_MC_13TeV lnN        -      -      -            1.1 0.9091 0.9091
+CMS_EXO24035_num_vtx_pair_unc_2016preAPV lnN        -      -      -            1.1    1.1    1.1
+CMS_pileup_13TeV              lnN        -      -      -         1.0001 1.0001 1.0001
+
+
+CMS_EXO24035_sig_cont_13TeV   lnN        -      -      -         1.0/1.05 1.0/1.05 1.0/1.05
