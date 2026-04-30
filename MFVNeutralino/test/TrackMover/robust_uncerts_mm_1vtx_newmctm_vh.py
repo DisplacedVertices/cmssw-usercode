@@ -252,8 +252,8 @@ reweight = True
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['15'] 
-mass = '15'
+masses = ['55'] 
+mass = '55'
 ctaus       = [ '300', '1000', '3000', '10000', '30000'] #missing 100 ['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
@@ -321,8 +321,8 @@ for year in years:
                 dat_str = ''
                 
                 if not reweight:
-                    sim_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root" % (eta, year)
-                    dat_str = "~/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root" % (eta, year)
+                    sim_str = "/uscms/home/pkotamni/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/background_leptonpresel_%s.root" % (eta, year)
+                    dat_str = "/uscms/home/pkotamni/nobackup/crabdirs/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_noCorrection/SingleMuon%s.root" % (eta, year)
                 else:
                     sim_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/background_leptonpresel_%s.root" % (eta, int(ctau), int(mass), year)
                     dat_str = "/eos/uscms/store/user/pkotamni/TrackMover_LEPTONMU/TrackMover_%sEta_NoPreSelRelaxBSPNotwVetodR0p4JetByJetHistsOnnormdzulv30lepmumv8_20_tau%06ium_M%i_2DCorrection/SingleMuon%s.root" % (eta, int(ctau), int(mass), year)
@@ -557,8 +557,10 @@ for year in years:
                     DiffeffArray_emu.append(eff_psd_emu - effArray_emu[0])
                     DifferrArray_emu.append(assessCorrelatedDiffEffUncerts(eff_psd_emu, effArray_emu[0], none_signon_integral))
 
-        #print("Probe Data-to-MC Overall effciency difference \n")
-        #print("Total TM MC %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f) and Total TM Data %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f)\n" % (none_tmmc_integral, err_none_tmmc_integral, 100*none_tmmc_eff, 100*err_none_tmmc_eff, none_tmdat_integral, err_none_tmdat_integral, 100*none_tmdat_eff, 100*err_none_tmdat_eff))
+        print("Probe Data-to-MC Overall effciency difference \n")
+        print("Total TM MC %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f) and Total TM Data %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f)\n" % (none_tmmc_integral, err_none_tmmc_integral, 100*none_tmmc_eff, 100*err_none_tmmc_eff, none_tmdat_integral, err_none_tmdat_integral, 100*none_tmdat_eff, 100*err_none_tmdat_eff))
+        print(" Mass: %s GeV  Ctau: %s um  Year: %s   Eta: %s" % (mass, ctau, year, eta))
+        print(" Data/MC efficiency ratio is: %.2f +/- %.2f" % (none_tmdat_eff/none_tmmc_eff, none_tmdat_eff/none_tmmc_eff*math.sqrt( (err_none_tmdat_eff/none_tmdat_eff)**2 + (err_none_tmmc_eff/none_tmmc_eff)**2 )))
         for i in range(1,len(psd_methods)):
             if (i == 1 or i==3):
                dataMC_unc +=  (-100*DiffeffArray[i-1]/effArray[0])**2
