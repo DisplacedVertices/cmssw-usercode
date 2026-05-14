@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 """
 Discover all signal datacards under ForLimits/Datacards/, group them by
-(proc, ctau, mass), and submit one Condor job per hypothesis that:
-  1. combineCards.py -- merges per-year/per-channel cards into one Run-2 card
-  2. combine -M AsymptoticLimits -- 95% CL expected/observed limits
-  3. combine -M FitDiagnostics   -- best-fit signal strength + s+b shapes
+(proc, ctau, mass), and submit one Condor job per hypothesis that runs:
+  1. combine -M AsymptoticLimits -- 95% CL expected/observed limits
+  2. combine -M FitDiagnostics   -- best-fit signal strength + s+b shapes
+
+Cards are merged locally by combineCards.py before submission (requires the
+CMSSW_14_1_0_pre4 environment to be active when running this script).
+The combine binary and libHiggsAnalysisCombinedLimit.so are shipped via
+transfer_input_files so worker nodes do not need /uscms/home or /uscms_data.
 
 Prerequisites
   - makeLimitsInputROOT.py must have been run for all years + channels so that
     Datacards/{lep,bjet}/Datacard_*.txt files exist.
-  - CMSSW_14_1_0_pre4 + Combine must be installed.  Set CMSSW_14_BASE below.
-    To install from scratch (run outside apptainer, on LPC EL9 node):
+  - Run this script with CMSSW_14_1_0_pre4 + Combine sourced (cmsenv).
+    combineCards.py and the combine binary must be in PATH.
+    To install from scratch (on LPC EL9 node, outside apptainer):
         cmsrel CMSSW_14_1_0_pre4
         cd CMSSW_14_1_0_pre4/src && cmsenv
         git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
@@ -20,6 +25,7 @@ Usage
   python submitCombine.py                       # all signals
   python submitCombine.py --subset VH,mfv_neu  # selected processes
   python submitCombine.py --dry-run             # list jobs without submitting
+  python submitCombine.py --skip-existing       # skip already-completed jobs
 """
 import os
 import sys
@@ -28,56 +34,73 @@ import stat
 import argparse
 import subprocess
 
-# =============================================================================
-# --- SET THIS AFTER INSTALLING CMSSW_14_1_0_pre4 ----------------------------
-CMSSW_14_BASE = "/uscms/home/gdecastr/nobackup/work/CMSSW_14_1_0_pre4"
-# =============================================================================
-
 HERE         = os.path.dirname(os.path.abspath(__file__))
 DATACARD_DIR = os.path.join(HERE, "Datacards")
 COMBINE_OUT  = os.path.join(HERE, "CombineOutput")
 CONDOR_DIR   = os.path.join(HERE, "CombineCondor")
+
+# Tarball of user-built Combine files: binary, library, .pcm/.rootmap.
+# Expected at $CMSSW_BASE/../combine_env.tar.gz (one level above the CMSSW installation).
+# Override by setting the COMBINE_TARBALL environment variable.
+COMBINE_TARBALL  = os.environ.get(
+    "COMBINE_TARBALL",
+    os.path.join(os.path.dirname(os.environ.get("CMSSW_BASE", "")), "combine_env.tar.gz"),
+)
+# CMSSW_14_1_0 (final release) is in CVMFS and has the same ABI as pre4.
+# Worker nodes only bind /cvmfs, so we set up the environment from there.
+CVMFS_CMSSW14    = "/cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw/CMSSW_14_1_0/src"
 
 YEARS    = ("20161", "20162", "2017", "2018")
 CHANNELS = ("lep", "bjet")
 
 # ---------------------------------------------------------------------------
 # Per-job shell script
+# Cards are pre-merged locally; this script only runs combine.
+# CMSSW_14_1_0 from CVMFS sets up ROOT/RooFit; the shipped .so provides Combine.
 # ---------------------------------------------------------------------------
 _JOB_SH = """\
 #!/bin/bash
 set -e
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cd {cmssw_src}
+cd {cvmfs_cmssw14}
 eval $(scramv1 runtime -sh)
-mkdir -p {work_dir}
-cd {work_dir}
+cd /srv
+tar xf combine_env.tar.gz
+export PATH=/srv/combine_env/bin:$PATH
+export LD_LIBRARY_PATH=/srv/combine_env/lib:$LD_LIBRARY_PATH
 
-echo "=== combineCards: {sig_id} ==="
-combineCards.py {card_args} > combined_{sig_id}.txt
-
-echo "=== AsymptoticLimits ==="
+echo "=== AsymptoticLimits: {sig_id} ==="
 combine -M AsymptoticLimits \\
     --name {sig_id} \\
-    combined_{sig_id}.txt \\
+    workspace_{sig_id}.root \\
     -v 1
 
-echo "=== FitDiagnostics ==="
+# FitDiagnostics is best-effort; failure does not abort the job.
+set +e
+echo "=== FitDiagnostics: {sig_id} ==="
 combine -M FitDiagnostics \\
     --name {sig_id} \\
-    combined_{sig_id}.txt \\
+    workspace_{sig_id}.root \\
     --saveShapes --saveWithUncertainties \\
     -v 1
+FD_STATUS=$?
+set -e
+if [ $FD_STATUS -ne 0 ]; then
+    echo "WARNING: FitDiagnostics failed (status $FD_STATUS) -- AsymptoticLimits result is still valid"
+fi
 
 echo "=== Done: {sig_id} ==="
 """
 
 # ---------------------------------------------------------------------------
 # Condor JDL
+# transfer_input_files ships combine + the one user-built .so + the merged card.
+# initialdir directs returned output files straight into CombineOutput/sig_id/.
 # ---------------------------------------------------------------------------
 _JDL = """\
 universe                = vanilla
 executable              = {job_sh}
+initialdir              = {work_dir}
 output                  = {log_pfx}.out
 error                   = {log_pfx}.err
 log                     = {log_pfx}.log
@@ -86,7 +109,8 @@ request_memory          = 2000MB
 +DesiredOS              = "EL9"
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-transfer_output_files   = ""
+transfer_input_files    = {combine_tarball},{workspace}
+transfer_output_files   = higgsCombine{sig_id}.AsymptoticLimits.mH120.root
 queue 1
 """
 
@@ -128,23 +152,42 @@ def _write_job(sig_id, cards, dry_run):
     _makedirs(work_dir)
     _makedirs(condor_dir)
 
-    card_args  = " ".join("%s=%s" % (k, v) for k, v in sorted(cards.items()))
-    cmssw_src  = os.path.join(CMSSW_14_BASE, "src")
+    # Pre-merge cards locally (runs on submit node where NFS is available).
+    card_args     = " ".join("%s=%s" % (k, v) for k, v in sorted(cards.items()))
+    combined_card = os.path.join(condor_dir, "combined_%s.txt" % sig_id)
+    workspace     = os.path.join(condor_dir, "workspace_%s.root" % sig_id)
+    if not dry_run:
+        ret = subprocess.call("combineCards.py %s > %s" % (card_args, combined_card), shell=True)
+        if ret != 0:
+            print("WARNING: combineCards.py failed for %s -- skipping" % sig_id)
+            return False
+        # Convert to RooStats workspace locally (requires CMSSW_14_1_0_pre4 Python).
+        # Worker nodes run combine on the workspace in pure C++ -- no Python needed there.
+        ret = subprocess.call(
+            "text2workspace.py %s -m 125 -o %s" % (combined_card, workspace), shell=True)
+        if ret != 0:
+            print("WARNING: text2workspace.py failed for %s -- skipping" % sig_id)
+            return False
 
     job_sh = os.path.join(condor_dir, "run.sh")
     with open(job_sh, "w") as fh:
         fh.write(_JOB_SH.format(
-            cmssw_src = cmssw_src,
-            work_dir  = work_dir,
-            card_args = card_args,
-            sig_id    = sig_id,
+            cvmfs_cmssw14 = CVMFS_CMSSW14,
+            sig_id        = sig_id,
         ))
     os.chmod(job_sh, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     log_pfx = os.path.join(condor_dir, "job")
     jdl_fn  = os.path.join(condor_dir, "submit.jdl")
     with open(jdl_fn, "w") as fh:
-        fh.write(_JDL.format(job_sh=job_sh, log_pfx=log_pfx))
+        fh.write(_JDL.format(
+            job_sh          = job_sh,
+            work_dir        = work_dir,
+            log_pfx         = log_pfx,
+            combine_tarball = COMBINE_TARBALL,
+            workspace       = workspace,
+            sig_id          = sig_id,
+        ))
 
     if not dry_run:
         ret = subprocess.call("condor_submit " + jdl_fn, shell=True)
@@ -165,9 +208,16 @@ def main():
                     help="Skip hypotheses that already have AsymptoticLimits output")
     args = ap.parse_args()
 
-    if "CHANGEME" in CMSSW_14_BASE and not args.dry_run:
-        print("ERROR: set CMSSW_14_BASE in submitCombine.py before submitting.")
-        sys.exit(1)
+    if not args.dry_run:
+        for path in (COMBINE_TARBALL, CVMFS_CMSSW14):
+            if not os.path.exists(path):
+                print("ERROR: required path not found: %s" % path)
+                sys.exit(1)
+        import shutil
+        for tool in ("combineCards.py", "text2workspace.py"):
+            if not shutil.which(tool):
+                print("ERROR: %s not in PATH -- source CMSSW_14_1_0_pre4 cmsenv first" % tool)
+                sys.exit(1)
 
     subset = set(args.subset.split(",")) if args.subset else None
     hyps   = find_hypotheses()
@@ -188,8 +238,8 @@ def main():
             if os.path.exists(out_fn):
                 n_skip += 1
                 continue
-        _write_job(sig_id, hyps[sig_id], args.dry_run)
-        n += 1
+        if _write_job(sig_id, hyps[sig_id], args.dry_run) is not False:
+            n += 1
 
     if n_skip:
         print("Skipped %d already-completed hypotheses (--skip-existing)" % n_skip)

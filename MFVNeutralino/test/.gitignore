@@ -1,4 +1,7 @@
 *.root
+*.pkl
+*.png
+*.pdf
 out.*
 crab
 crab.cfg
