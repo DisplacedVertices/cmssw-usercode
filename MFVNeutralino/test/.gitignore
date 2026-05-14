@@ -9,3 +9,11 @@ plots
 events_to_debug
 temp
 *.haddlog
+ForLimits/Datacards/
+ForLimits/LimitsInput/
+ForLimits/CombineOutput/
+ForLimits/CombineCondor/
+ForLimits/LimitPlots/
+ForLimits/BinningStudy/datacards/
+ForLimits/BinningStudy/combine_output/
+ForLimits/BinningStudy/generate_variants.log

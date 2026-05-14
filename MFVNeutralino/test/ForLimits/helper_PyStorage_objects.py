@@ -155,8 +155,6 @@ class SigRInf_Grp(object):
 
     def __getattr__(self, name):
         """Delegate unknown attributes to the first list item."""
-        if name in {}:
-            return
         result = getattr(self.sig_ls[0], name)
         if isinstance(result, str):
             result = result.replace(self.sig_ls[0].proc, self.proc)

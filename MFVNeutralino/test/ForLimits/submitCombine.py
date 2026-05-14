@@ -87,6 +87,7 @@ FD_STATUS=$?
 set -e
 if [ $FD_STATUS -ne 0 ]; then
     echo "WARNING: FitDiagnostics failed (status $FD_STATUS) -- AsymptoticLimits result is still valid"
+    touch higgsCombine{sig_id}.FitDiagnostics.mH120.root fitDiagnostics{sig_id}.root
 fi
 
 echo "=== Done: {sig_id} ==="
@@ -110,7 +111,7 @@ request_memory          = 2000MB
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = {combine_tarball},{workspace}
-transfer_output_files   = higgsCombine{sig_id}.AsymptoticLimits.mH120.root
+transfer_output_files   = higgsCombine{sig_id}.AsymptoticLimits.mH120.root,higgsCombine{sig_id}.FitDiagnostics.mH120.root,fitDiagnostics{sig_id}.root
 queue 1
 """
 
@@ -193,6 +194,7 @@ def _write_job(sig_id, cards, dry_run):
         ret = subprocess.call("condor_submit " + jdl_fn, shell=True)
         if ret != 0:
             print("WARNING: condor_submit returned %d for %s" % (ret, sig_id))
+            return False
     else:
         print("  [dry-run] %s  (%d cards: %s)" % (sig_id, len(cards), ", ".join(sorted(cards))))
 
