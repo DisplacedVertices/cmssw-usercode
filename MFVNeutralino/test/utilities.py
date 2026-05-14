@@ -170,14 +170,18 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='ttbar'):
                 x += ['qcdpt1000mupt5']
         elif bkg_tag == 'diboson':
             x = ['ww', 'wz', 'zz',]
-        else:
+        elif bkg_tag == 'ttbar':
             x = ['ttbar',]  
+        else :
+            raise RuntimeError("bkg_tag", bkg_tag, "not implemented for _leptonpresel or trigeff. Exiting.")
     elif _btagpresel:
         x = []
         if bkg_tag == 'qcd':
            x += ['qcdht%04i' % x for x in [ 200, 300, 500, 700, 1000, 1500, 2000]]
+        elif bkg_tag == 'ttbar':
+            x = ['ttbar',]  
         else :
-           x += ['ttbar',]
+            raise RuntimeError("bkg_tag", bkg_tag, "not implemented for _btagpresel. Exiting.")
     elif _metpresel:
         x = ['ttbar', 'wjetstolnu']
         x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
@@ -191,7 +195,7 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='ttbar'):
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017): #HERE
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20162): #HERE
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:
@@ -242,9 +246,17 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
+
+        if _leptonpresel : 
+            bkg_tags = ['qcd','wjetstolnu', 'dyjets', 'diboson', 'ttbar']
+        elif _btagpresel :
+            bkg_tags = ['qcd', 'ttbar']
+        else :
+            raise RuntimeError("Only _leptonpresel and _btagpresel implemented. Exiting.")
         
-        for bkg_tag in ['qcd','wjetstolnu', 'dyjets', 'diboson', 'ttbar',]:  #FIXME 
+        for bkg_tag in bkg_tags : 
             files = _background_samples(year=year, bkg_tag=bkg_tag)
+            #print "files are", files
             files = ['%s%s.root' % (x, year_s) for x in files]
             files2 = []
             for fn in files:
@@ -256,6 +268,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
                         raise RuntimeError(msg)
                 else:
                     files2.append(fn)
+            #print "files2 are", files2
             if files2:
                 cmd = 'samples merge %f %s%s%s.root ' % (scale,bkg_tag,_presel_s, year_s) 
                 cmd += ' '.join(files2)
