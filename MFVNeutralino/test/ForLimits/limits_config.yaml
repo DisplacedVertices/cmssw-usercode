@@ -1,0 +1,73 @@
+# ============================================================
+# Limit framework configuration
+# Edit paths and runtime settings here. Physics configuration
+# (signal groupings, nuisance definitions) lives in script_configs.py.
+# ============================================================
+
+# Runtime: override with --year and --channel CLI flags
+year: "2018"    # one of: 20161, 20162, 2017, 2018
+channel: "lep"  # "lep" or "bjet"
+debug: true     # verbose output while running
+
+# ---- Binning -------------------------------------------------
+# Units: cm.  Three bins matching AN Figure 49: [0, 0.8, 1.6, 4.0] cm
+bins: [0., 0.8, 1.6, 4.0]
+nbins: 3
+
+# ---- Input signal MiniTree paths ----------------------------
+# Folder should contain files named like: {process}_tau{ct}_{year}.root
+signal:
+  lep:
+    folder: "/uscms/home/gdecastr/nobackup/crabdirs/MiniTree_tag001Lepm_VH/"
+    file_key: "condor_*tau*/minitree_0.root"
+  bjet:
+    folder: "/uscms/home/gdecastr/nobackup/crabdirs/MiniTree_tag001BvetoLHTm_bjet/"
+    file_key: "condor_*tau*/minitree_0.root"
+
+# ---- Input background paths ---------------------------------
+# Local copies of the MC Run 2 background templates (copied from alecduqu's One2Two).
+# Per-year files (2v_from_jets_{year}_5track_default_*.root) are also present in
+# BackgroundTemplates/{lep,bjet}/ for reference; only the run2-combined files are
+# currently used (no {year} placeholder in filename → .format(year) is a no-op).
+# TODO: replace with data-driven per-year estimates when available after unblinding.
+background:
+  lep:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/BackgroundTemplates/lep/"
+    filename: "2v_from_jets_run2_5track_default_ULV30Lepm.root"
+  bjet:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/BackgroundTemplates/bjet/"
+    filename: "2v_from_jets_run2_5track_default_ULV30BvetoLHTm.root"
+
+# ---- Output paths -------------------------------------------
+# root_output: the intermediate ROOT file holding histograms
+# datacard_output: the final .txt combine datacards
+root_output:
+  lep:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput/lep/"
+  bjet:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput/bjet/"
+  filename: "limitsinput"
+
+datacard_output:
+  lep:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards/lep/"
+  bjet:
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards/bjet/"
+  prefix: "Datacard_"
+  suffix: ".txt"
+
+# ---- Nuisance table paths (relative to ForLimits/ directory) ----
+nuisance_tables:
+  vtx_reco_TM:    "NuisTabStore_TrkMvr/pickle"
+  disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
+  tk_reco_eff:
+    base: "NuisTabStore_TrkRec/"
+    up_prefix: "up_pickle"
+    dn_prefix: "dn_pickle"
+
+# ---- Observed events (set to 0 for blind analysis) -----------
+observations:
+  "20161": [0, 0, 0]
+  "20162": [0, 0, 0]
+  "2017":  [0, 0, 0]
+  "2018":  [0, 0, 0]
