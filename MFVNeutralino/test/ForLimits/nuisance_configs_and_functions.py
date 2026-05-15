@@ -6,6 +6,20 @@ import sig_and_bkg_configs as sb_conf
 import script_configs as config
 
 
+"""
+This file is called by getNuisanceFromSig.py
+
+-INPUTS-
+nuis_name: string. It becomes the nuisance name, and indexes dictionaries.
+
+Required inputs for NuisanceInfo:
+nuis_name: string
+nuis_val: float or array-like, values (meaningless for shape uncertainties)
+make_updn: Boolean, is this a shape uncertainty?
+sep_yrs: Boolean, should this nuisance be combined across the different years or not?
+corr: Boolean, are the N bins correlated?
+"""
+
 # Module-level globals -- updated per year via _init_for_year()
 year     = config.datacard["year"]
 year_id  = config.datacard["year_key"].index(year)

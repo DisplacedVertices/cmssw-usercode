@@ -11,12 +11,27 @@ import helper_ROOT_functions as ROOThelper
 import script_configs as config
 import sig_and_bkg_configs as sb_conf
 
+"""
+DEFINITION: SignalROOTInfo
+-Store filename, extract information from filename
+
+DEFINITION: NuisanceInfo
+-Store information to write a nuisance parameter
+
+DEFINITION: NuisanceTable
+"""
+
 nbins   = config.datacard["nbins"]
 prt_dt  = sb_conf.printout_flags["PyStorage"]
 
 
 class SignalROOTInfo(object):
-    """Extract process name, lifetime, mass, year from a MiniTree filename."""
+    """
+    Based on a ROOT MiniTree filename, extract information like process name, lifetime.
+    -INPUTS-
+    full_fn: full filename
+    root_exists: Boolean. If True, it'll make an accompanying ROOT.TFile() and MCSample()
+    """
 
     def __init__(self, full_fn, root_exists=False, nbins=3):
         self.full_fn = full_fn
@@ -47,6 +62,9 @@ class SignalROOTInfo(object):
                 raise ValueError("No Samples.py entry")
 
     def get_processtag(self):
+        """
+        Get the process tag, e.g. mfv_stopdbardbar
+        """
         name_start = self.fn.split("tau")[0]
         success = True
         if name_start == self.fn:
@@ -82,6 +100,7 @@ class SignalROOTInfo(object):
         return self.fn.replace(".root", "").replace(".ROOT", "")
 
     def return_lifetime_in_unit(self, unit=None):
+        """Returns original string if unit=None, else converts into whatever unit is inputted"""
         if unit is None:
             return self.lifetime
         return ROOThelper.convert_units(to_unit=unit, from_expr=self.lifetime)
@@ -90,6 +109,7 @@ class SignalROOTInfo(object):
         return int(self.mass)
 
     def return_name2details(self, lifetime_unit="mm"):
+        """This function is constructed to resemble name2details of the old code"""
         return [self.proc, self.return_lifetime_in_unit(unit=lifetime_unit), self.mass, self.year]
 
     def print_diagnostics(self, lifetime_unit="mm"):
@@ -114,7 +134,15 @@ class SignalROOTInfo(object):
 
 
 class SigRInf_Grp(object):
-    """Group of SignalROOTInfo objects that behave as one (e.g., VH = ZH + WH+ + WH-)."""
+    """
+    Make a cluster of SignalROOTInfo objects, that behave like the first object of the group but with
+
+    This code defaults most things to the first item of the list. So it will fail if full_fn_ls entries don't have matching lifetime/mass/year etc.
+
+    -INPUTS-
+    full_fn: ls-like, full filenames
+    root_exists: Boolean. Should it search for the ROOT and MCSample()?
+    """
 
     def __init__(self, full_fn_ls, root_exists=False, nbins=3, overwrite_proc=None):
         assert len(full_fn_ls) > 0
@@ -131,6 +159,7 @@ class SigRInf_Grp(object):
             setattr(self, item, old_val.replace(self.sig_ls[0].proc, self.proc))
 
     def return_nuis_key(self):
+        """Defining explicitly because it's not forwarded by getattribute"""
         return self.sig_ls[0].return_nuis_key().replace(self.sig_ls[0].proc, self.proc)
 
     def return_name2details(self, lifetime_unit="mm"):

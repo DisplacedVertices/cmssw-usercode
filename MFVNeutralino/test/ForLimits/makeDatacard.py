@@ -5,6 +5,18 @@ import script_configs as config
 import nuisance_configs as ns_conf
 import helper_PyStorage_objects as sth
 
+"""
+Naming conventions (Note: apparently if I put template as an input, the function refuses to change template, idk why)
+    return_XX : it will give something back, append to template
+    add_XX: overwrite template with the return value
+    replace_XX: like add
+    write_XX: overwrite template (apparently this can't be done)
+
+The only stuff that are hard-coded are:
+-Sig and bkg are called 0 and 1
+-Sig and bkg are written in this order
+"""
+
 # Hard codes
 n_proc = 2
 

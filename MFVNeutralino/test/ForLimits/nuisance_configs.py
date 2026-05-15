@@ -1,6 +1,10 @@
 """
-Nuisance naming and pickle-path configuration.
-Paths are resolved via script_configs -> limits_config.yaml (see nuisance_tables section).
+A place to store the messy dictionaries required to make nuisance_configs_and_functions.py work.
+
+nuis_names: nuisance naming
+
+pickle_prefixes: where to find nuisance table storage
+year_remaps: some filenames are provided with a different convention to our 20161-2018 conventions
 """
 import script_configs as config
 
