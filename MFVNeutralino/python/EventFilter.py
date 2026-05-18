@@ -55,7 +55,7 @@ def setup_event_filter(process,
     elif mode == 'muons only':
         trigger_filter = 'muons only'
         event_filter = 'muons only'
-    elif mode == 'electrons only':
+    elif mode == 'electrons only veto muons':
         trigger_filter = 'electrons only'
         event_filter = 'electrons only veto muons'
     elif mode == 'displeptons only':

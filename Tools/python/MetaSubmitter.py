@@ -209,7 +209,7 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=10, limit_ttbar=False):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=3, limit_ttbar=False):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
             'SingleMuon': 3,
