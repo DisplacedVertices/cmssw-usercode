@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Plot 95% CL upper limits on sigma x B^2 [fb].
+Plot 95% CL upper limits on sigma x B^2 [fb] (SUSY) or BR(H->SS) (Higgs).
 
 Reads CombineOutput/<sig_id>/higgsCombine<sig_id>.AsymptoticLimits.mH120.root
 for all available hypotheses and produces per-process plots.
@@ -66,6 +66,15 @@ _HEPDATA_THEORY_CSV = {
     "mfv_stopbbarbbar": os.path.join(_ONE2TWO, "stopstop.csv"),
 }
 
+# Additional theory curves drawn on top of the primary one (keyed by process).
+# For mfv_neu: EWK Higgsino N2N1 (Ñ₂χ̃₁⁰, aNNLO-NNLL, fully degenerate, 13 TeV).
+# Only N2N1 is relevant: both final-state particles are neutral, matching the
+# neutral LLP produced in the gluino signal MC. C1C1/N2C1 involve charginos
+# which are themselves long-lived in the degenerate limit (different topology).
+_EXTRA_THEORY_CSV = {
+    "mfv_neu": os.path.join(_ONE2TWO, "higgsino_N2N1.csv"),
+}
+
 
 PROC_LABELS = {
     "VH":                  r"WH + ZH (incl. gg),  H$\to$SS$\to$dddd",
@@ -85,38 +94,32 @@ _SUSY_PROCS = {"mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"}
 # For SUSY: pivot near the expected exclusion boundary (~1-100 fb for M~1-2 TeV).
 # Falls back to automatic geometric-mean computation for unspecified processes.
 _2D_VSCALE = {
-    "mfv_neu":          (0.1,  10.0, 1e5),
-    "mfv_stopdbardbar": (0.1,  10.0, 1e5),
-    "mfv_stopbbarbbar": (0.1,  10.0, 1e5),
+    "mfv_neu":          (0.1,   10.0,  1e5),
+    "mfv_stopdbardbar": (0.1,   10.0,  1e5),
+    "mfv_stopbbarbbar": (0.1,   10.0,  1e5),
+    # Higgs: pivot at SM benchmark BR=1%; range covers 0.1%-100% (well beyond any limit)
+    "VH":               (1e-3,  0.01,  1.0),
+    "ggZHToSSTobbbb":   (1e-3,  0.01,  1.0),
+    "ggHToSSTodddd":    (1e-3,  0.01,  1.0),
+    "ttHToLLPs_bbbb":   (1e-3,  0.01,  1.0),
+    "ttHToLLPs_dddd":   (1e-3,  0.01,  1.0),
 }
 
-# H→SS reference cross sections: σ_SM_H [pb] × BR(H→SS=1%) × filter_eff × 1000 → fb
-# From Samples.py _set_signal_stuff (13 TeV, mH=125 GeV, CERN YR4).
-# VH combines WplusH + WminusH + qqZH + ggZH (all filter_eff=1 in Samples.py).
+# BR(H→SS) benchmark used as datacard normalization and as reference line on plots.
 _BR_HSS = 0.01
-_HIGGS_SIGMA_REF_FB = {
-    "VH":               (3*9.426e-02 + 3*5.983e-02 + 3*2.568e-02 + 3*4.14e-03) * _BR_HSS * 1000,
-    "ggZHToSSTobbbb":   3 * 4.14e-03 * _BR_HSS * 1000,
-    "ttHToLLPs_bbbb":   0.5071 * _BR_HSS * 1000,
-    "ttHToLLPs_dddd":   0.5071 * _BR_HSS * 1000,
-}
-# ggH has a mass-dependent generator-level filter efficiency (constant across ctau).
-_GGHSS_FILTER_EFF    = {"15": 0.106, "40": 0.085, "55": 0.082}
-_GGHSS_BASE_SIGMA_FB = 48.58 * _BR_HSS * 1000   # 485.8 fb before filter_eff
 
 
 def _sig_scale_fb(proc, mass=None):
-    """σ_ref [fb] used in the Combine datacard for this (proc, mass) hypothesis.
+    """Scale factor to convert Combine r to physical units.
 
-    For SUSY σ_ref = 1 fb, so r already equals σ×B² [fb].
-    For H→SS σ_ref = σ_SM_H × BR(H→SS=1%) × filter_eff, so multiply r by this
-    to obtain σ×B² [fb].
+    SUSY: σ_ref = 1 fb → r = σ×B² [fb] → return 1.0.
+    H→SS: σ_ref = σ_SM_H × BR(H→SS=1%) [× filter_eff, which cancels].
+          r = σ(H)×BR(H→SS) / (σ_SM × 0.01), so BR(H→SS) = r × 0.01.
+          σ_SM cancels regardless of production mode → return _BR_HSS for all Higgs.
     """
     if proc in _SUSY_PROCS:
         return 1.0
-    if proc == "ggHToSSTodddd":
-        return _GGHSS_BASE_SIGMA_FB  # filter_eff cancels: σ×BR = r × σ_SM × 0.01
-    return _HIGGS_SIGMA_REF_FB.get(proc, 1.0)
+    return _BR_HSS
 
 
 _COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
@@ -124,16 +127,7 @@ _COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
 _RUN2_LUMI = r"137.9 fb$^{-1}$ (13 TeV)"
 
 # Per-process normalization footnote shown in the plot annotation box.
-# H->SS processes: BR(H->SS)=1% is folded into xsec.
-# ggH additionally has a mass-dependent gen-level filter efficiency in xsec.
-_NORM_NOTE = r"$\sigma \times \mathcal{B}(H{\to}SS)=1\%$"
-_PROC_NORM_NOTES = {
-    "VH":             _NORM_NOTE,
-    "ggZHToSSTobbbb": _NORM_NOTE,
-    "ggHToSSTodddd":  _NORM_NOTE,
-    "ttHToLLPs_bbbb": _NORM_NOTE,
-    "ttHToLLPs_dddd": _NORM_NOTE,
-}
+_PROC_NORM_NOTES = {}
 
 
 # ---------------------------------------------------------------------------
@@ -330,48 +324,37 @@ def _hepdata_slice_at_ctau(hd, ctau_mm):
 
 
 def _draw_ref_curve_vsmass(ax, proc):
-    """Draw σ_ref curve vs mass (theory for SUSY, SM benchmark for H→SS). Returns True if drawn."""
+    """Draw theory/benchmark reference curves vs mass. Returns True if anything drawn."""
     if proc in _SUSY_PROCS:
         csv_path = _HEPDATA_THEORY_CSV.get(proc)
         if not csv_path or not os.path.exists(csv_path):
             return False
         masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
+        label = r"$\tilde{g}\tilde{g}$ NLO+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
         ax.plot(masses_csv, xsec_fb_csv, color="black", lw=1.5, ls="--",
-                label=r"Theory $\sigma\mathcal{B}^{2}$", zorder=3)
+                label=label, zorder=3)
+        extra_path = _EXTRA_THEORY_CSV.get(proc)
+        if extra_path and os.path.exists(extra_path):
+            em, exs = _load_theory_xsec_csv(extra_path)
+            ax.plot(em, exs, color="dimgray", lw=1.5, ls=":",
+                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO-NNLL", zorder=3)
         return True
-    if proc == "ggHToSSTodddd":
-        ax.axhline(_GGHSS_BASE_SIGMA_FB, color="black", lw=1.5, ls="--",
-                   label=r"SM $\sigma\mathcal{B}(H{\to}SS{=}1\%)$", zorder=3)
-        return True
-    scale = _HIGGS_SIGMA_REF_FB.get(proc)
-    if scale is not None:
-        ax.axhline(scale, color="black", lw=1.5, ls="--",
-                   label=r"SM $\sigma\mathcal{B}(H{\to}SS{=}1\%)$", zorder=3)
+    # Higgs: reference line at BR benchmark
+    if proc not in _SUSY_PROCS:
+        ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
+                   label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
         return True
     return False
 
 
 def _draw_ref_lines_ctau(ax, proc, masses_sorted, color_list):
-    """Draw σ_ref horizontal lines per mass (theory XS for SUSY, SM benchmark for H→SS)."""
+    """Draw theory/benchmark reference lines on ctau plots. Returns True if anything drawn."""
     if proc in _SUSY_PROCS:
-        csv_path = _HEPDATA_THEORY_CSV.get(proc)
-        if not csv_path or not os.path.exists(csv_path):
-            return False
-        masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
-        for i, mass in enumerate(masses_sorted):
-            xs = _interp_theory_xsec_fb(int(mass), masses_csv, xsec_fb_csv)
-            ax.axhline(xs, color=color_list[i % len(color_list)], lw=1.0, ls=":", alpha=0.6, zorder=2)
-        return True
-    if proc == "ggHToSSTodddd":
-        ax.axhline(_GGHSS_BASE_SIGMA_FB, color="black", lw=1.5, ls="--",
-                   label=r"SM $\sigma\mathcal{B}(H{\to}SS{=}1\%)$", zorder=3)
-        return True
-    scale = _HIGGS_SIGMA_REF_FB.get(proc)
-    if scale is not None:
-        ax.axhline(scale, color="black", lw=1.5, ls="--",
-                   label=r"SM $\sigma\mathcal{B}(H{\to}SS{=}1\%)$", zorder=3)
-        return True
-    return False
+        return False  # theory curve shown on vsmass plots; per-mass lines clutter ctau plots
+    # Higgs: single benchmark line at BR = 1%
+    ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
+               label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+    return True
 
 
 def _annotate_proc(ax, proc):
@@ -383,10 +366,15 @@ def _annotate_proc(ax, proc):
 
 
 def _ylabel(proc):
-    """Y-axis label: σ×B² [fb] for SUSY (both sparticles decay); σ×BR(H→SS) [fb] for H→SS."""
     if proc in _SUSY_PROCS:
         return r"95% CL upper limit on $\sigma\mathcal{B}^{2}$ [fb]"
-    return r"95% CL upper limit on $\sigma\mathcal{B}(H{\to}SS)$ [fb]"
+    return r"95% CL upper limit on $\mathcal{B}(H{\to}SS)$"
+
+
+def _mass_xlabel(proc):
+    if proc == "mfv_neu":
+        return r"Neutralino mass [GeV]"
+    return "Mass [GeV]"
 
 
 def _cms_label(ax):
@@ -434,7 +422,7 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
                     label="m = %s GeV (obs)" % mass)
 
     if not _draw_ref_lines_ctau(ax, proc, masses, _COLORS):
-        ax.axhline(1.0, color="black", lw=1.2, ls=":", zorder=3)
+        pass
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel(r"$c\tau$ [mm]")
@@ -482,9 +470,9 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
                     label=r"$c\tau$ = %s (obs)" % lbl)
 
     if not _draw_ref_curve_vsmass(ax, proc):
-        ax.axhline(1.0, color="black", lw=1.2, ls=":", zorder=3)
+        pass
     ax.set_yscale("log")
-    ax.set_xlabel("Mass [GeV]")
+    ax.set_xlabel(_mass_xlabel(proc))
     ax.set_ylabel(_ylabel(proc))
     ax.legend(fontsize=9, ncol=2)
     ax.grid(True, which="both", ls=":", alpha=0.4)
@@ -551,9 +539,9 @@ def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
         if hd:
             _draw_hepdata_pair(ax, hd, c1, c2)
         if not _draw_ref_curve_vsmass(ax, proc):
-            ax.axhline(1.0, color="black", lw=1.2, ls=":", zorder=3)
+            pass
         ax.set_yscale("log")
-        ax.set_xlabel("Mass [GeV]")
+        ax.set_xlabel(_mass_xlabel(proc))
         ax.set_ylabel(_ylabel(proc))
         ax.legend(fontsize=9)
         ax.grid(True, which="both", ls=":", alpha=0.4)
@@ -585,9 +573,9 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
     if hd:
         _draw_hepdata_pair(ax, hd, c1, c2)
     if not _draw_ref_curve_vsmass(ax, proc):
-        ax.axhline(1.0, color="black", lw=1.2, ls=":", zorder=3)
+        pass
     ax.set_yscale("log")
-    ax.set_xlabel("Mass [GeV]")
+    ax.set_xlabel(_mass_xlabel(proc))
     ax.set_ylabel(_ylabel(proc))
     ax.legend(fontsize=9)
     ax.grid(True, which="both", ls=":", alpha=0.4)
@@ -601,16 +589,17 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
 # 2D: ctau vs mass color map + r=1 contour  (no HepData overlay)
 # ---------------------------------------------------------------------------
 
-def _excl_thresholds_2d(proc, masses, mass_vals):
+def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
     """Return σ×B² [fb] exclusion threshold per mass column for the 2D contour.
 
     For SUSY: threshold = σ_theory_NLO(mass) from CSV. The r=1 Combine contour
     marks σ×B²=1 fb (arbitrary σ_ref), NOT the theory exclusion boundary.
     For H→SS: threshold = σ_ref_fb(proc, mass) = σ_SM × BR(1%) × filter_eff,
     so r=1 Combine contour IS the SM exclusion boundary — no correction needed.
+    theory_csv overrides the default CSV for SUSY (used for EWK variant plots).
     """
     if proc in _SUSY_PROCS:
-        csv_path = _HEPDATA_THEORY_CSV.get(proc)
+        csv_path = theory_csv if theory_csv is not None else _HEPDATA_THEORY_CSV.get(proc)
         if csv_path and os.path.exists(csv_path):
             masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
             return np.array([_interp_theory_xsec_fb(m, masses_csv, xsec_fb_csv)
@@ -631,19 +620,19 @@ def _interp_grid(log_ctaus, mass_vals, grid, fine_lct, fine_mass):
     return 10.0 ** sp(fine_lct, fine_mass)
 
 
-def plot_2d(proc, mass_data, out_dir, hepdata):
+def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix=""):
     masses    = _sorted_masses(mass_data)
 
-    # Build a clean rectangular grid:
-    # - Drop masses with very few ctau points (e.g. M3000 with only 2 after wall-time failures).
-    # - Allow masses missing at most 1 ctau relative to the best-covered mass, so that
-    #   partially-complete high-mass points (M1200, M1600) are kept and the exclusion
-    #   contour remains visible.  The intersection then eliminates any residual holes.
+    # Build a rectangular grid (NaN for missing cells, capped in _interp_grid).
+    # SUSY: drop masses with >1 missing ctau (e.g. M3000 hit wall time, only 2 jobs done).
+    # Higgs: only 3 mass points total so keep any mass with >=2 valid ctau.
+    # Use the union of all ctau values so no mass is excluded for lacking a corner point;
+    # missing (ctau, mass) cells are left as NaN and capped to "not excluded" during interpolation.
     ctau_counts = {m: len(mass_data[m]) for m in masses}
     max_n       = max(ctau_counts.values())
-    min_n       = max(3, max_n - 1)
+    min_n       = max(3, max_n - 1) if proc in _SUSY_PROCS else 2
     masses      = [m for m in masses if ctau_counts[m] >= min_n]
-    ctaus_all   = sorted(set.intersection(*[set(mass_data[m].keys()) for m in masses]))
+    ctaus_all   = sorted(set.union(*[set(mass_data[m].keys()) for m in masses]))
 
     if len(masses) < 2 or len(ctaus_all) < 2:
         print("  Skipping 2D for %s: need at least 2x2 grid" % proc)
@@ -686,7 +675,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata):
 
     # Exclusion threshold per mass: σ×B² [fb] value at which r=1 boundary is physical.
     # For SUSY this is σ_theory_NLO(mass); for H→SS it equals σ_ref_fb (= scales).
-    thresholds  = _excl_thresholds_2d(proc, masses, mass_vals)
+    thresholds  = _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=theory_csv)
     thresh_fine = np.interp(fine_mass, mass_vals, thresholds)
 
     # Ratio grids: σ×B²_limit / threshold. Contour at 1.0 = genuine exclusion boundary.
@@ -695,35 +684,42 @@ def plot_2d(proc, mass_data, out_dir, hepdata):
     fine_ratio_exp = _interp_grid(log_ctaus, mass_vals, ratio_exp, fine_lct, fine_mass)
     fine_ratio_obs = _interp_grid(log_ctaus, mass_vals, ratio_obs, fine_lct, fine_mass)
 
-    # Colormap scale: use hardcoded (vmin, vref, vmax) if available, else auto from thresholds.
-    if proc in _2D_VSCALE:
-        vmin, vref, vmax = _2D_VSCALE[proc]
+    # Colormap: SUSY uses ratio = σ×B²_limit / σ_theory (pivot=1 = exclusion boundary).
+    # Higgs uses absolute BR limit (pivot at benchmark BR=1%).
+    if proc in _SUSY_PROCS:
+        cmap_data_exp = fine_ratio_exp
+        cmap_data_obs = fine_ratio_obs
+        vmin, vref, vmax = 0.01, 1.0, 100.0
+        cbar_label = r"$\sigma\mathcal{B}^{2}\ /\ \sigma_\mathrm{theory}$"
     else:
-        vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
-        vmin = vref * 0.05
-        vmax = vref * 200.0
+        cmap_data_exp = fine_exp_s
+        cmap_data_obs = fine_obs_s
+        vmin, vref, vmax = _2D_VSCALE.get(proc, (None, None, None))
+        if vref is None:
+            vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
+            vmin, vmax = vref * 0.05, vref * 200.0
+        cbar_label = _ylabel(proc)
 
     fig, ax = plt.subplots(figsize=(9, 6))
 
-    # Diverging log-scale colormap centred at the exclusion threshold.
     n_half = 30
     levels = np.concatenate([
         np.logspace(np.log10(vmin), np.log10(vref), n_half + 1)[:-1],
         np.logspace(np.log10(vref), np.log10(vmax), n_half + 1),
     ])
     norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
-    cmap = plt.get_cmap("RdBu_r")   # blue=excluded, red=not excluded
+    cmap = plt.get_cmap("RdBu_r")   # blue=excluded (ratio<1), red=not excluded
 
     _all_nice = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
                  1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
                  10000, 20000, 50000, 100000]
     _nice_ticks = [t for t in _all_nice if vmin <= t <= vmax]
 
-    if fine_exp_s is not None:
-        cf = ax.contourf(fine_ctau, fine_mass, fine_exp_s.T,
+    if cmap_data_exp is not None:
+        cf = ax.contourf(fine_ctau, fine_mass, cmap_data_exp.T,
                          levels=levels, norm=norm, cmap=cmap, extend="both")
         cbar = plt.colorbar(cf, ax=ax, pad=0.02)
-        cbar.set_label(_ylabel(proc))
+        cbar.set_label(cbar_label)
         cbar.set_ticks(_nice_ticks)
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
         cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
@@ -738,19 +734,20 @@ def plot_2d(proc, mass_data, out_dir, hepdata):
                        colors=["black"], linewidths=[2.5], linestyles=["solid"])
             ax.plot([], [], color="black", lw=2.5, ls="-", label="Obs. excl.")
     else:
+        grid_cmap = ratio_exp if proc in _SUSY_PROCS else grid_exp_s
         xs, ys, cs = [], [], []
         for j, mass in enumerate(masses):
             for i, ctau in enumerate(ctau_vals):
-                if not np.isnan(grid_exp_s[i, j]):
+                if not np.isnan(grid_cmap[i, j]):
                     xs.append(ctau)
                     ys.append(mass_vals[j])
-                    cs.append(np.clip(grid_exp_s[i, j], vmin, vmax))
+                    cs.append(np.clip(grid_cmap[i, j], vmin, vmax))
         if xs:
             sc = ax.scatter(xs, ys, c=cs, s=300, zorder=5,
                             norm=norm, cmap=cmap,
                             edgecolors="black", linewidths=0.5)
             cbar = plt.colorbar(sc, ax=ax, pad=0.02)
-            cbar.set_label(_ylabel(proc))
+            cbar.set_label(cbar_label)
             cbar.set_ticks(_nice_ticks)
             cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
             cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
@@ -769,7 +766,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata):
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax)
     _annotate_proc(ax, proc)
-    _save(fig, os.path.join(out_dir, "%s_2D.pdf" % proc))
+    _save(fig, os.path.join(out_dir, "%s_2D%s.pdf" % (proc, fname_suffix)))
 
 
 
@@ -826,6 +823,10 @@ def main():
         if proc in ("ggHToSSTodddd", "VH"):
             plot_1d_vs_mass_ctau_pair(proc, data[proc], args.out_dir, 1.0, 10.0)
         plot_2d(proc, data[proc], args.out_dir, hepdata)
+        if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
+            plot_2d(proc, data[proc], args.out_dir, hepdata,
+                    theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
+                    fname_suffix="_ewk")
 
     print("\nDone. Plots saved to %s" % args.out_dir)
 
