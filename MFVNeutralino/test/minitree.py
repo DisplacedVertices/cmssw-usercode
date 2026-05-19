@@ -48,7 +48,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     elif use_Lepton_triggers :
         if is_mc :
-            samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
+            samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True)
             pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
         else :
             samples = pick_samples(dataset, Muon_data=True, Electron_data=True)
