@@ -38,7 +38,7 @@ def doit(*x):
 # brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2.json -o run2_byls.csv
 # brilcalc lumi --byls --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger.json -o run2_displacement_trigger_byls.csv
 
-for pc in 10, 1:
+for pc in 20, :
     doit('ana_run2.json', 'run2_byls.csv.gz', (ac.int_lumi_run2)/1000.0, pc/100., 'ana_run2_%spc.json' % pc)
     doit('ana_run2_displacement_trigger.json', 'run2_displacement_trigger_byls.csv.gz', (ac.int_lumi_bjet_trig_run2)/1000.0, pc/100., 'ana_run2_displacement_trigger_%spc.json' % pc)
 
