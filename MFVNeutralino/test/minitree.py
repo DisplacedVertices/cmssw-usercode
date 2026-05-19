@@ -29,6 +29,11 @@ process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
 if not is_mc :
     del process.pMiniTreeNtk4
     del process.pMiniTreeNtk3or4
+    del process.pMiniTreeNtk3or5
+    del process.pMiniTreeNtk4or5
+    del process.pMiniTreeNtk3or4exact
+    del process.pMiniTreeNtk3or5exact
+    del process.pMiniTreeNtk4or5exact
     del process.pMiniTree
 
 

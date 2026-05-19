@@ -35,14 +35,14 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
-#process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
-
-process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts ) # just trigger for now
-
-process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+# If we want these, we should at minimum make use of the Ntk criteria (to avoid accidentally looking at presel plots w/ 5-tracks per vertex before unblinding).
+# I think (but have not dug to confirm) that "presel" includes the AnalysisCuts w/o any vertex cuts while "no cuts" is purely the event filter + possibly trigger
+#process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
+#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts ) # just trigger for now
+#
+#process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False) # (used by "process.EX1pPreSel" below)
+#process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
 nm1s = [
     ('Ntracks', 'min_ntracks = 0'),
@@ -69,6 +69,7 @@ for ntk in ntks:
         EX1 = 'Ntk4or5'
     else:
         EX1 = 'Ntk%i' % ntk
+        EX3 = ''
 
     if EX1:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
@@ -82,16 +83,13 @@ for ntk in ntks:
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
 process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2EX3)
-process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2EX3min_svdist2d = 0.04)
 
 process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
-process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
 
 process.EX1mfvVertexHistosPreSel     = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
-process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
 process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel * process.EX1mfvVertexHistosPreSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
@@ -100,7 +98,6 @@ process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx 
     if 2 in nvs:
         exec '''
 process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    * process.EX1mfvEventHistosFullSel    * process.EX1mfvVertexHistosFullSel)
-process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
     for name, cut in nm1s:
@@ -178,7 +175,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('Histos_' + version,
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

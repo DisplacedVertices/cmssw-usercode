@@ -286,7 +286,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             match = re.match(r"([A-Za-z]+)(201\d{1}[A-Za-z]*)", name)
             if match:
                 name = match.group(1)
-            sample.files_per = d.get(sample.name, 10000)
+            sample.files_per = d.get(sample.name, 10)
 
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
