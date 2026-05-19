@@ -1,6 +1,7 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
+study_20pc = True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_btag_triggers, use_btag_vetoLepHT_triggers 
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
@@ -150,12 +151,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sys.exit('In histos.py, use_Muon_triggers and use_Electron_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). Instead, do use_Lepton_triggers.')
 
     if  use_btag_vetoLepHT_triggers:
-        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        if is_mc :
+            samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)
+            pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        else :
+            samples = pick_samples(dataset, BTagCSV_data=True, DisplacedJet_data=True)
+            pset_modifier = None
 
     elif use_Lepton_triggers :
-        samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        if is_mc :
+            samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
+            pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        else :
+            samples = pick_samples(dataset, Muon_data=True, Electron_data=True)
+            pset_modifier = None
 
     else :
         print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
@@ -163,6 +172,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
     json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
+    if study_20pc : 
+        json_filename = json_filename.replace(".json", "_20pc.json")
+    print "json file is:", json_filename
+
     set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))
 
     cs = CondorSubmitter('Histos_' + version,
