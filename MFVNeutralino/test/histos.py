@@ -13,7 +13,7 @@ tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
 # Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
-'''
+#'''
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True),
     SkipEvent = cms.untracked.vstring("ProductNotFound"),
@@ -21,7 +21,7 @@ process.options = cms.untracked.PSet(
 
 # Explicitly skip the bad event (run:lumi:event)
 process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
-'''
+#'''
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -30,8 +30,8 @@ process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 #process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
-import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
-SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
+#import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+#SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
@@ -40,15 +40,17 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 #process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 #process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts ) # just trigger for now
 #
-#process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.Ntk3mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False) # (used by "process.EX1pPreSel" below)
-#process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.Ntk3mfvEventHistosPreSel)
 
-nm1s = [
-    ('Ntracks', 'min_ntracks = 0'),
-    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
-    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
-    ]
+#nm1s = [
+#    ('Ntracks', 'min_ntracks = 0'),
+#    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
+#    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
+#    ]
+
+nm1s = []
 
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]

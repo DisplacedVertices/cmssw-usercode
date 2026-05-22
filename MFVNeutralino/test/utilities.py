@@ -68,7 +68,15 @@ def cmd_report_data():
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
-    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron', 'MET', 'BTagCSV', 'DisplacedJet', 'EGamma':
+
+    dslist = []
+    
+    if _leptonpresel :
+        dslist = ['SingleMuon', 'SingleElectron', 'EGamma']
+    elif _btagpresel :
+        dslist = ['BTagCSV', 'JetHT', 'DisplacedJet']
+
+    for ds in dslist :
         print ds
         files = set(glob(ds + '*.root'))
         if not files:
@@ -78,24 +86,37 @@ def cmd_hadd_data():
         have = []
         if ds == 'DisplacedJet':
             year_eras = [
-            #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
-            #('20162', 'FGH'),  
+            ('20161', 'BCDEF'),
+            ('20162', 'FGH'),  
             ('2017', 'CDE'), 
-            #('2018', 'ABCD'),
+            ('2018', 'ABCD'),
             ]
-        elif ds == 'SingleMuon': 
+        elif ds == 'BTagCSV':
             year_eras = [
-            #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
-            #('20162', 'FGH'),  
-            ('2017', 'BCDEF'), #B 
-            #('2018', 'ABCD'),
+            ('20161', 'BCDEF'),
+            ('20162', 'FGH'),  
+            ('2017', 'CDE'), 
+            ]
+        elif ds == 'JetHT':
+            year_eras = [
+            ('2018', 'ABCD'),
+            ]
+        elif ds == 'SingleElectron': 
+            year_eras = [
+            ('20161', 'BCDEF'),
+            ('20162', 'FGH'),  
+            ('2017', 'BCDEF'),
+            ]
+        elif ds == 'EGamma': 
+            year_eras = [
+            ('2018', 'ABCD'),
             ]
         else:
             year_eras = [
-            #('20161', 'BCDEF'), #FIXME B2->B #HERE SingleMuon BCDEF 
-            #('20162', 'FGH'),  
+            ('20161', 'BCDEF'),
+            ('20162', 'FGH'),  
             ('2017', 'BCDEF'), 
-            #('2018', 'ABCD'),
+            ('2018', 'ABCD'),
             ]
 
         for year, eras in year_eras:
@@ -107,8 +128,13 @@ def cmd_hadd_data():
                 hadd_or_merge('%s%s.root' % (ds, year), files)
                 have.append(year)
 
-        if '2017' in have and '2018' in have:
-            hadd_or_merge(ds + '2017p8.root', ['%s%s.root' % (ds, year) for year in '2017', '2018'])
+        #if '2017' in have and '2018' in have:
+        #    hadd_or_merge(ds + '2017p8.root', ['%s%s.root' % (ds, year) for year in '2017', '2018'])
+    if _leptonpresel :
+        hadd_or_merge('Lepton_data_2016.root', ['SingleMuon20161.root', 'SingleMuon20162.root', 'SingleElectron20161.root', 'SingleElectron20162.root'])
+        hadd_or_merge('Lepton_data_2017.root', ['SingleMuon2017.root', 'SingleElectron2017.root'])
+        hadd_or_merge('Lepton_data_2018.root', ['SingleMuon2018.root', 'Egamma2018.root'])
+        hadd_or_merge('Lepton_data_run2.root', ['Lepton_data_2016.root', 'Lepton_data_2017.root', 'Lepton_data_2018.root'])
 
 cmd_merge_data = cmd_hadd_data
 
@@ -160,7 +186,10 @@ def _background_samples(trigeff=False, year=2017, bkg_tag='ttbar'):
             if not trigeff:
                 x = []
                 x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170,300]] #15 
-                x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]  
+                if year == 2017 or year == 2018 :
+                    x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]  
+                else :
+                    x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]  
         elif bkg_tag == 'qcdmupt5':
             x = [] 
             if not trigeff:
@@ -282,12 +311,12 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
         if _leptonpresel:
           cmd = '' #FIXME run hadd outside this script to avoid runtime error
           #cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root diboson_leptonpresel_%s.root ttbar_leptonpresel_%s.root' % (year, year, year, year, year)
-          #cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root qcd_leptonpresel_%s.root diboson_leptonpresel_%s.root ttbar_leptonpresel_%s.root ' % (year, year, year, year, year, year)
+          cmd = 'hadd.py background_leptonpresel_%s.root wjetstolnu_leptonpresel_%s.root dyjets_leptonpresel_%s.root qcd_leptonpresel_%s.root diboson_leptonpresel_%s.root ttbar_leptonpresel_%s.root ' % (year, year, year, year, year, year)
           print cmd
         else:
           cmd = '' #FIXME run hadd outside this script to avoid runtime error
           #cmd = 'hadd.py background_btagpresel_%s.root ttbar_btagpresel_%s.root' % (year, year)
-          #cmd = 'hadd.py background_btagpresel_%s.root ttbar_btagpresel_%s.root qcd_btagpresel_%s.root' % (year, year, year)
+          cmd = 'hadd.py background_btagpresel_%s.root ttbar_btagpresel_%s.root qcd_btagpresel_%s.root' % (year, year, year)
           print cmd
         os.system(cmd)
         
@@ -349,8 +378,11 @@ def cmd_effsprint(year_to_use=2017):
 
 def cmd_histos():
     #cmd_report_data()
-    #cmd_hadd_data()
-    cmd_merge_background()
+    cmd_hadd_data()
+    cmd_merge_background(year_to_use=20161)
+    cmd_merge_background(year_to_use=20162)
+    cmd_merge_background(year_to_use=2017)
+    cmd_merge_background(year_to_use=2018)
     #cmd_effsprint()
 
 def cmd_presel():
@@ -364,7 +396,7 @@ def cmd_vpeffs():
     cmd_merge_background()
 
 def cmd_minitree():
-    cmd_report_data()
+    #cmd_report_data() # need to update this, check sometime in the future...
     cmd_hadd_data()
 
 def cmd_trackermapperhists():
