@@ -131,9 +131,11 @@ def cmd_hadd_data():
         #if '2017' in have and '2018' in have:
         #    hadd_or_merge(ds + '2017p8.root', ['%s%s.root' % (ds, year) for year in '2017', '2018'])
     if _leptonpresel :
-        hadd_or_merge('Lepton_data_2016.root', ['SingleMuon20161.root', 'SingleMuon20162.root', 'SingleElectron20161.root', 'SingleElectron20162.root'])
+        hadd_or_merge('Lepton_data_20161.root', ['SingleMuon20161.root', 'SingleElectron20161.root'])
+        hadd_or_merge('Lepton_data_20162.root', ['SingleMuon20162.root', 'SingleElectron20162.root'])
+        hadd_or_merge('Lepton_data_2016.root', ['Lepton_data_20161.root', 'Lepton_data_20162.root'])
         hadd_or_merge('Lepton_data_2017.root', ['SingleMuon2017.root', 'SingleElectron2017.root'])
-        hadd_or_merge('Lepton_data_2018.root', ['SingleMuon2018.root', 'Egamma2018.root'])
+        hadd_or_merge('Lepton_data_2018.root', ['SingleMuon2018.root', 'EGamma2018.root'])
         hadd_or_merge('Lepton_data_run2.root', ['Lepton_data_2016.root', 'Lepton_data_2017.root', 'Lepton_data_2018.root'])
 
 cmd_merge_data = cmd_hadd_data
