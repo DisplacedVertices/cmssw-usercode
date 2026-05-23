@@ -49,7 +49,7 @@ nuis_replacements = {
     "lep": {},
 }
 
-# Background systematics are disabled until CRs are unblinded and real uncertainties measured.
+# disabled until CRs unblinded
 nuis_bkg = set()
 nuis_bkg_replacements = {}
 

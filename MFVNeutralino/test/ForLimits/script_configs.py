@@ -37,8 +37,7 @@ datacard = {
 # --------------------------------------------------------------------------
 # Signal configuration
 # --------------------------------------------------------------------------
-# Signals that fire the lepton trigger.
-# mfv_neu is NOT in the lepton channel -- it has no lepton in the hard scatter.
+# Lepton trigger signals (mfv_neu excluded -- no hard-scatter lepton).
 _lep_sigs = [
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",
@@ -52,8 +51,7 @@ _bjet_sigs = [
     "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
 ]
 
-# Lepton-triggered signals that require a lepton reco efficiency nuisance.
-# VH (ZH/WH/ggZH) and ttH have a lepton in the hard scatter; SUSY signals do not.
+# Processes with a hard-scatter lepton -- get lep_effi nuisance (VH, ttH; not SUSY).
 lep_reco_effi_sigs = frozenset([
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",

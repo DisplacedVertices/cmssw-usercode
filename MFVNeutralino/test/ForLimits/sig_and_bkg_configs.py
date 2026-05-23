@@ -26,9 +26,8 @@ template_norms = {
 }
 
 
-# n2v_uncs: excluded from datacards until real uncertainties are measured.
-# Replace the placeholder values below and uncomment to re-enable;
-# also add "n2v_unc" back to nuis_bkg in getNuisanceFromSig.py.
+# n2v_uncs disabled until real uncertainties measured after unblinding.
+# To re-enable: fill values below, uncomment, add "n2v_unc" to nuis_bkg.
 #
 # n2v_uncs = {
 #     "lep":  [0.0001, 0.0001, 0.0001, 0.0001],

@@ -191,13 +191,30 @@ class SigRInf_Grp(object):
 
 
 class NuisanceInfo(object):
-    """Store information for one nuisance parameter line on a combine datacard.
+    """
+    Object to store information to make a nuisance parameter. This object was defined assuming log-normal parameters, but it can be adjusted to non-log-normal parameters.
 
-    Convention: store e.g. 1.01 (not 0.01) for a ~1% fluctuation.
+    The convention is to store e.g. 1.01 (NOT 0.01) if some fluctuation is ~1%.
+
+    -INPUTS-
+    nuis_name: string.
+    nuis_val: int or arr-like. Note this is meaningless if type is shape, but provide something anyway otherwise it'll crash.
+    make_updn: Boolean. Will this make a shape uncertainty?
+    sep_yrs: Boolean. If true, the nuis_name will be tagged with year number, e.g. lepSF -> lepSF8 (prevents ROOT chaining unrelated nuisances together)
+    -Optional Inputs-
+    corr: Boolean. Will this nuisance produce one line on the datacard, or more than one? If non-correlated, it will produce nuisb1, nuisb2 (or nuis7b1) etc
+    nuis_type: string. If make_updn is True, it MUST be "shape".
+    nbins: int
+    ana_spec: Boolean. Is this analysis-specific and gets tagged with CMS+CADI?
+    add_era_tags: if False, neither a year- nor Run2-tag will be added
+    extra_info: list
+
+    -Other Things Stored-
     """
 
     def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr,
                  nuis_type="lnN", nbins=3, ana_spec=False, add_era_tags=True, extra_info=None):
+        """It will always expand one entry into an array of size nbins. If you don't want this behavior, give it e.g. [1, 1.05, 1] so some bins don't fluctuate."""
         if extra_info is None:
             extra_info = []
 
@@ -210,11 +227,7 @@ class NuisanceInfo(object):
             except Exception:
                 raise Exception("Unable to parse nuis_val")
 
-        # Resize nuis_val to match nbins when the array length doesn't match.
-        # Shorter: pad with 1.0 (no effect) -- happens when nuisance tables
-        #          were built for fewer bins than the current scheme.
-        # Longer:  truncate -- happens when a hardcoded per-bin array (e.g.
-        #          pileup [1.03, 1.04, 1.06]) is used with a coarser binning.
+        # Pad with 1.0 or truncate to match nbins.
         if len(self.nuis_val) != nbins:
             if len(self.nuis_val) < nbins:
                 self.nuis_val = np.concatenate(
@@ -259,10 +272,11 @@ class NuisanceInfo(object):
 
 
 class NuisanceTable(object):
-    """2-D (lifetime x mass) nuisance table with bilinear interpolation.
+    """
+    Make and query a table of nuisances.
 
-    Values are always stored as fractions (not percent); set as_percent=True
-    if the input data is in percent.
+    -STORAGE-
+    Nuisance grid: Indexed by year (string). The values are ALWAYS interpreted as fractions (not percent).
     """
 
     def __init__(self, proc="", x_vals=None, x_unit=None, y_vals=None, y_unit=None,
@@ -270,6 +284,17 @@ class NuisanceTable(object):
                  years=None,
                  nbin_len=False, dtype=float, pickle_loc=None,
                  make_pickle_fn=True, trig_for_pickle=None):
+        """
+        -INPUTS-
+        as_percent: Boolean. If True, input 10 -> store 0.1. If False, stores exactly the input. The value stored is always interpreted as a FRACTION.
+        years: array-like, must be strings
+        nbin_len: Boolean. If False, assumes Nuisances are integers. Else it assumes len-nbins arrays. Writes arr_len.
+        dtype: how the np.array should represent the data
+        pickle_loc: if not None, it will un-pickle the specified dictionary, and construct itself.
+        make_pickle_fn: if True, it will add pickle_loc + "_" + proc + ".pkl"
+        trig_for_pickle: addresses the issue that aliases are needed for some processes, and these are trig-dependent
+                -Good practice: if you don't think it needs aliases, don't feed it one, so it catches errors
+        """
         if years is None:
             years = set(["20161", "20162", "2017", "2018"])
 

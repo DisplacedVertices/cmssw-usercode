@@ -73,11 +73,8 @@ _HEPDATA_THEORY_CSV = {
     "mfv_stopbbarbbar": os.path.join(_ONE2TWO, "stopstop.csv"),
 }
 
-# Additional theory curves drawn on top of the primary one (keyed by process).
-# For mfv_neu: EWK Higgsino N2N1 (Ñ₂χ̃₁⁰, aNNLO-NNLL, fully degenerate, 13 TeV).
-# Only N2N1 is relevant: both final-state particles are neutral, matching the
-# neutral LLP produced in the gluino signal MC. C1C1/N2C1 involve charginos
-# which are themselves long-lived in the degenerate limit (different topology).
+# Extra theory curves drawn on top (per process). For mfv_neu: EWK Higgsino N2N1
+# (aNNLO-NNLL, 13 TeV) -- both final-state particles are neutral, matching the gluino LLP.
 _EXTRA_THEORY_CSV = {
     "mfv_neu": os.path.join(_ONE2TWO, "higgsino_N2N1.csv"),
 }
@@ -96,10 +93,8 @@ PROC_LABELS = {
 
 _SUSY_PROCS = {"mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"}
 
-# Fixed 2D colorbar scale (vmin, vref, vmax) in fb, keyed by process.
-# vref is the neutral-color pivot (white on RdBu_r) and the colorbar reference line.
-# For SUSY: pivot near the expected exclusion boundary (~1-100 fb for M~1-2 TeV).
-# Falls back to automatic geometric-mean computation for unspecified processes.
+# (vmin, vref, vmax) in fb for the 2D color scale; vref is the white pivot on RdBu_r.
+# Unspecified processes fall back to geometric-mean auto-scaling.
 _2D_VSCALE = {
     "mfv_neu":          (0.1,   10.0,  1e5),
     "mfv_stopdbardbar": (0.1,   10.0,  1e5),
@@ -206,9 +201,7 @@ def read_limits(sig_id):
                 if abs(q - qref) < 0.01:
                     result[key] = float(t.limit)
         f.Close()
-        # HybridNew run with Asimov dataset (-t -1) produces a single entry with
-        # quantileExpected=-1 (the "observed" slot).  Since data=Asimov, this IS
-        # the median expected limit — remap so downstream code finds it as "exp".
+        # -t -1 (Asimov) puts the result in quantileExpected=-1 ("obs" slot) -- remap to "exp".
         if method_found == "HybridNew" and "obs" in result and "exp" not in result:
             result["exp"] = result.pop("obs")
         return result if "exp" in result else None
@@ -631,13 +624,9 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
 # ---------------------------------------------------------------------------
 
 def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
-    """Return σ×B² [fb] exclusion threshold per mass column for the 2D contour.
-
-    For SUSY: threshold = σ_theory_NLO(mass) from CSV. The r=1 Combine contour
-    marks σ×B²=1 fb (arbitrary σ_ref), NOT the theory exclusion boundary.
-    For H→SS: threshold = σ_ref_fb(proc, mass) = σ_SM × BR(1%) × filter_eff,
-    so r=1 Combine contour IS the SM exclusion boundary — no correction needed.
-    theory_csv overrides the default CSV for SUSY (used for EWK variant plots).
+    """Per-mass σ×B² [fb] threshold where r=1 is the physical exclusion boundary.
+    SUSY: σ_theory_NLO from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
+    theory_csv overrides the SUSY default (for EWK variant plots).
     """
     if proc in _SUSY_PROCS:
         csv_path = theory_csv if theory_csv is not None else _HEPDATA_THEORY_CSV.get(proc)
@@ -664,11 +653,8 @@ def _interp_grid(log_ctaus, mass_vals, grid, fine_lct, fine_mass):
 def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix=""):
     masses    = _sorted_masses(mass_data)
 
-    # Build a rectangular grid (NaN for missing cells, capped in _interp_grid).
-    # SUSY: drop masses with >1 missing ctau (e.g. M3000 hit wall time, only 2 jobs done).
-    # Higgs: only 3 mass points total so keep any mass with >=2 valid ctau.
-    # Use the union of all ctau values so no mass is excluded for lacking a corner point;
-    # missing (ctau, mass) cells are left as NaN and capped to "not excluded" during interpolation.
+    # Rectangular grid with NaN for missing cells (capped to "not excluded" in _interp_grid).
+    # min_n: drop masses with too few valid ctau points (SUSY needs 3+, Higgs 2+).
     ctau_counts = {m: len(mass_data[m]) for m in masses}
     max_n       = max(ctau_counts.values())
     min_n       = max(3, max_n - 1) if proc in _SUSY_PROCS else 2
