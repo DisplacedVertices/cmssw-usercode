@@ -39,12 +39,16 @@ DATACARD_DIR = os.path.join(HERE, "Datacards")
 COMBINE_OUT  = os.path.join(HERE, "CombineOutput")
 CONDOR_DIR   = os.path.join(HERE, "CombineCondor")
 
-# Tarball of user-built Combine files: binary, library, .pcm/.rootmap.
-# Expected at $CMSSW_BASE/../combine_env.tar.gz (one level above the CMSSW installation).
-# Override by setting the COMBINE_TARBALL environment variable.
+def _apply_tag(tag):
+    """Redirect all I/O directories to tagged variants (e.g. tag='4bin')."""
+    global DATACARD_DIR, COMBINE_OUT, CONDOR_DIR
+    DATACARD_DIR = os.path.join(HERE, "Datacards_%s"    % tag)
+    COMBINE_OUT  = os.path.join(HERE, "CombineOutput_%s" % tag)
+    CONDOR_DIR   = os.path.join(HERE, "CombineCondor_%s" % tag)
+
 COMBINE_TARBALL  = os.environ.get(
     "COMBINE_TARBALL",
-    os.path.join(os.path.dirname(os.environ.get("CMSSW_BASE", "")), "combine_env.tar.gz"),
+    "/uscms_data/d3/gdecastr/work/combine_env.tar.gz",
 )
 # CMSSW_14_1_0 (final release) is in CVMFS and has the same ABI as pre4.
 # Worker nodes only bind /cvmfs, so we set up the environment from there.
@@ -54,11 +58,12 @@ YEARS    = ("20161", "20162", "2017", "2018")
 CHANNELS = ("lep", "bjet")
 
 # ---------------------------------------------------------------------------
-# Per-job shell script
-# Cards are pre-merged locally; this script only runs combine.
-# CMSSW_14_1_0 from CVMFS sets up ROOT/RooFit; the shipped .so provides Combine.
+# Per-job shell scripts
 # ---------------------------------------------------------------------------
-_JOB_SH = """\
+
+# AsymptoticLimits: analytic CLs, fast (~5s), produces bands + median.
+# Output: higgsCombine{sig}.AsymptoticLimits.mH120.root + combine.log
+_JOB_SH_ASYMPTOTIC = """\
 #!/bin/bash
 set -e
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -69,36 +74,41 @@ tar xf combine_env.tar.gz
 export PATH=/srv/combine_env/bin:$PATH
 export LD_LIBRARY_PATH=/srv/combine_env/lib:$LD_LIBRARY_PATH
 
-echo "=== AsymptoticLimits: {sig_id} ==="
-combine -M AsymptoticLimits \\
-    --name {sig_id} \\
-    workspace_{sig_id}.root \\
-    -v 1
+SIG={sig_id}
+echo "=== AsymptoticLimits: $SIG ==="
+combine -M AsymptoticLimits workspace_$SIG.root \\
+    --name $SIG --run blind -v 0 \\
+    2>&1 | tee combine.log
+echo "=== Done: $SIG ==="
+"""
 
-# FitDiagnostics is best-effort; failure does not abort the job.
-set +e
-echo "=== FitDiagnostics: {sig_id} ==="
-combine -M FitDiagnostics \\
-    --name {sig_id} \\
-    workspace_{sig_id}.root \\
-    --saveShapes --saveWithUncertainties \\
-    -v 1
-FD_STATUS=$?
+# HybridNew: single Asimov (-t -1) run; blinded analysis so data = background.
+_JOB_SH_HYBRIDNEW = """\
+#!/bin/bash
 set -e
-if [ $FD_STATUS -ne 0 ]; then
-    echo "WARNING: FitDiagnostics failed (status $FD_STATUS) -- AsymptoticLimits result is still valid"
-    touch higgsCombine{sig_id}.FitDiagnostics.mH120.root fitDiagnostics{sig_id}.root
-fi
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cd {cvmfs_cmssw14}
+eval $(scramv1 runtime -sh)
+cd /srv
+tar xf combine_env.tar.gz
+export PATH=/srv/combine_env/bin:$PATH
+export LD_LIBRARY_PATH=/srv/combine_env/lib:$LD_LIBRARY_PATH
 
-echo "=== Done: {sig_id} ==="
+SIG={sig_id}
+echo "=== HybridNew Asimov expected: $SIG ==="
+combine -M HybridNew --frequentist --testStat LHC \\
+    -T 20000 --fork 2 -t -1 -s 1234 \\
+    --rMax {rmax} \\
+    --name $SIG \\
+    workspace_$SIG.root -v 0
+echo "=== Done: $SIG ==="
 """
 
 # ---------------------------------------------------------------------------
-# Condor JDL
-# transfer_input_files ships combine + the one user-built .so + the merged card.
-# initialdir directs returned output files straight into CombineOutput/sig_id/.
+# Condor JDL templates (one per method)
 # ---------------------------------------------------------------------------
-_JDL = """\
+
+_JDL_ASYMPTOTIC = """\
 universe                = vanilla
 executable              = {job_sh}
 initialdir              = {work_dir}
@@ -111,9 +121,58 @@ request_memory          = 2000MB
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = {combine_tarball},{workspace}
-transfer_output_files   = higgsCombine{sig_id}.AsymptoticLimits.mH120.root,higgsCombine{sig_id}.FitDiagnostics.mH120.root,fitDiagnostics{sig_id}.root
+transfer_output_files   = higgsCombine{sig_id}.AsymptoticLimits.mH120.root,combine.log
 queue 1
 """
+
+_JDL_HYBRIDNEW = """\
+universe                = vanilla
+executable              = {job_sh}
+initialdir              = {work_dir}
+output                  = {log_pfx}.out
+error                   = {log_pfx}.err
+log                     = {log_pfx}.log
+request_cpus            = 2
+request_memory          = 4000MB
++DesiredOS              = "EL9"
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files    = {combine_tarball},{workspace}
+transfer_output_files   = higgsCombine{sig_id}.HybridNew.mH120.1234.root
+queue 1
+"""
+
+# Keep _JOB_SH / _JDL as aliases for backward compatibility
+_JOB_SH = _JOB_SH_HYBRIDNEW
+_JDL    = _JDL_HYBRIDNEW
+
+
+def _read_asymptotic_exp(sig_id):
+    """Return median expected limit (quantile=0.5) from AsymptoticLimits ROOT file, or None."""
+    root_fn = os.path.join(COMBINE_OUT, sig_id,
+                           "higgsCombine%s.AsymptoticLimits.mH120.root" % sig_id)
+    if not os.path.exists(root_fn):
+        return None
+    try:
+        import ROOT
+        ROOT.PyConfig.IgnoreCommandLineOptions = True
+        ROOT.gROOT.SetBatch(True)
+        f = ROOT.TFile.Open(root_fn)
+        if not f or f.IsZombie():
+            return None
+        t = f.Get("limit")
+        if not t:
+            f.Close()
+            return None
+        for _ in t:
+            if abs(float(t.quantileExpected) - 0.5) < 0.01:
+                val = float(t.limit)
+                f.Close()
+                return val
+        f.Close()
+    except Exception:
+        pass
+    return None
 
 
 def _makedirs(path):
@@ -147,48 +206,75 @@ def find_hypotheses():
     return hyps
 
 
-def _write_job(sig_id, cards, dry_run):
+def _write_job(sig_id, cards, dry_run, method="hybridnew"):
     work_dir   = os.path.join(COMBINE_OUT, sig_id)
     condor_dir = os.path.join(CONDOR_DIR,  sig_id)
     _makedirs(work_dir)
     _makedirs(condor_dir)
 
-    # Pre-merge cards locally (runs on submit node where NFS is available).
+    # Pre-merge cards and build workspace locally (submit node has NFS access).
     card_args     = " ".join("%s=%s" % (k, v) for k, v in sorted(cards.items()))
     combined_card = os.path.join(condor_dir, "combined_%s.txt" % sig_id)
     workspace     = os.path.join(condor_dir, "workspace_%s.root" % sig_id)
     if not dry_run:
-        ret = subprocess.call("combineCards.py %s > %s" % (card_args, combined_card), shell=True)
-        if ret != 0:
-            print("WARNING: combineCards.py failed for %s -- skipping" % sig_id)
-            return False
-        # Convert to RooStats workspace locally (requires CMSSW_14_1_0_pre4 Python).
-        # Worker nodes run combine on the workspace in pure C++ -- no Python needed there.
-        ret = subprocess.call(
-            "text2workspace.py %s -m 125 -o %s" % (combined_card, workspace), shell=True)
-        if ret != 0:
-            print("WARNING: text2workspace.py failed for %s -- skipping" % sig_id)
-            return False
+        if not os.path.exists(workspace):
+            import shutil
+            for tool in ("combineCards.py", "text2workspace.py"):
+                if not shutil.which(tool):
+                    print("ERROR: %s not in PATH; workspace missing for %s -- skipping" % (tool, sig_id))
+                    return False
+            ret = subprocess.call("combineCards.py %s > %s" % (card_args, combined_card), shell=True)
+            if ret != 0:
+                print("WARNING: combineCards.py failed for %s -- skipping" % sig_id)
+                return False
+            ret = subprocess.call(
+                "text2workspace.py %s -m 125 -o %s" % (combined_card, workspace), shell=True)
+            if ret != 0:
+                print("WARNING: text2workspace.py failed for %s -- skipping" % sig_id)
+                return False
 
-    job_sh = os.path.join(condor_dir, "run.sh")
-    with open(job_sh, "w") as fh:
-        fh.write(_JOB_SH.format(
-            cvmfs_cmssw14 = CVMFS_CMSSW14,
-            sig_id        = sig_id,
-        ))
-    os.chmod(job_sh, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-
+    job_sh  = os.path.join(condor_dir, "run.sh")
     log_pfx = os.path.join(condor_dir, "job")
     jdl_fn  = os.path.join(condor_dir, "submit.jdl")
-    with open(jdl_fn, "w") as fh:
-        fh.write(_JDL.format(
-            job_sh          = job_sh,
-            work_dir        = work_dir,
-            log_pfx         = log_pfx,
-            combine_tarball = COMBINE_TARBALL,
-            workspace       = workspace,
-            sig_id          = sig_id,
-        ))
+
+    if method == "asymptotic":
+        with open(job_sh, "w") as fh:
+            fh.write(_JOB_SH_ASYMPTOTIC.format(
+                cvmfs_cmssw14 = CVMFS_CMSSW14,
+                sig_id        = sig_id,
+            ))
+        os.chmod(job_sh, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+        with open(jdl_fn, "w") as fh:
+            fh.write(_JDL_ASYMPTOTIC.format(
+                job_sh          = job_sh,
+                work_dir        = work_dir,
+                log_pfx         = log_pfx,
+                combine_tarball = COMBINE_TARBALL,
+                workspace       = workspace,
+                sig_id          = sig_id,
+            ))
+    else:
+        asymp_exp = _read_asymptotic_exp(sig_id)
+        if asymp_exp and asymp_exp > 0:
+            rmax = 10.0 * asymp_exp  # no floor: at r=10*expected, CLs~0 and fork 2 is stable
+        else:
+            rmax = 20.0  # fallback for signals with no asymptotic log
+        with open(job_sh, "w") as fh:
+            fh.write(_JOB_SH_HYBRIDNEW.format(
+                cvmfs_cmssw14 = CVMFS_CMSSW14,
+                sig_id        = sig_id,
+                rmax          = rmax,
+            ))
+        os.chmod(job_sh, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+        with open(jdl_fn, "w") as fh:
+            fh.write(_JDL_HYBRIDNEW.format(
+                job_sh          = job_sh,
+                work_dir        = work_dir,
+                log_pfx         = log_pfx,
+                combine_tarball = COMBINE_TARBALL,
+                workspace       = workspace,
+                sig_id          = sig_id,
+            ))
 
     if not dry_run:
         ret = subprocess.call("condor_submit " + jdl_fn, shell=True)
@@ -207,18 +293,24 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="Write job files but do not call condor_submit")
     ap.add_argument("--skip-existing", action="store_true",
-                    help="Skip hypotheses that already have AsymptoticLimits output")
+                    help="Skip hypotheses that already have output for the chosen method")
+    ap.add_argument("--limit", type=int, default=None,
+                    help="Submit at most N jobs (for testing)")
+    ap.add_argument("--sig-id", default=None,
+                    help="Submit only this exact hypothesis (e.g. mfv_neu_tau001000um_M0400)")
+    ap.add_argument("--tag", default=None,
+                    help="Redirect I/O to tagged directories, e.g. --tag 4bin uses Datacards_4bin/, CombineOutput_4bin/, CombineCondor_4bin/")
+    ap.add_argument("--method", default="hybridnew", choices=["hybridnew", "asymptotic"],
+                    help="Which combine method to run: hybridnew (default) or asymptotic")
     args = ap.parse_args()
+
+    if args.tag:
+        _apply_tag(args.tag)
 
     if not args.dry_run:
         for path in (COMBINE_TARBALL, CVMFS_CMSSW14):
             if not os.path.exists(path):
                 print("ERROR: required path not found: %s" % path)
-                sys.exit(1)
-        import shutil
-        for tool in ("combineCards.py", "text2workspace.py"):
-            if not shutil.which(tool):
-                print("ERROR: %s not in PATH -- source CMSSW_14_1_0_pre4 cmsenv first" % tool)
                 sys.exit(1)
 
     subset = set(args.subset.split(",")) if args.subset else None
@@ -232,16 +324,24 @@ def main():
     n_skip = 0
     for sig_id in sorted(hyps):
         proc = sig_id.split("_tau")[0]
+        if args.sig_id and sig_id != args.sig_id:
+            continue
         if subset and proc not in subset:
             continue
         if args.skip_existing:
-            out_fn = os.path.join(COMBINE_OUT, sig_id,
-                                  "higgsCombine%s.AsymptoticLimits.mH120.root" % sig_id)
+            if args.method == "asymptotic":
+                out_fn = os.path.join(COMBINE_OUT, sig_id,
+                                      "higgsCombine%s.AsymptoticLimits.mH120.root" % sig_id)
+            else:
+                out_fn = os.path.join(COMBINE_OUT, sig_id,
+                                      "higgsCombine%s.HybridNew.mH120.1234.root" % sig_id)
             if os.path.exists(out_fn):
                 n_skip += 1
                 continue
-        if _write_job(sig_id, hyps[sig_id], args.dry_run) is not False:
+        if _write_job(sig_id, hyps[sig_id], args.dry_run, method=args.method) is not False:
             n += 1
+        if args.limit and n >= args.limit:
+            break
 
     if n_skip:
         print("Skipped %d already-completed hypotheses (--skip-existing)" % n_skip)

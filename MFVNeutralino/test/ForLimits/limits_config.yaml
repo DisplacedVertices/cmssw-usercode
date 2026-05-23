@@ -10,9 +10,9 @@ channel: "lep"  # "lep" or "bjet"
 debug: true     # verbose output while running
 
 # ---- Binning -------------------------------------------------
-# Units: cm.  Three bins matching AN Figure 49: [0, 0.8, 1.6, 4.0] cm
-bins: [0., 0.8, 1.6, 4.0]
-nbins: 3
+# Units: cm.  Four bins: [0, 0.1, 0.4, 2.0, 4.0] cm
+bins: [0., 0.1, 0.4, 2.0, 4.0]
+nbins: 4
 
 # ---- Input signal MiniTree paths ----------------------------
 # Folder should contain files named like: {process}_tau{ct}_{year}.root
@@ -43,16 +43,16 @@ background:
 # datacard_output: the final .txt combine datacards
 root_output:
   lep:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput/lep/"
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput_4bin/lep/"
   bjet:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput/bjet/"
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput_4bin/bjet/"
   filename: "limitsinput"
 
 datacard_output:
   lep:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards/lep/"
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards_4bin/lep/"
   bjet:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards/bjet/"
+    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards_4bin/bjet/"
   prefix: "Datacard_"
   suffix: ".txt"
 
@@ -67,7 +67,7 @@ nuisance_tables:
 
 # ---- Observed events (set to 0 for blind analysis) -----------
 observations:
-  "20161": [0, 0, 0]
-  "20162": [0, 0, 0]
-  "2017":  [0, 0, 0]
-  "2018":  [0, 0, 0]
+  "20161": [0, 0, 0, 0]
+  "20162": [0, 0, 0, 0]
+  "2017":  [0, 0, 0, 0]
+  "2018":  [0, 0, 0, 0]

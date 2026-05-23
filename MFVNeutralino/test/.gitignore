@@ -15,5 +15,12 @@ ForLimits/CombineOutput/
 ForLimits/CombineCondor/
 ForLimits/LimitPlots/
 ForLimits/BinningStudy/datacards/
+ForLimits/BinningStudy/datacards_systs/
 ForLimits/BinningStudy/combine_output/
-ForLimits/BinningStudy/generate_variants.log
+ForLimits/BinningStudy/combine_output_systs/
+ForLimits/BinningStudy/condor_hybridnew/
+ForLimits/BinningStudy/root_output/
+ForLimits/BinningStudy/__pycache__/
+ForLimits/BinningStudy/*.pyc
+ForLimits/BinningStudy/*.log
+ForLimits/BinningStudy/*.err

@@ -2,7 +2,8 @@
 """
 Plot 95% CL upper limits on sigma x B^2 [fb] (SUSY) or BR(H->SS) (Higgs).
 
-Reads CombineOutput/<sig_id>/higgsCombine<sig_id>.AsymptoticLimits.mH120.root
+Reads CombineOutput/<sig_id>/higgsCombine<sig_id>.HybridNew.mH120.root
+(falls back to AsymptoticLimits if HybridNew output is absent)
 for all available hypotheses and produces per-process plots.
 
 Output (in LimitPlots/):
@@ -44,6 +45,12 @@ try:
     _HAS_MPLHEP = True
 except ImportError:
     _HAS_MPLHEP = False
+
+plt.rcParams.update({
+    "axes.labelsize":  13,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+})
 
 try:
     from scipy.interpolate import RectBivariateSpline
@@ -161,9 +168,20 @@ def parse_sig_id(sig_id):
 
 def read_limits(sig_id):
     """Return {key: r_value} or None.  Keys: obs, exp, dn1, up1, dn2, up2."""
-    fn = os.path.join(COMBINE_OUT, sig_id,
-                      "higgsCombine%s.AsymptoticLimits.mH120.root" % sig_id)
-    if not os.path.exists(fn):
+    method_found = None
+    fn = None
+    for method in ("HybridNew", "AsymptoticLimits"):
+        # HybridNew jobs run with -s 1234, which appends the seed to the filename.
+        for suffix in (".mH120.1234.root", ".mH120.root"):
+            candidate = os.path.join(COMBINE_OUT, sig_id,
+                                     "higgsCombine%s.%s%s" % (sig_id, method, suffix))
+            if os.path.exists(candidate):
+                fn = candidate
+                method_found = method
+                break
+        if fn:
+            break
+    if fn is None:
         return None
     try:
         f = ROOT.TFile.Open(fn)
@@ -188,6 +206,11 @@ def read_limits(sig_id):
                 if abs(q - qref) < 0.01:
                     result[key] = float(t.limit)
         f.Close()
+        # HybridNew run with Asimov dataset (-t -1) produces a single entry with
+        # quantileExpected=-1 (the "observed" slot).  Since data=Asimov, this IS
+        # the median expected limit — remap so downstream code finds it as "exp".
+        if method_found == "HybridNew" and "obs" in result and "exp" not in result:
+            result["exp"] = result.pop("obs")
         return result if "exp" in result else None
     except Exception as exc:
         print("Could not read %s: %s" % (fn, exc))
@@ -382,6 +405,13 @@ def _cms_label(ax):
         hep.cms.label("Preliminary", data=False, ax=ax, fontsize=12, rlabel=_RUN2_LUMI)
 
 
+def _band(lims_list, key, fallback_key=None):
+    """Return list of limit values for `key` if ALL entries have it, else None."""
+    vals = [l.get(key) if fallback_key is None else l.get(key, l.get(fallback_key))
+            for l in lims_list]
+    return vals if all(v is not None for v in vals) else None
+
+
 def _save(fig, out_fn):
     plt.tight_layout()
     fig.savefig(out_fn, bbox_inches="tight")
@@ -404,20 +434,24 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
         ctaus  = sorted(cdict.keys())
         if not ctaus:
             continue
-        exp    = [cdict[c]["exp"]                       * scale for c in ctaus]
-        dn1    = [cdict[c]["dn1"]                       * scale for c in ctaus]
-        up1    = [cdict[c]["up1"]                       * scale for c in ctaus]
-        dn2    = [cdict[c].get("dn2", cdict[c]["dn1"]) * scale for c in ctaus]
-        up2    = [cdict[c].get("up2", cdict[c]["up1"]) * scale for c in ctaus]
+        lims_c = [cdict[c] for c in ctaus]
+        exp    = [l["exp"] * scale for l in lims_c]
+        _raw1  = _band(lims_c, "dn1"); dn1 = [v * scale for v in _raw1] if _raw1 else None
+        _raw2  = _band(lims_c, "up1"); up1 = [v * scale for v in _raw2] if _raw2 else None
+        _raw3  = _band(lims_c, "dn2", "dn1"); dn2 = [v * scale for v in _raw3] if _raw3 else None
+        _raw4  = _band(lims_c, "up2", "up1"); up2 = [v * scale for v in _raw4] if _raw4 else None
 
         col = _COLORS[i % len(_COLORS)]
-        ax.fill_between(ctaus, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        ax.fill_between(ctaus, dn1, up1, alpha=0.35, color=col, edgecolor="none")
+        if dn2 and up2:
+            ax.fill_between(ctaus, dn2, up2, alpha=0.15, color=col, edgecolor="none")
+        if dn1 and up1:
+            ax.fill_between(ctaus, dn1, up1, alpha=0.35, color=col, edgecolor="none")
         ax.plot(ctaus, exp, color=col, lw=2, ls="--",
                 label="m = %s GeV (exp)" % mass)
 
-        if "obs" in cdict[ctaus[0]]:
-            obs = [cdict[c]["obs"] * scale for c in ctaus]
+        _obs_raw = _band(lims_c, "obs")
+        if _obs_raw:
+            obs = [v * scale for v in _obs_raw]
             ax.plot(ctaus, obs, color=col, lw=2, ls="-",
                     label="m = %s GeV (obs)" % mass)
 
@@ -450,22 +484,25 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
         mass_vals = [int(m) for m in masses]
         scales    = [_sig_scale_fb(proc, m) for m in masses]
 
-        exp  = [mdict[m]["exp"]                       * s for m, s in zip(masses, scales)]
-        dn1  = [mdict[m]["dn1"]                       * s for m, s in zip(masses, scales)]
-        up1  = [mdict[m]["up1"]                       * s for m, s in zip(masses, scales)]
-        dn2  = [mdict[m].get("dn2", mdict[m]["dn1"]) * s for m, s in zip(masses, scales)]
-        up2  = [mdict[m].get("up2", mdict[m]["up1"]) * s for m, s in zip(masses, scales)]
+        lims_m = [mdict[m] for m in masses]
+        exp  = [l["exp"] * s for l, s in zip(lims_m, scales)]
+        _r1  = _band(lims_m, "dn1"); dn1 = [v * s for v, s in zip(_r1, scales)] if _r1 else None
+        _r2  = _band(lims_m, "up1"); up1 = [v * s for v, s in zip(_r2, scales)] if _r2 else None
+        _r3  = _band(lims_m, "dn2", "dn1"); dn2 = [v * s for v, s in zip(_r3, scales)] if _r3 else None
+        _r4  = _band(lims_m, "up2", "up1"); up2 = [v * s for v, s in zip(_r4, scales)] if _r4 else None
 
         col = _COLORS[i % len(_COLORS)]
         lbl = _format_ctau(ctau)
-        ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
+        if dn2 and up2:
+            ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
+        if dn1 and up1:
+            ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
         ax.plot(mass_vals, exp, color=col, lw=2, ls="--",
                 label=r"$c\tau$ = %s (exp)" % lbl)
 
-        has_obs = "obs" in mdict[masses[0]]
-        if has_obs:
-            obs = [mdict[m]["obs"] * s for m, s in zip(masses, scales)]
+        _obs_raw = _band(lims_m, "obs")
+        if _obs_raw:
+            obs = [v * s for v, s in zip(_obs_raw, scales)]
             ax.plot(mass_vals, obs, color=col, lw=2, ls="-",
                     label=r"$c\tau$ = %s (obs)" % lbl)
 
@@ -492,19 +529,23 @@ def _draw_lowht_pair(ax, proc, ctau_data, c1, c2):
         masses    = _sorted_masses(mdict)
         mass_vals = [int(m) for m in masses]
         scales    = [_sig_scale_fb(proc, m) for m in masses]
-        exp  = [mdict[m]["exp"]                       * s for m, s in zip(masses, scales)]
-        dn1  = [mdict[m]["dn1"]                       * s for m, s in zip(masses, scales)]
-        up1  = [mdict[m]["up1"]                       * s for m, s in zip(masses, scales)]
-        dn2  = [mdict[m].get("dn2", mdict[m]["dn1"]) * s for m, s in zip(masses, scales)]
-        up2  = [mdict[m].get("up2", mdict[m]["up1"]) * s for m, s in zip(masses, scales)]
+        lims_m = [mdict[m] for m in masses]
+        exp  = [l["exp"] * s for l, s in zip(lims_m, scales)]
+        _r1  = _band(lims_m, "dn1"); dn1 = [v * s for v, s in zip(_r1, scales)] if _r1 else None
+        _r2  = _band(lims_m, "up1"); up1 = [v * s for v, s in zip(_r2, scales)] if _r2 else None
+        _r3  = _band(lims_m, "dn2", "dn1"); dn2 = [v * s for v, s in zip(_r3, scales)] if _r3 else None
+        _r4  = _band(lims_m, "up2", "up1"); up2 = [v * s for v, s in zip(_r4, scales)] if _r4 else None
         col = _COLORS[i]
         lbl = _format_ctau(ctau)
-        ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
+        if dn2 and up2:
+            ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
+        if dn1 and up1:
+            ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
         ax.plot(mass_vals, exp, color=col, lw=2, ls="--",
                 label=r"$c\tau$ = %s  Low-HT exp." % lbl)
-        if "obs" in mdict[masses[0]]:
-            obs = [mdict[m]["obs"] * s for m, s in zip(masses, scales)]
+        _obs_raw = _band(lims_m, "obs")
+        if _obs_raw:
+            obs = [v * s for v, s in zip(_obs_raw, scales)]
             ax.plot(mass_vals, obs, color=col, lw=2, ls="-",
                     label=r"$c\tau$ = %s  Low-HT obs." % lbl)
 
@@ -719,7 +760,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
         cf = ax.contourf(fine_ctau, fine_mass, cmap_data_exp.T,
                          levels=levels, norm=norm, cmap=cmap, extend="both")
         cbar = plt.colorbar(cf, ax=ax, pad=0.02)
-        cbar.set_label(cbar_label)
+        cbar.set_label(cbar_label, fontsize=11)
         cbar.set_ticks(_nice_ticks)
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
         cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
@@ -747,7 +788,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
                             norm=norm, cmap=cmap,
                             edgecolors="black", linewidths=0.5)
             cbar = plt.colorbar(sc, ax=ax, pad=0.02)
-            cbar.set_label(cbar_label)
+            cbar.set_label(cbar_label, fontsize=11)
             cbar.set_ticks(_nice_ticks)
             cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
             cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
@@ -772,6 +813,259 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
 
 
 # ---------------------------------------------------------------------------
+# Method comparison: collect both HybridNew and AsymptoticLimits per signal
+# ---------------------------------------------------------------------------
+
+_HN_COLOR = "#2166ac"   # blue  — HybridNew
+_AS_COLOR = "#d6604d"   # red   — AsymptoticLimits
+
+
+def read_limits_method(sig_id, method):
+    """Read limits for a specific method without priority fallback."""
+    for suffix in (".mH120.1234.root", ".mH120.root"):
+        fn = os.path.join(COMBINE_OUT, sig_id,
+                          "higgsCombine%s.%s%s" % (sig_id, method, suffix))
+        if os.path.exists(fn):
+            break
+    else:
+        return None
+    try:
+        f = ROOT.TFile.Open(fn)
+        if not f or f.IsZombie():
+            return None
+        t = f.Get("limit")
+        if not t:
+            f.Close()
+            return None
+        quant_map = {-1.0: "obs", 0.025: "dn2", 0.16: "dn1",
+                     0.5: "exp", 0.84: "up1", 0.975: "up2"}
+        result = {}
+        for _ in t:
+            q = round(float(t.quantileExpected), 3)
+            for qref, key in quant_map.items():
+                if abs(q - qref) < 0.01:
+                    result[key] = float(t.limit)
+        f.Close()
+        if method == "HybridNew" and "obs" in result and "exp" not in result:
+            result["exp"] = result.pop("obs")
+        return result if "exp" in result else None
+    except Exception as exc:
+        print("Could not read %s %s: %s" % (sig_id, method, exc))
+        return None
+
+
+def collect_all_methods():
+    """Return {proc -> {mass_str -> {ctau_mm -> {method: lims}}}}"""
+    data = {}
+    if not os.path.isdir(COMBINE_OUT):
+        return data
+    for sig_id in sorted(os.listdir(COMBINE_OUT)):
+        if not os.path.isdir(os.path.join(COMBINE_OUT, sig_id)):
+            continue
+        proc, ctau_str, mass = parse_sig_id(sig_id)
+        if proc is None:
+            continue
+        ctau_mm = ctau_to_mm(ctau_str)
+        if ctau_mm <= 0:
+            continue
+        methods = {}
+        for method in ("HybridNew", "AsymptoticLimits"):
+            lims = read_limits_method(sig_id, method)
+            if lims is not None:
+                methods[method] = lims
+        if not methods:
+            continue
+        data.setdefault(proc, {}).setdefault(mass, {})[ctau_mm] = methods
+    return data
+
+
+# ---------------------------------------------------------------------------
+# Comparison 1D: one plot per ctau, HybridNew median vs Asymptotic median+bands
+# ---------------------------------------------------------------------------
+
+def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir):
+    """Per-ctau 1D vs mass: HybridNew median (blue) + Asymptotic median+bands (red)."""
+    # Invert to {ctau -> {mass -> {method -> lims}}}
+    ctau_data = {}
+    for mass, cdict in mass_data_m.items():
+        for ctau, mdict in cdict.items():
+            ctau_data.setdefault(ctau, {})[mass] = mdict
+
+    for ctau in sorted(ctau_data.keys()):
+        mdict     = ctau_data[ctau]
+        masses    = _sorted_masses(mdict)
+        if not masses:
+            continue
+        mass_vals = [int(m) for m in masses]
+        scales    = [_sig_scale_fb(proc, m) for m in masses]
+
+        fig, ax = plt.subplots(figsize=(8, 6))
+        drew = False
+
+        # AsymptoticLimits: median + ±1σ/2σ bands
+        as_idx  = [i for i, m in enumerate(masses) if "AsymptoticLimits" in mdict[m]]
+        if as_idx:
+            as_mv   = [mass_vals[i] for i in as_idx]
+            as_sc   = [scales[i]    for i in as_idx]
+            as_lims = [mdict[masses[i]]["AsymptoticLimits"] for i in as_idx]
+            as_exp  = [l["exp"] * s for l, s in zip(as_lims, as_sc)]
+            as_dn1  = [l["dn1"] * s for l, s in zip(as_lims, as_sc)] if all("dn1" in l for l in as_lims) else None
+            as_up1  = [l["up1"] * s for l, s in zip(as_lims, as_sc)] if all("up1" in l for l in as_lims) else None
+            as_dn2  = [l.get("dn2", l["dn1"]) * s for l, s in zip(as_lims, as_sc)] if as_dn1 else None
+            as_up2  = [l.get("up2", l["up1"]) * s for l, s in zip(as_lims, as_sc)] if as_up1 else None
+            if as_dn2 and as_up2:
+                ax.fill_between(as_mv, as_dn2, as_up2, alpha=0.15, color=_AS_COLOR, edgecolor="none")
+            if as_dn1 and as_up1:
+                ax.fill_between(as_mv, as_dn1, as_up1, alpha=0.35, color=_AS_COLOR, edgecolor="none")
+            ax.plot(as_mv, as_exp, color=_AS_COLOR, lw=2, ls="--", label="Asymptotic exp.", zorder=4)
+            drew = True
+
+        # HybridNew: median only (solid, marker at missing points)
+        hn_idx  = [i for i, m in enumerate(masses) if "HybridNew" in mdict[m]]
+        if hn_idx:
+            hn_mv   = [mass_vals[i] for i in hn_idx]
+            hn_sc   = [scales[i]    for i in hn_idx]
+            hn_lims = [mdict[masses[i]]["HybridNew"] for i in hn_idx]
+            hn_exp  = [l["exp"] * s for l, s in zip(hn_lims, hn_sc)]
+            ax.plot(hn_mv, hn_exp, color=_HN_COLOR, lw=2.5, ls="-",
+                    marker="o", ms=5, label="HybridNew exp.", zorder=5)
+            drew = True
+
+        if not drew:
+            plt.close(fig)
+            continue
+
+        _draw_ref_curve_vsmass(ax, proc)
+        ax.set_yscale("log")
+        ax.set_xlabel(_mass_xlabel(proc))
+        ax.set_ylabel(_ylabel(proc))
+        ax.set_title(r"$c\tau = %s$" % _format_ctau(ctau), fontsize=12)
+        ax.legend(fontsize=10)
+        ax.grid(True, which="both", ls=":", alpha=0.4)
+        _cms_label(ax)
+        _annotate_proc(ax, proc)
+        ctau_tag = _format_ctau(ctau).replace(".", "p")
+        _save(fig, os.path.join(out_dir, "%s_compare_%s.pdf" % (proc, ctau_tag)))
+
+
+# ---------------------------------------------------------------------------
+# Comparison 2D: color map + HybridNew contour + Asymptotic contour
+# ---------------------------------------------------------------------------
+
+def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fname_suffix=""):
+    """2D comparison: HybridNew color map with both exclusion contours overlaid."""
+    masses = _sorted_masses(mass_data_m)
+    ctau_counts = {m: len(mass_data_m[m]) for m in masses}
+    max_n  = max(ctau_counts.values())
+    min_n  = max(3, max_n - 1) if proc in _SUSY_PROCS else 2
+    masses = [m for m in masses if ctau_counts[m] >= min_n]
+    ctaus_all = sorted(set.union(*[set(mass_data_m[m].keys()) for m in masses]))
+
+    if len(masses) < 2 or len(ctaus_all) < 2:
+        print("  Skipping comparison 2D for %s: need at least 2x2 grid" % proc)
+        return
+
+    mass_vals  = np.array([int(m) for m in masses], dtype=float)
+    ctau_vals  = np.array(ctaus_all, dtype=float)
+    scales     = np.array([_sig_scale_fb(proc, m) for m in masses])
+    thresholds = _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=theory_csv)
+
+    grid_hn = np.full((len(ctau_vals), len(mass_vals)), np.nan)
+    grid_as = np.full((len(ctau_vals), len(mass_vals)), np.nan)
+
+    for j, mass in enumerate(masses):
+        for i, ctau in enumerate(ctau_vals):
+            if ctau not in mass_data_m[mass]:
+                continue
+            entry = mass_data_m[mass][ctau]
+            if "HybridNew" in entry:
+                grid_hn[i, j] = entry["HybridNew"]["exp"]
+            if "AsymptoticLimits" in entry:
+                grid_as[i, j] = entry["AsymptoticLimits"]["exp"]
+
+    grid_hn_s = grid_hn * scales[np.newaxis, :]
+    grid_as_s = grid_as * scales[np.newaxis, :]
+
+    # Color map: HybridNew where available, fill Asymptotic for missing cells
+    grid_cmap = np.where(np.isnan(grid_hn_s), grid_as_s, grid_hn_s)
+
+    if proc in _SUSY_PROCS:
+        ratio_cmap = grid_cmap / thresholds[np.newaxis, :]
+        ratio_hn   = grid_hn_s / thresholds[np.newaxis, :]
+        ratio_as   = grid_as_s / thresholds[np.newaxis, :]
+        vmin, vref, vmax = 0.01, 1.0, 100.0
+        cbar_label = r"$\sigma\mathcal{B}^{2}\ /\ \sigma_\mathrm{theory}$  [HybridNew]"
+    else:
+        ratio_cmap = grid_cmap
+        ratio_hn   = grid_hn_s / thresholds[np.newaxis, :]
+        ratio_as   = grid_as_s / thresholds[np.newaxis, :]
+        vmin, vref, vmax = _2D_VSCALE.get(proc, (None, None, None))
+        if vref is None:
+            vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
+            vmin, vmax = vref * 0.05, vref * 200.0
+        cbar_label = _ylabel(proc) + "  [HybridNew]"
+
+    log_ctaus   = np.log10(ctau_vals)
+    log_ctau_lo = log_ctaus[0] - 0.7
+    fine_lct    = np.linspace(log_ctau_lo, log_ctaus[-1], 200)
+    fine_mass   = np.linspace(mass_vals[0], mass_vals[-1], 200)
+    fine_ctau   = 10.0 ** fine_lct
+
+    fine_cmap    = _interp_grid(log_ctaus, mass_vals, ratio_cmap, fine_lct, fine_mass)
+    fine_ratio_hn = _interp_grid(log_ctaus, mass_vals, ratio_hn,   fine_lct, fine_mass)
+    fine_ratio_as = _interp_grid(log_ctaus, mass_vals, ratio_as,   fine_lct, fine_mass)
+
+    n_half = 30
+    levels = np.concatenate([
+        np.logspace(np.log10(vmin), np.log10(vref), n_half + 1)[:-1],
+        np.logspace(np.log10(vref), np.log10(vmax), n_half + 1),
+    ])
+    norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
+    cmap = plt.get_cmap("RdBu_r")
+    _all_nice = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
+                 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
+                 10000, 20000, 50000, 100000]
+    _nice_ticks = [t for t in _all_nice if vmin <= t <= vmax]
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+
+    if fine_cmap is not None:
+        cf = ax.contourf(fine_ctau, fine_mass, fine_cmap.T,
+                         levels=levels, norm=norm, cmap=cmap, extend="both")
+        cbar = plt.colorbar(cf, ax=ax, pad=0.02)
+        cbar.set_label(cbar_label, fontsize=11)
+        cbar.set_ticks(_nice_ticks)
+        cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
+        cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+
+    if fine_ratio_hn is not None:
+        ax.contour(fine_ctau, fine_mass, fine_ratio_hn.T, levels=[1.0],
+                   colors=[_HN_COLOR], linewidths=[2.5], linestyles=["solid"])
+        ax.plot([], [], color=_HN_COLOR, lw=2.5, ls="-", label="HybridNew exp.")
+
+    if fine_ratio_as is not None:
+        ax.contour(fine_ctau, fine_mass, fine_ratio_as.T, levels=[1.0],
+                   colors=[_AS_COLOR], linewidths=[2.0], linestyles=["dashed"])
+        ax.plot([], [], color=_AS_COLOR, lw=2.0, ls="--", label="Asymptotic exp.")
+
+    for j, mass in enumerate(masses):
+        for i, ctau in enumerate(ctau_vals):
+            ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
+
+    y_pad = max(3.0, (mass_vals[-1] - mass_vals[0]) * 0.08)
+    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + y_pad)
+    ax.set_xscale("log")
+    ax.set_xlim(10.0 ** log_ctau_lo, 10.0 ** (log_ctaus[-1] + 0.25))
+    ax.set_xlabel(r"$c\tau$ [mm]")
+    ax.set_ylabel("Mass [GeV]")
+    ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
+    ax.grid(True, which="both", ls=":", alpha=0.3)
+    _cms_label(ax)
+    _annotate_proc(ax, proc)
+    _save(fig, os.path.join(out_dir, "%s_2D_compare%s.pdf" % (proc, fname_suffix)))
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -779,10 +1073,12 @@ def main():
     global COMBINE_OUT
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out-dir",     default=PLOT_DIR)
-    ap.add_argument("--combine-out", default=COMBINE_OUT)
-    ap.add_argument("--subset",      default=None,
+    ap.add_argument("--out-dir",        default=PLOT_DIR)
+    ap.add_argument("--combine-out",    default=COMBINE_OUT)
+    ap.add_argument("--subset",         default=None,
                     help="Comma-separated process names to plot")
+    ap.add_argument("--comparison-dir", default=None,
+                    help="If set, write HybridNew vs Asymptotic comparison plots here")
     args = ap.parse_args()
 
     COMBINE_OUT = args.combine_out
@@ -829,6 +1125,25 @@ def main():
                     fname_suffix="_ewk")
 
     print("\nDone. Plots saved to %s" % args.out_dir)
+
+    if args.comparison_dir:
+        os.makedirs(args.comparison_dir, exist_ok=True)
+        print("\n--- Generating HybridNew vs Asymptotic comparison plots ---")
+        data_m = collect_all_methods()
+        for proc in sorted(data_m):
+            if proc in _skip_procs:
+                continue
+            if subset and proc not in subset:
+                continue
+            n_pts = sum(len(v) for v in data_m[proc].values())
+            print("\n%s:  %d hypotheses" % (proc, n_pts))
+            plot_comparison_1d_per_ctau(proc, data_m[proc], args.comparison_dir)
+            plot_comparison_2d(proc, data_m[proc], args.comparison_dir, hepdata)
+            if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
+                plot_comparison_2d(proc, data_m[proc], args.comparison_dir, hepdata,
+                                   theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
+                                   fname_suffix="_ewk")
+        print("\nComparison plots saved to %s" % args.comparison_dir)
 
 
 if __name__ == "__main__":

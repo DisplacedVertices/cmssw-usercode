@@ -108,10 +108,11 @@ def turn_info_to_line(ns_name, ns_type, strls, write_sig):
         nuis_seg += dash if strls[i] is None else pad(str(strls[i]), 7, False)
 
     new_line += pad(ns_name, 30) + pad(ns_type, 5)
+    dash_tag = "DASH%d" % nbins
     if write_sig is True:
-        new_line += nuis_seg + return_sep() + "DASH3"
+        new_line += nuis_seg + return_sep() + dash_tag
     elif write_sig is False:
-        new_line += "DASH3" + return_sep() + nuis_seg
+        new_line += dash_tag + return_sep() + nuis_seg
     else:
         raise Exception("Specify whether to write signal or bkg")
     return new_line
@@ -130,7 +131,7 @@ def turn_info_to_nlines(ns_names, ns_type, strls, write_sig):
 
 def return_no_dashes(template):
     new_template = template
-    for d in range(4):
+    for d in range(nbins + 1):
         new_template = new_template.replace("DASH%i" % d, d * pad("-", 7, False))
     return new_template
 
