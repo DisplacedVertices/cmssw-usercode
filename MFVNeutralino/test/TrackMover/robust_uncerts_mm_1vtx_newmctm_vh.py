@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 from JMTucker.Tools.ROOTTools import *
 
 import ROOT
@@ -159,6 +160,7 @@ def assessRatioEffPropagateUncerts(den, num): #To report pseudo-data efficiency 
 
 def assessCorrelatedDiffEffUncerts(eff_pseudo, eff_sig, denominator): #To report difference error in pseudo-data efficiency and signal efficiency that are correlated 
     # eff is normalized to 1 
+    #print math.sqrt(math.fabs(eff_pseudo*denominator - eff_sig*denominator))/denominator
     rat_err = round (math.sqrt(math.fabs(eff_pseudo*denominator - eff_sig*denominator))/denominator, 2)  
 
     return rat_err
@@ -246,15 +248,20 @@ def calcTocShiftUncert(low, cent, hi):
 # Initialize stuff:
 
 years = [ '20161p2', '2017p8'] #FIXME
+#years = [ '2017p8'] #FIXME
 doShift  = True
 reweight = True
 #toc_shift = 0.0   # How much to move the turn-on curve by
 #shift_fr  = 0.0   # How much to slide the closeseedtk dist by (decimal part)
 #shift_val = 0     # How much to slide the closeseedtk dist by (integer part)
 
-masses = ['55'] 
-mass = '55'
+mass = str(sys.argv[1])
+
+if mass != '15' and mass != '40' and mass != '55' :
+    sys.exit("invalid mass %s" % mass)
+
 ctaus       = [ '300', '1000', '3000', '10000', '30000'] #missing 100 ['1000', '3000', '30000'] 
+#ctaus       = [ '1000'] #missing 100 ['1000', '3000', '30000'] 
 psd_methods = ['none', 'slide_distr', 'scale_distr', 'scale_toc'] # 'trackrescl']
 
 
@@ -280,14 +287,25 @@ list_err = []
 list_err_2 = []
 list_relerr = []
 list_relerr_2 = []
+list_data_MC_ratio = []
+list_data_MC_ratio_2 = []
+list_new_err = []
+list_new_err_2 = []
+list_new_relerr = []
+list_new_relerr_2 = []
+
 for year in years:  
   for ctau in ctaus:
     possible_eta = { "Low" : 0, "Mix" : 0, "High": 0 }
     eff_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
     err_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
+    new_err_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
+    data_MC_ratio_eta = { "Low" : 0.0, "Mix" : 0.0, "High": 0.0 }
+    data_MC_ratio_mass_tau = 0.0
     tot_err_mass_tau = 0.0
     tot_eff_mass_tau = 0.0
     for eta in ['Low','Mix','High']:
+    #for eta in ['Low']:
 
         effArray = []
         errArray = []
@@ -519,6 +537,7 @@ for year in years:
 
                 err_signon = assessSignalEffUncerts(pre_signon_dist, signon_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
                 err_sigovp = assessSignalEffUncerts(pre_sigovp_dist, sigovp_dist)#assessRatioEffPropagateUncerts(pre_signon_dist, signon_dist) #FIXME NOW
+                #print "err_signon %.2f, eff_signon %.2f, err_sigovp %.2f, eff_sigovp %.2f" % (err_signon, eff_signon, err_sigovp, eff_sigovp)
                 err_sig = np.sqrt((err_signon/eff_signon)**2 +  (err_sigovp/eff_sigovp)**2)
                 
                 err_psd = assessRatioEffPropagateUncerts(pre_psd_dist, psd_dist)
@@ -544,23 +563,29 @@ for year in years:
                     is0 = dat_den.IntegralAndError(0,200,es0)
                     none_tmdat_integral = round(is0,2)
                     err_none_tmdat_integral = round(es0,2)
-                    err_none_tmdat_eff = 0.0 #FIXME assessRatioEffPropagateUncerts(pre_tmdat_dist, tmdat_dist) #FIXME NOW
+                    err_none_tmdat_eff = assessRatioEffPropagateUncerts(pre_tmdat_dist, tmdat_dist)
                     es1 = ROOT.Double(0) 
                     is1 = sim_den.IntegralAndError(0,200,es1)
                     none_tmmc_integral = round(is1,2)
                     err_none_tmmc_integral = round(es1,2)
-                    err_none_tmmc_eff = 0.0 #FIXME assessRatioEffPropagateUncerts(pre_tmmc_dist, tmmc_dist) #FIXME NOW
+                    err_none_tmmc_eff = assessRatioEffPropagateUncerts(pre_tmmc_dist, tmmc_dist)
 
                 else:
                     DiffeffArray.append(eff_psd - effArray[0])
                     DifferrArray.append(assessCorrelatedDiffEffUncerts(eff_psd, effArray[0], none_signon_integral))
                     DiffeffArray_emu.append(eff_psd_emu - effArray_emu[0])
+                    #print "CHECK assessCorrelatedDiffEffUncerts(eff_psd_emu, effArray_emu[0], none_signon_integral): ", assessCorrelatedDiffEffUncerts(eff_psd_emu, effArray_emu[0], none_signon_integral), eff_psd_emu, effArray_emu[0], none_signon_integral
                     DifferrArray_emu.append(assessCorrelatedDiffEffUncerts(eff_psd_emu, effArray_emu[0], none_signon_integral))
 
         print("Probe Data-to-MC Overall effciency difference \n")
         print("Total TM MC %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f) and Total TM Data %.2f +/- %.2f (w/ Eff. %.2f +/- %.2f)\n" % (none_tmmc_integral, err_none_tmmc_integral, 100*none_tmmc_eff, 100*err_none_tmmc_eff, none_tmdat_integral, err_none_tmdat_integral, 100*none_tmdat_eff, 100*err_none_tmdat_eff))
         print(" Mass: %s GeV  Ctau: %s um  Year: %s   Eta: %s" % (mass, ctau, year, eta))
-        print(" Data/MC efficiency ratio is: %.2f +/- %.2f" % (none_tmdat_eff/none_tmmc_eff, none_tmdat_eff/none_tmmc_eff*math.sqrt( (err_none_tmdat_eff/none_tmdat_eff)**2 + (err_none_tmmc_eff/none_tmmc_eff)**2 )))
+        #print(" Data/MC efficiency ratio is: %.2f +/- %.2f" % (none_tmdat_eff/none_tmmc_eff, none_tmdat_eff/none_tmmc_eff*math.sqrt( (err_none_tmdat_eff/none_tmdat_eff)**2 + (err_none_tmmc_eff/none_tmmc_eff)**2 )))
+        data_MC_ratio = none_tmdat_eff/none_tmmc_eff
+        data_MC_ratio_stat_unc = none_tmdat_eff/none_tmmc_eff*math.sqrt( (err_none_tmdat_eff/none_tmdat_eff)**2 + (err_none_tmmc_eff/none_tmmc_eff)**2 )
+        print(" 1 - Data/MC efficiency ratio is: %.2f +/- %.2f percent" % ( 100*(1-data_MC_ratio), 100*data_MC_ratio_stat_unc))
+        data_MC_ratio_eta[eta] = data_MC_ratio
+
         for i in range(1,len(psd_methods)):
             if (i == 1 or i==3):
                dataMC_unc +=  (-100*DiffeffArray[i-1]/effArray[0])**2
@@ -569,10 +594,18 @@ for year in years:
         for i in range(1,len(psd_methods)):
             if (i == 3):
                emulate_unc += (-100*DiffeffArray_emu[i-1]/effArray_emu[0])**2
+               #print "CHECK: DifferrArray_emu[i-1] %.2f, effArray_emu[0] %.2f" % (DifferrArray_emu[i-1], effArray_emu[0])
                stat_unc = (-100*DifferrArray_emu[i-1]/effArray_emu[0])**2 
                print("%s pseudo emulating eff %.2f +/- %.2f \t pseudo emulating eff - novp. sig eff %.2f +/- %.2f \t 1-ratio %.2f +/- %.2f \n" % (psd_methods[i],100*effArray_emu[i], 100*errArray_emu[i], 100*DiffeffArray_emu[i-1], 100*DifferrArray_emu[i-1], -100*DiffeffArray_emu[i-1]/effArray_emu[0], -100*DifferrArray_emu[i-1]/effArray_emu[0]))
         #print("Probe overlapped LLPs \n")
 
+        print "New data_MC_ratio_stat_unc %.2f %%" % (100*data_MC_ratio_stat_unc)
+        iso_tot_unc_new = np.sqrt( (100*data_MC_ratio_stat_unc)**2 + emulate_unc) # note emulate_unc is actually a squared quantity already
+
+        # Old "stat_unc" appears to be related (at least in part) to the signal MC stat uncertainty, and is tiny for the 55 GeV VH samples. let's see if it matters anywhere at all, otherwise we ignore it.
+        print "Old dataMC_unc %.2f %%" % math.sqrt(dataMC_unc)
+        print "Old stat_unc %.2f %%" % math.sqrt(stat_unc)
+        print "Old (and current) emulate_unc %.2f %%" % math.sqrt(emulate_unc)
         iso_tot_unc = np.sqrt(dataMC_unc + stat_unc + emulate_unc) 
 
         #print("pseudo slide dvv eff %.2f +/- %.2f \t pseudo slide dvv eff - dvv eff %.2f \t 1-ratio %.2f \n" % (100*eff_psd_dvv, 100*err_psd_dvv, 100*(eff_psd_dvv-eff_dvv), 100*(1-(eff_psd_dvv/eff_dvv))))
@@ -588,47 +621,74 @@ for year in years:
         dvv_unc = dvv_unc*100 #FIXME
         ovp_unc = ovp_unc*100 #FIXME
 
-        tot_err = np.sqrt(ovp_unc**2 + dvv_unc**2 + iso_tot_unc**2)
-        #print( " Weighted Iso. & Ovp. LLP Unc. : %.2f %%" %(tot_err))
-        err_eta[eta] = tot_err 
-        #print(eta, " 1-vtx err. ", tot_err)
+        old_tot_err = np.sqrt(ovp_unc**2 + dvv_unc**2 + iso_tot_unc**2)
+        new_tot_err = np.sqrt(ovp_unc**2 + dvv_unc**2 + iso_tot_unc_new**2)
+        #print( " Weighted Iso. & Ovp. LLP Unc. : %.2f %%" %(old_tot_err))
+        err_eta[eta] = old_tot_err 
+        new_err_eta[eta] = new_tot_err 
+        #print(eta, " 1-vtx err. ", old_tot_err)
         #print("\n")
 
     print("\n")
     tot_possible = possible_eta['Low'] + possible_eta['Mix'] + possible_eta['High']
     frac_low = possible_eta['Low']/tot_possible
     print('frac low = ', frac_low)
-    print('err low = ', err_eta['Low'])
+    print('old err low = ', err_eta['Low'])
+    print('new err low = ', new_err_eta['Low'])
     frac_mix = possible_eta['Mix']/tot_possible
     print('frac mix = ', frac_mix)
-    print('err mix = ', err_eta['Mix'])
+    print('old err mix = ', err_eta['Mix'])
+    print('new err mix = ', new_err_eta['Mix'])
     frac_high = possible_eta['High']/tot_possible
     print('frac high = ', frac_high)
-    print('err high = ', err_eta['High'])
+    print('old err high = ', err_eta['High'])
+    print('new err high = ', new_err_eta['High'])
+    data_MC_ratio_mass_tau = frac_low*(data_MC_ratio_eta['Low']) + frac_mix*(data_MC_ratio_eta['Mix']) + frac_high*(data_MC_ratio_eta['High'])
+    new_tot_err_mass_tau = frac_low*(new_err_eta['Low']**2) + frac_mix*(new_err_eta['Mix']**2) + frac_high*(new_err_eta['High']**2)
+
     tot_err_mass_tau = frac_low*(err_eta['Low']**2) + frac_mix*(err_eta['Mix']**2) + frac_high*(err_eta['High']**2)
     tot_eff_mass_tau = frac_low*(eff_eta['Low']) + frac_mix*(eff_eta['Mix']) + frac_high*(eff_eta['High'])
+    # JPR FIXME: note that the new relative uncertainty is an uncertainty on the signal eff, not the SF itself.
+    # SF_abs_uncertainty = SF * (eff_signal_MC_abs_uncertainty / eff_signal_MC) = SF * eff_signal_MC_relative_uncertainty
+    # oh wait, so the SF_relative_uncertainty = SF_abs_uncertainty/SF = eff_signal_MC_relative_uncertainty ?? Double check.
+    #
+    # okay yes:
+    # SF +/- SF_err = SF +/- SF *eff_MC_err/eff_MC ==> rel_SF_err = eff_MC_err/eff_MC
+    print( " Weighted #eta 1-vtx Data/MC ratio : %.2f %%" %(data_MC_ratio_mass_tau*100))
+    print( " Weighted #eta 1-vtx Rel.Unc. (new) : %.2f %%" %(np.sqrt(new_tot_err_mass_tau)))
+    print( " Weighted #eta 1-vtx Abs.Unc. on the Data/MC ratio (new) : %.2f %%" %(data_MC_ratio_mass_tau*np.sqrt(new_tot_err_mass_tau)))
+
     print( " Weighted #eta 1-vtx Eff. : %.2f %%" %(tot_eff_mass_tau*100))
-    print( " Weighted #eta 1-vtx Rel.Unc. : %.2f %%" %(np.sqrt(tot_err_mass_tau)))
-    print( " Weighted #eta 1-vtx Abs.Unc. : %.2f %%" %(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau)))
+    print( " Weighted #eta 1-vtx Rel.Unc. (old) : %.2f %%" %(np.sqrt(tot_err_mass_tau)))
+    print( " Weighted #eta 1-vtx Abs.Unc. (old) : %.2f %%" %(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau)))
     if year=='20161p2':
       list_eff.append(tot_eff_mass_tau*100)
       list_err.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
       list_relerr.append(np.sqrt(tot_err_mass_tau))
+
+      list_data_MC_ratio.append(data_MC_ratio_mass_tau*100)
+      list_new_err.append(data_MC_ratio_mass_tau*np.sqrt(new_tot_err_mass_tau))
+      list_new_relerr.append(np.sqrt(new_tot_err_mass_tau))
     else:
       list_eff_2.append(tot_eff_mass_tau*100)
       list_err_2.append(tot_eff_mass_tau*np.sqrt(tot_err_mass_tau))
       list_relerr_2.append(np.sqrt(tot_err_mass_tau))
-ps = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
+
+      list_data_MC_ratio_2.append(data_MC_ratio_mass_tau*100)
+      list_new_err_2.append(data_MC_ratio_mass_tau*np.sqrt(new_tot_err_mass_tau))
+      list_new_relerr_2.append(np.sqrt(new_tot_err_mass_tau))
+
+ps = plot_saver(plot_dir('TM_Results_June5_2026_VH_m%s' % mass), size=(700,600), pdf=True, log=False)
 canvas = ps.c
 canvas.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
 x = array('d', np.asarray(list_ctau))
-y = array('d', np.asarray(list_eff))
+y = array('d', np.asarray(list_eff)*np.asarray(list_data_MC_ratio)/100.)
 ex = array('d', [ 0.0, 0.0, 0.0, 0.0, 0.0])
-ey = array('d', np.asarray(list_err))
+ey = array('d', np.asarray(list_eff)*np.asarray(list_new_relerr)/100.)
 
-y2 = array('d', np.asarray(list_eff_2))
-ey2 = array('d', np.asarray(list_err_2))
+y2 = array('d', np.asarray(list_eff_2)*np.asarray(list_data_MC_ratio_2)/100.)
+ey2 = array('d', np.asarray(list_eff_2)*np.asarray(list_new_relerr_2)/100.)
 # Create a TGraphErrors object
 gr = ROOT.TGraphErrors(len(x), x, y, ex, ey)
 gr2 = ROOT.TGraphErrors(len(x), x, y2, ex, ey2)
@@ -638,14 +698,14 @@ gr.SetMarkerColor(ROOT.kBlue)
 gr.SetMarkerStyle(20)
 gr.SetLineColor(ROOT.kBlue)
 gr.GetYaxis().SetRangeUser(0.0, 100.0)
-gr.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay")
+gr.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay, post SF")
 # Draw the graph
 gr.Draw("AP")
 gr2.SetMarkerColor(ROOT.kRed)
 gr2.SetMarkerStyle(20)
 gr2.SetLineColor(ROOT.kRed)
 gr2.GetYaxis().SetRangeUser(0.0, 100.0)
-gr2.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay")
+gr2.GetYaxis().SetTitle("1-vtx efficiency for an LLP decay, post SF")
 gr2.Draw("P")
 #canvas.SetLogx()
 
@@ -673,15 +733,14 @@ p.Draw()
 ROOT.gPad.Modified()
 ROOT.gPad.Update()
 canvas.Update()
-ps.save('vhss_'+str(mass)+'GeV_mmCtau')
+ps.save('vhss_'+str(mass)+'GeV_mmCtau_eff')
 
 
-ps2 = plot_saver(plot_dir('TM_Results_March4'), size=(700,600), pdf=True, log=False)
-canvas2 = ps2.c
+canvas2 = ps.c
 canvas2.SetBottomMargin(0.15)
 # Create arrays for x, y, x errors, and y errors
-relerr_y1 = array('d', np.asarray(list_relerr))
-relerr_y2 = array('d', np.asarray(list_relerr_2))
+relerr_y1 = array('d', np.asarray(list_new_relerr))
+relerr_y2 = array('d', np.asarray(list_new_relerr_2))
 # Create a TGraphErrors object
 gr = ROOT.TGraph(len(x), x, relerr_y1)
 gr2 = ROOT.TGraph(len(x), x, relerr_y2)
@@ -691,14 +750,14 @@ gr.SetMarkerColor(ROOT.kBlue)
 gr.SetMarkerStyle(20)
 gr.SetLineColor(ROOT.kBlue)
 gr.GetYaxis().SetRangeUser(0.0, 100.0)
-gr.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency")
+gr.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency (based on SF)")
 # Draw the graph
 gr.Draw("AP")
 gr2.SetMarkerColor(ROOT.kRed)
 gr2.SetMarkerStyle(20)
 gr2.SetLineColor(ROOT.kRed)
 gr2.GetYaxis().SetRangeUser(0.0, 100.0)
-gr2.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency")
+gr2.GetYaxis().SetTitle("1-vtx relative uncertainty for LLP-decay efficiency (based on SF)")
 gr2.Draw("P")
 #canvas.SetLogx()
 
@@ -726,4 +785,62 @@ p.Draw()
 ROOT.gPad.Modified()
 ROOT.gPad.Update()
 canvas2.Update()
-ps2.save('vhss_'+str(mass)+'GeV_mmCtau_relerr')
+ps.save('vhss_'+str(mass)+'GeV_mmCtau_relerr')
+
+
+
+canvas = ps.c
+canvas.SetBottomMargin(0.15)
+# Create arrays for x, y, x errors, and y errors
+x = array('d', np.asarray(list_ctau))
+y = array('d', np.asarray(list_data_MC_ratio))
+ex = array('d', [ 0.0, 0.0, 0.0, 0.0, 0.0])
+ey = array('d', np.asarray(list_new_err))
+
+y2 = array('d', np.asarray(list_data_MC_ratio_2))
+ey2 = array('d', np.asarray(list_new_err_2))
+# Create a TGraphErrors object
+gr = ROOT.TGraphErrors(len(x), x, y, ex, ey)
+gr2 = ROOT.TGraphErrors(len(x), x, y2, ex, ey2)
+
+# Set graph attributes
+gr.SetMarkerColor(ROOT.kBlue)
+gr.SetMarkerStyle(20)
+gr.SetLineColor(ROOT.kBlue)
+gr.GetYaxis().SetRangeUser(0.0, 100.0)
+gr.GetYaxis().SetTitle("1-vtx data-to-MC efficiency ratio (SF)")
+# Draw the graph
+gr.Draw("AP")
+gr2.SetMarkerColor(ROOT.kRed)
+gr2.SetMarkerStyle(20)
+gr2.SetLineColor(ROOT.kRed)
+gr2.GetYaxis().SetRangeUser(0.0, 100.0)
+gr2.GetYaxis().SetTitle("1-vtx data-to-MC efficiency ratio (SF)")
+gr2.Draw("P")
+#canvas.SetLogx()
+
+gr.SetTitle("pre(post)-VFP 2016");
+gr2.SetTitle("2017+2018");
+ROOT.gPad.BuildLegend(0.42,0.195,0.70,0.335,"","p");
+gr.SetTitle("VH->SS with LLP of "+str(mass)+" GeV")
+xax = gr.GetXaxis()
+
+for i in range(len(list_ctau)):
+    bin_ind = xax.FindBin(list_ctau[i])
+    xax.SetBinLabel(bin_ind, str(math.pow(10,list_ctau[i]))+" mm ")
+    xax.ChangeLabel(bin_ind, 30.0)
+
+
+p = ROOT.TPaveText(0.013, 0.080, 0.105, 0.120, "brNDC")
+p.SetFillColor(ROOT.kWhite)
+p.SetTextFont(42)
+p.SetTextAlign(12)
+p.AddText("c#tau")
+p.SetTextSize(0.04)
+p.SetBorderSize(0)
+p.Draw()
+# Update the canvas
+ROOT.gPad.Modified()
+ROOT.gPad.Update()
+canvas.Update()
+ps.save('vhss_'+str(mass)+'GeV_mmCtau_SF')
