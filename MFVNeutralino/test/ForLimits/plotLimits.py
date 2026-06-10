@@ -86,7 +86,7 @@ PROC_LABELS = {
     "ggHToSSTodddd":       r"ggH,  H$\to$SS$\to$dddd",
     "ttHToLLPs_bbbb":      r"ttH,  H$\to$SS$\to$bbbb",
     "ttHToLLPs_dddd":      r"ttH,  H$\to$SS$\to$dddd",
-    "mfv_neu":             r"RPV SUSY,  $\tilde{g}\to qqq$",
+    "mfv_neu":             r"RPV SUSY,  $\tilde{g}\to tbs$",
     "mfv_stopdbardbar":    r"RPV SUSY,  $\tilde{t}\to\bar{d}\bar{d}$",
     "mfv_stopbbarbbar":    r"RPV SUSY,  $\tilde{t}\to\bar{b}\bar{b}$",
 }
@@ -643,7 +643,14 @@ def _interp_grid(log_ctaus, mass_vals, grid, fine_lct, fine_mass):
     g = grid.copy()
     if np.all(np.isnan(g)):
         return None
-    # fill missing cells with a large cap so contour at r=1 can still be drawn
+    # Interpolate interior NaN holes along ctau per mass column before capping edges
+    x_all = np.arange(g.shape[0])
+    for j in range(g.shape[1]):
+        col = g[:, j]
+        valid = ~np.isnan(col)
+        if valid.sum() >= 2 and not valid.all():
+            g[:, j] = np.interp(x_all, x_all[valid], col[valid])
+    # fill remaining edge NaNs with a large cap so contour at r=1 can still be drawn
     cap = max(200.0, float(np.nanmax(g)) * 2.0)
     g[np.isnan(g) | (g <= 0)] = cap
     sp = RectBivariateSpline(log_ctaus, mass_vals, np.log10(g), kx=1, ky=1)
@@ -869,13 +876,15 @@ def collect_all_methods():
 # Comparison 1D: one plot per ctau, HybridNew median vs Asymptotic median+bands
 # ---------------------------------------------------------------------------
 
-def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir):
+def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir, hepdata=None):
     """Per-ctau 1D vs mass: HybridNew median (blue) + Asymptotic median+bands (red)."""
     # Invert to {ctau -> {mass -> {method -> lims}}}
     ctau_data = {}
     for mass, cdict in mass_data_m.items():
         for ctau, mdict in cdict.items():
             ctau_data.setdefault(ctau, {})[mass] = mdict
+
+    hd = hepdata.get(proc) if hepdata else None
 
     for ctau in sorted(ctau_data.keys()):
         mdict     = ctau_data[ctau]
@@ -916,6 +925,18 @@ def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir):
             ax.plot(hn_mv, hn_exp, color=_HN_COLOR, lw=2.5, ls="-",
                     marker="o", ms=5, label="HybridNew exp.", zorder=5)
             drew = True
+
+        # HepData reference (EXO-19-013), where available for this ctau
+        if hd is not None:
+            hd_masses_sl, hd_r_sl = _hepdata_slice_at_ctau(hd, ctau)
+            if hd_masses_sl is not None:
+                hd_masses_sl = np.array(hd_masses_sl)
+                hd_r_sl      = np.array(hd_r_sl)
+                keep = hd_r_sl > 0
+                if np.any(keep):
+                    ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color="black", lw=1.5, ls="-",
+                            label="High-HT obs. (EXO-19-013)", zorder=3)
+                    drew = True
 
         if not drew:
             plt.close(fig)
@@ -1123,7 +1144,7 @@ def main():
                 continue
             n_pts = sum(len(v) for v in data_m[proc].values())
             print("\n%s:  %d hypotheses" % (proc, n_pts))
-            plot_comparison_1d_per_ctau(proc, data_m[proc], args.comparison_dir)
+            plot_comparison_1d_per_ctau(proc, data_m[proc], args.comparison_dir, hepdata)
             plot_comparison_2d(proc, data_m[proc], args.comparison_dir, hepdata)
             if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
                 plot_comparison_2d(proc, data_m[proc], args.comparison_dir, hepdata,
