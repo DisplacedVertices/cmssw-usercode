@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 import helper_PyStorage_objects as sth
