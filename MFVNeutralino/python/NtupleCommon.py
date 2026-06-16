@@ -1,11 +1,11 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = '_tag001' # this is our ntuple numbering scheme, and we should make tags of our code each time
+ntuple_version_ = '_tag002' # this is our ntuple numbering scheme, and we should make tags of our code each time
 
 # trigger schemes we are currently using
-use_btag_vetoLepHT_triggers = True
-use_Lepton_triggers = False
+use_btag_vetoLepHT_triggers = False
+use_Lepton_triggers = True
 
 # trigger schemes for data, to avoid double counting of PDs
 use_Muon_triggers = False
@@ -331,8 +331,17 @@ def miniaod_ntuple_process(settings):
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
         x.track_ref_getter.input_is_miniaod = True
 
+    # Fill compact packedGenParticles -> prunedGenParticles ancestry annotations
+    # on the already-selected MFVVertexAux tracks. These fields ride along in
+    # MFVVertexAux and are copied into the minitree by MFVMiniTreer.
+    for x in process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
+        x.track_gen_matching = settings.is_mc
+        x.track_gen_require_same_charge = True
+        x.packed_gen_particles_src = 'packedGenParticles'
+        x.pruned_gen_particles_src = 'prunedGenParticles'
+
     process.mfvEvent.input_is_miniaod = True
-    process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
+    process.mfvEvent.gen_particles_src = 'prunedGenParticles' # this may be imperfect for gen_bquarks / gen_leptons. May want the packed ones that have status 1 particles, if we revisit these in the future.
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 

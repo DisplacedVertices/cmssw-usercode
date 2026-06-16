@@ -7,6 +7,7 @@ from JMTucker.Tools.Year import year
 
 settings = NtupleSettings()
 settings.is_mc = True # NOTE: you must set this differently when processing data vs. MC!
+#settings.is_mc = False
 settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
@@ -47,10 +48,8 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #set_events(process, [(1, 12002, 31167330)])
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 #input_files(process, '/store/data/Run2017B/MET/MINIAOD/UL2017_MiniAODv2-v1/100000/9B53ACB7-C063-1D44-A564-42435C24DE7B.root')
+input_files(process, '/store/mc/RunIISummer20UL18MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/110000/307A2B60-76A2-3F43-8A2D-FD3E62A0F7EA.root')
 
-# this test file was from the 2017 UL ZH signal below:
-# /store/mc/RunIISummer20UL17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2550000/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root
-input_files(process, '/uscms/home/joeyr/nobackup/13DF01B3-1BC9-0246-8C88-DF26E2F16793.root')
 cmssw_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

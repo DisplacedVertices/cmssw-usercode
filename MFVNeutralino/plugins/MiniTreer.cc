@@ -216,6 +216,55 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //nt.vertices = vertices;
 
+  auto has_track_gen = [](const MFVVertexAux& v, int i) {
+    return i >= 0 &&
+           i < int(v.track_gen_pdgid.size()) &&
+           i < int(v.track_gen_deltapoverp.size()) &&
+           i < int(v.track_gen_mother_key.size()) &&
+           i < int(v.track_gen_mother_pdgid.size()) &&
+           i < int(v.track_gen_b_key.size()) &&
+           i < int(v.track_gen_b_pdgid.size());
+  };
+
+  auto fill_tk0_gen = [&](const MFVVertexAux& v, int i) {
+
+    if (has_track_gen(v, i)) {
+      nt.tk0_gen_pdgid.push_back(v.track_gen_pdgid[i]);
+      nt.tk0_gen_deltapoverp.push_back(v.track_gen_deltapoverp[i]);
+      nt.tk0_gen_mother_key.push_back(v.track_gen_mother_key[i]);
+      nt.tk0_gen_mother_pdgid.push_back(v.track_gen_mother_pdgid[i]);
+      nt.tk0_gen_b_key.push_back(v.track_gen_b_key[i]);
+      nt.tk0_gen_b_pdgid.push_back(v.track_gen_b_pdgid[i]);
+    }
+    else {
+      nt.tk0_gen_pdgid.push_back(0);
+      nt.tk0_gen_deltapoverp.push_back(1e9);
+      nt.tk0_gen_mother_key.push_back(-1);
+      nt.tk0_gen_mother_pdgid.push_back(0);
+      nt.tk0_gen_b_key.push_back(-1);
+      nt.tk0_gen_b_pdgid.push_back(0);
+    }
+  };
+
+  auto fill_tk1_gen = [&](const MFVVertexAux& v, int i) {
+    if (has_track_gen(v, i)) {
+      nt.tk1_gen_pdgid.push_back(v.track_gen_pdgid[i]);
+      nt.tk1_gen_deltapoverp.push_back(v.track_gen_deltapoverp[i]);
+      nt.tk1_gen_mother_key.push_back(v.track_gen_mother_key[i]);
+      nt.tk1_gen_mother_pdgid.push_back(v.track_gen_mother_pdgid[i]);
+      nt.tk1_gen_b_key.push_back(v.track_gen_b_key[i]);
+      nt.tk1_gen_b_pdgid.push_back(v.track_gen_b_pdgid[i]);
+    }
+    else {
+      nt.tk1_gen_pdgid.push_back(0);
+      nt.tk1_gen_deltapoverp.push_back(1e9);
+      nt.tk1_gen_mother_key.push_back(-1);
+      nt.tk1_gen_mother_pdgid.push_back(0);
+      nt.tk1_gen_b_key.push_back(-1);
+      nt.tk1_gen_b_pdgid.push_back(0);
+    }
+  };
+
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];
     nt.nvtx = 1;
@@ -230,8 +279,12 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_dxy.push_back(v0.track_dxy[i]);
+        nt.tk0_rescale_dxyerr.push_back(v0.track_rescale_dxyerr[i]);
+        nt.tk0_dz.push_back(v0.track_dz[i]);
         nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
+        fill_tk0_gen(v0, i);
       }      
     nt.genmatch0 = gen_matches(v0);
     nt.costhtkonlymombs0 = v0.costhmombs(mfv::PTracksOnly);
@@ -259,8 +312,12 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_dxy.push_back(v0.track_dxy[i]);
+        nt.tk0_rescale_dxyerr.push_back(v0.track_rescale_dxyerr[i]);
+        nt.tk0_dz.push_back(v0.track_dz[i]);
         nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
+        fill_tk0_gen(v0, i);
       }      
       for (int i = 0, ie = v1.ntracks(); i < ie; ++i) {
         nt.tk1_qchi2.push_back(v1.track_q(i) * v1.track_chi2[i]);
@@ -271,8 +328,12 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk1_px.push_back(v1.track_px[i]);
         nt.tk1_py.push_back(v1.track_py[i]);
         nt.tk1_pz.push_back(v1.track_pz[i]);
+        nt.tk1_dxy.push_back(v1.track_dxy[i]);
+        nt.tk1_rescale_dxyerr.push_back(v1.track_rescale_dxyerr[i]);
+        nt.tk1_dz.push_back(v1.track_dz[i]);
         nt.tk1_inpv.push_back(v1.track_inpv[i]);
         nt.tk1_cov.push_back(v1.track_cov[i]);
+        fill_tk1_gen(v1, i);
       }      
     }
     nt.genmatch0 = gen_matches(v0);

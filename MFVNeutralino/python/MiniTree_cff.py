@@ -39,7 +39,7 @@ mfvMiniTreeNtk3or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTig
 mfvMiniTreeNtk4or5exact = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5')
 
 # we currently disable the presel tree to save on space (particularly important for backgrounds)
-mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTight', no_tree = cms.bool(True))
+mfvMiniTreePreSelEvtFilt = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3', no_tree = cms.bool(True))
 
 #pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
 #pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)

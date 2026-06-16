@@ -5,6 +5,8 @@
 #include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -55,16 +57,36 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<double> rho_token;
+  const bool track_gen_matching;
+  const bool track_gen_require_same_charge;
+  const edm::EDGetTokenT<std::vector<pat::PackedGenParticle> > packed_gen_particles_token;
+  const edm::EDGetTokenT<reco::GenParticleCollection> pruned_gen_particles_token;
   EffectiveAreas electron_effective_areas;
   const mfv::VertexAuxSorter sorter;
   const bool verbose;
   const std::string module_label;
+
+  struct TrackGenMatch {
+    int packed_idx = -1;
+    int pdgid = 0;
+    float deltapoverp = 1e9;
+    int mother_key = -1;
+    int mother_pdgid = 0;
+    int b_key = -1;
+    int b_pdgid = 0;
+  };
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
   Measurement1D gen_dist(const reco::Vertex&, const std::vector<double>& gen, const bool use3d);
   Measurement1D miss_dist(const reco::Vertex&, const reco::Vertex&, const math::XYZTLorentzVector& mom);
   std::pair<bool, Measurement1D> track_dist(const reco::TransientTrack & t, const reco::Vertex & v);
+  static bool is_bhadron_id(int pdgid);
+  int index_of_pruned(const reco::Candidate* c, const reco::GenParticleCollection& pruned) const;
+  TrackGenMatch match_track_to_gen(const reco::TrackBase& tk,
+                                   const std::vector<pat::PackedGenParticle>& packed,
+                                   const reco::GenParticleCollection& pruned) const;
+  void push_track_gen_match(MFVVertexAux& aux, const TrackGenMatch& m) const;
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
@@ -84,6 +106,10 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+    track_gen_matching(cfg.getParameter<bool>("track_gen_matching")),
+    track_gen_require_same_charge(cfg.getParameter<bool>("track_gen_require_same_charge")),
+    packed_gen_particles_token(consumes<std::vector<pat::PackedGenParticle> >(cfg.getParameter<edm::InputTag>("packed_gen_particles_src"))),
+    pruned_gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("pruned_gen_particles_src"))),
     electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     sorter(cfg.getParameter<std::string>("sort_by")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
@@ -131,6 +157,101 @@ Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco
 std::pair<bool, Measurement1D> MFVVertexAuxProducer::track_dist(const reco::TransientTrack & t, const reco::Vertex & v) { //use 3d by default
   return IPTools::absoluteImpactParameter3D(t, v);
 }
+
+bool MFVVertexAuxProducer::is_bhadron_id(int pdgid) {
+  const int id = std::abs(pdgid);
+  return id > 100 && (((id / 100) % 10) == 5 || ((id / 1000) % 10) == 5);
+}
+
+int MFVVertexAuxProducer::index_of_pruned(const reco::Candidate* c, const reco::GenParticleCollection& pruned) const {
+  if (!c)
+    return -1;
+  for (unsigned i = 0; i < pruned.size(); ++i)
+    if (&pruned[i] == c)
+      return int(i);
+  return -1;
+}
+
+MFVVertexAuxProducer::TrackGenMatch
+MFVVertexAuxProducer::match_track_to_gen(const reco::TrackBase& tk,
+                                         const std::vector<pat::PackedGenParticle>& packed,
+                                         const reco::GenParticleCollection& pruned) const {
+  TrackGenMatch best;
+
+  const double tpx = tk.px();
+  const double tpy = tk.py();
+  const double tpz = tk.pz();
+  const double tp = std::sqrt(tpx*tpx + tpy*tpy + tpz*tpz);
+
+  for (unsigned i = 0; i < packed.size(); ++i) {
+    const pat::PackedGenParticle& gen = packed[i];
+
+    if (gen.charge() == 0)
+      continue;
+    if (track_gen_require_same_charge && gen.charge() != tk.charge())
+      continue;
+
+    const double dpx = gen.px() - tpx;
+    const double dpy = gen.py() - tpy;
+    const double dpz = gen.pz() - tpz;
+    const double dp = std::sqrt(dpx*dpx + dpy*dpy + dpz*dpz);
+    const double rel = tp > 0 ? dp / tp : 1e9;
+
+
+    // skip any matches that are worse than this
+    const double max_deltapoverp = 0.2; // i.e. gen and reco momenta agree within 20% of the reco track's momentum
+    if(rel > max_deltapoverp) continue;
+
+    if (best.packed_idx < 0 || rel < best.deltapoverp) {
+      best.packed_idx = int(i);
+      best.pdgid = gen.pdgId();
+      best.deltapoverp = rel;
+
+      best.mother_key = -1;
+      best.mother_pdgid = 0;
+      best.b_key = -1;
+      best.b_pdgid = 0;
+
+      if (gen.numberOfMothers() > 0) {
+        const reco::GenParticleRef mref = gen.motherRef();
+        if (mref.isNonnull()) {
+          best.mother_key = int(mref.key());
+          best.mother_pdgid = mref->pdgId();
+
+          const reco::Candidate* current = nullptr;
+          if (best.mother_key >= 0 && best.mother_key < int(pruned.size()))
+            current = &pruned[best.mother_key];
+          else
+            current = mref.get();
+
+          for (unsigned depth = 0; current && depth < 50; ++depth) {
+            const int id = std::abs(current->pdgId());
+            if (is_bhadron_id(id)) {
+              best.b_key = index_of_pruned(current, pruned);
+              best.b_pdgid = current->pdgId();
+              break;
+            }
+            if (id == 2212 || current->numberOfMothers() == 0)
+              break;
+            current = current->mother(0);
+          }
+        }
+      }
+    }
+  }
+
+  return best;
+}
+
+void MFVVertexAuxProducer::push_track_gen_match(MFVVertexAux& aux, const TrackGenMatch& m) const {
+  aux.track_gen_pdgid.push_back(m.pdgid);
+  aux.track_gen_deltapoverp.push_back(m.deltapoverp);
+  aux.track_gen_mother_key.push_back(m.mother_key);
+  aux.track_gen_mother_pdgid.push_back(m.mother_pdgid);
+  aux.track_gen_b_key.push_back(m.b_key);
+  aux.track_gen_b_pdgid.push_back(m.b_pdgid);
+}
+
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
@@ -196,6 +317,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   edm::Handle<std::vector<double> > gen_vertices;
   event.getByToken(gen_vertices_token, gen_vertices);
   assert(gen_vertices->size() == 6);
+
+  edm::Handle<std::vector<pat::PackedGenParticle> > packed_gen_particles;
+  edm::Handle<reco::GenParticleCollection> pruned_gen_particles;
+  const bool do_track_gen_matching = track_gen_matching && !event.isRealData();
+  if (do_track_gen_matching) {
+    event.getByToken(packed_gen_particles_token, packed_gen_particles);
+    event.getByToken(pruned_gen_particles_token, pruned_gen_particles);
+  }
 
   edm::Handle<reco::VertexCollection> secondary_vertices;
   event.getByToken(vertex_token, secondary_vertices);
@@ -646,6 +775,11 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_injet.push_back(track_in_a_jet(mfv::JByNtracks, trref)); // JMTBAD multiple jet assoc types
       aux.track_inpv.push_back(pv_for_track == tracks_in_pvs.end() ? -1 : pv_for_track->second);
       aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
+
+      // the only rescaled quantity we need
+      const auto rs = track_rescaler.scale(**trki);
+      aux.track_rescale_dxyerr.push_back(rs.rescaled_tk.dxyError());
+
       aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
       aux.track_vx.push_back(tri->vx());
       aux.track_vy.push_back(tri->vy());
@@ -659,6 +793,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_pt_err.push_back(tri->ptError());
       aux.track_eta.push_back(tri->eta());
       aux.track_phi.push_back(tri->phi());
+      if (do_track_gen_matching)
+        push_track_gen_match(aux, match_track_to_gen(*tri, *packed_gen_particles, *pruned_gen_particles));
+      else
+        push_track_gen_match(aux, TrackGenMatch());
       std::pair<bool, Measurement1D> tkdist = track_dist(sedtri, sv);
       aux.track_tkdist_val.push_back(tkdist.second.value());
       aux.track_tkdist_sig.push_back(tkdist.second.significance());

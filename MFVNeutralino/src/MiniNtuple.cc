@@ -8,9 +8,12 @@
 namespace mfv {
   MiniNtuple::MiniNtuple() {
     clear();
-    p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = 0;
+    p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk0_dxy = p_tk0_rescale_dxyerr = p_tk0_dz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = p_tk1_dxy = p_tk1_rescale_dxyerr = p_tk1_dz = 0;
     p_tk0_inpv = p_tk1_inpv = 0;
     p_tk0_cov = p_tk1_cov = 0;
+    p_tk0_gen_pdgid = p_tk0_gen_mother_key = p_tk0_gen_mother_pdgid = p_tk0_gen_b_key = p_tk0_gen_b_pdgid = 0;
+    p_tk1_gen_pdgid = p_tk1_gen_mother_key = p_tk1_gen_mother_pdgid = p_tk1_gen_b_key = p_tk1_gen_b_pdgid = 0;
+    p_tk0_gen_deltapoverp = p_tk1_gen_deltapoverp = 0;
     p_gen_daughters = p_gen_bquarks = p_gen_leptons = 0;
     p_gen_daughter_id = 0;
     p_misc_weights = 0;
@@ -54,8 +57,17 @@ namespace mfv {
     tk0_px.clear();
     tk0_py.clear();
     tk0_pz.clear();
+    tk0_dxy.clear();
+    tk0_rescale_dxyerr.clear();
+    tk0_dz.clear();
     tk0_inpv.clear();
     tk0_cov.clear();
+    tk0_gen_pdgid.clear();
+    tk0_gen_deltapoverp.clear();
+    tk0_gen_mother_key.clear();
+    tk0_gen_mother_pdgid.clear();
+    tk0_gen_b_key.clear();
+    tk0_gen_b_pdgid.clear();
     tk1_qchi2.clear();
     tk1_ndof.clear();
     tk1_vx.clear();
@@ -64,8 +76,17 @@ namespace mfv {
     tk1_px.clear();
     tk1_py.clear();
     tk1_pz.clear();
+    tk1_dxy.clear();
+    tk1_rescale_dxyerr.clear();
+    tk1_dz.clear();
     tk1_inpv.clear();
     tk1_cov.clear();
+    tk1_gen_pdgid.clear();
+    tk1_gen_deltapoverp.clear();
+    tk1_gen_mother_key.clear();
+    tk1_gen_mother_pdgid.clear();
+    tk1_gen_b_key.clear();
+    tk1_gen_b_pdgid.clear();
     misc_weights.clear();
   }
 
@@ -442,8 +463,17 @@ namespace mfv {
     tree->Branch("tk0_px", &nt.tk0_px);
     tree->Branch("tk0_py", &nt.tk0_py);
     tree->Branch("tk0_pz", &nt.tk0_pz);
+    tree->Branch("tk0_dxy", &nt.tk0_dxy);
+    tree->Branch("tk0_rescale_dxyerr", &nt.tk0_rescale_dxyerr);
+    tree->Branch("tk0_dz", &nt.tk0_dz);
     tree->Branch("tk0_inpv", &nt.tk0_inpv);
     tree->Branch("tk0_cov", &nt.tk0_cov);
+    tree->Branch("tk0_gen_pdgid", &nt.tk0_gen_pdgid);
+    tree->Branch("tk0_gen_deltapoverp", &nt.tk0_gen_deltapoverp);
+    tree->Branch("tk0_gen_mother_key", &nt.tk0_gen_mother_key);
+    tree->Branch("tk0_gen_mother_pdgid", &nt.tk0_gen_mother_pdgid);
+    tree->Branch("tk0_gen_b_key", &nt.tk0_gen_b_key);
+    tree->Branch("tk0_gen_b_pdgid", &nt.tk0_gen_b_pdgid);
     tree->Branch("genmatch0", &nt.genmatch0);
     tree->Branch("costhtkonlymombs0", &nt.costhtkonlymombs0);
     tree->Branch("costhtksjetsntkmombs0", &nt.costhtksjetsntkmombs0);
@@ -461,8 +491,17 @@ namespace mfv {
     tree->Branch("tk1_px", &nt.tk1_px);
     tree->Branch("tk1_py", &nt.tk1_py);
     tree->Branch("tk1_pz", &nt.tk1_pz);
+    tree->Branch("tk1_dxy", &nt.tk1_dxy);
+    tree->Branch("tk1_rescale_dxyerr", &nt.tk1_rescale_dxyerr);
+    tree->Branch("tk1_dz", &nt.tk1_dz);
     tree->Branch("tk1_inpv", &nt.tk1_inpv);
     tree->Branch("tk1_cov", &nt.tk1_cov);
+    tree->Branch("tk1_gen_pdgid", &nt.tk1_gen_pdgid);
+    tree->Branch("tk1_gen_deltapoverp", &nt.tk1_gen_deltapoverp);
+    tree->Branch("tk1_gen_mother_key", &nt.tk1_gen_mother_key);
+    tree->Branch("tk1_gen_mother_pdgid", &nt.tk1_gen_mother_pdgid);
+    tree->Branch("tk1_gen_b_key", &nt.tk1_gen_b_key);
+    tree->Branch("tk1_gen_b_pdgid", &nt.tk1_gen_b_pdgid);
     tree->Branch("genmatch1", &nt.genmatch1);
     tree->Branch("costhtkonlymombs1", &nt.costhtkonlymombs1);
     tree->Branch("costhtksjetsntkmombs1", &nt.costhtksjetsntkmombs1);
@@ -563,8 +602,17 @@ namespace mfv {
     tree->SetBranchAddress("tk0_px", &nt.p_tk0_px);
     tree->SetBranchAddress("tk0_py", &nt.p_tk0_py);
     tree->SetBranchAddress("tk0_pz", &nt.p_tk0_pz);
+    tree->SetBranchAddress("tk0_dxy", &nt.p_tk0_dxy);
+    tree->SetBranchAddress("tk0_rescale_dxyerr", &nt.p_tk0_rescale_dxyerr);
+    tree->SetBranchAddress("tk0_dz", &nt.p_tk0_dz);
     tree->SetBranchAddress("tk0_inpv", &nt.p_tk0_inpv);
     tree->SetBranchAddress("tk0_cov", &nt.p_tk0_cov);
+    if (tree->GetBranch("tk0_gen_pdgid")) tree->SetBranchAddress("tk0_gen_pdgid", &nt.p_tk0_gen_pdgid);
+    if (tree->GetBranch("tk0_gen_deltapoverp")) tree->SetBranchAddress("tk0_gen_deltapoverp", &nt.p_tk0_gen_deltapoverp);
+    if (tree->GetBranch("tk0_gen_mother_key")) tree->SetBranchAddress("tk0_gen_mother_key", &nt.p_tk0_gen_mother_key);
+    if (tree->GetBranch("tk0_gen_mother_pdgid")) tree->SetBranchAddress("tk0_gen_mother_pdgid", &nt.p_tk0_gen_mother_pdgid);
+    if (tree->GetBranch("tk0_gen_b_key")) tree->SetBranchAddress("tk0_gen_b_key", &nt.p_tk0_gen_b_key);
+    if (tree->GetBranch("tk0_gen_b_pdgid")) tree->SetBranchAddress("tk0_gen_b_pdgid", &nt.p_tk0_gen_b_pdgid);
     tree->SetBranchAddress("genmatch0", &nt.genmatch0);
     tree->SetBranchAddress("costhtkonlymombs0", &nt.costhtkonlymombs0);
     tree->SetBranchAddress("costhtksjetsntkmombs0", &nt.costhtksjetsntkmombs0);
@@ -582,8 +630,17 @@ namespace mfv {
     tree->SetBranchAddress("tk1_px", &nt.p_tk1_px);
     tree->SetBranchAddress("tk1_py", &nt.p_tk1_py);
     tree->SetBranchAddress("tk1_pz", &nt.p_tk1_pz);
+    tree->SetBranchAddress("tk1_dxy", &nt.p_tk1_dxy);
+    tree->SetBranchAddress("tk1_rescale_dxyerr", &nt.p_tk1_rescale_dxyerr);
+    tree->SetBranchAddress("tk1_dz", &nt.p_tk1_dz);
     tree->SetBranchAddress("tk1_inpv", &nt.p_tk1_inpv);
     tree->SetBranchAddress("tk1_cov", &nt.p_tk1_cov);
+    if (tree->GetBranch("tk1_gen_pdgid")) tree->SetBranchAddress("tk1_gen_pdgid", &nt.p_tk1_gen_pdgid);
+    if (tree->GetBranch("tk1_gen_deltapoverp")) tree->SetBranchAddress("tk1_gen_deltapoverp", &nt.p_tk1_gen_deltapoverp);
+    if (tree->GetBranch("tk1_gen_mother_key")) tree->SetBranchAddress("tk1_gen_mother_key", &nt.p_tk1_gen_mother_key);
+    if (tree->GetBranch("tk1_gen_mother_pdgid")) tree->SetBranchAddress("tk1_gen_mother_pdgid", &nt.p_tk1_gen_mother_pdgid);
+    if (tree->GetBranch("tk1_gen_b_key")) tree->SetBranchAddress("tk1_gen_b_key", &nt.p_tk1_gen_b_key);
+    if (tree->GetBranch("tk1_gen_b_pdgid")) tree->SetBranchAddress("tk1_gen_b_pdgid", &nt.p_tk1_gen_b_pdgid);
     tree->SetBranchAddress("genmatch1", &nt.genmatch1);
     tree->SetBranchAddress("costhtkonlymombs1", &nt.costhtkonlymombs1);
     tree->SetBranchAddress("costhtksjetsntkmombs1", &nt.costhtksjetsntkmombs1);
@@ -613,8 +670,17 @@ namespace mfv {
     if (nt.p_tk0_px   ) nnt->tk0_px    = *nt.p_tk0_px;
     if (nt.p_tk0_py   ) nnt->tk0_py    = *nt.p_tk0_py;
     if (nt.p_tk0_pz   ) nnt->tk0_pz    = *nt.p_tk0_pz;
+    if (nt.p_tk0_dxy  ) nnt->tk0_dxy   = *nt.p_tk0_dxy;
+    if (nt.p_tk0_rescale_dxyerr) nnt->tk0_rescale_dxyerr = *nt.p_tk0_rescale_dxyerr;
+    if (nt.p_tk0_dz   ) nnt->tk0_dz    = *nt.p_tk0_dz;
     if (nt.p_tk0_inpv ) nnt->tk0_inpv  = *nt.p_tk0_inpv;
     if (nt.p_tk0_cov  ) nnt->tk0_cov   = *nt.p_tk0_cov;
+    if (nt.p_tk0_gen_pdgid       ) nnt->tk0_gen_pdgid        = *nt.p_tk0_gen_pdgid;
+    if (nt.p_tk0_gen_deltapoverp ) nnt->tk0_gen_deltapoverp  = *nt.p_tk0_gen_deltapoverp;
+    if (nt.p_tk0_gen_mother_key  ) nnt->tk0_gen_mother_key   = *nt.p_tk0_gen_mother_key;
+    if (nt.p_tk0_gen_mother_pdgid) nnt->tk0_gen_mother_pdgid = *nt.p_tk0_gen_mother_pdgid;
+    if (nt.p_tk0_gen_b_key       ) nnt->tk0_gen_b_key        = *nt.p_tk0_gen_b_key;
+    if (nt.p_tk0_gen_b_pdgid     ) nnt->tk0_gen_b_pdgid      = *nt.p_tk0_gen_b_pdgid;
 
     if (nt.p_tk1_qchi2) nnt->tk1_qchi2 = *nt.p_tk1_qchi2;
     if (nt.p_tk1_ndof ) nnt->tk1_ndof  = *nt.p_tk1_ndof;
@@ -624,17 +690,29 @@ namespace mfv {
     if (nt.p_tk1_px   ) nnt->tk1_px    = *nt.p_tk1_px;
     if (nt.p_tk1_py   ) nnt->tk1_py    = *nt.p_tk1_py;
     if (nt.p_tk1_pz   ) nnt->tk1_pz    = *nt.p_tk1_pz;
+    if (nt.p_tk1_dxy  ) nnt->tk1_dxy   = *nt.p_tk1_dxy;
+    if (nt.p_tk1_rescale_dxyerr) nnt->tk1_rescale_dxyerr = *nt.p_tk1_rescale_dxyerr;
+    if (nt.p_tk1_dz   ) nnt->tk1_dz    = *nt.p_tk1_dz;
     if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
+    if (nt.p_tk1_gen_pdgid       ) nnt->tk1_gen_pdgid        = *nt.p_tk1_gen_pdgid;
+    if (nt.p_tk1_gen_deltapoverp ) nnt->tk1_gen_deltapoverp  = *nt.p_tk1_gen_deltapoverp;
+    if (nt.p_tk1_gen_mother_key  ) nnt->tk1_gen_mother_key   = *nt.p_tk1_gen_mother_key;
+    if (nt.p_tk1_gen_mother_pdgid) nnt->tk1_gen_mother_pdgid = *nt.p_tk1_gen_mother_pdgid;
+    if (nt.p_tk1_gen_b_key       ) nnt->tk1_gen_b_key        = *nt.p_tk1_gen_b_key;
+    if (nt.p_tk1_gen_b_pdgid     ) nnt->tk1_gen_b_pdgid      = *nt.p_tk1_gen_b_pdgid;
 
     if (nt.p_misc_weights) nnt->misc_weights = *nt.p_misc_weights;
 
     nnt->p_gen_daughters = nnt->p_gen_bquarks = nnt->p_gen_leptons = 0;
     nnt->p_gen_daughter_id = 0;
     
-    nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
+    nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk0_dxy = nnt->p_tk0_rescale_dxyerr = nnt->p_tk0_dz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = nnt->p_tk1_dxy = nnt->p_tk1_rescale_dxyerr = nnt->p_tk1_dz = 0;
     nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
+    nnt->p_tk0_gen_pdgid = nnt->p_tk0_gen_mother_key = nnt->p_tk0_gen_mother_pdgid = nnt->p_tk0_gen_b_key = nnt->p_tk0_gen_b_pdgid = 0;
+    nnt->p_tk1_gen_pdgid = nnt->p_tk1_gen_mother_key = nnt->p_tk1_gen_mother_pdgid = nnt->p_tk1_gen_b_key = nnt->p_tk1_gen_b_pdgid = 0;
+    nnt->p_tk0_gen_deltapoverp = nnt->p_tk1_gen_deltapoverp = 0;
 
     nnt->p_misc_weights = 0;
 
