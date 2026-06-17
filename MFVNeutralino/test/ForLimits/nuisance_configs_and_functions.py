@@ -1,4 +1,5 @@
 from __future__ import print_function
+import csv as _csv
 import numpy as np
 
 import helper_PyStorage_objects as sth
@@ -173,6 +174,109 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
         frac_unc = 0.01
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
                              sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+
+
+def get_qcd_scale_ren_ggH(nuis_name, siginfo, debug_mode=False):
+    """QCD renormalization scale theory uncertainty for ggH (2%, year- and bin-correlated)."""
+    return [sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=False, corr=True,
+                             nbins=siginfo.nbins, ana_spec=False, add_era_tags=False)]
+
+
+def _load_fac_scale_VH_table(csv_path):
+    """Parse fac_scale_shape_bins.csv into yield-weighted VH kappas.
+
+    Returns {(mass_gev, ctau_um, year): ([kup_b0..b3], [kdn_b0..b3])}.
+    ggZH -> 1.0 (negligible fac-scale dep.).
+    Low-stats bins (flags_bin{i}='low_bin') -> kappa=1.0, weight=0.
+    """
+    NBINS_CSV = 4
+    NBINS_ALL = 4
+
+    raw = {}
+    with open(csv_path) as f:
+        for r in _csv.DictReader(f):
+            key = (int(r['mass_gev']), int(r['ctau_um']), r['year'])
+            entry = {}
+            for b in range(NBINS_CSV):
+                if r['flags_bin%d' % b] == 'ok':
+                    entry[b] = (float(r['kappa_up_bin%d' % b]),
+                                float(r['kappa_dn_bin%d' % b]),
+                                int(r['n_bin%d' % b]))
+                else:
+                    entry[b] = (1.0, 1.0, 0)
+            raw.setdefault(key, {})[r['stype']] = entry
+
+    table = {}
+    for key, stypes_d in raw.items():
+        kup, kdn = [], []
+        for b in range(NBINS_ALL):
+            if b >= NBINS_CSV:
+                kup.append(1.0)
+                kdn.append(1.0)
+                continue
+            total_n = sum_ku = sum_kd = 0.0
+            for st in ('ZH', 'WplusH', 'WminusH'):
+                ku, kd, n = stypes_d.get(st, {}).get(b, (1.0, 1.0, 0))
+                sum_ku += ku * n
+                sum_kd += kd * n
+                total_n += n
+            if total_n > 0:
+                kup.append(sum_ku / total_n)
+                kdn.append(sum_kd / total_n)
+            else:
+                kup.append(1.0)
+                kdn.append(1.0)
+        table[key] = (kup, kdn)
+    return table
+
+
+_fac_scale_VH_table = None
+
+
+def _get_fac_scale_VH_table():
+    global _fac_scale_VH_table
+    if _fac_scale_VH_table is None:
+        _fac_scale_VH_table = _load_fac_scale_VH_table(ns_conf.fac_scale_VH_csv_path)
+    return _fac_scale_VH_table
+
+
+def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
+    """Factorization scale shape uncertainty for VH (ZH/WH+/WH-), year-correlated.
+
+    Per-bin kappas from CSV; bin 3 and ggZH use kappa=1.0; low-stats bins use kappa=1.0.
+    Missing signal points fall back to kappa=1.0 (no systematic applied).
+    """
+    table  = _get_fac_scale_VH_table()
+    mass   = siginfo.return_mass_as_int()
+    ctau   = int(siginfo.return_lifetime_in_unit(unit="um"))
+    result = table.get((mass, ctau, year))
+
+    if result is None:
+        if debug_mode:
+            print("QCDscale_fac_VH: no entry for mass=%d ctau=%d year=%s; using 1.0" % (
+                mass, ctau, year))
+        kup = [1.0] * siginfo.nbins
+        kdn = [1.0] * siginfo.nbins
+    else:
+        kup = list(result[0])[:siginfo.nbins]
+        kdn = list(result[1])[:siginfo.nbins]
+        while len(kup) < siginfo.nbins:
+            kup.append(1.0)
+            kdn.append(1.0)
+
+    if debug_mode:
+        print("QCDscale_fac_VH: mass=%d ctau=%d year=%s kup=%s kdn=%s" % (
+            mass, ctau, year, kup, kdn))
+
+    up_nuis = sth.NuisanceInfo(nuis_name, kup, make_updn=False, sep_yrs=False, corr=True,
+                               nuis_type="special", nbins=siginfo.nbins,
+                               ana_spec=False, add_era_tags=False,
+                               extra_info=["updn_pair", "up"])
+    dn_nuis = sth.NuisanceInfo(nuis_name, kdn, make_updn=False, sep_yrs=False, corr=True,
+                               nuis_type="special", nbins=siginfo.nbins,
+                               ana_spec=False, add_era_tags=False,
+                               extra_info=["updn_pair", "dn"])
+    return [up_nuis, dn_nuis]
 
 
 # ---------------------------------------------------------------------------

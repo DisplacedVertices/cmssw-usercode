@@ -131,6 +131,7 @@ nuisance_table_paths = {
         "up_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["up_prefix"],
         "dn_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["dn_prefix"],
     },
+    "fac_scale_VH_csv": _cfg["nuisance_tables"]["fac_scale_VH_csv"],  # absolute path
 }
 
 # --------------------------------------------------------------------------

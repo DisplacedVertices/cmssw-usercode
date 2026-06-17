@@ -77,8 +77,10 @@ def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
     elif nuis_name == "pileup":        new_nuis = nsfc.get_pileup("CMS_pileup", siginfo, debug_mode=debug_mode)
     elif nuis_name == "int_lumi":      new_nuis = nsfc.get_int_lumi("lumi", siginfo, debug_mode=debug_mode)
     elif nuis_name == "lep_effi":      new_nuis = nsfc.get_lep_effi("CMS_eff_", siginfo, debug_mode=debug_mode)
-    elif nuis_name == "trig_JESR_btag": new_nuis = nsfc.get_trig_JESR_btag("disp_trig_uncerts", siginfo, debug_mode=debug_mode)
-    elif nuis_name == "calo_inef":     new_nuis = nsfc.get_calo_inef("calo_ineff", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "trig_JESR_btag":       new_nuis = nsfc.get_trig_JESR_btag("disp_trig_uncerts", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "calo_inef":            new_nuis = nsfc.get_calo_inef("calo_ineff", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "qcd_scale_ren_ggH":   new_nuis = nsfc.get_qcd_scale_ren_ggH("QCDscale_ren_ggH", siginfo, debug_mode=debug_mode)
+    elif nuis_name == "qcd_scale_fac_VH":    new_nuis = nsfc.get_qcd_scale_fac_VH("QCDscale_fac_VH",  siginfo, debug_mode=debug_mode)
     else:
         print("Error: nuisance name not implemented for", nuis_name)
 
@@ -140,6 +142,12 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
 
     for nuis in sorted(nuis_set):
         get_nuis_fromname(nuis, siginfo, nuis_ls, debug_mode=debug_mode)
+
+    # Process-specific theory systematics (year- and bin-correlated, no CMS_EXO24035_ prefix)
+    if siginfo.proc == "ggHToSSTodddd":
+        get_nuis_fromname("qcd_scale_ren_ggH", siginfo, nuis_ls, debug_mode=debug_mode)
+    if siginfo.proc == "VH":
+        get_nuis_fromname("qcd_scale_fac_VH", siginfo, nuis_ls, debug_mode=debug_mode)
 
     if debug_mode:
         print("Nuisances that produced a SIG Nuisance object:")

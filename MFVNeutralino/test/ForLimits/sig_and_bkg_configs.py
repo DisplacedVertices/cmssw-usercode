@@ -36,10 +36,14 @@ template_norms = {
 n2v_uncs = None  # sentinel; code must not use this until real values are filled
 
 
+# CMS Run 2 luminosity uncertainty decomposition (CMS-LUM-17-003/4, CMS-LUM-18-002).
+# Totals: 2016 1.2%, 2017 2.3%, 2018 2.5%.
 lumi_lit_corrs = {
-    "lumi_13TeV_1516_l": {"2016": 1.0118, "2017": None, "2018": None},
-    "lumi_13TeV_151617_l": {"2016": 1.0004, "2017": 1.0055, "2018": None},
-    "lumi_13TeV_15161718_l": {"2016": 1.0035, "2017": 1.0061, "2018": 1.0084},
+    "lumi_13TeV_correlated": {"2016": 1.006,  "2017": 1.009,  "2018": 1.020 },
+    "lumi_13TeV_1718":       {"2016": None,   "2017": 1.006,  "2018": 1.002 },
+    "lumi_2016":             {"2016": 1.010,  "2017": None,   "2018": None  },
+    "lumi_2017":             {"2016": None,   "2017": 1.020,  "2018": None  },
+    "lumi_2018":             {"2016": None,   "2017": None,   "2018": 1.015 },
 }
 
 
