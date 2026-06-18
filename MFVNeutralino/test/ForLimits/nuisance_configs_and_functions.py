@@ -73,12 +73,19 @@ def get_mc_stat(nuis_name, siginfo, debug_mode=False):
 def get_reco_effi(nuis_name, siginfo, debug_mode=False):
     """Track reconstruction efficiency uncertainty.
 
-    Currently only VH has a dedicated table; other processes fall back to 1.0
-    (which is then filtered out by replace_all_ones in getNuisanceFromSig).
+    Bjet channel: flat 5% working placeholder per AN Sec. 6.2.1 (Table 39/40).
+    Lep channel: per-bin asymmetric values from dedicated VH scale factor tables.
     """
+    if siginfo.trig_type == "bjet":
+        # AN working placeholder: flat 5% symmetric lnN for all bjet signals
+        if debug_mode:
+            print("tk_reco_eff: using flat 5% placeholder for bjet signal")
+        return [sth.NuisanceInfo(nuis_name, [1.05] * siginfo.nbins, make_updn=False,
+                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+
+    # Lep channel: per-bin asymmetric values from VH scale factor tables
     pickle_locs = interp_pickle_triple(nuis_name)
 
-    # TODO: replace "VH" with siginfo.proc once tables exist for all processes
     up_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[0])
     up_arr  = up_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
     if up_arr is None:
@@ -161,9 +168,9 @@ def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
     if frac_unc is None:
         print("Warning: trig_JESR_btag value not found. Writing arbitrary value.")
         return [sth.NuisanceInfo(nuis_name + "_fake", 1 + 0.1, make_updn=False,
-                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                                 sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
-                             sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                             sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
 
 
 def get_calo_inef(nuis_name, siginfo, debug_mode=False):

@@ -52,7 +52,10 @@ _bjet_sigs = [
 ]
 
 # Processes with a hard-scatter lepton -- get lep_effi nuisance (VH, ttH; not SUSY).
+# "VH" is the combined signal group (ZH+WH++WH-+ggZH); individual sub-process names
+# are also listed for any cards generated outside the combined group path.
 lep_reco_effi_sigs = frozenset([
+    "VH",
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",
     "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
