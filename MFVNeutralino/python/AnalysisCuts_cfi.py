@@ -20,7 +20,7 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                                              # 6 = bjets/displaced dijet (with HT and lepton veto, when enabled)
-                               require_met_filters = cms.bool(False), # FIXME revert this once we have minitrees with it reenabled
+                               require_met_filters = cms.bool(True),
                                require_bquarks  = cms.bool(False),
                                require_trigbit  = cms.bool(True),
                                require_trig_obj_match = cms.bool(False), # note only implemented for PF/calo jets. We found it to be inefficient for the displacement triggers in 2016 for some reason
