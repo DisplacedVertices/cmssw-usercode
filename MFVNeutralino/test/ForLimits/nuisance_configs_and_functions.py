@@ -119,7 +119,7 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
     if siginfo.trig_type == "lep":
-        nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06], make_updn=False,
+        nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06, 1.06], make_updn=False,
                                 sep_yrs=False, corr=True, nbins=siginfo.nbins)
     elif siginfo.trig_type == "bjet":
         nuis = sth.NuisanceInfo(nuis_name, 1.03, make_updn=False,
