@@ -483,7 +483,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->jet_track_qpt.push_back(tk->charge() * tk->pt());
         mevent->jet_track_eta.push_back(tk->eta());
         mevent->jet_track_phi.push_back(tk->phi());
-        mevent->jet_track_dxy.push_back(tk->dxy(beamspot->position()));
+        mevent->jet_track_dxy.push_back(tk->dxy(*beamspot));
         mevent->jet_track_dz.push_back(primary_vertex ? tk->dz(primary_vertex->position()) : 0);
         mevent->jet_track_pt_err.push_back(tk->ptError());
         mevent->jet_track_eta_err.push_back(tk->etaError());
@@ -612,7 +612,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->vertex_seed_track_qpt.push_back(tk.charge() * tk.pt());
       mevent->vertex_seed_track_eta.push_back(tk.eta());
       mevent->vertex_seed_track_phi.push_back(tk.phi());
-      mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
+      mevent->vertex_seed_track_dxy.push_back(tk.dxy(*beamspot));
       mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
       mevent->vertex_seed_track_err_pt.push_back(tk.ptError());
       mevent->vertex_seed_track_err_eta.push_back(tk.etaError());

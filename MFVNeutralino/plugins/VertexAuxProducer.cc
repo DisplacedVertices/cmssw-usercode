@@ -370,7 +370,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   }
   edm::Handle<reco::TrackCollection> vertex_seed_tracks;
   event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
-  std::vector<size_t> vec_outsedtki;
+  std::vector<size_t> vec_outseedtki;
   for (int irawsv = 0; irawsv < nsv; ++irawsv) {
     int isv = sort_irawsv[nsv-irawsv-1];
     const reco::Vertex& sv = secondary_vertices->at(isv);
@@ -418,16 +418,16 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       }
       //get seed tracks outside all vertices
-      size_t sedtki = 0;
-      for (const reco::Track& sedtk : *vertex_seed_tracks) {
-	      assert(abs(sedtk.charge()) == 1);
-	      if ((fabs(sedtk.pt() - fabs(tk->charge() * tk->pt())) < 0.0001 &&
-		    fabs(sedtk.eta() - tk->eta()) < 0.0001 &&
-		    fabs(sedtk.phi() - tk->phi()) < 0.0001) || std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
+      size_t seedtki = 0;
+      for (const reco::Track& seedtk : *vertex_seed_tracks) {
+	      assert(abs(seedtk.charge()) == 1);
+	      if ((fabs(seedtk.pt() - fabs(tk->charge() * tk->pt())) < 0.0001 &&
+		    fabs(seedtk.eta() - tk->eta()) < 0.0001 &&
+		    fabs(seedtk.phi() - tk->phi()) < 0.0001) || std::count(vec_outseedtki.begin(), vec_outseedtki.end(), seedtki) > 0) {
 		    continue;
 	      }
-	      vec_outsedtki.push_back(sedtki);
-	      sedtki++;
+	      vec_outseedtki.push_back(seedtki);
+	      seedtki++;
       }
     }
     if (rs_ttks.size() > 1) {
@@ -652,7 +652,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
               aux.electron_dxy.push_back(etk->dxy(primary_vertex->position()));
               aux.electron_dz.push_back(etk->dz(primary_vertex->position()));
             }
-            aux.electron_dxybs.push_back(etk->dxy(beamspot->position()));
+            aux.electron_dxybs.push_back(etk->dxy(*beamspot));
             aux.electron_dxyerr.push_back(etk->dxyError());
             aux.electron_dzerr.push_back(etk->dzError());
           }
@@ -701,7 +701,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
               aux.muon_dxy.push_back(mtk->dxy(primary_vertex->position()));
               aux.muon_dz.push_back(mtk->dz(primary_vertex->position()));
             }
-            aux.muon_dxybs.push_back(mtk->dxy(beamspot->position()));
+            aux.muon_dxybs.push_back(mtk->dxy(*beamspot));
             aux.muon_dxyerr.push_back(mtk->dxyError());
             aux.muon_dzerr.push_back(mtk->dzError());
           }
@@ -774,7 +774,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       aux.track_injet.push_back(track_in_a_jet(mfv::JByNtracks, trref)); // JMTBAD multiple jet assoc types
       aux.track_inpv.push_back(pv_for_track == tracks_in_pvs.end() ? -1 : pv_for_track->second);
-      aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
+      aux.track_dxy.push_back(fabs(tri->dxy(*beamspot)));
 
       // the only rescaled quantity we need
       const auto rs = track_rescaler.scale(**trki);
@@ -869,26 +869,24 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 	  const reco::VertexRef svref(secondary_vertices, isv);
 	  MFVVertexAux & aux = auxes->at(irawsv);
 
-	  size_t sedtki = 0;
-	  for (const reco::Track& sedtk : *vertex_seed_tracks) {
-		  assert(abs(sedtk.charge()) == 1);
-		  if (std::count(vec_outsedtki.begin(), vec_outsedtki.end(), sedtki) > 0) {
-			  const reco::TransientTrack outsedtri = tt_builder->build(sedtk);
+	  size_t seedtki = 0;
+	  for (const reco::Track& seedtk : *vertex_seed_tracks) {
+		  assert(abs(seedtk.charge()) == 1);
+		  if (std::count(vec_outseedtki.begin(), vec_outseedtki.end(), seedtki) > 0) {
+			  const reco::TransientTrack outsedtri = tt_builder->build(seedtk);
 			  std::pair<bool, Measurement1D> tkdist = track_dist(outsedtri, sv);
 			  aux.outsed_track_tkdist_val.push_back(tkdist.second.value());
 			  aux.outsed_track_tkdist_sig.push_back(tkdist.second.significance());
 			  if (irawsv == 0) {
-				  const double dxybs = sedtk.dxy(*beamspot);
-				  const auto rs = track_rescaler.scale(sedtk);
+				  const double dxybs = fabs(seedtk.dxy(*beamspot));
+				  const auto rs = track_rescaler.scale(seedtk);
 				  const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
 				  const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
-				  aux.outsed_track_dxy.push_back(fabs(sedtk.dxy(beamspot->position())));
+				  aux.outsed_track_dxy.push_back(dxybs);
 				  aux.outsed_track_nsigmadxy.push_back(rescaled_sigmadxybs);
-
 			  }
 		  }
 	  }
-	  
   }
   sorter.sort(*auxes);
 
