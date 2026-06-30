@@ -525,6 +525,7 @@ struct MFVEvent {
   std::vector<float> vertex_seed_track_err_eta;
   std::vector<float> vertex_seed_track_err_phi;
   std::vector<float> vertex_seed_track_err_dxy;
+  std::vector<float> vertex_seed_track_rescale_err_dxy;
   std::vector<float> vertex_seed_track_err_dz;
   std::vector<mfv::HitPattern::value_t> vertex_seed_track_hp_;
   mfv::HitPattern vertex_seed_track_hp(int i) const { return mfv::HitPattern(vertex_seed_track_hp_[i]); }

@@ -26,6 +26,8 @@
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/Tools/interface/TrackRescaler.h"
 
 class MFVEventProducer : public edm::EDProducer {
 public:
@@ -33,6 +35,7 @@ public:
   void produce(edm::Event&, const edm::EventSetup&);
 
 private:
+  jmt::TrackRescaler track_rescaler;
   const bool input_is_miniaod;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
@@ -165,11 +168,17 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (input_is_miniaod)
     event.getByToken(packed_candidates_token, packed_candidates);
 
+  const int track_rescaler_which = jmt::TrackRescaler::w_BTagDispJet; // which rescaling if ever a different one (0 : BTagDisplJet, 1 : SingleLepton, 2 : JetHT, -1 disable)
+  track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
+                       jmt::AnalysisEras::pick(event, this),
+                       track_rescaler_which);
+
   //////////////////////////////////////////////////////////////////////
 
   mevent->gen_valid = false;
 
   if (!event.isRealData()) {
+
     edm::Handle<GenEventInfoProduct> gen_info;
     event.getByToken(gen_info_token, gen_info);
 
@@ -620,6 +629,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->vertex_seed_track_err_dxy.push_back(tk.dxyError());
       mevent->vertex_seed_track_err_dz.push_back(tk.dzError());
       mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
+
+      // the only rescaled quantity we need
+      const auto rs = track_rescaler.scale(tk);
+      mevent->vertex_seed_track_rescale_err_dxy.push_back(rs.rescaled_tk.dxyError());
     }
   }
 
