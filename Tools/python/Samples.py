@@ -91,22 +91,21 @@ def _set_signal_stuff(sample):
     sample.latex = _latex(sample)
     #sample.xsec = 1e-3
     br_h_llps = 1.0
+    # All exotic higgs samples use the .xlsx here - https://gitlab.cern.ch/LHCHIGGSXS/LHCHXSWG1/crosssections
     if (sample.name.startswith('WplusH')):
-        sample.xsec = 3*(9.426e-02)*br_h_llps# Higgs 125, once for each lepton flavor - https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#WHlH_l_e_or_Process
+        sample.xsec = 0.89954*br_h_llps # W+H inclusive, MH=125
     elif (sample.name.startswith('WminusH')):
-        sample.xsec = 3*(5.983e-02)*br_h_llps# same reasoning as above
+        sample.xsec = 0.56823*br_h_llps # W-H inclusive, MH=125
     elif (sample.name.startswith('ggZH')):
-        sample.xsec = 3*(4.14e-03)*br_h_llps# gg-initiated ZH, MH=125 - https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#ZH_Process
+        sample.xsec = 0.1305*br_h_llps # gg-initiated ZH inclusive, MH=125
     elif (sample.name.startswith('ZH')):
-        sample.xsec = 3*(2.568e-02)*br_h_llps# qq-initiated ZH (total ZH 2.982e-02 minus gg component 4.14e-03), MH=125
-    elif sample.name.startswith('ttHToLLPs'):
-        sample.xsec = 0.5071 * br_h_llps # Higgs 125 - https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV?u#ttH_Process
-    elif sample.name.startswith('ttHToSSTo'):
-        sample.xsec = 0.5071 * br_h_llps # Higgs 125 - https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#ttH_Process
+        sample.xsec = 0.81829*br_h_llps # qq-initiated ZH inclusive (total ZH 0.94879 minus gg component 0.1305), MH=125
+    elif sample.name.startswith('ttHToLLPs') or sample.name.startswith('ttHToSSTo'):
+        sample.xsec = 0.5925 * br_h_llps # ttH, MH=125
     elif sample.name.startswith('VBFHToSSTo'):
-        sample.xsec = 3.779 * br_h_llps # VBF H, MH=125 - https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#VBF_Process
+        sample.xsec = 4.112 * br_h_llps # VBF H, MH=125
     elif (sample.name.startswith('ggHToSS')):
-        sample.xsec = 48.58 * br_h_llps #https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV
+        sample.xsec = 51.72 * br_h_llps # ggH, MH=125
     else:
         #print(sample.name)
         sample.xsec = 1e-3
