@@ -28,12 +28,12 @@ def setup_event_filter(process,
         pass
     elif mode == 'trigger jets only':
         trigger_filter = 'jets only'
-    elif mode == 'trigger bjets only':
-        trigger_filter = 'bjets only'
+    elif mode == 'trigger btag only':
+        trigger_filter = 'btag only'
     elif mode == 'trigger met only':
         trigger_filter = 'met only'
-    elif mode == 'trigger displaced dijet only':
-        trigger_filter = 'displaced dijet only'
+    elif mode == 'trigger dispjet only':
+        trigger_filter = 'dispjet only'
     elif mode == 'trigger HT OR bjets OR displaced dijet':
         trigger_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'trigger bjets OR displaced dijet veto HT':
@@ -58,6 +58,18 @@ def setup_event_filter(process,
     elif mode == 'electrons only veto muons':
         trigger_filter = 'electrons only'
         event_filter = 'electrons only veto muons'
+
+    # Data primary-dataset orthogonality. At the MiniAOD -> ntuple step the
+    # split is trigger-only: BTag/JetHT owns events that fire both trigger
+    # families, while the DispJet stream vetoes BTag triggers. The common
+    # offline BTag/DispJet, lepton, and HT cuts are applied downstream after
+    # the two orthogonal data streams are merged.
+    elif mode == 'btag only veto leptons and HT':
+        trigger_filter = 'btag only'
+        event_filter = 'bjets OR displaced dijet veto leptons and HT'
+    elif mode == 'dispjet only veto btag and leptons and HT':
+        trigger_filter = 'dispjet only'
+        event_filter = 'dispjet only veto btag and leptons and HT'
     elif mode == 'displeptons only':
         trigger_filter = 'displeptons only',
         event_filter = 'leptons only'
@@ -85,9 +97,6 @@ def setup_event_filter(process,
         trigger_filter = event_filter = 'bjets OR displaced dijet'
     elif mode == 'bjets OR displaced dijet novtx':
         trigger_filter = event_filter = 'bjets OR displaced dijet'
-        event_filter_require_vertex = False
-    elif mode == 'displaced dijet veto bjets novtx':
-        trigger_filter = event_filter = 'displaced dijet veto bjets'
         event_filter_require_vertex = False
     elif mode == 'jets only novtx':
         trigger_filter = event_filter = 'jets only'
@@ -120,12 +129,12 @@ def setup_event_filter(process,
 
     if trigger_filter == 'jets only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
-    elif trigger_filter == 'bjets only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBJetsOnly as triggerFilter
+    elif trigger_filter == 'btag only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBTagOnly as triggerFilter
     elif trigger_filter == 'met only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMETOnly as triggerFilter
-    elif trigger_filter == 'displaced dijet only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetOnly as triggerFilter
+    elif trigger_filter == 'dispjet only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDispJetOnly as triggerFilter
     elif trigger_filter == 'met AND iso muons':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMETANDMuons as triggerFilter
     elif trigger_filter == 'HT OR bjets OR displaced dijet':
@@ -146,8 +155,6 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDispLeptonsORSingleLeptons as triggerFilter
     elif trigger_filter == 'bjets OR displaced dijet':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijet as triggerFilter
-    elif trigger_filter == 'displaced dijet veto bjets':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetVetoBjets as triggerFilter
     elif trigger_filter == 'dilepton only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDileptonOnly as triggerFilter
     elif trigger_filter == 'low HT online track test':
@@ -155,7 +162,7 @@ def setup_event_filter(process,
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "muons only", "electrons only", "dilepton only", "bjets only", "met only", "displaced dijet only", "met AND iso muon", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "bjets OR displaced dijet veto leptons and HT", "displaced dijet veto bjets", "low HT online track test", True, False)' % trigger_filter)
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "muons only", "electrons only", "dilepton only", "btag only", "met only", "dispjet only", "met AND iso muon", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "bjets OR displaced dijet veto leptons and HT", "low HT online track test", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -183,8 +190,8 @@ def setup_event_filter(process,
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoLeptonHT as eventFilter
         elif event_filter == 'bjets OR displaced dijet':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijet as eventFilter
-        elif event_filter == 'displaced dijet veto bjets':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterDisplacedDijetVetoBjets as eventFilter
+        elif event_filter == 'dispjet only veto btag and leptons and HT':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterDispJetVetoBTagTriggers as eventFilter
         elif event_filter == 'met only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterMETOnly as eventFilter
         elif event_filter == 'low HT online track test':
@@ -192,7 +199,7 @@ def setup_event_filter(process,
         elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
         elif event_filter is not False:
-            raise ValueError('event_filter must be one of ("jets only", "leptons only", "muons only", "electrons only veto muons", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet", "bjets OR displaced dijet veto HT",  "bjets OR displaced dijet veto leptons and HT", "displaced dijet veto bjets", "low HT online track test", True, False)')
+            raise ValueError('event_filter must be one of ("jets only", "leptons only", "muons only", "electrons only veto muons", "dispjet only veto btag and leptons and HT", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "bjets OR displaced dijet veto leptons and HT", "low HT online track test", True, False)')
 
         print("mode: "+mode)
         print("events_filter: "+event_filter)

@@ -1,37 +1,40 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = '_tag002' # this is our ntuple numbering scheme, and we should make tags of our code each time
+ntuple_version_ = '_tag003' # this is our ntuple numbering scheme, and we should make tags of our code each time
 
-# trigger schemes we are currently using
-use_btag_vetoLepHT_triggers = False
+# Inclusive trigger schemes used for MC and for post-ntupling processing.
+# The orthogonal (BTag/JetHT and DispJet data streams) and (Electron and Muon data streams) 
+# are each merged again before
+# these common offline analysis cuts are applied.
+use_BTagDispJet_vetoLepHT_triggers = False
 use_Lepton_triggers = True
 
-# trigger schemes for data, to avoid double counting of PDs
+# Data-only trigger schemes used at the MiniAOD -> ntuple step to avoid double
+# counting between primary datasets. BTag/JetHT owns events that fire both the
+# BTag and DispJet trigger families, and Muon owns events that fire both the
+# Muon and Electron triggers. 
+use_BTag_triggers = False
+use_DispJet_triggers = False
 use_Muon_triggers = False
 use_Electron_triggers = False
 
-# trigger schemes we aren't currently using
-use_btag_triggers = False
+# Trigger schemes we aren't currently using.
 use_MET_triggers = False
 use_DisplacedLepton_triggers = False
 
 # for gen-level studies of our LLPs
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 
-if use_btag_triggers : 
-    ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
-elif use_btag_vetoLepHT_triggers : 
-    ntuple_version_ += "BvetoLHT" # for "Btag triggers"; also includes DisplacedDijet triggers
+if use_BTagDispJet_vetoLepHT_triggers or use_BTag_triggers or use_DispJet_triggers:
+    # Use one common dataset tag so the orthogonal BTag/JetHT and DispJet data
+    # streams can be merged in the downstream minitree/histogram steps.
+    ntuple_version_ += "BvetoLHT"
 elif use_MET_triggers :
     lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
     ntuple_version_ += "MET"
-elif use_Lepton_triggers :
+elif use_Lepton_triggers or use_Muon_triggers or use_Electron_triggers :
     ntuple_version_ += 'Lep'
-elif use_Muon_triggers :
-    ntuple_version_ += "LepMu"
-elif use_Electron_triggers :
-    ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -42,10 +45,7 @@ dataset = 'ntuple' + ntuple_version_use.lower()
 #dataset = "NtuplefixrecreatePeace_OnnormdzULV30Lepm_NoEF"
 #dataset = "ntupleonnormdzulv30lepm" #Peace's ntuples for 2017 and 2018 lepton MC
 
-if use_btag_triggers :
-    sys.exit('use_btag_triggers is deprecated, please use use_btag_vetoLepHT_triggers instead. Exiting.')
-
-if sum([use_btag_triggers,use_btag_vetoLepHT_triggers,use_MET_triggers,use_Lepton_triggers,use_Muon_triggers,use_Electron_triggers,use_DisplacedLepton_triggers]) != 1 :
+if sum([use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers]) != 1:
     sys.exit("Must set exactly one trigger scheme to be on. Exiting.")
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
@@ -425,9 +425,7 @@ def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclu
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
-        if use_btag_triggers :
-            magic = "event_filter = 'bjets OR displaced dijet'"
-        if use_btag_vetoLepHT_triggers:
+        if use_BTagDispJet_vetoLepHT_triggers:
             magic = "event_filter = 'bjets OR displaced dijet veto leptons and HT'"
         elif use_Lepton_triggers :
             magic ="event_filter = 'leptons only'"

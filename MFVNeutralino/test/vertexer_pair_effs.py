@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_btag_vetoLepHT_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_BTagDispJet_vetoLepHT_triggers
 dataset += '_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
@@ -28,7 +28,7 @@ process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCuts * process.mfvVe
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers or use_btag_vetoLepHT_triggers :
+    if use_BTagDispJet_vetoLepHT_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
         samples = samples.qcd_samples_2017
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
