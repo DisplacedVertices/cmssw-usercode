@@ -173,6 +173,27 @@ _add_ds("miniaod", {
 'ttHToLLPs_dddd_tau10mm_M55_2018': (225, ['/store/group/lpclonglived/gdecastr/ttH_Exotic_Higgs_Samples/SampleFactory/NLO_nFinal3_HToSSTodddd_MH125_MS55_ctauS10_13TeV/chain_RunIISummer20UL18wmLHEGEN-RunIISummer20UL18NanoAODv9/20260212_122818/RunIISummer20UL18MiniAODv2_%i.root' % i for i in xrange(225)]),
 })
 
+_add_ds("ntuple_tag003bvetolhtm", {
+'BTagCSV2017B': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_170058", 5),
+'BTagCSV2017C': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_170059", 69),
+'BTagCSV2017D': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_170100", 17),
+'BTagCSV2017E': (49, ['/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_210208/0000/ntuple_36.root'] + ['/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_170101/0000/ntuple_%i.root' % i for i in chain(xrange(36), xrange(37,49))]),
+'BTagCSV2017F': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/BTagCSV/Ntuple_tag003BvetoLHTm_2017/260714_170102", 251),
+'DisplacedJet2017C': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2017/260714_170207", 12),
+'DisplacedJet2017D': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2017/260714_170208", 7),
+'DisplacedJet2017E': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2017/260714_170209", 14),
+'DisplacedJet2017F': (41, ['/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2017/260715_092009/0000/ntuple_3.root'] + ['/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2017/260714_170210/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(4,41))]),
+'JetHT2018A': (191, ['/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_170454/0000/ntuple_%i.root' % i for i in chain(xrange(22), xrange(23,191))] + ['/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_210204/0000/ntuple_22.root']),
+'JetHT2018B': (86, ['/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_210206/0000/ntuple_19.root'] + ['/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_170455/0000/ntuple_%i.root' % i for i in chain(xrange(19), xrange(20,86))]),
+'JetHT2018C': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_170456", 79),
+'JetHT2018D': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/JetHT/Ntuple_tag003BvetoLHTm_2018/260714_170457", 371),
+'DisplacedJet2018A': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2018/260714_170359", 18),
+'DisplacedJet2018B': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2018/260714_170400", 8),
+'DisplacedJet2018C': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2018/260714_170401", 8),
+'DisplacedJet2018D': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/DisplacedJet/Ntuple_tag003BvetoLHTm_2018/260714_170402", 38),
+})
+
+
 _add_ds("ntuple_tag002lepm", {
 'qcdempt015_20161': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/Ntuple_tag002Lepm_20161/260616_002148", 13),
 'qcdmupt15_20161': _fromnum0("/store/group/lpcdisplacedvertices/joeyr/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/Ntuple_tag002Lepm_20161/260616_002149", 25),
