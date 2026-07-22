@@ -49,9 +49,12 @@ def interp_pickle_triple(nn):
 
 
 def make_anticorr_bkg(val, dp=4, in_is_b1=True):
-    """Anti-correlate bin 1 vs. bins 2+3 for a background nuisance.
+    """Anti-correlate bin 1 against all the other bins for a background nuisance.
 
-    val: 1+x (e.g. 1.1 for 10%).  in_is_b1: whether val is the bin-1 direction.
+    -INPUTS-
+    val: 1+x (e.g. 1.1 for 10%)
+    dp: if not None, round everything to this many decimal places
+    in_is_b1: whether val is the bin-1 direction or the other-bins direction
     """
     out_arr = val * np.ones(nbins) if in_is_b1 else (1.0 / val) * np.ones(nbins)
     out_arr[1:] = 1.0 / out_arr[1:]
@@ -89,11 +92,19 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
     up_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[0])
     up_arr  = up_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
     if up_arr is None:
+        print("*" * 90)
+        print("*** FABRICATED NUISANCE: tk_reco_eff UP not found for %s, writing all 1.0"
+              % siginfo.return_nuis_key())
+        print("*" * 90)
         up_arr = [1.0] * siginfo.nbins
 
     dn_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[1])
     dn_arr  = dn_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
     if dn_arr is None:
+        print("*" * 90)
+        print("*** FABRICATED NUISANCE: tk_reco_eff DOWN not found for %s, writing all 1.0"
+              % siginfo.return_nuis_key())
+        print("*" * 90)
         dn_arr = [1.0] * siginfo.nbins
 
     if debug_mode:
@@ -116,7 +127,11 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
     if debug_mode:
         print("Identified TM fractional uncertainty:", frac_unc)
     if frac_unc is None:
-        print("Warning: vtx_reco_TM value not found. Writing fake value.")
+        print("*" * 90)
+        print("*** FABRICATED NUISANCE: vtx_reco_TM not found in the table for %s"
+              % siginfo.return_nuis_key())
+        print("*** writing a 100% lnN (value 2.0). This point is off the stored grid.")
+        print("*" * 90)
         frac_unc = 1.0
     frac_unc = np.round(frac_unc, 7)
 
@@ -126,8 +141,10 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
     if siginfo.trig_type == "lep":
+        # AN Sec 6.2.6 quotes 3%, 4%, 6% on the old 3-bin binning; the 4th bin is extrapolated
         nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06, 1.06], make_updn=False,
-                                sep_yrs=False, corr=True, nbins=siginfo.nbins)
+                                sep_yrs=False, corr=True, nbins=siginfo.nbins,
+                                extrapolate_last=True)
     elif siginfo.trig_type == "bjet":
         nuis = sth.NuisanceInfo(nuis_name, 1.03, make_updn=False,
                                 sep_yrs=False, corr=True, nbins=siginfo.nbins)
@@ -166,7 +183,11 @@ def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
     if debug_mode:
         print("Identified b-tag fractional uncertainty:", frac_unc)
     if frac_unc is None:
-        print("Warning: trig_JESR_btag value not found. Writing arbitrary value.")
+        print("*" * 90)
+        print("*** FABRICATED NUISANCE: trig_JESR_btag not found in the table for %s"
+              % siginfo.return_nuis_key())
+        print("*** writing an arbitrary 10%% lnN under the name %s_fake." % nuis_name)
+        print("*" * 90)
         return [sth.NuisanceInfo(nuis_name + "_fake", 1 + 0.1, make_updn=False,
                                  sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
@@ -185,6 +206,9 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
 
 def get_qcd_scale_ren_ggH(nuis_name, siginfo, debug_mode=False):
     """QCD renormalization scale theory uncertainty for ggH (2%, year- and bin-correlated)."""
+    if "ggH" not in siginfo.proc:
+        raise Exception("QCDscale_ren_ggH is a ggH-only uncertainty, got " + siginfo.proc)
+
     return [sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=False, corr=True,
                              nbins=siginfo.nbins, ana_spec=False, add_era_tags=False)]
 
@@ -193,8 +217,9 @@ def _load_fac_scale_VH_table(csv_path):
     """Parse fac_scale_shape_bins.csv into yield-weighted VH kappas.
 
     Returns {(mass_gev, ctau_um, year): ([kup_b0..b3], [kdn_b0..b3])}.
-    ggZH -> 1.0 (negligible fac-scale dep.).
-    Low-stats bins (flags_bin{i}='low_bin') -> kappa=1.0, weight=0.
+    All four bins are read from the CSV; only bins flagged 'low_bin' are forced to 1.0.
+    The CSV has no ggZH rows, so the kappa is the ZH/W+H/W-H yield-weighted average, and it
+    is then applied to the whole VH process (which does include ggZH).
     """
     NBINS_CSV = 4
     NBINS_ALL = 4
@@ -250,7 +275,7 @@ def _get_fac_scale_VH_table():
 def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
     """Factorization scale shape uncertainty for VH (ZH/WH+/WH-), year-correlated.
 
-    Per-bin kappas from CSV; bin 3 and ggZH use kappa=1.0; low-stats bins use kappa=1.0.
+    Per-bin kappas from the CSV, all four bins; only low-stats bins are forced to 1.0.
     Missing signal points fall back to kappa=1.0 (no systematic applied).
     """
     table  = _get_fac_scale_VH_table()

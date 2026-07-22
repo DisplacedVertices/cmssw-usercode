@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ROOT
 import numpy as np
 import os
@@ -135,13 +136,16 @@ class SignalROOTInfo(object):
 
 class SigRInf_Grp(object):
     """
-    Make a cluster of SignalROOTInfo objects, that behave like the first object of the group but with
+    Make a cluster of SignalROOTInfo objects that behaves like the first object of the group,
+    but with the process name substituted for the cluster name (e.g. ZHToSSTodddd -> VH).
 
     This code defaults most things to the first item of the list. So it will fail if full_fn_ls entries don't have matching lifetime/mass/year etc.
 
     -INPUTS-
-    full_fn: ls-like, full filenames
+    full_fn_ls: ls-like, full filenames, one per cluster member
     root_exists: Boolean. Should it search for the ROOT and MCSample()?
+    nbins: int, passed to each SignalROOTInfo
+    overwrite_proc: str, the cluster name to report instead of the first member's process
     """
 
     def __init__(self, full_fn_ls, root_exists=False, nbins=3, overwrite_proc=None):
@@ -200,20 +204,25 @@ class NuisanceInfo(object):
     nuis_name: string.
     nuis_val: int or arr-like. Note this is meaningless if type is shape, but provide something anyway otherwise it'll crash.
     make_updn: Boolean. Will this make a shape uncertainty?
-    sep_yrs: Boolean. If true, the nuis_name will be tagged with year number, e.g. lepSF -> lepSF8 (prevents ROOT chaining unrelated nuisances together)
+    sep_yrs: Boolean. If true, the nuis_name gets the year tag appended, e.g. lepSF -> lepSF_2018 (prevents ROOT chaining unrelated nuisances together)
+    corr: Boolean. Will this nuisance produce one line on the datacard, or more than one? If non-correlated, it produces nuis_2018b1, nuis_2018b2 etc
     -Optional Inputs-
-    corr: Boolean. Will this nuisance produce one line on the datacard, or more than one? If non-correlated, it will produce nuisb1, nuisb2 (or nuis7b1) etc
     nuis_type: string. If make_updn is True, it MUST be "shape".
     nbins: int
     ana_spec: Boolean. Is this analysis-specific and gets tagged with CMS+CADI?
     add_era_tags: if False, neither a year- nor Run2-tag will be added
     extra_info: list
+    extrapolate_last: Boolean. Only matters when the input array is shorter than nbins.
+            If False (default) the missing bins are padded with 1.0, i.e. no fluctuation.
+            If True they repeat the last supplied value. Turn this on only for nuisances
+            where extrapolating the last bin is the intended physics, e.g. the lep pileup one.
 
     -Other Things Stored-
     """
 
     def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr,
-                 nuis_type="lnN", nbins=3, ana_spec=False, add_era_tags=True, extra_info=None):
+                 nuis_type="lnN", nbins=3, ana_spec=False, add_era_tags=True, extra_info=None,
+                 extrapolate_last=False):
         """It will always expand one entry into an array of size nbins. If you don't want this behavior, give it e.g. [1, 1.05, 1] so some bins don't fluctuate."""
         if extra_info is None:
             extra_info = []
@@ -227,13 +236,26 @@ class NuisanceInfo(object):
             except Exception:
                 raise Exception("Unable to parse nuis_val")
 
-        # Pad with 1.0 or truncate to match nbins.
+        # Pad or truncate to match nbins. Padding is with 1.0 unless extrapolate_last is set,
+        # in which case the last supplied value is repeated.
         if len(self.nuis_val) != nbins:
-            if len(self.nuis_val) < nbins:
-                self.nuis_val = np.concatenate(
-                    [self.nuis_val, np.ones(nbins - len(self.nuis_val))])
+            n_have = len(self.nuis_val)
+            if n_have < nbins:
+                fill = self.nuis_val[-1] if extrapolate_last else 1.0
+                self.nuis_val = np.concatenate([self.nuis_val, fill * np.ones(nbins - n_have)])
+                if extrapolate_last:
+                    print("Note: extrapolated nuisance %s from %d to %d bins by repeating the "
+                          "last value" % (nuis_name, n_have, nbins))
+                else:
+                    print("*" * 90)
+                    print("*** PADDED NUISANCE: %s only had %d of %d bins, the missing bins were "
+                          "filled with 1.0" % (nuis_name, n_have, nbins))
+                    print("*** that means NO uncertainty is applied in those bins.")
+                    print("*" * 90)
             else:
                 self.nuis_val = self.nuis_val[:nbins]
+                print("Warning: truncated nuisance %s from %d to %d bins"
+                      % (nuis_name, n_have, nbins))
 
         if np.any(self.nuis_val < 0):
             raise Exception("Nuisance must be >=0. Also remember 1 (not 0) is the central value")
@@ -298,6 +320,11 @@ class NuisanceTable(object):
         if years is None:
             years = set(["20161", "20162", "2017", "2018"])
 
+        # The process we were asked for. When an alias kicks in below, self.proc becomes the
+        # alias target (e.g. VH) while this stays the process the caller actually wanted, so
+        # get_point_from_fn can still recognise it.
+        self.requested_proc = str(proc)
+
         if pickle_loc is None:
             if any(v is None for v in [proc, x_vals, x_unit, y_vals, y_unit, as_percent]):
                 raise Exception("Missing inputs")
@@ -336,6 +363,9 @@ class NuisanceTable(object):
                     use_dict = pickle.load(fh)
             except Exception:
                 could_find = False
+                if trig_for_pickle is None:
+                    raise Exception("Could not read pickle %s, and no trig_for_pickle was given "
+                                    "so there are no aliases to fall back on" % pickle_loc_tosearch)
                 for alias in config.sig["aliases"][trig_for_pickle][proc]:
                     try:
                         pickle_loc_tosearch = pickle_loc
@@ -393,8 +423,8 @@ class NuisanceTable(object):
         val_arr = np.array(val_arr)
         if val_arr.shape != self.nuis_dict[year].shape:
             raise Exception("Bad array dimensions, or wrong year.")
-        for i in xrange(len(x_vals)):
-            for j in xrange(len(y_vals)):
+        for i in range(len(x_vals)):
+            for j in range(len(y_vals)):
                 self.add_entry(proc, x_vals[i], y_vals[j], year, val_arr[i, j],
                                x_unit=x_unit, y_unit=y_unit, debug_mode=debug_mode)
 
@@ -416,7 +446,7 @@ class NuisanceTable(object):
         s_ind = []
         vsu_ls = []
 
-        for i in xrange(len(xy_vals)):
+        for i in range(len(xy_vals)):
             su  = self.nuis_dict[dict_unit_k[i]]
             ua  = self.nuis_dict[dict_vals_k[i]]
             vsu = ROOThelper.convert_units(su, from_num=xy_vals[i], from_unit=xy_units[i])
@@ -496,7 +526,10 @@ class NuisanceTable(object):
         except Exception:
             new_sig = file_info
         proc, tau, mass, yr = new_sig.return_name2details(lifetime_unit=self.nuis_dict["x_unit"])
-        if proc != self.proc:
+        # Accept the alias target too. Without this, any process that had to be redirected to
+        # another table (ttH -> VH, ggZH -> VH, ttH -> ggH) never matches and silently returns
+        # None, which downstream turns into a fabricated 100% nuisance.
+        if proc != self.proc and proc != getattr(self, "requested_proc", None):
             return None
         if overrides is not None:
             for k in overrides:

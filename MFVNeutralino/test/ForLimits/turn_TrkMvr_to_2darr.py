@@ -1,3 +1,4 @@
+from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 
@@ -42,8 +43,8 @@ for p in proc_nm:
 
 
     if True:
-        print "\nSummary of", p
-        print ntab.pretty_print_diagnostics()
-        print "\n\n"
+        print("\nSummary of", p)
+        print(ntab.pretty_print_diagnostics())
+        print("\n\n")
 
 

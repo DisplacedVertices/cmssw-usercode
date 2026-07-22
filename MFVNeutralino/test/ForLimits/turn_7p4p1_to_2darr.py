@@ -1,3 +1,4 @@
+from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 
@@ -46,13 +47,13 @@ for p in proc_nm:
     ntab.get_point("2017", x_val=1.01, y_val=401, x_unit="mm", use_log=False, debug_mode=True)
 
     point_from_fn = ntab.get_point_from_fn("mfv_neu_tau010000um_M0400_2018", debug_mode=True)
-    print "Searching mfv_neu_tau010000um_M0400_2018 returned", point_from_fn
+    print("Searching mfv_neu_tau010000um_M0400_2018 returned", point_from_fn)
 
     
     if False:
-        print "\nSummary of", p
-        print ntab.pretty_print_diagnostics()
-        print "\n\n"
+        print("\nSummary of", p)
+        print(ntab.pretty_print_diagnostics())
+        print("\n\n")
 
     ntab.save_pickle(pickle_prefix)
 
@@ -62,12 +63,12 @@ for p in proc_nm:
 # Check if pickling is right
 for p in proc_nm:
     ntab = sth.NuisanceTable(proc=p, pickle_loc=pickle_prefix)
-    print "Successfully reconstructed:", ntab.proc
+    print("Successfully reconstructed:", ntab.proc)
 
     if True:
-        print "\nSummary of", p
-        print ntab.pretty_print_diagnostics()
-        print "\n\n"
+        print("\nSummary of", p)
+        print(ntab.pretty_print_diagnostics())
+        print("\n\n")
 
 
 

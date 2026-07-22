@@ -82,7 +82,7 @@ def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
     elif nuis_name == "qcd_scale_ren_ggH":   new_nuis = nsfc.get_qcd_scale_ren_ggH("QCDscale_ren_ggH", siginfo, debug_mode=debug_mode)
     elif nuis_name == "qcd_scale_fac_VH":    new_nuis = nsfc.get_qcd_scale_fac_VH("QCDscale_fac_VH",  siginfo, debug_mode=debug_mode)
     else:
-        print("Error: nuisance name not implemented for", nuis_name)
+        raise Exception("Error: nuisance name not implemented for " + nuis_name)
 
     new_nuis = replace_all_ones(new_nuis)
     nuis_ls += new_nuis
@@ -114,20 +114,29 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
 
     lep_effi is only added for processes that have a lepton in the hard scatter
     (VH, ttH). Pure SUSY signals fired by the lepton trigger do not receive it.
+
+    -INPUTS-
+    siginfo: a SignalROOTInfo object
+    nuis_ls: empty list to be filled (though it should work if not empty)
     """
     trig_type = siginfo.trig_type
 
     nuis_set = nuis_allsigs.copy()
     if trig_type == "lep":
         nuis_set.update(nuis_lep)
-        # Only VH and ttH carry a lepton reco efficiency uncertainty
-        if siginfo.proc in config.lep_reco_effi_sigs:
-            nuis_set.add("lep_effi")
     elif trig_type == "bjet":
         nuis_set.update(nuis_bjet)
     else:
         print("FAIL: please make sure the input SignalROOTInfo object has a trig_type identified")
         return
+
+    # Process-specific nuisances, each gated on the channels it is valid in
+    for spec_name, spec in config.sig["spec_nuis"].items():
+        if siginfo.proc not in spec["procs"]:
+            continue
+        if spec["channels"] is not None and trig_type not in spec["channels"]:
+            continue
+        nuis_set.add(spec_name)
 
     for repl in nuis_replacements["all"]:
         nuis_set.update(repl)
@@ -143,12 +152,6 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
     for nuis in sorted(nuis_set):
         get_nuis_fromname(nuis, siginfo, nuis_ls, debug_mode=debug_mode)
 
-    # Process-specific theory systematics (year- and bin-correlated, no CMS_EXO24035_ prefix)
-    if siginfo.proc == "ggHToSSTodddd":
-        get_nuis_fromname("qcd_scale_ren_ggH", siginfo, nuis_ls, debug_mode=debug_mode)
-    if siginfo.proc == "VH":
-        get_nuis_fromname("qcd_scale_fac_VH", siginfo, nuis_ls, debug_mode=debug_mode)
-
     if debug_mode:
         print("Nuisances that produced a SIG Nuisance object:")
         for nuis in nuis_ls:
@@ -156,7 +159,11 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
 
 
 def get_nuis_frombkg(nuis_bkg_ls, debug_mode=False):
-    """Build the nuisance list for the background estimate."""
+    """Build the nuisance list for the background estimate.
+
+    -INPUTS-
+    nuis_bkg_ls: empty list to be filled (though it should work if not empty)
+    """
     nuis_set = nuis_bkg.copy()
 
     for repl in nuis_bkg_replacements:

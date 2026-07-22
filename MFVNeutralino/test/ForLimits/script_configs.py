@@ -1,4 +1,5 @@
-# Runtime paths and settings come from limits_config.yaml.
+# Input and output paths come from the required CLI arguments via set_paths().
+# limits_config.yaml holds the runtime settings (bins, observations, filename patterns).
 # Physics configuration (signal groupings, nuisance lists) lives here.
 import os
 import yaml
@@ -42,6 +43,7 @@ _lep_sigs = [
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",
     "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
+    "VH",  # Signal clusters are treated similarly to signals
 ]
 
 # Signals that fire the displaced (b-jet) trigger
@@ -51,26 +53,22 @@ _bjet_sigs = [
     "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
 ]
 
-# Processes with a hard-scatter lepton -- get lep_effi nuisance (VH, ttH; not SUSY).
-# "VH" is the combined signal group (ZH+WH++WH-+ggZH); individual sub-process names
-# are also listed for any cards generated outside the combined group path.
-lep_reco_effi_sigs = frozenset([
-    "VH",
-    "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
-    "ggZHToSSTobbbb", "ggZHToSSTodddd",
-    "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
-])
-
 sig = {
     "type":      _cfg["channel"],
     "lep":       _cfg["signal"]["lep"],
     "bjet":      _cfg["signal"]["bjet"],
     "lep_sigs":  _lep_sigs,
     "bjet_sigs": _bjet_sigs,
-    # VH = ZH + WH+ + WH- summed (same lifetime/mass grid, different xsec)
+    # VH = ZH + WH+ + WH- + ggZH summed. All four must be present at a given lifetime/mass
+    # for the cluster to be built.
     "sig_grps": {
         "VH": ["ZHToSSTodddd", "WminusHToSSTodddd", "WplusHToSSTodddd", "ggZHToSSTodddd"],
     },
+    # Cluster members that are also generated on a wider lifetime grid than the rest of the
+    # cluster. WplusH and WminusH only exist at 6 lifetimes, ggZH at 12, so a point where
+    # only ggZH exists is not a broken cluster, it is simply not a VH point and gets skipped.
+    # Any other member sitting alone IS a broken cluster and raises.
+    "sig_grp_wide_members": frozenset(["ggZHToSSTodddd"]),
     # Nuisance aliases: use when a dedicated table doesn't exist for a process
     "aliases": {
         "bjet": {
@@ -86,6 +84,27 @@ sig = {
             "WplusHToSSTodddd":  {"VH"},
             "ZHToSSTodddd":      {"VH"},
         },
+    },
+    # Nuisances that only apply to specific processes.
+    # procs: process names that receive the nuisance
+    # channels: trigger channels it applies in, None means any channel
+    "spec_nuis": {
+        # Processes with a hard-scatter lepton -- get lep_effi nuisance (VH, ttH; not SUSY).
+        # "VH" is the combined signal group (ZH+WH++WH-+ggZH); individual sub-process names
+        # are also listed for any cards generated outside the combined group path.
+        # AN Sec 6.2.3: the electron SF uncertainty applies to the lepton-triggered channel only.
+        "lep_effi": {
+            "procs": frozenset([
+                "VH",
+                "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
+                "ggZHToSSTobbbb", "ggZHToSSTodddd",
+                "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
+            ]),
+            "channels": frozenset(["lep"]),
+        },
+        # Process-specific theory systematics (year- and bin-correlated, no CMS_EXO24035_ prefix)
+        "qcd_scale_ren_ggH": {"procs": frozenset(["ggHToSSTodddd"]), "channels": None},
+        "qcd_scale_fac_VH":  {"procs": frozenset(["VH"]),            "channels": None},
     },
 }
 
@@ -104,19 +123,48 @@ bkg["bjet"]["fn"] = bkg["bjet"].pop("filename", bkg["bjet"].get("fn", ""))
 # Output paths
 # root_output  : intermediate ROOT file with signal/bkg histograms
 # datacard_out_loc : final combine .txt datacard files
+# Folders stay None until set_paths() fills them from the required CLI arguments.
 # --------------------------------------------------------------------------
 output = {
-    "lep":    {"out_folder": _cfg["root_output"]["lep"]["folder"]},
-    "bjet":   {"out_folder": _cfg["root_output"]["bjet"]["folder"]},
+    "lep":    {"out_folder": None},
+    "bjet":   {"out_folder": None},
     "out_fn": _cfg["root_output"]["filename"],
 }
 
 datacard_out_loc = {
-    "lep":           {"out_folder": _cfg["datacard_output"]["lep"]["folder"]},
-    "bjet":          {"out_folder": _cfg["datacard_output"]["bjet"]["folder"]},
+    "lep":           {"out_folder": None},
+    "bjet":          {"out_folder": None},
     "out_fn_prefix": _cfg["datacard_output"]["prefix"],
     "out_fn_suffix": _cfg["datacard_output"]["suffix"],
 }
+
+
+def set_paths(minitree_dir, bkg_template_dir, out_dir):
+    """
+    Fill in the runtime paths from the required CLI arguments. Nothing in the committed
+    yaml points at a personal area, so these must be supplied on every run.
+
+    -INPUTS-
+    minitree_dir: folder holding the signal MiniTrees for the channel being run
+    bkg_template_dir: folder holding the background templates for the channel being run
+    out_dir: base output folder; the LimitsInput and Datacard subfolders are made underneath
+    """
+    for ch in ("lep", "bjet"):
+        sig[ch]["folder"] = os.path.join(minitree_dir, "")
+        bkg[ch]["folder"] = os.path.join(bkg_template_dir, "")
+        output[ch]["out_folder"] = os.path.join(
+            out_dir, _cfg["root_output"]["subdir"], ch, "")
+        datacard_out_loc[ch]["out_folder"] = os.path.join(
+            out_dir, _cfg["datacard_output"]["subdir"], ch, "")
+
+
+def make_out_dirs(channel):
+    """Create the output folders for one channel if they don't already exist."""
+    for folder in (output[channel]["out_folder"], datacard_out_loc[channel]["out_folder"]):
+        if folder is None:
+            raise Exception("Output paths not set. set_paths() must be called first.")
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
 # --------------------------------------------------------------------------
 # Observed events (kept at 0 for blind analysis)
@@ -131,17 +179,32 @@ nuisance_table_paths = {
     "disp_trig_uncerts": _abs(_cfg["nuisance_tables"]["disp_trig_uncerts"]),
     "tk_reco_eff": {
         "base":      _abs(_cfg["nuisance_tables"]["tk_reco_eff"]["base"]),
+        "ct_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["ct_prefix"],
         "up_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["up_prefix"],
         "dn_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["dn_prefix"],
     },
-    "fac_scale_VH_csv": _cfg["nuisance_tables"]["fac_scale_VH_csv"],  # absolute path
+    "fac_scale_VH_csv": _abs(_cfg["nuisance_tables"]["fac_scale_VH_csv"]),
 }
 
 # --------------------------------------------------------------------------
 # Debug settings
+# Both fake-scaling switches are off by default and must never be True in production.
+# Datacards are assumed to already carry the intended scaling, since the MiniTree/Histos
+# maker uses the correct branching fractions in the cross-section file.
 # --------------------------------------------------------------------------
 debug_settings = {
     "enabled":       _cfg.get("debug", True),
     "scale_bkg_fake": False,   # set True only for explicit testing; never in production
     "bkg_fake_sf":   100,
+    "scale_sig_fake": False,   # set True only for explicit testing; never in production
+    "sig_fake_sf": {           # write None for no correction. Store corrections as string
+        "lep": {
+            "default": None,
+            "overrides": {},
+        },
+        "bjet": {
+            "default": None,
+            "overrides": {},
+        },
+    },
 }

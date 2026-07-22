@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Discover all signal datacards under ForLimits/Datacards/, group them by
+Discover all signal datacards under <out-dir>/Datacards_<tag>/, group them by
 (proc, ctau, mass), and submit one Condor job per hypothesis that runs:
   1. combine -M AsymptoticLimits -- 95% CL expected/observed limits
   2. combine -M FitDiagnostics   -- best-fit signal strength + s+b shapes
@@ -12,7 +12,8 @@ transfer_input_files so worker nodes do not need /uscms/home or /uscms_data.
 
 Prerequisites
   - makeLimitsInputROOT.py must have been run for all years + channels so that
-    Datacards/{lep,bjet}/Datacard_*.txt files exist.
+    Datacards_<tag>/{lep,bjet}/Datacard_*.txt files exist. Pass the same --out-dir
+    you gave it, otherwise this reads whatever happens to sit in this directory.
   - Run this script with CMSSW_14_1_0_pre4 + Combine sourced (cmsenv).
     combineCards.py and the combine binary must be in PATH.
     To install from scratch (on LPC EL9 node, outside apptainer):
@@ -22,10 +23,11 @@ Prerequisites
         scram b -j8
 
 Usage
-  python submitCombine.py                       # all signals
-  python submitCombine.py --subset VH,mfv_neu  # selected processes
-  python submitCombine.py --dry-run             # list jobs without submitting
-  python submitCombine.py --skip-existing       # skip already-completed jobs
+  python submitCombine.py --tag 4bin --out-dir DIR --method asymptotic   # all signals
+  python submitCombine.py --tag 4bin --out-dir DIR --subset VH,mfv_neu   # selected processes
+  python submitCombine.py --tag 4bin --out-dir DIR --dry-run             # list, don't submit
+  python submitCombine.py --tag 4bin --out-dir DIR --skip-existing       # skip completed
+  Run asymptotic before hybridnew, it uses the asymptotic result to set rMax.
 """
 import os
 import sys
@@ -39,12 +41,19 @@ DATACARD_DIR = os.path.join(HERE, "Datacards")
 COMBINE_OUT  = os.path.join(HERE, "CombineOutput")
 CONDOR_DIR   = os.path.join(HERE, "CombineCondor")
 
-def _apply_tag(tag):
-    """Redirect all I/O directories to tagged variants (e.g. tag='4bin')."""
+def _apply_tag(tag, base=None):
+    """Redirect all I/O directories to tagged variants (e.g. tag='4bin').
+
+    base defaults to this directory, but should be the same --out-dir that was given to
+    makeLimitsInputROOT.py, otherwise this reads a different set of datacards than the
+    one that was just produced.
+    """
     global DATACARD_DIR, COMBINE_OUT, CONDOR_DIR
-    DATACARD_DIR = os.path.join(HERE, "Datacards_%s"    % tag)
-    COMBINE_OUT  = os.path.join(HERE, "CombineOutput_%s" % tag)
-    CONDOR_DIR   = os.path.join(HERE, "CombineCondor_%s" % tag)
+    if base is None:
+        base = HERE
+    DATACARD_DIR = os.path.join(base, "Datacards_%s"    % tag)
+    COMBINE_OUT  = os.path.join(base, "CombineOutput_%s" % tag)
+    CONDOR_DIR   = os.path.join(base, "CombineCondor_%s" % tag)
 
 COMBINE_TARBALL  = os.environ.get(
     "COMBINE_TARBALL",
@@ -300,12 +309,21 @@ def main():
                     help="Submit only this exact hypothesis (e.g. mfv_neu_tau001000um_M0400)")
     ap.add_argument("--tag", default=None,
                     help="Redirect I/O to tagged directories, e.g. --tag 4bin uses Datacards_4bin/, CombineOutput_4bin/, CombineCondor_4bin/")
+    ap.add_argument("--out-dir", default=None,
+                    help="Base folder holding the tagged directories. Give the same --out-dir "
+                         "used for makeLimitsInputROOT.py. Defaults to this ForLimits directory.")
     ap.add_argument("--method", default="hybridnew", choices=["hybridnew", "asymptotic"],
                     help="Which combine method to run: hybridnew (default) or asymptotic")
     args = ap.parse_args()
 
     if args.tag:
-        _apply_tag(args.tag)
+        _apply_tag(args.tag, base=args.out_dir)
+    elif args.out_dir:
+        raise SystemExit("--out-dir only has an effect together with --tag")
+
+    if not os.path.isdir(DATACARD_DIR):
+        raise SystemExit("No datacard directory at %s. Point --out-dir at the same base you "
+                         "gave makeLimitsInputROOT.py." % DATACARD_DIR)
 
     if not args.dry_run:
         for path in (COMBINE_TARBALL, CVMFS_CMSSW14):

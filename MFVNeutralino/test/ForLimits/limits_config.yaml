@@ -14,14 +14,12 @@ debug: true     # verbose output while running
 bins: [0., 0.1, 0.4, 2.0, 4.0]
 nbins: 4
 
-# ---- Input signal MiniTree paths ----------------------------
-# Folder should contain files named like: {process}_tau{ct}_{year}.root
+# ---- Input signal MiniTrees ---------------------------------
+# The folder is the required --minitree-dir argument; only the glob pattern lives here.
 signal:
   lep:
-    folder: "/uscms/home/gdecastr/nobackup/crabdirs/MiniTree_tag001Lepm_VH/"
     file_key: "condor_*tau*/minitree_0.root"
   bjet:
-    folder: "/uscms/home/gdecastr/nobackup/crabdirs/MiniTree_tag001BvetoLHTm_bjet/"
     file_key: "condor_*tau*/minitree_0.root"
 
 # ---- Input background paths ---------------------------------
@@ -30,29 +28,25 @@ signal:
 # BackgroundTemplates/{lep,bjet}/ for reference; only the run2-combined files are
 # currently used (no {year} placeholder in filename → .format(year) is a no-op).
 # TODO: replace with data-driven per-year estimates when available after unblinding.
+# The folder is the required --bkg-template-dir argument; only the filename lives here.
+# BackgroundTemplates_EXAMPLE/ in this directory is a reference copy, not an input --
+# point --bkg-template-dir at your own templates.
 background:
   lep:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/BackgroundTemplates/lep/"
     filename: "2v_from_jets_run2_5track_default_ULV30Lepm.root"
   bjet:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/BackgroundTemplates/bjet/"
     filename: "2v_from_jets_run2_5track_default_ULV30BvetoLHTm.root"
 
 # ---- Output paths -------------------------------------------
 # root_output: the intermediate ROOT file holding histograms
 # datacard_output: the final .txt combine datacards
+# Both are made under the required --out-dir argument, as <out-dir>/<subdir>/<channel>/
 root_output:
-  lep:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput_4bin/lep/"
-  bjet:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/LimitsInput_4bin/bjet/"
+  subdir: "LimitsInput_4bin"
   filename: "limitsinput"
 
 datacard_output:
-  lep:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards_4bin/lep/"
-  bjet:
-    folder: "/uscms/home/gdecastr/nobackup/work/DVCode/mfv_10648/src/JMTucker/MFVNeutralino/test/ForLimits/Datacards_4bin/bjet/"
+  subdir: "Datacards_4bin"
   prefix: "Datacard_"
   suffix: ".txt"
 
@@ -62,9 +56,10 @@ nuisance_tables:
   disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
   tk_reco_eff:
     base: "NuisTabStore_TrkRec/"
+    ct_prefix: "ct_pickle"
     up_prefix: "up_pickle"
     dn_prefix: "dn_pickle"
-  fac_scale_VH_csv: "/uscms/home/gdecastr/nobackup/crabdirs/TheorySystematics/fac_scale_shape_bins.csv"
+  fac_scale_VH_csv: "TheoryTables/fac_scale_shape_bins.csv"
 
 # ---- Observed events (set to 0 for blind analysis) -----------
 observations:

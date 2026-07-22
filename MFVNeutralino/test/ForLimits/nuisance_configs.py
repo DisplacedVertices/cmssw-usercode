@@ -22,9 +22,10 @@ pickle_prefixes = {
 
 pickle_triple_prefixes = {
     "tk_reco_eff": {
-        "base": _ntpaths["tk_reco_eff"]["base"],
-        "up":   _ntpaths["tk_reco_eff"]["up_prefix"],
-        "dn":   _ntpaths["tk_reco_eff"]["dn_prefix"],
+        "base":    _ntpaths["tk_reco_eff"]["base"],
+        "central": _ntpaths["tk_reco_eff"]["ct_prefix"],
+        "up":      _ntpaths["tk_reco_eff"]["up_prefix"],
+        "dn":      _ntpaths["tk_reco_eff"]["dn_prefix"],
     },
 }
 

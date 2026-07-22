@@ -1,3 +1,4 @@
+from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 
@@ -50,21 +51,21 @@ for p in proc_nm:
     ct_ntab.get_point("2017", x_val=1, y_val=40, x_unit="mm", use_log=False, debug_mode=True)
 
     point_from_fn = ct_ntab.get_point_from_fn("VH_tau1mm_M040_2018", debug_mode=True)
-    print "Searching VH_tau1mm_M040_2018 returned", point_from_fn
+    print("Searching VH_tau1mm_M040_2018 returned", point_from_fn)
 
     point_from_fn = up_ntab.get_point_from_fn("VH_tau1mm_M040_2018", debug_mode=True)
-    print "Searching VH_tau1mm_M040_2018 returned", point_from_fn
+    print("Searching VH_tau1mm_M040_2018 returned", point_from_fn)
 
     point_from_fn = dn_ntab.get_point_from_fn("VH_tau1mm_M040_2018", debug_mode=True)
-    print "Searching VH_tau1mm_M040_2018 returned", point_from_fn
+    print("Searching VH_tau1mm_M040_2018 returned", point_from_fn)
 
     
     if True:
-        print "\nSummary of", p
-        print ct_ntab.pretty_print_diagnostics()
-        print up_ntab.pretty_print_diagnostics()
-        print dn_ntab.pretty_print_diagnostics()
-        print "\n\n"
+        print("\nSummary of", p)
+        print(ct_ntab.pretty_print_diagnostics())
+        print(up_ntab.pretty_print_diagnostics())
+        print(dn_ntab.pretty_print_diagnostics())
+        print("\n\n")
 
     ct_ntab.save_pickle(pickle_prefix_ct)
     up_ntab.save_pickle(pickle_prefix_up)
@@ -76,12 +77,12 @@ for p in proc_nm:
 # Check if pickling is right
 for p in proc_nm:
     ct_ntab = sth.NuisanceTable(proc=p, pickle_loc=pickle_prefix_ct)
-    print "Successfully reconstructed:", ct_ntab.proc
+    print("Successfully reconstructed:", ct_ntab.proc)
 
     if False:
-        print "\nSummary of", p
-        print ct_ntab.pretty_print_diagnostics()
-        print "\n\n"
+        print("\nSummary of", p)
+        print(ct_ntab.pretty_print_diagnostics())
+        print("\n\n")
 
 
 

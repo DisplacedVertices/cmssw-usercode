@@ -24,3 +24,7 @@ ForLimits/BinningStudy/__pycache__/
 ForLimits/BinningStudy/*.pyc
 ForLimits/BinningStudy/*.log
 ForLimits/BinningStudy/*.err
+
+# Reference copy of the background templates, shipped so people can see the layout
+!ForLimits/BackgroundTemplates_EXAMPLE/*/*.root
+!ForLimits/NuisTabStore_*/*.pkl

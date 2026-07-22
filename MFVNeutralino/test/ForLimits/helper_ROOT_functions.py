@@ -31,6 +31,9 @@ def mult_hist_w_array(h, arr):
 def convert_units(to_unit, from_num=None, from_unit=None, from_expr=None):
     """Convert a displacement value between mm and um.
 
+    -INPUTS-
+    to_unit, from_unit: str
+    from_num: int, float, str, or anything that can be put into a float()
     from_expr: if given, interprets the last 2 chars as the unit (filename convention).
     """
     if "eV" in to_unit and "eV" in from_unit:

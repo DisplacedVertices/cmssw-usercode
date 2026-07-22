@@ -24,6 +24,12 @@ from makeDatacard import make_nuis_dcnm as mk_dcnm
 # ---------------------------------------------------------------------------
 def _parse_args():
     p = argparse.ArgumentParser(description="Build limits input ROOT file and datacards")
+    p.add_argument("--minitree-dir",     required=True,
+                   help="Folder holding the signal MiniTrees for this channel")
+    p.add_argument("--bkg-template-dir", required=True,
+                   help="Folder holding the background templates for this channel")
+    p.add_argument("--out-dir",          required=True,
+                   help="Base output folder; LimitsInput and Datacard subfolders are made under it")
     p.add_argument("--year",    default=None, help="Year to process: 20161/20162/2017/2018/all")
     p.add_argument("--channel", default=None, choices=["lep", "bjet"], help="Trigger channel")
     p.add_argument("--debug",   action="store_true", default=None, help="Verbose output")
@@ -33,6 +39,9 @@ def _parse_args():
 
 def _apply_args(args):
     """Push CLI overrides back into config dicts so the rest of the code is unchanged."""
+    config.set_paths(minitree_dir=args.minitree_dir,
+                     bkg_template_dir=args.bkg_template_dir,
+                     out_dir=args.out_dir)
     if args.year and args.year != "all":
         config.datacard["year"] = args.year
     if args.channel:
@@ -56,6 +65,8 @@ print_mapping = True
 
 def _init_globals(yr):
     global debug, sig_type, year, year_id, year_tag, nbins, bins
+    if yr not in config.datacard["year_key"]:
+        raise ValueError("year %s not in year_key %s" % (yr, config.datacard["year_key"]))
     debug    = config.debug_settings["enabled"]
     sig_type = config.sig["type"]
     year     = yr
@@ -81,12 +92,20 @@ def check_config(yr):
         raise ValueError("len(observations[year]) must equal nbins")
     if config.debug_settings["scale_bkg_fake"]:
         print("WARNING: scale_bkg_fake is True -- background will be artificially scaled")
+    if config.debug_settings["scale_sig_fake"]:
+        print("WARNING: scale_sig_fake is True -- signal will be artificially scaled")
 
 
 # ---------------------------------------------------------------------------
 # Background
 # ---------------------------------------------------------------------------
 def make_bkg(f):
+    """
+    Write: lumi, observations, rebinned sum_dBV. Nuisance parameters are added elsewhere.
+
+    -INPUTS-
+    f: ROOT file to write into
+    """
     bkg_fn = os.path.join(
         config.bkg[sig_type]["folder"],
         config.bkg[sig_type]["fn"].format(year)
@@ -139,10 +158,24 @@ def make_bkg(f):
 # ---------------------------------------------------------------------------
 # Signal
 # ---------------------------------------------------------------------------
-def make_sigs(f, sig_nums, sig_scales):
+def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
+    """
+    Write: signal (rebinned sumdbv), ngen-per-bin, sumw, ngen total, sigyield total.
+
+    -INPUTS-
+    f: ROOT file to write into
+    sig_nums: dictionary. Stores {SigGrp object : str}, the string index of each signal
+    sig_scales: dictionary. Stores {SigGrp object : scalings from MiniTree sumw -> signal yield}
+    sig_fake_corrs: dictionary. Stores {SigGrp object : fake scale factor or None}
+
+    -OUTPUTS-
+    f will store new histograms; sig_nums, sig_scales and sig_fake_corrs will be added to
+    """
     sig_fn_syntax = config.sig[sig_type]["folder"] + config.sig[sig_type]["file_key"]
     candidate_files = sorted(glob(sig_fn_syntax))
     sig_id = 0
+    built_clusters = set()
+    wrong_channel = 0   # samples found that belong to the other trigger channel
 
     for cand in candidate_files:
         cand_id = os.path.basename(cand)
@@ -157,11 +190,31 @@ def make_sigs(f, sig_nums, sig_scales):
             for sc, members in config.sig["sig_grps"].items():
                 if siginfo.proc in members:
                     in_cluster = True
-                    if siginfo.proc == members[0]:
-                        sig_str_ls = [cand.replace(siginfo.proc, p) for p in members]
-                        print("Found cluster", sc, ":", sig_str_ls)
-                        siggrp = sth.SigRInf_Grp(sig_str_ls, root_exists=True, nbins=nbins, overwrite_proc=sc)
-                        generated_siggrp = True
+                    # Trigger on whichever member is seen first, not only members[0], so a
+                    # missing first member cannot make the whole cluster disappear silently.
+                    cluster_key = cand.replace(siginfo.proc, sc)
+                    if cluster_key in built_clusters:
+                        break
+                    sig_str_ls = [cand.replace(siginfo.proc, p) for p in members]
+                    missing = [s for s in sig_str_ls if not os.path.exists(s)]
+                    if (missing and len(missing) == len(members) - 1
+                            and siginfo.proc in config.sig["sig_grp_wide_members"]):
+                        # A wide-grid member sitting on its own: ggZH is generated at 12
+                        # lifetimes where ZH and W+-H only exist at 6, so this is not a broken
+                        # cluster, it is simply not a point where the cluster exists. Any other
+                        # member alone falls through to the raise below.
+                        print("Not a %s point, only %s exists here, skipping: %s"
+                              % (sc, siginfo.proc, siginfo.return_nuis_key()))
+                        break
+                    if missing:
+                        raise Exception(
+                            "Incomplete %s cluster for %s. A partial cluster is not a valid "
+                            "signal. Missing:\n  %s" % (sc, siginfo.return_nuis_key(),
+                                                        "\n  ".join(missing)))
+                    print("Found cluster", sc, ":", sig_str_ls)
+                    siggrp = sth.SigRInf_Grp(sig_str_ls, root_exists=True, nbins=nbins, overwrite_proc=sc)
+                    built_clusters.add(cluster_key)
+                    generated_siggrp = True
                     break
             if not in_cluster:
                 siggrp = sth.SigRInf_Grp([cand], root_exists=True, nbins=nbins, overwrite_proc=None)
@@ -174,12 +227,28 @@ def make_sigs(f, sig_nums, sig_scales):
         if not generated_siggrp:
             continue
         if siggrp.trig_type != sig_type:
+            wrong_channel += 1
             continue
         if debug:
             print("Queued signal #%d: %s (%s)" % (sig_id, os.path.basename(cand), siggrp.trig_type))
         sig_nums[siggrp] = str(sig_id)
         sig_id += 1
         siggrp.print_diagnostics()
+
+    # A folder for the other channel still yields a few cards, because ttH sits in both the
+    # lep and bjet lists and falls back to the configured channel. Catch that here rather than
+    # writing a handful of cards built from the wrong MiniTrees. Only a genuine mismatch is an
+    # error -- a year with no MiniTrees at all is normal and just gets skipped.
+    if wrong_channel > len(sig_nums):
+        raise Exception(
+            "--minitree-dir does not look like a %s folder: %d %s signals queued but %d samples "
+            "belong to the other channel.\n  %s"
+            % (sig_type, len(sig_nums), sig_type, wrong_channel, config.sig[sig_type]["folder"]))
+
+    if not sig_nums:
+        print("No %s signals for year %s in %s, skipping this year"
+              % (sig_type, year, config.sig[sig_type]["folder"]))
+        return
 
     if print_mapping:
         print("\nSignal mapping:")
@@ -197,9 +266,17 @@ def make_sigs(f, sig_nums, sig_scales):
         sum_sigyield = 0.0
         scales = []
 
+        r_f_corr = None  # "r fake correction", debug only
+        if config.debug_settings["scale_sig_fake"]:
+            fake_cfg = config.debug_settings["sig_fake_sf"][sig_type]
+            r_f_corr = fake_cfg["overrides"].get(siggrp.proc, fake_cfg["default"])
+        if r_f_corr is not None:
+            print("WARNING: scaling signal", siggrp.proc, "by fake factor", r_f_corr)
+        sig_fake_corrs[siggrp] = r_f_corr
+
         ROOT.TH1.AddDirectory(1)
         h_sumdbv_tot    = ROOT.TH1D(n(sig_id, "sumdbv"),       "", 800, 0, 8)
-        h_sumdbv_nw_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_nw", "", 800, 0, 8)
+        h_sumdbv_nw_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_nw", "", 800, 0, 8)  # No-weight version
 
         for sig in siggrp.sig_ls:
             if debug:
@@ -247,12 +324,19 @@ def make_sigs(f, sig_nums, sig_scales):
         h_sig_nw = h_sumdbv_nw_tot.Rebin(nbins, n(sig_id, "ngen_perbin"), bins)
         move_overflow_into_last_bin(h_sig_nw)
 
+        if r_f_corr is not None:
+            h_sig.Scale(float(r_f_corr))
+
         h_sumw_hist     = ROOT.TH1D(n(sig_id, "sumw"),         "", 1, 0, 1)
         h_ngen_hist     = ROOT.TH1D(n(sig_id, "ngen_total"),   "", 1, 0, 1)
         h_sigyield_hist = ROOT.TH1D(n(sig_id, "sigyield_total"), "", 1, 0, 1)
         h_sumw_hist.SetBinContent(1, sumw)
         h_ngen_hist.SetBinContent(1, ngen)
-        h_sigyield_hist.SetBinContent(1, sum_sigyield)
+        # sigyield carries the same fake scaling as h_sig, so that the zero-count Gamma-N
+        # fallback in makeDatacard (w = sigyield_total/ngen_total) stays consistent with the
+        # scaled rates instead of being 1/r_f_corr times too big.
+        h_sigyield_hist.SetBinContent(
+            1, sum_sigyield if r_f_corr is None else sum_sigyield * float(r_f_corr))
 
         f.cd()
         for h in [h_sig, h_sig_nw, h_sumw_hist, h_ngen_hist, h_sigyield_hist]:
@@ -267,10 +351,24 @@ def make_sigs(f, sig_nums, sig_scales):
 # ---------------------------------------------------------------------------
 # Shape systematics (up/down histograms)
 # ---------------------------------------------------------------------------
-def write_sig_updown(f, nuis_ls, siggrp, sig_scales, sig_id):
+def write_sig_updown(f, nuis_ls, siggrp, sig_scales, sig_fake_corrs, sig_id):
+    """
+    Given a list of nuisances and a signal tag, write the up/down histograms for every
+    shape nuisance (non-shape nuisances are ignored).
+
+    -INPUTS-
+    f: ROOT file to write into
+    nuis_ls: list of Nuisance objects
+    siggrp: SigGrp object
+    sig_scales: {SigGrp object : scales}, scale := MiniTree sumw -> signal yield
+    sig_fake_corrs: {SigGrp object : fake scale factor or None}
+    sig_id: string, the integer indexing the signal
+    """
     scales = sig_scales[siggrp]
     if debug:
         print("\nShape systematics for:", siggrp.fn, "scales:", scales)
+
+    r_f_corr = sig_fake_corrs[siggrp]
 
     for nuis in nuis_ls:
         if not nuis.make_updn:
@@ -315,6 +413,8 @@ def write_sig_updown(f, nuis_ls, siggrp, sig_scales, sig_id):
 
         for h in [h_sig_up, h_sig_dn]:
             move_overflow_into_last_bin(h)
+            if r_f_corr is not None:
+                h.Scale(float(r_f_corr))
             h.SetDirectory(0)
 
         f.cd()
@@ -336,6 +436,7 @@ def write_sig_updown(f, nuis_ls, siggrp, sig_scales, sig_id):
 def run_one_year(yr):
     _init_globals(yr)
     check_config(yr)
+    config.make_out_dirs(sig_type)
 
     if debug:
         print("\n=== Year: %s  Channel: %s ===" % (yr, sig_type))
@@ -356,12 +457,13 @@ def run_one_year(yr):
         print("\n--- Background ---")
     make_bkg(f)
 
-    sig_nums   = {}
-    sig_scales = {}
+    sig_nums   = {}  # signal obj to number dictionary
+    sig_scales = {}  # store scalings for signals, preventing repeated calculations
+    sig_fake_corrs = {}  # debug-only fake scalings, None unless scale_sig_fake is on
 
     if debug:
         print("\n--- Signal ---")
-    make_sigs(f, sig_nums, sig_scales)
+    make_sigs(f, sig_nums, sig_scales, sig_fake_corrs)
 
     if debug:
         print("\n--- Background nuisances ---")
@@ -373,8 +475,8 @@ def run_one_year(yr):
     for siggrp, s_id in sig_nums.items():
         nuis_ls = []
         getns.get_nuis_fromsig(siggrp, nuis_ls, debug_mode=debug)
-        write_sig_updown(f=f, nuis_ls=nuis_ls, siggrp=siggrp,
-                         sig_scales=sig_scales, sig_id=s_id)
+        write_sig_updown(f=f, nuis_ls=nuis_ls, siggrp=siggrp, sig_scales=sig_scales,
+                         sig_fake_corrs=sig_fake_corrs, sig_id=s_id)
         mkdat.make_datacard(f=f, nuis_ls=nuis_ls, nuis_bkg_ls=nuis_bkg_ls,
                             siggrp=siggrp, sig_id=s_id, debug_mode=debug)
 

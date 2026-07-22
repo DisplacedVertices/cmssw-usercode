@@ -71,6 +71,11 @@ def make_nuis_dcnm(nuis, siggrp, force_no_CADItag=False):
     """Return the datacard name(s) for a nuisance.
 
     Correlated -> single string; un-correlated -> list of per-bin strings.
+
+    -If analysis-specific, tag with CADI (unless forced not to). Due to shape-processing
+     conventions, force_no_CADItag currently suppresses the era tags too.
+    -If separate years, tag with year_tag, else with the Run2 key
+    -If separate bins (==corr/uncorr), tag b1, b2 etc
     """
     nuis_rootname = nuis.nuis_name
     if not force_no_CADItag:
@@ -98,7 +103,13 @@ ________
 
 
 def turn_info_to_line(ns_name, ns_type, strls, write_sig):
-    """Build one datacard line string."""
+    """Build one datacard line string.
+
+    -INPUTS-
+    ns_name, ns_type: str
+    strls: list of anything that becomes str
+    write_sig: Boolean. If True the signal columns are written first, else the background ones
+    """
     if len(strls) != nbins:
         raise Exception("Bad line input.")
     new_line = "\n"
@@ -120,7 +131,14 @@ def turn_info_to_line(ns_name, ns_type, strls, write_sig):
 
 
 def turn_info_to_nlines(ns_names, ns_type, strls, write_sig):
-    """Build per-bin datacard lines (un-correlated nuisances)."""
+    """Build per-bin datacard lines (un-correlated nuisances).
+
+    -INPUTS-
+    ns_names: list-like of str, one name per bin
+    ns_type: str
+    strls: list of anything that becomes str
+    write_sig: Boolean
+    """
     if len(strls) != nbins or len(ns_names) != nbins:
         raise Exception("Bad line input.")
     new_lines = ""
@@ -175,7 +193,11 @@ def add_observations(template, f, siggrp, sig_id):
 
 
 def add_central_vals(template, f, sig_norm_ls, siggrp, sig_id):
-    """Build the bin/process/rate block; fills sig_norm_ls in place for Gamma-N."""
+    """Build the bin/process/rate block; fills sig_norm_ls in place for Gamma-N.
+
+    -INPUTS-
+    sig_norm_ls: list (probably empty), will store extracted signal values for Gamma-N
+    """
     new_template = template + pad("bin", 12)
     for j in range(n_proc):
         for i in range(nbins):
@@ -273,7 +295,12 @@ def return_shape_lines(f, ns_ls, siggrp, sig_id, write_sig=True):
 
 
 def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
-    """Handle GammaN, updn_pair, and anti-lnN nuisance types."""
+    """Handle GammaN, updn_pair, and anti-lnN nuisance types. Any new ad-hoc nuisance
+    types get handled here.
+
+    -INPUTS-
+    sig_norm_ls: list of floats, extracted during the get-signal stage
+    """
     new_lines = ""
 
     for nuis in ns_ls:
@@ -323,7 +350,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
 
         elif nuis.nuis_type == "special":
             if nuis.extra_info[0] == "updn_pair":
-                if nuis.extra_info[1] == "up":
+                if nuis.extra_info[1] == "up":  # skip down
                     pair_found = False
                     for n2 in ns_ls:
                         if (n2.nuis_name == nuis.nuis_name and
@@ -335,7 +362,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                     if not pair_found:
                         raise Exception("updn_pair UP has no corresponding DOWN")
 
-                    strls = [str(n2.nuis_val[i]) + "/" + str(nuis.nuis_val[i])
+                    strls = [str(npair.nuis_val[i]) + "/" + str(nuis.nuis_val[i])
                              for i in range(nbins)]
                     if nuis.corr is True:
                         new_lines += turn_info_to_line(make_nuis_dcnm(nuis, siggrp), "lnN", strls, write_sig)
@@ -369,15 +396,24 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
 # ---------------------------------------------------------------------------
 
 def make_datacard(f, nuis_ls, nuis_bkg_ls, siggrp, sig_id, debug_mode=False):
-    """Write a combine .txt datacard to disk for one signal hypothesis."""
+    """Write a combine .txt datacard to disk for one signal hypothesis.
+
+    -INPUTS-
+    nuis_ls: list of nuisance objects, for signal
+    nuis_bkg_ls: list of nuisance objects, for background
+    siggrp: SigGrp object storing information about the signal MiniTree
+    sig_id: string, the integer indexing the signal
+    debug_mode: Bool, whether to print debug statements
+    """
     sig_name = "sig" + year_tag + sig_id
     if debug_mode:
         print("\nSearching for signal named", sig_name)
 
+    h_sig_tot = f.Get(sig_nm(sig_id).replace(" ", ""))
     template = (
         "# sample id in ROOT file " + sig_id + "\n"
         "# filename = " + siggrp.fn + "\n"
-        "# total sig rate = FIXME, not implemented"
+        "# total sig rate = " + "{:.4e}".format(h_sig_tot.Integral())
     )
 
     template = add_ijkmax(template=template, nuis_ls=nuis_ls, nuis_bkg_ls=nuis_bkg_ls, siggrp=siggrp)
