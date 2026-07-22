@@ -1,11 +1,26 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.Tools.Year import year
-from JMTucker.MFVNeutralino.TriggerFilter_cfi import bjet_paths
+from JMTucker.MFVNeutralino.TriggerFilter_cfi import bjet_paths_2016, bjet_paths_2017, bjet_paths_2018, lepton_paths_2016, lepton_paths_2017, lepton_paths_2018
+
 
 # TriggerHelper::pass_any_version expects the HLT path prefix ending in _v,
 # while hltHighLevel uses the same prefix followed by a wildcard.
-bjet_paths_for_trigger_helper = [path[:-1] if path.endswith('*') else path for path in bjet_paths]
+def for_trigger_helper(paths):
+    return [p[:-1] if p.endswith('*') else p for p in paths]
+
+if year == 2016:
+    bjet_paths_for_trigger_helper = for_trigger_helper(bjet_paths_2016)
+    lepton_paths_for_trigger_helper = for_trigger_helper(lepton_paths_2016)
+elif year == 2017:
+    bjet_paths_for_trigger_helper = for_trigger_helper(bjet_paths_2017)
+    lepton_paths_for_trigger_helper = for_trigger_helper(lepton_paths_2017)
+elif year == 2018:
+    bjet_paths_for_trigger_helper = for_trigger_helper(bjet_paths_2018)
+    lepton_paths_for_trigger_helper = for_trigger_helper(lepton_paths_2018)
+else:
+    raise RuntimeError("unsupported year")
+
 
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),
@@ -26,13 +41,7 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               veto_bjet_triggers = cms.bool(False),
                               bjet_triggers_to_veto = cms.vstring(*bjet_paths_for_trigger_helper),
                               veto_lepton_triggers = cms.bool(False),
-                              lepton_triggers_to_veto = cms.vstring(
-                                                              'HLT_IsoMu27_v', 
-                                                              'HLT_IsoMu24_v',
-                                                              'HLT_Ele27_WPTight_Gsf_v', 
-                                                              'HLT_Ele35_WPTight_Gsf_v', 
-                                                              'HLT_Ele32_WPTight_Gsf_v', 
-                                                             ),
+                              lepton_triggers_to_veto = cms.vstring(*lepton_paths_for_trigger_helper),
                               electron_effective_areas = cms.FileInPath('RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt'),
                               parse_randpars = cms.bool(False), 
                               randpar_mass = cms.int32(-1),

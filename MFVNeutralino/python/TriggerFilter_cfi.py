@@ -15,18 +15,23 @@ low_HT_paths = [
     "HLT_HT425_v*",  # for 2017+8 HLT track studies
     ]
 
-bjet_paths = [
-    # bjet triggers 2016
+bjet_paths_2016 = [
     "HLT_QuadJet45_TripleBTagCSV_p087_v*", 
     "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v*",
     "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v*",
-    # bjet triggers 2017
+]
+
+bjet_paths_2017 = [
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v*",
     "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v*",
-    # bjet triggers 2018
+]
+
+bjet_paths_2018 = [
     "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v*",
     "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v*",
-    ]
+]
+
+bjet_paths = bjet_paths_2016 + bjet_paths_2017 + bjet_paths_2018
 
 displaced_dijet_paths = [
     # displaced dijet triggers 2016
@@ -36,6 +41,18 @@ displaced_dijet_paths = [
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
     ]
+
+muon_paths_2016 = [
+    "HLT_IsoMu24_v*", #2016,2018
+    "HLT_Mu50_v*"
+]
+
+muon_paths_2017 = [
+    "HLT_IsoMu27_v*", #2017
+    "HLT_Mu50_v*"
+]
+
+muon_paths_2018 = muon_paths_2016
 
 muon_paths = [
     "HLT_IsoMu27_v*", #2017
@@ -47,6 +64,18 @@ muoniso_paths = [
      "HLT_IsoMu27_v*",
 ]
 
+electron_paths_2016 = [
+    "HLT_Ele27_WPTight_Gsf_v*",
+]
+
+electron_paths_2017 = [
+    "HLT_Ele35_WPTight_Gsf_v*",
+]
+
+electron_paths_2018 = [
+    "HLT_Ele32_WPTight_Gsf_v*",
+]
+
 electron_paths = [
     "HLT_Ele27_WPTight_Gsf_v*", #2016
     "HLT_Ele35_WPTight_Gsf_v*", #2017
@@ -54,6 +83,10 @@ electron_paths = [
     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
 ]
+
+lepton_paths_2016 = muon_paths_2016 + electron_paths_2016
+lepton_paths_2017 = muon_paths_2017 + electron_paths_2017
+lepton_paths_2018 = muon_paths_2018 + electron_paths_2018
 
 dilepton_paths = [
     "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
