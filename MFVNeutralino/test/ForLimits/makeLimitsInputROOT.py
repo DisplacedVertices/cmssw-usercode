@@ -327,6 +327,14 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         if r_f_corr is not None:
             h_sig.Scale(float(r_f_corr))
 
+        for i in range(1, h_sig.GetNbinsX() + 1):
+            if h_sig.GetBinContent(i) < 0:
+                print("*" * 30)
+                print("CLAMPING NEGATIVE WEIGHT FOR %s (bin %d, %g)"
+                      % (siggrp.return_nuis_key(), i, h_sig.GetBinContent(i)))
+                print("*" * 30)
+                h_sig.SetBinContent(i, 0.0)
+
         h_sumw_hist     = ROOT.TH1D(n(sig_id, "sumw"),         "", 1, 0, 1)
         h_ngen_hist     = ROOT.TH1D(n(sig_id, "ngen_total"),   "", 1, 0, 1)
         h_sigyield_hist = ROOT.TH1D(n(sig_id, "sigyield_total"), "", 1, 0, 1)

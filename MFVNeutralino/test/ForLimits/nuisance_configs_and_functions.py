@@ -1,8 +1,8 @@
 from __future__ import print_function
-import csv as _csv
 import numpy as np
 
 import helper_PyStorage_objects as sth
+import helper_theory_tables as thytab
 import nuisance_configs as ns_conf
 import sig_and_bkg_configs as sb_conf
 import script_configs as config
@@ -68,8 +68,11 @@ def make_anticorr_bkg(val, dp=4, in_is_b1=True):
 # ---------------------------------------------------------------------------
 
 def get_mc_stat(nuis_name, siginfo, debug_mode=False):
-    nuis = sth.NuisanceInfo(nuis_name, 1.2, make_updn=False, sep_yrs=True, corr=False,
-                            nuis_type="GammaN", nbins=siginfo.nbins, ana_spec=True)
+    """Signal MC stat, gmN per bin per year. Name carries the signal point: gmN's sideband
+    count is part of the parameter identity, so shared names make combineCards refuse to merge."""
+    point = "%s_tau%s_M%s" % (siginfo.proc, siginfo.lifetime, siginfo.mass)
+    nuis = sth.NuisanceInfo(nuis_name + "_" + point, 1.2, make_updn=False, sep_yrs=True,
+                            corr=False, nuis_type="GammaN", nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)
     return [nuis]
 
 
@@ -84,7 +87,7 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
         if debug_mode:
             print("tk_reco_eff: using flat 5% placeholder for bjet signal")
         return [sth.NuisanceInfo(nuis_name, [1.05] * siginfo.nbins, make_updn=False,
-                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
 
     # Lep channel: per-bin asymmetric values from VH scale factor tables
     pickle_locs = interp_pickle_triple(nuis_name)
@@ -112,10 +115,12 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
 
     up_nuis = sth.NuisanceInfo(nuis_name, up_arr, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=siginfo.nbins, ana_spec=True,
-                               extra_info=["updn_pair", "up"])
+                               extra_info=["updn_pair", "up"], extrapolate_last=True,
+                               owner=siginfo.return_nuis_key())
     dn_nuis = sth.NuisanceInfo(nuis_name, dn_arr, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=siginfo.nbins, ana_spec=True,
-                               extra_info=["updn_pair", "dn"])
+                               extra_info=["updn_pair", "dn"], extrapolate_last=True,
+                               owner=siginfo.return_nuis_key())
     return [up_nuis, dn_nuis]
 
 
@@ -136,7 +141,7 @@ def get_vtx_reco_TM(nuis_name, siginfo, debug_mode=False):
     frac_unc = np.round(frac_unc, 7)
 
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False, sep_yrs=False, corr=True,
-                             nbins=siginfo.nbins, ana_spec=True)]
+                             nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_pileup(nuis_name, siginfo, debug_mode=False):
@@ -144,10 +149,10 @@ def get_pileup(nuis_name, siginfo, debug_mode=False):
         # AN Sec 6.2.6 quotes 3%, 4%, 6% on the old 3-bin binning; the 4th bin is extrapolated
         nuis = sth.NuisanceInfo(nuis_name, [1.03, 1.04, 1.06, 1.06], make_updn=False,
                                 sep_yrs=False, corr=True, nbins=siginfo.nbins,
-                                extrapolate_last=True)
+                                extrapolate_last=True, owner=siginfo.return_nuis_key())
     elif siginfo.trig_type == "bjet":
         nuis = sth.NuisanceInfo(nuis_name, 1.03, make_updn=False,
-                                sep_yrs=False, corr=True, nbins=siginfo.nbins)
+                                sep_yrs=False, corr=True, nbins=siginfo.nbins, extrapolate_last=False)
     else:
         raise Exception("Could not add pileup")
     return [nuis]
@@ -163,7 +168,7 @@ def get_int_lumi(nuis_name, siginfo, debug_mode=False):
         if val is None:
             continue
         nuis = sth.NuisanceInfo(comp_name, val, make_updn=False, sep_yrs=False,
-                                corr=True, nbins=siginfo.nbins, add_era_tags=False)
+                                corr=True, nbins=siginfo.nbins, add_era_tags=False, extrapolate_last=False)
         out_ls.append(nuis)
     return out_ls
 
@@ -171,7 +176,7 @@ def get_int_lumi(nuis_name, siginfo, debug_mode=False):
 def get_lep_effi(nuis_name, siginfo, debug_mode=False):
     """Lepton reconstruction efficiency (electron ID only; muon not yet implemented)."""
     nuis_e_id = sth.NuisanceInfo(nuis_name + "e_id", 1 + 0.01, make_updn=False,
-                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=False)
+                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=False, extrapolate_last=False)
     return [nuis_e_id]
 
 
@@ -189,9 +194,9 @@ def get_trig_JESR_btag(nuis_name, siginfo, debug_mode=False):
         print("*** writing an arbitrary 10%% lnN under the name %s_fake." % nuis_name)
         print("*" * 90)
         return [sth.NuisanceInfo(nuis_name + "_fake", 1 + 0.1, make_updn=False,
-                                 sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                                 sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
-                             sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                             sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_calo_inef(nuis_name, siginfo, debug_mode=False):
@@ -201,7 +206,7 @@ def get_calo_inef(nuis_name, siginfo, debug_mode=False):
     else:
         frac_unc = 0.01
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
-                             sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True)]
+                             sep_yrs=True, corr=True, nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_qcd_scale_ren_ggH(nuis_name, siginfo, debug_mode=False):
@@ -210,66 +215,7 @@ def get_qcd_scale_ren_ggH(nuis_name, siginfo, debug_mode=False):
         raise Exception("QCDscale_ren_ggH is a ggH-only uncertainty, got " + siginfo.proc)
 
     return [sth.NuisanceInfo(nuis_name, 1.02, make_updn=False, sep_yrs=False, corr=True,
-                             nbins=siginfo.nbins, ana_spec=False, add_era_tags=False)]
-
-
-def _load_fac_scale_VH_table(csv_path):
-    """Parse fac_scale_shape_bins.csv into yield-weighted VH kappas.
-
-    Returns {(mass_gev, ctau_um, year): ([kup_b0..b3], [kdn_b0..b3])}.
-    All four bins are read from the CSV; only bins flagged 'low_bin' are forced to 1.0.
-    The CSV has no ggZH rows, so the kappa is the ZH/W+H/W-H yield-weighted average, and it
-    is then applied to the whole VH process (which does include ggZH).
-    """
-    NBINS_CSV = 4
-    NBINS_ALL = 4
-
-    raw = {}
-    with open(csv_path) as f:
-        for r in _csv.DictReader(f):
-            key = (int(r['mass_gev']), int(r['ctau_um']), r['year'])
-            entry = {}
-            for b in range(NBINS_CSV):
-                if r['flags_bin%d' % b] == 'ok':
-                    entry[b] = (float(r['kappa_up_bin%d' % b]),
-                                float(r['kappa_dn_bin%d' % b]),
-                                int(r['n_bin%d' % b]))
-                else:
-                    entry[b] = (1.0, 1.0, 0)
-            raw.setdefault(key, {})[r['stype']] = entry
-
-    table = {}
-    for key, stypes_d in raw.items():
-        kup, kdn = [], []
-        for b in range(NBINS_ALL):
-            if b >= NBINS_CSV:
-                kup.append(1.0)
-                kdn.append(1.0)
-                continue
-            total_n = sum_ku = sum_kd = 0.0
-            for st in ('ZH', 'WplusH', 'WminusH'):
-                ku, kd, n = stypes_d.get(st, {}).get(b, (1.0, 1.0, 0))
-                sum_ku += ku * n
-                sum_kd += kd * n
-                total_n += n
-            if total_n > 0:
-                kup.append(sum_ku / total_n)
-                kdn.append(sum_kd / total_n)
-            else:
-                kup.append(1.0)
-                kdn.append(1.0)
-        table[key] = (kup, kdn)
-    return table
-
-
-_fac_scale_VH_table = None
-
-
-def _get_fac_scale_VH_table():
-    global _fac_scale_VH_table
-    if _fac_scale_VH_table is None:
-        _fac_scale_VH_table = _load_fac_scale_VH_table(ns_conf.fac_scale_VH_csv_path)
-    return _fac_scale_VH_table
+                             nbins=siginfo.nbins, ana_spec=False, add_era_tags=False, extrapolate_last=False)]
 
 
 def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
@@ -278,7 +224,7 @@ def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
     Per-bin kappas from the CSV, all four bins; only low-stats bins are forced to 1.0.
     Missing signal points fall back to kappa=1.0 (no systematic applied).
     """
-    table  = _get_fac_scale_VH_table()
+    table  = thytab.get_fac_scale_VH_table()
     mass   = siginfo.return_mass_as_int()
     ctau   = int(siginfo.return_lifetime_in_unit(unit="um"))
     result = table.get((mass, ctau, year))
@@ -303,11 +249,11 @@ def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
     up_nuis = sth.NuisanceInfo(nuis_name, kup, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=siginfo.nbins,
                                ana_spec=False, add_era_tags=False,
-                               extra_info=["updn_pair", "up"])
+                               extra_info=["updn_pair", "up"], extrapolate_last=False)
     dn_nuis = sth.NuisanceInfo(nuis_name, kdn, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=siginfo.nbins,
                                ana_spec=False, add_era_tags=False,
-                               extra_info=["updn_pair", "dn"])
+                               extra_info=["updn_pair", "dn"], extrapolate_last=False)
     return [up_nuis, dn_nuis]
 
 
@@ -317,40 +263,40 @@ def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
 
 def get_bkg_jet_ang(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.06), make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_vtx_arbi(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.37), make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_vtx_refi(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name, make_anticorr_bkg(1.1), make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_pileup(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name, 1.0001, make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins)]
+                             sep_yrs=False, corr=True, nbins=nbins, extrapolate_last=False)]
 
 
 def get_bkg_sig_cont(nuis_name, debug_mode=False):
     up_nuis = sth.NuisanceInfo(nuis_name, 1.05, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=nbins, ana_spec=True,
-                               extra_info=["updn_pair", "up"])
+                               extra_info=["updn_pair", "up"], extrapolate_last=False)
     dn_nuis = sth.NuisanceInfo(nuis_name, 1.00, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=nbins, ana_spec=True,
-                               extra_info=["updn_pair", "dn"])
+                               extra_info=["updn_pair", "dn"], extrapolate_last=False)
     return [up_nuis, dn_nuis]
 
 
 def get_bkg_bkg_norm(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name, 1.15, make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True)]
+                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_n2v_unc(nuis_name, debug_mode=False):
     frac_unc = sb_conf.n2v_uncs[sig_type][year_id] / sb_conf.template_norms["n2v"][sig_type][year_id]
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,
-                             sep_yrs=True, corr=True, nbins=nbins, ana_spec=True)]
+                             sep_yrs=True, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]

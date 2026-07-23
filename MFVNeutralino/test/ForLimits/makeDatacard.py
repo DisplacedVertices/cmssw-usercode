@@ -318,14 +318,11 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
             sig_cts_hname = "h_sig%s_ngen_perbin_%s" % (sig_id, year)
             h_sig_cts = f.Get(sig_cts_hname)
 
-            # Precompute per-event weight fallback (AN formula):
-            # w = Lumi x XSection / Generated_MC_Events_Pre-Cuts
-            # Used when a bin has zero unweighted events.
-            _h_ngen     = f.Get("h_sig%s_ngen_total_%s"    % (sig_id, year))
+            _h_sumw     = f.Get("h_sig%s_sumw_%s"          % (sig_id, year))
             _h_sigyield = f.Get("h_sig%s_sigyield_total_%s" % (sig_id, year))
-            _ngen_total     = _h_ngen.GetBinContent(1)     if _h_ngen     else 0.0
+            _sumw_total     = _h_sumw.GetBinContent(1)     if _h_sumw     else 0.0
             _sigyield_total = _h_sigyield.GetBinContent(1) if _h_sigyield else 0.0
-            _w_precut = (_sigyield_total / _ngen_total) if _ngen_total > 0 else 0.0
+            _w_empty = (_sigyield_total / _sumw_total) if _sumw_total > 0 else 0.0
 
             for i in range(nbins):
                 strls = []
@@ -337,9 +334,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                         if count > 0:
                             kappa = sig_norm_ls[j] / count
                         else:
-                            # Fall back to pre-cut weight estimate per AN:
-                            # w = Lumi x XSection / Generated_MC_Events_Pre-Cuts
-                            kappa = _w_precut
+                            kappa = _w_empty
                         strls.append(kappa)
                 new_lines += turn_info_to_line(
                     dc_names[i],

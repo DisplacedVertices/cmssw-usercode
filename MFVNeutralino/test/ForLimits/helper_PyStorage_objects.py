@@ -212,17 +212,15 @@ class NuisanceInfo(object):
     ana_spec: Boolean. Is this analysis-specific and gets tagged with CMS+CADI?
     add_era_tags: if False, neither a year- nor Run2-tag will be added
     extra_info: list
-    extrapolate_last: Boolean. Only matters when the input array is shorter than nbins.
-            If False (default) the missing bins are padded with 1.0, i.e. no fluctuation.
-            If True they repeat the last supplied value. Turn this on only for nuisances
-            where extrapolating the last bin is the intended physics, e.g. the lep pileup one.
+    extrapolate_last: Boolean, REQUIRED so every call site declares it. For an array shorter
+            than nbins: True repeats the last value, False pads with 1.0 (no fluctuation).
 
     -Other Things Stored-
     """
 
-    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr,
+    def __init__(self, nuis_name, nuis_val, make_updn, sep_yrs, corr, extrapolate_last,
                  nuis_type="lnN", nbins=3, ana_spec=False, add_era_tags=True, extra_info=None,
-                 extrapolate_last=False):
+                 owner=""):
         """It will always expand one entry into an array of size nbins. If you don't want this behavior, give it e.g. [1, 1.05, 1] so some bins don't fluctuate."""
         if extra_info is None:
             extra_info = []
@@ -243,19 +241,17 @@ class NuisanceInfo(object):
             if n_have < nbins:
                 fill = self.nuis_val[-1] if extrapolate_last else 1.0
                 self.nuis_val = np.concatenate([self.nuis_val, fill * np.ones(nbins - n_have)])
-                if extrapolate_last:
-                    print("Note: extrapolated nuisance %s from %d to %d bins by repeating the "
-                          "last value" % (nuis_name, n_have, nbins))
-                else:
-                    print("*" * 90)
-                    print("*** PADDED NUISANCE: %s only had %d of %d bins, the missing bins were "
-                          "filled with 1.0" % (nuis_name, n_have, nbins))
-                    print("*** that means NO uncertainty is applied in those bins.")
-                    print("*" * 90)
+                print("*" * 30)
+                print("%s SYSTEMATIC %s FOR %s"
+                      % ("EXTRAPOLATING" if extrapolate_last else "PADDING", nuis_name,
+                         owner if owner else "(unknown sample)"))
+                print("*" * 30)
             else:
                 self.nuis_val = self.nuis_val[:nbins]
-                print("Warning: truncated nuisance %s from %d to %d bins"
-                      % (nuis_name, n_have, nbins))
+                print("*" * 30)
+                print("TRUNCATING SYSTEMATIC %s FOR %s"
+                      % (nuis_name, owner if owner else "(unknown sample)"))
+                print("*" * 30)
 
         if np.any(self.nuis_val < 0):
             raise Exception("Nuisance must be >=0. Also remember 1 (not 0) is the central value")
