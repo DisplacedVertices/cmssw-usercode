@@ -1,3 +1,68 @@
+1. ../ntuple.py
+Assuming the relevant ntuples and minitrees are already run for the dataset of interest, go up one directory.
+First add/set 'settings.run_n_tk_seeds = True' near the top of the file where other settings are defined.
+After that configure NtupleCommon.py and run 'python ntuple.py submit'. You will have to wait a while...
+This will need to be run once for data, once for electron, once for muon.
+Once run you will need to run 'mpublish *'
+Example output ntuple directories
+/uscms/home/alecduqu/crab_dirs/Ntuple_tag001LepElem_NTkSeeds
+/uscms/home/alecduqu/crab_dirs/Ntuple_tag001LepMum_NTkSeeds
+/uscms/home/alecduqu/crab_dirs/Ntuple_tag001Lepm_NTkSeeds
+
+2. run ../vertexer_pair_effs.py
+All of the above ntuples can be added to the same batch submission in Samples.py and SampleFiles.py.
+For the actual script vertexer_pair_effs.py, first set 'is_mc' to the proper value then configure
+NtupleCommon.py
+run 'python vertexer_pair_effs.py submit'
+Example ouput
+/uscms/home/alecduqu/crab_dirs/VertexerPairEffs_tag001Lepm
+
+3. 
+JMTucker/MFVNeutralino/test/utilities.py data leptonpresel ***make sure the arguments are correct here
+This merges the outputs of vertexer_pair_effs.py to make them easier to use.
+
+4. vertexer_eff.py
+First (assuming the relevant ntuples and minitrees are already run), we need to generate the histograms that
+define whether or not a pair of verticess are distinguished based on their dvv value. This is done by ensuring
+the proper variables are set in vertexer_eff.py.
+Ensure that the variable "path" is set to be equal to the path to the seed track histograms. Currently the up
+up to date histograms for lepton data are in '/uscms/home/alecduqu/crab_dirs/VertexerPairEffs_tag001Lepm'
+(MC not quite ready yet)
+Next, make sure that the loop over "is_mc" is set to the proper value depending on whether generating histograms
+for data or MC (True for MC and False for Data).
+Then the loop nested in side the is_mc loop must be set to the proper year. You could run over many years or 
+just one. The years are "20161", "20162", "2017", "2018"; or if you wish to run all years in the same histograms, set
+this value to "run2".
+Finally, ensure that the variable in_fn is set to be equal to the name of the file that can for the collection of
+samples that you wish to run over.
+Example outputs:
+/uscms/home/alecduqu/mfv_10648/src/JMTucker/MFVNeutralino/test/One2Two/vpeffs_data_run2_ULV11Bm.root
+/uscms/home/alecduqu/mfv_10648/src/JMTucker/MFVNeutralino/test/One2Two/vpeffs_data_run2_ULV11Bm_ntkseeds.root
+
+5. 2v_from_jets.cc
+This script generates the background template (along with some other 1-vertex and 2-vertex event histograms).
+It uses outputs from the above files to generate plots using your choice MiniTrees (defined at the beginning of
+'void construct_dvvc(ConstructDvvcParameters p, const char* out_fn)').
+The following variables must be set to the proper values:
+const std::string ulversion = "ULV30Lepm";  or  "ULV30BvetoLHTm";   (Lepton or Displacement triggered)
+bool use_signal = true;   or  false;      (running over MC signal samples or not)
+In ConstructDvvcParameters
+   is_mc_(true or false)     (running over MC MiniTrees or data MiniTrees)
+   year_("run2")            ("20161", "20162", "2017", "2018", or "run2")
+Upon setting the year you want to run in ConstructDvvcParameters, the same year must also be set near the top of
+int main(int argc, const char* argv[]) as
+const char* year  = argc >= 4 ? argv[3] : "run2"; (change depending on year run)
+and in the loop later in the same "int main" function
+for (const char* year : { "run2",}) {      (change depending on year run)                                                                                                                         
+    for (int ntracks : { 3, 4, 5, 7}) {
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
+Finally, there is a large block of nested if statements and lines such as:
+samples.push_back("mfv_neu_tau030000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_20161")));
+Make sure that the correct samples are uncommented that you want to run over.
+
+
+***README below is from 7 years ago!!!!
+
 Here is the procedure for constructing the background template and estimating the associated statistical and systematic uncertainties. Some of this information is duplicated in the header of 2v_from_jets.cc and elsewhere.
 
 1) Determine deltaphi input (fit_jetpairdphi.py).
