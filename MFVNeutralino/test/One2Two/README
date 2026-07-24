@@ -59,6 +59,10 @@ for (const char* year : { "run2",}) {      (change depending on year run)
 Finally, there is a large block of nested if statements and lines such as:
 samples.push_back("mfv_neu_tau030000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_20161")));
 Make sure that the correct samples are uncommented that you want to run over.
+Once all variables are set correctly run:
+sba
+make   (there will be some warning messages, it is ok)
+./2v_from_jets.exe
 
 
 ***README below is from 7 years ago!!!!
