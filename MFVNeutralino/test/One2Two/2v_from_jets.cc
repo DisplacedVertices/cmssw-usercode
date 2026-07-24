@@ -37,6 +37,9 @@ EOF
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <random>
+#include <string>
+//#include <Python.h>
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TFile.h"
@@ -50,18 +53,20 @@ EOF
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h" //Alec added
 
 int dvv_nbins = 100;
 double dvv_bin_width = 0.01;
 std::vector<TString> cb_cbbar_vector = {};
-//const std::string ulversion = "ULV30Lepm"; // FIXME
-const std::string ulversion = "ULV30BvetoLHTm";
+const std::string ulversion = "ULV30Lepm"; //Use for Lepton triggered samples
+//const std::string ulversion = "ULV30BvetoLHTm"; //Use for bjet triggered samples
+bool use_signal = false;
 
 struct ConstructDvvcParameters {
   int ibkg_begin_;
   int ibkg_end_;
   bool is_mc_;
-  bool only_10pc_;
+  bool only_20pc_;
   bool inject_signal_;
   std::string year_;
   int ntracks_;
@@ -76,10 +81,10 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters()
     : ibkg_begin_(-999),
       ibkg_end_(-999),
-      is_mc_(true),
-      only_10pc_(false),
+      is_mc_(false),
+      only_20pc_(true),
       inject_signal_(false),
-      year_("2017p8"), //2017p8
+      year_("run2"), //change depending on year run
       ntracks_(5),
       bquarks_(-1),
       btags_(-1),
@@ -95,7 +100,7 @@ struct ConstructDvvcParameters {
   int ibkg_begin() const { return ibkg_begin_; }
   int ibkg_end() const { return ibkg_end_; }
   bool is_mc() const { return is_mc_; }
-  bool only_10pc() const { return only_10pc_; }
+  bool only_20pc() const { return only_20pc_; }
   bool inject_signal() const { return inject_signal_; }
   std::string year() const { return year_; }
   int ntracks() const { return ntracks_; }
@@ -110,7 +115,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters ibkg_begin(bool x)        { ConstructDvvcParameters y(*this); y.ibkg_begin_        = x; return y; }
   ConstructDvvcParameters ibkg_end(bool x)          { ConstructDvvcParameters y(*this); y.ibkg_end_          = x; return y; }
   ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y(*this); y.is_mc_             = x; return y; }
-  ConstructDvvcParameters only_10pc(bool x)         { ConstructDvvcParameters y(*this); y.only_10pc_         = x; return y; }
+  ConstructDvvcParameters only_20pc(bool x)         { ConstructDvvcParameters y(*this); y.only_20pc_         = x; return y; }
   ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y(*this); y.inject_signal_     = x; return y; }
   ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y(*this); y.year_              = x; return y; }
   ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y(*this); y.ntracks_           = x; return y; }
@@ -123,9 +128,10 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-     printf("ibkg_begin-end = %d-%d, is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, min_npu = %d, max_npu = %d", ibkg_begin(), ibkg_end(), is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), min_npu(), max_npu());
+     printf("ibkg_begin-end = %d-%d, is_mc = %d, only_20pc = %d, inject_signal = %d, year = %s, ntracks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, min_npu = %d, max_npu = %d", ibkg_begin(), ibkg_end(), is_mc(), only_20pc(), inject_signal(), year_.c_str(), ntracks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), min_npu(), max_npu());
   }
 
+  //This is a coarse parameterization of the vertex pair reconstruction efficiency after vertex refinement step, this needs to be used in conjunction with vertexer_eff.py outputs
   float extra_eff_2d(float dvv) {
     if (dvv < 0.08) return 0.60;
     if (dvv > 0.20) return 0.84;
@@ -134,31 +140,90 @@ struct ConstructDvvcParameters {
 
 };
 
+std::string callPythonAndGetOutput(const std::string& argument) { //Alec added this command to call python commands that find the sample scale factor
+  //std::string command = "python /uscms/homes/a/alecduqu/mfv_ScaleFactors/src/JMTucker/MFVNeutralino/test/One2Two/2v_from_jets_new.py " + argument + " " + ulversion;
+  std::string command = "python 2v_from_jets_new.py " + argument + " " + ulversion;
+  //std::cout << command << std::endl;
+  std::array<char, 128> buffer;
+  std::string result;
+  // Open a pipe to the command
+  FILE* pipe = popen(command.c_str(), "r");
+  if (!pipe) throw std::runtime_error("popen() failed!");
+  try {
+    // Read the output line by line
+    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+      result += buffer.data();
+    }
+  } catch (...) {
+    pclose(pipe);
+    throw;
+  }
+  pclose(pipe);
+  return result;
+}
+
 void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
-  p.print(); printf(", out_fn = %s\n", out_fn);
+  //p.print(); printf(", out_fn = %s\n", out_fn);
+  //std::string print_output = callPythonAndGetOutput("qcdht0700_2017");
+  //std::cout << "C++ received from Python: " << print_output << std::endl;
 
   const char* file_path; //which filepath?
+  const char* file_path_20161;
+  const char* file_path_20162;
+  const char* file_path_2017;
+  const char* file_path_2018;
   if (p.is_mc()) {
     if (ulversion == "ULV30BvetoLHTm") {
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+      //file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+      //file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm"; //Shaun's MiniTrees
+      //file_path_20161 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
+      //file_path_20162 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
+      //file_path_2017 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
+      //file_path_2018 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
+      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
+      //file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
+      //file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
+      //file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
     }
     else { 
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+      //file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+      //file_path_20161 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_20161correctionsLepm_noef"; //20161
+      //file_path_20162 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_20162correctionsLepm_noef"; //20162
+      //file_path_2017 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_correctionsLepm_noef"; //2017 //Alec's MiniTrees
+      //file_path_2018 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_eventweights_Lepton_SF_2018correctionsLepm_noef"; //2018
+      //file_path_20161 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_20161correctionsLepm_noef/"; //20161 moved to eos
+      //file_path_20162 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_20162correctionsLepm_noef/"; //20162 moved to eos
+      //file_path_2017 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_correctionsLepm_noef/"; //2017 moved to eos
+      //file_path_2018 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_2018correctionsLepm_noef/"; //2018 moved to eos
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
     }
-  } else if (p.only_10pc()) {
+  } else if (p.only_20pc()) {
     if (ulversion == "ULV30BvetoLHTm") {
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
     }
     else { 
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
     }
   } else {
     if (ulversion == "ULV30BvetoLHTm") {
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+      file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
     }
     else { 
-       file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+      file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
     }
   }
 
@@ -174,206 +239,879 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   // FIXME these weights are based off of the number of finished ntuples (which is
   // close to, but not necessarily 100% of ntuples). When it comes time to do the
   // final studies, we'll need to make sure ALL ntuples/minitrees finish, and then
-  // update some of the weights
+  // update some of the weights             std::string command = "python " + filepath + "ttbar_20161.root"; system(command.c_str());
+  //Py_Initialize();
+  //PyRun_SimpleString('sys.path.append("path/to/my/module/")');
   if (ulversion == "ULV30BvetoLHTm"){
-       if (p.is_mc()) {
-          if (use_20161) {
-		samples.push_back("ttbar_20161");    weights.push_back(0.35);
-		samples.push_back("qcdht0100_20161");    weights.push_back(12658.82);
-		samples.push_back("qcdht0200_20161");    weights.push_back(1408.45);
-		samples.push_back("qcdht0300_20161");    weights.push_back(277.09);
-		samples.push_back("qcdht0500_20161");    weights.push_back(22.53);
-		samples.push_back("qcdht0700_20161");    weights.push_back(5.84);
-		samples.push_back("qcdht1000_20161");    weights.push_back(3.47);
-		samples.push_back("qcdht1500_20161");    weights.push_back(0.48);
-		samples.push_back("qcdht2000_20161");    weights.push_back(0.19);
-	  }
+    if (p.is_mc()) {
+      if (use_20161) {
+	if (use_signal) {
+	  //samples.push_back("ggHToSSTodddd_tau100mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau100mm_M55_20161")));
+	  //samples.push_back("ggHToSSTodddd_tau10mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau10mm_M55_20161")));
+	  //samples.push_back("ggHToSSTodddd_tau1mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau1mm_M55_20161")));
 
-	  if (use_20162) {
-		samples.push_back("ttbar_20162");    weights.push_back(0.31);
-		samples.push_back("qcdht0100_20162");    weights.push_back(11914.23);
-		samples.push_back("qcdht0200_20162");    weights.push_back(1048.92);
-		samples.push_back("qcdht0300_20162");    weights.push_back(246.00);
-		samples.push_back("qcdht0500_20162");    weights.push_back(18.50);
-		samples.push_back("qcdht0700_20162");    weights.push_back(5.58);
-		samples.push_back("qcdht1000_20162");    weights.push_back(2.75);
-		samples.push_back("qcdht1500_20162");    weights.push_back(0.37);
-		samples.push_back("qcdht2000_20162");    weights.push_back(0.15);
-	  }
+	  /*samples.push_back("mfv_neu_tau000100um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0200_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0300_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0400_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0600_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0800_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1200_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1600_20161")));
+	  samples.push_back("mfv_neu_tau000100um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M3000_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0200_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0300_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0400_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0600_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0800_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1200_20161")));
+	  samples.push_back("mfv_neu_tau000300um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1600_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0200_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0300_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0400_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0600_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0800_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1200_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1600_20161")));
+	  samples.push_back("mfv_neu_tau001000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M3000_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0200_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0300_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0400_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0600_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0800_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1200_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1600_20161")));
+	  samples.push_back("mfv_neu_tau010000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M3000_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0200_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0300_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0600_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0800_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1600_20161")));
+	  samples.push_back("mfv_neu_tau030000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M3000_20161")));*/
 
-	  if (use_2017) {  
-		samples.push_back("ttbar_2017");    weights.push_back(0.27);
-		samples.push_back("qcdht0200_2017");    weights.push_back(2954.88);
-		samples.push_back("qcdht0300_2017");    weights.push_back(601.09);
-		samples.push_back("qcdht0500_2017");    weights.push_back(67.95);
-		samples.push_back("qcdht0700_2017");    weights.push_back(15.25);
-		samples.push_back("qcdht1000_2017");    weights.push_back(8.68);
-		samples.push_back("qcdht1500_2017");    weights.push_back(1.04);
-		samples.push_back("qcdht2000_2017");    weights.push_back(0.43);
-	  }
+	  /*samples.push_back("mfv_stopbbarbbar_tau000100um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0300_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0400_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0800_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M3000_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0300_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0400_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0800_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M3000_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0300_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0400_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0800_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M3000_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0300_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0400_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0800_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M3000_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0200_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0300_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0400_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0600_2016AP1));*/
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0800_20161")));
+	  /*samples.push_back("mfv_stopbbarbbar_tau030000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1200_2016")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1600_20161")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M3000_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0300_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0400_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0800_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M3000_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0300_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0400_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0800_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M3000_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0300_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0800_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M3000_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0300_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0400_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0800_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M3000_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0300_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0400_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0400_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0600_2016AP1));*/
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0800_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0800_20161")));
+	  /*samples.push_back("mfv_stopdbardbar_tau030000um_M1200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1200_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M1600_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1600_20161")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M3000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M3000_20161")));*/
+	}
+	else {
+	  samples.push_back("qcdht0100_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0100_20161")));
+	  samples.push_back("qcdht0200_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0200_20161")));
+	  samples.push_back("qcdht0300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0300_20161")));
+	  samples.push_back("qcdht0500_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0500_20161")));
+	  samples.push_back("qcdht0700_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0700_20161")));
+	  samples.push_back("qcdht1000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht1000_20161")));
+	  samples.push_back("qcdht1500_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht1500_20161")));
+	  samples.push_back("qcdht2000_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht2000_20161")));
+	  samples.push_back("ttbar_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ttbar_20161")));
+	  //samples.push_back("ttbar_20161");    weights.push_back(0.35);
+	  //samples.push_back("qcdht0100_20161");    weights.push_back(12658.82);
+	  //samples.push_back("qcdht0200_20161");    weights.push_back(1408.45);
+	  //samples.push_back("qcdht0300_20161");    weights.push_back(277.09);
+	  //samples.push_back("qcdht0500_20161");    weights.push_back(22.53);
+	  //samples.push_back("qcdht0700_20161");    weights.push_back(5.84);
+	  //samples.push_back("qcdht1000_20161");    weights.push_back(3.47);
+	  //samples.push_back("qcdht1500_20161");    weights.push_back(0.48);
+	  //samples.push_back("qcdht2000_20161");    weights.push_back(0.19);
+	}
+      }
 
-	  if (use_2018) {  
-		samples.push_back("ttbar_2018");    weights.push_back(0.30);
-		samples.push_back("qcdht0200_2018");    weights.push_back(3235.19);
-		samples.push_back("qcdht0300_2018");    weights.push_back(624.06);
-		samples.push_back("qcdht0500_2018");    weights.push_back(73.49);
-		samples.push_back("qcdht0700_2018");    weights.push_back(15.73);
-		samples.push_back("qcdht1000_2018");    weights.push_back(9.01);
-		samples.push_back("qcdht1500_2018");    weights.push_back(1.00);
-		samples.push_back("qcdht2000_2018");    weights.push_back(1.00);
-	  }
-       }
-       else {
-	    if (use_2017) {
-	        samples.push_back("JetHT2017B");                      weights.push_back(1);
-	        samples.push_back("JetHT2017C");                      weights.push_back(1);
-	        samples.push_back("JetHT2017D");                      weights.push_back(1);
-	        samples.push_back("JetHT2017E");                      weights.push_back(1);
-	        samples.push_back("JetHT2017F");                      weights.push_back(1);
-	    }
-	    if (use_2018) {  
-	        samples.push_back("JetHT2018A");                      weights.push_back(1);
-	        samples.push_back("JetHT2018B");                      weights.push_back(1);
-	        samples.push_back("JetHT2018C");                      weights.push_back(1);
-	        samples.push_back("JetHT2018D");                      weights.push_back(1);
-	    }
-        }
+      if (use_20162) {
+	if (use_signal) {
+	  //samples.push_back("ggHToSSTodddd_tau100mm_M55_2016"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau100mm_M55_2016")));
+	  //samples.push_back("ggHToSSTodddd_tau10mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau10mm_M55_20162")));
+	  //samples.push_back("ggHToSSTodddd_tau1mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau1mm_M55_20162")));
+
+	  /*samples.push_back("mfv_neu_tau000100um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0200_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0300_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0400_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0600_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0800_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1200_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1600_20162")));
+	  samples.push_back("mfv_neu_tau000100um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M3000_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0200_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0300_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0400_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0600_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0800_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1200_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1600_20162")));
+	  samples.push_back("mfv_neu_tau000300um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M3000_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0200_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0300_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0400_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0600_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0800_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1200_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1600_20162")));
+	  samples.push_back("mfv_neu_tau001000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M3000_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0200_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0300_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0400_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0600_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0800_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1200_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1600_20162")));
+	  samples.push_back("mfv_neu_tau010000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M3000_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0200_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0300_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0600_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0800_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1200_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1600_20162")));
+	  samples.push_back("mfv_neu_tau030000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M3000_20162")));*/
+
+	  /*samples.push_back("mfv_stopbbarbbar_tau000100um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0300_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0400_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0800_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000100um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M3000_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0300_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0400_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0800_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau000300um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M3000_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0300_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0400_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0800_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau001000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M3000_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0300_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0400_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0800_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau010000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M3000_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0300_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0400_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0600_20162")));*/
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0800_20162")));
+	  /*samples.push_back("mfv_stopbbarbbar_tau030000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1200_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1600_20162")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M3000_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0300_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0400_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0800_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000100um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M3000_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0300_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0400_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0800_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau000300um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M3000_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0300_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0400_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0800_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau001000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M3000_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0300_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0400_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0800_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau010000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0300_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0400_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0400_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0600_20162")));*/
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0800_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0800_20162")));
+	  /*samples.push_back("mfv_stopdbardbar_tau030000um_M1200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1200_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M1600_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1600_20162")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M3000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M3000_20162")));*/
+	}
+	else {
+	  samples.push_back("qcdht0100_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0100_20162")));
+	  samples.push_back("qcdht0200_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0200_20162")));
+	  samples.push_back("qcdht0300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0300_20162")));
+	  samples.push_back("qcdht0500_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0500_20162")));
+	  samples.push_back("qcdht0700_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht0700_20162")));
+	  samples.push_back("qcdht1000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht1000_20162")));
+	  samples.push_back("qcdht1500_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht1500_20162")));
+	  samples.push_back("qcdht2000_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdht2000_20162")));
+	  samples.push_back("ttbar_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ttbar_20162")));
+	  //samples.push_back("ttbar_20162");    weights.push_back(0.31);
+	  //samples.push_back("qcdht0100_20162");    weights.push_back(11914.23);
+	  //samples.push_back("qcdht0200_20162");    weights.push_back(1048.92);
+	  //samples.push_back("qcdht0300_20162");    weights.push_back(246.00);
+	  //samples.push_back("qcdht0500_20162");    weights.push_back(18.50);
+	  //samples.push_back("qcdht0700_20162");    weights.push_back(5.58);
+	  //samples.push_back("qcdht1000_20162");    weights.push_back(2.75);
+	  //samples.push_back("qcdht1500_20162");    weights.push_back(0.37);
+	  //samples.push_back("qcdht2000_20162");    weights.push_back(0.15);
+	}
+      }
+
+      if (use_2017) {
+	if (use_signal) {
+	  //samples.push_back("ggHToSSTodddd_tau1mm_M55_2017");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau1mm_M55_2017")));
+	  //samples.push_back("ggHToSSTodddd_tau10mm_M55_2017");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau10mm_M55_2017")));
+	  //samples.push_back("ggHToSSTodddd_tau100mm_M55_2017");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau100mm_M55_2017")));
+
+	  //samples.push_back("mfv_neu_tau000100um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0200_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0300_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0400_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0600_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1200_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1600_2017")));
+	  //samples.push_back("mfv_neu_tau000100um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M3000_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0200_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0300_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0600_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0800_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1200_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1600_2017")));
+	  //samples.push_back("mfv_neu_tau000300um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M3000_2017")));
+	  //not done samples.push_back("mfv_neu_tau001000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0200_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0300_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0400_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0600_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0800_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1200_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1600_2017")));
+	  //samples.push_back("mfv_neu_tau001000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M3000_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0200_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0300_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0400_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0600_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0800_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1200_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1600_2017")));
+	  //samples.push_back("mfv_neu_tau010000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M3000_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0200_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0300_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0600_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0800_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1600_2017")));
+	  //samples.push_back("mfv_neu_tau030000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M3000_2017")));
+
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0300_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0400_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0800_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M3000_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0300_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0400_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0800_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M3000_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0300_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0400_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0800_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M3000_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0300_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0400_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0800_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M3000_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0300_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0400_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0600_2017")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0800_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1200_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1600_2017")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M3000_2017")));
+	  ///samples.push_back("mfv_stopdbardbar_tau000100um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0300_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0400_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0800_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M3000_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0300_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0400_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0800_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1200_2017")));
+	  //not done samples.push_back("mfv_stopdbardbar_tau000300um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M3000_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0300_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0400_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0800_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M3000_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0300_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0400_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0800_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M3000_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0300_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0400_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0400_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0600_2017")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0800_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0800_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M1200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1200_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M1600_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1600_2017")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M3000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M3000_2017")));
+	}
+	else {  
+	  samples.push_back("ttbar_2017");      weights.push_back(std::stof(callPythonAndGetOutput("ttbar_2017")));
+	  samples.push_back("qcdht0200_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0200_2017"))); //No difference if removed
+	  samples.push_back("qcdht0300_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0300_2017"))); //little difference
+	  samples.push_back("qcdht0500_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0500_2017"))); //major culprit
+	  samples.push_back("qcdht0700_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0700_2017"))); //the major culprit
+	  samples.push_back("qcdht1000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht1000_2017")));
+	  samples.push_back("qcdht1500_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht1500_2017")));
+	  samples.push_back("qcdht2000_2017");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht2000_2017")));
+	  //samples.push_back("ttbar_2017"); weights.push_back(0.27);
+	  //samples.push_back("qcdht0200_2017"); weights.push_back(2954.88);
+	  //samples.push_back("qcdht0300_2017"); weights.push_back(601.09);
+	  //samples.push_back("qcdht0500_2017"); weights.push_back(67.95);
+	  //samples.push_back("qcdht0700_2017"); weights.push_back(15.25);
+	  //samples.push_back("qcdht1000_2017"); weights.push_back(8.68);
+	  //samples.push_back("qcdht1500_2017"); weights.push_back(1.04);
+	  //samples.push_back("qcdht2000_2017"); weights.push_back(0.43);
+	}
+      }
+
+      if (use_2018) {
+	if (use_signal) {
+	  //samples.push_back("ggHToSSTodddd_tau1mm_M40_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau1mm_M55_2018")));
+          //samples.push_back("ggHToSSTodddd_tau10mm_M40_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau10mm_M55_2018")));
+          //samples.push_back("ggHToSSTodddd_tau100mm_M40_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau100mm_M55_2018")));
+	  //samples.push_back("ggHToSSTodddd_tau1mm_M55_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau1mm_M55_2018")));
+	  //samples.push_back("ggHToSSTodddd_tau10mm_M55_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau10mm_M55_2018")));
+	  //samples.push_back("ggHToSSTodddd_tau100mm_M55_2018");  weights.push_back(std::stof(callPythonAndGetOutput("ggHToSSTodddd_tau100mm_M55_2018")));
+
+	  //samples.push_back("mfv_neu_tau000100um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0200_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0300_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0400_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0600_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M0800_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1200_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M1600_2018")));
+	  //samples.push_back("mfv_neu_tau000100um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000100um_M3000_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0200_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0300_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0400_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M0800_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1200_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M1600_2018")));
+	  //samples.push_back("mfv_neu_tau000300um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau000300um_M3000_2018")));
+	  //samples.push_back("mfv_neu_tau001000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0300_2018")));
+	  //samples.push_back("mfv_neu_tau001000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_neu_tau001000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0600_2018")));
+	  //samples.push_back("mfv_neu_tau001000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_neu_tau001000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1200_2018")));
+	  //samples.push_back("mfv_neu_tau001000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M1600_2018")));
+	  //samples.push_back("mfv_neu_tau001000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau001000um_M3000_2018")));
+	  //samples.push_back("mfv_neu_tau010000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0200_2018")));
+	  //samples.push_back("mfv_neu_tau010000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0300_2018")));
+	  //samples.push_back("mfv_neu_tau010000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_neu_tau010000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0600_2018")));
+	  //samples.push_back("mfv_neu_tau010000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_neu_tau010000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1200_2018")));
+	  //samples.push_back("mfv_neu_tau010000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau010000um_M1600_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0200_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0300_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0400_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0600_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M0800_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1200_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M1600_2018")));
+	  //samples.push_back("mfv_neu_tau030000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_neu_tau030000um_M3000_2018")));
+
+	  // samples.push_back("mfv_stopbbarbbar_tau000100um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0300_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0400_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M0800_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M1600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000100um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000100um_M3000_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0300_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0400_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M0800_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M1600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau000300um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau000300um_M3000_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0300_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M1600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau001000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau001000um_M3000_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0300_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M1600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau010000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau010000um_M3000_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0300_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0400_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0600_2018")));
+	  samples.push_back("mfv_stopbbarbbar_tau030000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M0800_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1200_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M1600_2018")));
+	  //samples.push_back("mfv_stopbbarbbar_tau030000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopbbarbbar_tau030000um_M3000_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0300_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0400_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M0800_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M1600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000100um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000100um_M3000_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0300_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0400_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M0800_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M1600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau000300um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau000300um_M3000_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0300_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M1600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau001000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau001000um_M3000_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0300_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0400_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0400_2018"))); //tester
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M0800_2018"))); //tester
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M1600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau010000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau010000um_M3000_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0300_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0300_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M0600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0600_2018")));
+	  samples.push_back("mfv_stopdbardbar_tau030000um_M0800_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M0800_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M1200_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1200_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M1600_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M1600_2018")));
+	  //samples.push_back("mfv_stopdbardbar_tau030000um_M3000_2018"); weights.push_back(std::stof(callPythonAndGetOutput("mfv_stopdbardbar_tau030000um_M3000_2018")));
+	}
+	else {
+	  samples.push_back("ttbar_2018");      weights.push_back(std::stof(callPythonAndGetOutput("ttbar_2018"))); //weights.push_back(0.30);
+	  samples.push_back("qcdht0200_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0200_2018"))); //weights.push_back(3235.19);
+	  samples.push_back("qcdht0300_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0300_2018"))); //weights.push_back(624.06);
+	  samples.push_back("qcdht0500_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0500_2018"))); //weights.push_back(73.49);
+	  samples.push_back("qcdht0700_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht0700_2018"))); //weights.push_back(15.73);
+	  samples.push_back("qcdht1000_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht1000_2018"))); //weights.push_back(9.01);
+	  samples.push_back("qcdht1500_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht1500_2018"))); //weights.push_back(1.00);
+	  samples.push_back("qcdht2000_2018");  weights.push_back(std::stof(callPythonAndGetOutput("qcdht2000_2018"))); //weights.push_back(1.00);
+	}
+      }
+    }
+    else { //ADDING 20pc SAMPLES HERE!!!!
+      if (use_2017) {
+	//samples.push_back("JetHT2017B");                      weights.push_back(1);
+	//samples.push_back("JetHT2017C");                      weights.push_back(1);
+	//samples.push_back("JetHT2017D");                      weights.push_back(1);
+	//samples.push_back("JetHT2017E");                      weights.push_back(1);
+	//samples.push_back("JetHT2017F");                      weights.push_back(1);
+      }
+      if (use_2018) {  
+	//samples.push_back("JetHT2018A");                      weights.push_back(1);
+	//samples.push_back("JetHT2018B");                      weights.push_back(1);
+	//samples.push_back("JetHT2018C");                      weights.push_back(1);
+	//samples.push_back("JetHT2018D");                      weights.push_back(1);
+      }
+    }
 
   }
   else {
-	  if (p.is_mc()) {
-            if (use_20161) { 
-		samples.push_back("dyjetstollM10_20161");    weights.push_back(18.10);
-		samples.push_back("dyjetstollM50_20161");    weights.push_back(1.10);
-		samples.push_back("qcdbctoept020_20161");    weights.push_back(831.25);
-		samples.push_back("qcdbctoept030_20161");    weights.push_back(906.11);
-		samples.push_back("qcdbctoept080_20161");    weights.push_back(99.62);
-		samples.push_back("qcdbctoept170_20161");    weights.push_back(6.15);
-		samples.push_back("qcdbctoept250_20161");    weights.push_back(1.62);
-		samples.push_back("qcdempt015_20161");    weights.push_back(6408.17);
-		samples.push_back("qcdempt020_20161");    weights.push_back(13452.91);
-		samples.push_back("qcdempt030_20161");    weights.push_back(34786.25);
-		samples.push_back("qcdempt050_20161");    weights.push_back(650179.33);
-		samples.push_back("qcdempt080_20161");    weights.push_back(1490.82);
-		samples.push_back("qcdempt120_20161");    weights.push_back(270.35);
-		samples.push_back("qcdempt170_20161");    weights.push_back(3411.90);
-		samples.push_back("qcdempt300_20161");    weights.push_back(19.00);
-		samples.push_back("qcdmupt15_20161");    weights.push_back(541.11);
-		samples.push_back("ttbar_20161");    weights.push_back(0.17);
-		samples.push_back("wjetstolnu_0j_20161");    weights.push_back(6.82);
-		samples.push_back("wjetstolnu_1j_20161");    weights.push_back(1.05);
-		samples.push_back("wjetstolnu_2j_20161");    weights.push_back(0.74);
-		samples.push_back("ww_20161");    weights.push_back(0.09);
-		samples.push_back("wz_20161");    weights.push_back(0.07);
-		samples.push_back("zz_20161");    weights.push_back(0.19);
-            }
+    if (p.is_mc()) {
+      if (use_20161) {
+	if (use_signal) {
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M40_20161")));
+	  //samples.push_back("WminusHToSSTodddd_tau10mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M40_20161")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M40_20161")));
+	  //samples.push_back("WplusHToSSTodddd_tau10mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M40_20161")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M40_20161")));
+	  //samples.push_back("ZHToSSTodddd_tau10mm_M40_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M40_20161")));
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M55_20161")));
+	  samples.push_back("WminusHToSSTodddd_tau10mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M55_20161")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M55_20161")));
+	  samples.push_back("WplusHToSSTodddd_tau10mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M55_20161")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M55_20161")));
+	  samples.push_back("ZHToSSTodddd_tau10mm_M55_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M55_20161")));
+	}
+	else {
+	  samples.push_back("dyjetstollM10_20161"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM10_20161"))); //weights.push_back(18.10);
+	  samples.push_back("dyjetstollM50_20161"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM50_20161"))); //weights.push_back(1.10);
+	  samples.push_back("qcdbctoept020_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept020_20161"))); //weights.push_back(831.25);
+	  samples.push_back("qcdbctoept030_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept030_20161"))); //weights.push_back(906.11);
+	  samples.push_back("qcdbctoept080_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept080_20161"))); //weights.push_back(99.62);
+	  samples.push_back("qcdbctoept170_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept170_20161"))); //weights.push_back(6.15);
+	  samples.push_back("qcdbctoept250_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept250_20161"))); //weights.push_back(1.62);
+	  samples.push_back("qcdempt015_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt015_20161"))); //weights.push_back(6408.17);
+	  samples.push_back("qcdempt020_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt020_20161"))); //weights.push_back(13452.91);
+	  samples.push_back("qcdempt030_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt030_20161"))); //weights.push_back(34786.25);
+	  samples.push_back("qcdempt050_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt050_20161"))); //weights.push_back(650179.33);
+	  samples.push_back("qcdempt080_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt080_20161"))); //weights.push_back(1490.82);
+	  samples.push_back("qcdempt120_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt120_20161"))); //weights.push_back(270.35);
+	  samples.push_back("qcdempt170_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt170_20161"))); //weights.push_back(3411.90);
+	  samples.push_back("qcdempt300_20161"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt300_20161"))); //weights.push_back(19.00);
+	  samples.push_back("qcdmupt15_20161");  weights.push_back(std::stof(callPythonAndGetOutput("qcdmupt15_20161"))); //weights.push_back(541.11);
+	  samples.push_back("ttbar_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ttbar_20161"))); //weights.push_back(0.17);
+	  samples.push_back("wjetstolnu_0j_20161"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_0j_20161"))); //weights.push_back(6.82);
+	  samples.push_back("wjetstolnu_1j_20161"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_1j_20161"))); //weights.push_back(1.05);
+	  samples.push_back("wjetstolnu_2j_20161"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_2j_20161"))); //weights.push_back(0.74);
+	  samples.push_back("ww_20161"); weights.push_back(std::stof(callPythonAndGetOutput("ww_20161"))); //weights.push_back(0.09);
+	  samples.push_back("wz_20161"); weights.push_back(std::stof(callPythonAndGetOutput("wz_20161"))); //weights.push_back(0.07);
+	  samples.push_back("zz_20161"); weights.push_back(std::stof(callPythonAndGetOutput("zz_20161"))); //weights.push_back(0.19);
+	}
+      }
             
-            if (use_20162) { 
-		samples.push_back("dyjetstollM10_20162");    weights.push_back(11.32);
-		samples.push_back("dyjetstollM50_20162");    weights.push_back(1.10);
-		samples.push_back("qcdbctoept020_20162");    weights.push_back(705.76);
-		samples.push_back("qcdbctoept030_20162");    weights.push_back(797.35);
-		samples.push_back("qcdbctoept080_20162");    weights.push_back(72.58);
-		samples.push_back("qcdbctoept170_20162");    weights.push_back(4.60);
-		samples.push_back("qcdbctoept250_20162");    weights.push_back(1.17);
-		samples.push_back("qcdempt015_20162");    weights.push_back(5582.99);
-		samples.push_back("qcdempt020_20162");    weights.push_back(11650.56);
-		samples.push_back("qcdempt030_20162");    weights.push_back(25156.70);
-		samples.push_back("qcdempt050_20162");    weights.push_back(6199.98);
-		samples.push_back("qcdempt080_20162");    weights.push_back(1298.58);
-		samples.push_back("qcdempt120_20162");    weights.push_back(225.78);
-		samples.push_back("qcdempt170_20162");    weights.push_back(151.61);
-		samples.push_back("qcdempt300_20162");    weights.push_back(16.46);
-		samples.push_back("qcdmupt15_20162");    weights.push_back(456.73);
-		samples.push_back("ttbar_20162");    weights.push_back(0.16);
-		samples.push_back("wjetstolnu_0j_20162");    weights.push_back(5.60);
-		samples.push_back("wjetstolnu_1j_20162");    weights.push_back(0.89);
-		samples.push_back("wjetstolnu_2j_20162");    weights.push_back(0.66);
-		samples.push_back("ww_20162");    weights.push_back(0.08);
-		samples.push_back("wz_20162");    weights.push_back(0.06);
-		samples.push_back("zz_20162");    weights.push_back(0.18);
-            }
+      if (use_20162) { 
+	if (use_signal) {
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M40_20162")));
+	  //samples.push_back("WminusHToSSTodddd_tau10mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M40_20162")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M40_20162")));
+	  //samples.push_back("WplusHToSSTodddd_tau10mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M40_20162")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M40_20162")));
+	  //samples.push_back("ZHToSSTodddd_tau10mm_M40_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M40_20162")));
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M55_20162")));
+	  samples.push_back("WminusHToSSTodddd_tau10mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M55_20162")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M55_20162")));
+	  samples.push_back("WplusHToSSTodddd_tau10mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M55_20162")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M55_20162")));
+	  samples.push_back("ZHToSSTodddd_tau10mm_M55_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M55_20162")));
+	}
+	else {
+	  samples.push_back("dyjetstollM10_20162"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM10_20162"))); //weights.push_back(11.32);
+	  samples.push_back("dyjetstollM50_20162"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM50_20162"))); //weights.push_back(1.10);
+	  samples.push_back("qcdbctoept020_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept020_20162"))); //weights.push_back(705.76);
+	  samples.push_back("qcdbctoept030_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept030_20162"))); //weights.push_back(797.35);
+	  samples.push_back("qcdbctoept080_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept080_20162"))); //weights.push_back(72.58);
+	  samples.push_back("qcdbctoept170_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept170_20162"))); //weights.push_back(4.60);
+	  samples.push_back("qcdbctoept250_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept250_20162"))); //weights.push_back(1.17);
+	  samples.push_back("qcdempt015_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt015_20162"))); //weights.push_back(5582.99);
+	  samples.push_back("qcdempt020_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt020_20162"))); //weights.push_back(11650.56);
+	  samples.push_back("qcdempt030_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt030_20162"))); //weights.push_back(25156.70);
+	  samples.push_back("qcdempt050_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt050_20162"))); //weights.push_back(6199.98);
+	  samples.push_back("qcdempt080_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt080_20162"))); //weights.push_back(1298.58);
+	  samples.push_back("qcdempt120_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt120_20162"))); //weights.push_back(225.78);
+	  samples.push_back("qcdempt170_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt170_20162"))); //weights.push_back(151.61);
+	  samples.push_back("qcdempt300_20162"); weights.push_back(std::stof(callPythonAndGetOutput("qcdempt300_20162"))); //weights.push_back(16.46);
+	  samples.push_back("qcdmupt15_20162");  weights.push_back(std::stof(callPythonAndGetOutput("qcdmupt15_20162"))); //weights.push_back(456.73);
+	  samples.push_back("ttbar_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ttbar_20162"))); //weights.push_back(0.16);
+	  samples.push_back("wjetstolnu_0j_20162"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_0j_20162"))); //weights.push_back(5.60);
+	  samples.push_back("wjetstolnu_1j_20162"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_1j_20162"))); //weights.push_back(0.89);
+	  samples.push_back("wjetstolnu_2j_20162"); weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_2j_20162"))); //weights.push_back(0.66);
+	  samples.push_back("ww_20162"); weights.push_back(std::stof(callPythonAndGetOutput("ww_20162"))); //weights.push_back(0.08);
+	  samples.push_back("wz_20162"); weights.push_back(std::stof(callPythonAndGetOutput("wz_20162"))); //weights.push_back(0.06);
+	  samples.push_back("zz_20162"); weights.push_back(std::stof(callPythonAndGetOutput("zz_20162"))); //weights.push_back(0.18);
+	}
+      }
 
-            if (use_2017) { 
-		samples.push_back("dyjetstollM10_2017");    weights.push_back(15.45);
-		samples.push_back("dyjetstollM50_2017");    weights.push_back(2.18);
-		samples.push_back("qcdbctoept015_2017");    weights.push_back(589.79);
-		samples.push_back("qcdbctoept020_2017");    weights.push_back(1142.48);
-		samples.push_back("qcdbctoept030_2017");    weights.push_back(1058.97);
-		samples.push_back("qcdbctoept080_2017");    weights.push_back(101.06);
-		samples.push_back("qcdbctoept170_2017");    weights.push_back(5.57);
-		samples.push_back("qcdbctoept250_2017");    weights.push_back(1.47);
-		samples.push_back("qcdempt020_2017");    weights.push_back(14035.33);
-		samples.push_back("qcdempt030_2017");    weights.push_back(29803.79);
-		samples.push_back("qcdempt050_2017");    weights.push_back(7906.91);
-		samples.push_back("qcdempt080_2017");    weights.push_back(4664.42);
-		samples.push_back("qcdempt120_2017");    weights.push_back(300.25);
-		samples.push_back("qcdempt170_2017");    weights.push_back(183.50);
-		samples.push_back("qcdempt300_2017");    weights.push_back(20.24);
-		samples.push_back("ttbar_2017");    weights.push_back(0.14);
-		samples.push_back("wjetstolnu_0j_2017");    weights.push_back(12.65);
-		samples.push_back("wjetstolnu_1j_2017");    weights.push_back(2.00);
-		samples.push_back("wjetstolnu_2j_2017");    weights.push_back(1.41);
-		samples.push_back("ww_2017");    weights.push_back(0.21);
-		samples.push_back("wz_2017");    weights.push_back(0.16);
-		samples.push_back("zz_2017");    weights.push_back(0.18);
-		samples.push_back("qcdpt15mupt5_2017");    weights.push_back(18680.12);
-		samples.push_back("qcdpt20mupt5_2017");    weights.push_back(1827.01);
-		samples.push_back("qcdpt30mupt5_2017");    weights.push_back(1347.09);
-		samples.push_back("qcdpt50mupt5_2017");    weights.push_back(412.17);
-		samples.push_back("qcdpt80mupt5_2017");    weights.push_back(84.36);
-		samples.push_back("qcdpt120mupt5_2017");    weights.push_back(33.29);
-		samples.push_back("qcdpt170mupt5_2017");    weights.push_back(6.18);
-		samples.push_back("qcdpt300mupt5_2017");    weights.push_back(0.43);
-		samples.push_back("qcdpt470mupt5_2017");    weights.push_back(0.06);
-		samples.push_back("qcdpt600mupt5_2017");    weights.push_back(0.02);
-		samples.push_back("qcdpt800mupt5_2017");    weights.push_back(0.00);
-		samples.push_back("qcdpt1000mupt5_2017");    weights.push_back(0.00);
-            }
-	    if (use_2018) {
-		samples.push_back("dyjetstollM10_2018");    weights.push_back(11.84);
-		samples.push_back("dyjetstollM50_2018");    weights.push_back(3.56);
-		samples.push_back("qcdbctoept015_2018");    weights.push_back(671.48);
-		samples.push_back("qcdbctoept020_2018");    weights.push_back(1709.18);
-		samples.push_back("qcdbctoept030_2018");    weights.push_back(1912.59);
-		samples.push_back("qcdbctoept080_2018");    weights.push_back(141.47);
-		samples.push_back("qcdbctoept170_2018");    weights.push_back(9.93);
-		samples.push_back("qcdbctoept250_2018");    weights.push_back(7.42);
-		samples.push_back("qcdempt015_2018");    weights.push_back(13836.45);
-		samples.push_back("qcdempt020_2018");    weights.push_back(20392.99);
-		samples.push_back("qcdempt030_2018");    weights.push_back(46444.82);
-		samples.push_back("qcdempt050_2018");    weights.push_back(11273.78);
-		samples.push_back("qcdempt080_2018");    weights.push_back(2316.50);
-		samples.push_back("qcdempt120_2018");    weights.push_back(410.66);
-		samples.push_back("qcdempt170_2018");    weights.push_back(267.03);
-		samples.push_back("qcdempt300_2018");    weights.push_back(29.73);
-		samples.push_back("qcdmupt15_2018");    weights.push_back(1089.56);
-		samples.push_back("ttbar_2018");    weights.push_back(0.16);
-		samples.push_back("wjetstolnu_0j_2018");    weights.push_back(20.75);
-		samples.push_back("wjetstolnu_1j_2018");    weights.push_back(4.62);
-		samples.push_back("wjetstolnu_2j_2018");    weights.push_back(2.07);
-		samples.push_back("ww_2018");    weights.push_back(0.54);
-		samples.push_back("wz_2018");    weights.push_back(1.35);
-		samples.push_back("zz_2018");    weights.push_back(0.21);
-
-            }  
-          }
-	  else {
-	    if (use_2017) {
-	        samples.push_back("SingleElectron2017B");    weights.push_back(1);
-                samples.push_back("SingleElectron2017D");    weights.push_back(1);
-                samples.push_back("SingleElectron2017F");    weights.push_back(1);
-                samples.push_back("SingleMuon2017D");        weights.push_back(1);
-                samples.push_back("SingleMuon2017F");        weights.push_back(1);
-                samples.push_back("SingleElectron2017C");    weights.push_back(1);
-                samples.push_back("SingleElectron2017E");    weights.push_back(1);
-                samples.push_back("SingleMuon2017C");        weights.push_back(1);
-                samples.push_back("SingleMuon2017E");        weights.push_back(1);
-	    }
-          }
+      if (use_2017) {
+	if (use_signal) {
+	  //samples.push_back("WminusHToSSTodddd_tau100um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau100um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau300um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau300um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau3mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau3mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau10mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau30mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau30mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau100um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau100um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau300um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau300um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau3mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau3mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau10mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau30mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau30mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau100um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau100um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau300um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau300um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau3mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau3mm_M55_2017"))); //weights.push_back(1);
+	  samples.push_back("WminusHToSSTodddd_tau10mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WminusHToSSTodddd_tau30mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau30mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau100um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau100um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau300um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau300um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau3mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau3mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau10mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau30mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau30mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau100um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau100um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau300um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau300um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau3mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau3mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau10mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau30mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau30mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau100um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau100um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau300um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau300um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau3mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau3mm_M55_2017"))); //weights.push_back(1);
+	  samples.push_back("WplusHToSSTodddd_tau10mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("WplusHToSSTodddd_tau30mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau30mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau100um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau100um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau300um_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau300um_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau3mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau3mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau10mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau30mm_M15_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau30mm_M15_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau100um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau100um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau300um_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau300um_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau3mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau3mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau10mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau30mm_M40_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau30mm_M40_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau100um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau100um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau300um_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau300um_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau3mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau3mm_M55_2017"))); //weights.push_back(1);
+	  samples.push_back("ZHToSSTodddd_tau10mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M55_2017"))); //weights.push_back(1);
+	  //samples.push_back("ZHToSSTodddd_tau30mm_M55_2017"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau30mm_M55_2017"))); //weights.push_back(1);
+	}
+	else {
+	  samples.push_back("dyjetstollM10_2017"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM10_2017")));//weights.push_back(15.45);
+          samples.push_back("dyjetstollM50_2017"); weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM50_2017")));//weights.push_back(2.18);
+	  samples.push_back("qcdbctoept015_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept015_2017")));//weights.push_back(589.79);
+	  samples.push_back("qcdbctoept020_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept020_2017")));//weights.push_back(1142.48);
+	  samples.push_back("qcdbctoept030_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept030_2017")));//weights.push_back(1058.97);
+	  samples.push_back("qcdbctoept080_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept080_2017")));//weights.push_back(101.06);
+	  samples.push_back("qcdbctoept170_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept170_2017")));//weights.push_back(5.57);
+	  samples.push_back("qcdbctoept250_2017"); weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept250_2017")));//weights.push_back(1.47);
+	  samples.push_back("qcdempt020_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt020_2017")));//weights.push_back(14035.33);
+	  samples.push_back("qcdempt030_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt030_2017")));//weights.push_back(29803.79);
+	  samples.push_back("qcdempt050_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt050_2017")));//weights.push_back(7906.91);
+	  samples.push_back("qcdempt080_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt080_2017")));//weights.push_back(4664.42);
+	  samples.push_back("qcdempt120_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt120_2017")));//weights.push_back(300.25);
+	  samples.push_back("qcdempt170_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt170_2017")));//weights.push_back(183.50);
+	  samples.push_back("qcdempt300_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdempt300_2017")));//weights.push_back(20.24);
+	  samples.push_back("qcdpt15mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt15mupt5_2017")));//weights.push_back(18680.12);
+          samples.push_back("qcdpt20mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt20mupt5_2017")));//weights.push_back(1827.01);
+          samples.push_back("qcdpt30mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt30mupt5_2017")));//weights.push_back(1347.09);
+          samples.push_back("qcdpt50mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt50mupt5_2017")));//weights.push_back(412.17);
+          samples.push_back("qcdpt80mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt80mupt5_2017")));//weights.push_back(84.36);
+          samples.push_back("qcdpt120mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt120mupt5_2017")));//weights.push_back(33.29);
+          samples.push_back("qcdpt170mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt170mupt5_2017")));//weights.push_back(6.18);
+          samples.push_back("qcdpt300mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt300mupt5_2017")));//weights.push_back(0.43);
+          samples.push_back("qcdpt470mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt470mupt5_2017")));//weights.push_back(0.06);
+          samples.push_back("qcdpt600mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt600mupt5_2017")));//weights.push_back(0.02);
+          samples.push_back("qcdpt800mupt5_2017");    weights.push_back(std::stof(callPythonAndGetOutput("qcdpt800mupt5_2017")));//weights.push_back(0.00);
+          samples.push_back("qcdpt1000mupt5_2017");   weights.push_back(std::stof(callPythonAndGetOutput("qcdpt1000mupt5_2017")));//weights.push_back(0.00);
+	  samples.push_back("ttbar_2017");         weights.push_back(std::stof(callPythonAndGetOutput("ttbar_2017")));//weights.push_back(0.14);
+	  samples.push_back("wjetstolnu_0j_2017");    weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_0j_2017")));//weights.push_back(12.65);
+	  samples.push_back("wjetstolnu_1j_2017");    weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_1j_2017")));//weights.push_back(2.00);
+	  samples.push_back("wjetstolnu_2j_2017");    weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_2j_2017")));//weights.push_back(1.41);
+	  samples.push_back("ww_2017");    weights.push_back(std::stof(callPythonAndGetOutput("ww_2017")));//weights.push_back(0.21);
+	  samples.push_back("wz_2017");    weights.push_back(std::stof(callPythonAndGetOutput("wz_2017")));//weights.push_back(0.16);
+	  samples.push_back("zz_2017");    weights.push_back(std::stof(callPythonAndGetOutput("zz_2017")));//weights.push_back(0.18);
+	}
+      }
+      if (use_2018) {
+	if (use_signal) {
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M40_2018")));
+	  //samples.push_back("WminusHToSSTodddd_tau10mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M40_2018")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M40_2018")));
+	  //samples.push_back("WplusHToSSTodddd_tau10mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M40_2018")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M40_2018")));
+	  //samples.push_back("ZHToSSTodddd_tau10mm_M40_2018"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M40_2018")));
+	  //samples.push_back("WminusHToSSTodddd_tau1mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau1mm_M55_2018")));
+	  samples.push_back("WminusHToSSTodddd_tau10mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WminusHToSSTodddd_tau10mm_M55_2018")));
+	  //samples.push_back("WplusHToSSTodddd_tau1mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau1mm_M55_2018")));
+	  samples.push_back("WplusHToSSTodddd_tau10mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("WplusHToSSTodddd_tau10mm_M55_2018")));
+	  //samples.push_back("ZHToSSTodddd_tau1mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau1mm_M55_2018")));
+	  samples.push_back("ZHToSSTodddd_tau10mm_M55_2018"); weights.push_back(std::stof(callPythonAndGetOutput("ZHToSSTodddd_tau10mm_M55_2018")));
+	}
+	else {
+	  samples.push_back("dyjetstollM10_2018");   weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM10_2018"))); //weights.push_back(11.84);
+          samples.push_back("dyjetstollM50_2018");   weights.push_back(std::stof(callPythonAndGetOutput("dyjetstollM50_2018"))); //weights.push_back(3.56);
+	  samples.push_back("qcdbctoept015_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept015_2018"))); //weights.push_back(671.48);
+	  samples.push_back("qcdbctoept020_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept020_2018"))); //weights.push_back(1709.18);
+	  samples.push_back("qcdbctoept030_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept030_2018"))); //weights.push_back(1912.59);
+	  samples.push_back("qcdbctoept080_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept080_2018"))); //weights.push_back(141.47);
+	  samples.push_back("qcdbctoept170_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept170_2018"))); //weights.push_back(9.93);
+	  samples.push_back("qcdbctoept250_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdbctoept250_2018"))); //weights.push_back(7.42);
+	  samples.push_back("qcdempt015_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt015_2018"))); //weights.push_back(13836.45);
+	  samples.push_back("qcdempt020_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt020_2018"))); //weights.push_back(20392.99);
+	  samples.push_back("qcdempt030_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt030_2018"))); //weights.push_back(46444.82);
+	  samples.push_back("qcdempt050_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt050_2018"))); //weights.push_back(11273.78);
+	  samples.push_back("qcdempt080_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt080_2018"))); //weights.push_back(2316.50);
+	  samples.push_back("qcdempt120_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt120_2018"))); //weights.push_back(410.66);
+	  samples.push_back("qcdempt170_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt170_2018"))); //weights.push_back(267.03);
+	  samples.push_back("qcdempt300_2018");      weights.push_back(std::stof(callPythonAndGetOutput("qcdempt300_2018"))); //weights.push_back(29.73);
+	  samples.push_back("qcdmupt15_2018");   weights.push_back(std::stof(callPythonAndGetOutput("qcdmupt15_2018"))); //weights.push_back(1089.56);
+	  samples.push_back("ttbar_2018");           weights.push_back(std::stof(callPythonAndGetOutput("ttbar_2018"))); //weights.push_back(0.16);
+	  samples.push_back("wjetstolnu_0j_2018");   weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_0j_2018"))); //weights.push_back(20.75);
+	  samples.push_back("wjetstolnu_1j_2018");   weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_1j_2018"))); //weights.push_back(4.62);
+	  samples.push_back("wjetstolnu_2j_2018");   weights.push_back(std::stof(callPythonAndGetOutput("wjetstolnu_2j_2018"))); //weights.push_back(2.07);
+	  samples.push_back("ww_2018");              weights.push_back(std::stof(callPythonAndGetOutput("ww_2018"))); //weights.push_back(0.54);
+	  samples.push_back("wz_2018");              weights.push_back(std::stof(callPythonAndGetOutput("wz_2018"))); //weights.push_back(1.35);
+	  samples.push_back("zz_2018");              weights.push_back(std::stof(callPythonAndGetOutput("zz_2018"))); //weights.push_back(0.21);
+	}
+      }  
+    }
+    else {
+      if (use_20161) {
+	//samples.push_back("Lepton_data_20161_20pc");   weights.push_back(1);
+	samples.push_back("SingleMuon20161B_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20161C_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20161D_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20161E_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20161F_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20161B_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20161C_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20161D_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20161E_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20161F_20pc");    weights.push_back(1);
+      }
+      if (use_20162) {
+	//samples.push_back("Lepton_data_20162_20pc");   weights.push_back(1);
+	samples.push_back("SingleMuon20162F_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20162G_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon20162H_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20162F_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20162G_20pc");    weights.push_back(1);
+        samples.push_back("SingleElectron20162H_20pc");    weights.push_back(1);
+      }
+      if (use_2017) {
+	//samples.push_back("Lepton_data_2017_20pc");    weights.push_back(1);
+	samples.push_back("SingleElectron2017B_20pc");    weights.push_back(1);
+	samples.push_back("SingleElectron2017D_20pc");    weights.push_back(1);
+	samples.push_back("SingleElectron2017F_20pc");    weights.push_back(1);
+	samples.push_back("SingleMuon2017D_20pc");        weights.push_back(1);
+	samples.push_back("SingleMuon2017F_20pc");        weights.push_back(1);
+	samples.push_back("SingleElectron2017C_20pc");    weights.push_back(1);
+	samples.push_back("SingleElectron2017E_20pc");    weights.push_back(1);
+	samples.push_back("SingleMuon2017C_20pc");        weights.push_back(1);
+	samples.push_back("SingleMuon2017E_20pc");        weights.push_back(1);
+      }
+      if (use_2018) {
+	//samples.push_back("Lepton_data_2018_20pc");    weights.push_back(1);
+	samples.push_back("SingleMuon2018A_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon2018B_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon2018C_20pc");    weights.push_back(1);
+        samples.push_back("SingleMuon2018D_20pc");    weights.push_back(1);
+        samples.push_back("EGamma2018A_20pc");    weights.push_back(1);
+        samples.push_back("EGamma2018B_20pc");    weights.push_back(1);
+        samples.push_back("EGamma2018C_20pc");    weights.push_back(1);
+        samples.push_back("EGamma2018D_20pc");    weights.push_back(1);
+      }
+    }
 
   }
-  const char* tree_path; int min_ntracks0 = 0; int max_ntracks0 = 1000000; int min_ntracks1 = 0; int max_ntracks1 = 1000000; //which ntracks?
+  //end of adding sample weights to samples vector
+
+  //Only uses vertices with the number of tracks defined by ntracks by taking data from the appropriate MiniTree
+  const char* tree_path; int min_ntracks0 = 0; int max_ntracks0 = 1000000; int min_ntracks1 = 0; int max_ntracks1 = 1000000;
   if (p.ntracks() == 3)      { tree_path = "mfvMiniTreeNtk3/t"; }
   else if (p.ntracks() == 4) { tree_path = "mfvMiniTreeNtk4/t"; }
   else if (p.ntracks() == 5) { tree_path = "mfvMiniTree/t"; }
@@ -383,7 +1121,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   else { fprintf(stderr, "bad ntracks"); exit(1); }
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
-  if (p.is_mc()) {
+  /*if (p.is_mc()) {
     if      (p.year() == "20161")        { dphi_pdf_c = 1.22; dphi_pdf_a = 2.63; }
     else if (p.year() == "20162")        { dphi_pdf_c = 1.22; dphi_pdf_a = 2.54; }
     else if (p.year() == "20162")         { dphi_pdf_c = 1.22; dphi_pdf_a = 2.73; }
@@ -391,7 +1129,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     else if (p.year() == "2018")         { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8" or p.year() == "run2")  { dphi_pdf_c = 1.23; dphi_pdf_a = 4.18; }
     else { fprintf(stderr, "bad year"); exit(1); }
-  } else if (p.only_10pc()) {
+  } else if (p.only_20pc()) {
     if (p.year() == "2017")         { dphi_pdf_c = 1.34; dphi_pdf_a = 5.44; }
     else if (p.year() == "2018")    { dphi_pdf_c = 1.25; dphi_pdf_a = 6.21; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.30; dphi_pdf_a = 5.78; }
@@ -406,16 +1144,18 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     else if (p.year() == "2018")    { dphi_pdf_c = 1.30; dphi_pdf_a = 6.01; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.31; dphi_pdf_a = 5.96; }
     else { fprintf(stderr, "bad year"); exit(1); }
-  }
+  }*/
 
   const char* vpeffs_version; //efficiency input
-  if (p.only_10pc()) {
+  if (p.only_20pc()) {
     vpeffs_version = "ULV11Bm";
   } else {
     vpeffs_version = "ULV11Bm";
   }
-  TString eff_file_name_2d = TString::Format("/afs/cern.ch/user/p/pekotamn/crabdirs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
-  TString jet_angle_fname = TString::Format("background_lw_2017.root");
+  //TString eff_file_name_2d = TString::Format("/afs/cern.ch/user/p/pekotamn/crabdirs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  //TString eff_file_name_2d = TString::Format("/uscms/home/alecduqu/mfv_ScaleFactors/src/JMTucker/MFVNeutralino/test/One2Two/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  TString eff_file_name_2d = TString::Format("./vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  TString jet_angle_fname = TString::Format("background_lw_2017.root"); //This is not ultimately used anywhere
 
   const char* eff_hist = "maxtk3";
   if (p.vary_eff()) {
@@ -429,11 +1169,19 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   gRandom->SetSeed(12191982);
 
   //fill only-one-vertex dBV distribution
-  TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 1250, 0, 2.5);
+  TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0); //was 1250, 0, 2.5
+  TH1D* h_1v_dbv_npult20 = new TH1D("h_1v_dbv_npult20", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0);
+  TH1D* h_1v_dbv_npugt20lt30 = new TH1D("h_1v_dbv_npugt20lt30", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0);
+  TH1D* h_1v_dbv_npugt30lt40 = new TH1D("h_1v_dbv_npugt30lt40", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0);
+  TH1D* h_1v_dbv_npugt40 = new TH1D("h_1v_dbv_npugt40", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0);
+  TH1D* h_1v_bs2derr = new TH1D("h_1v_bs2derr", "#sigma(dist2d(SV, beamspot)) (cm)", 100, 0, 0.005); //Alec added
+  TH1D* h_1v_rescale_bs2derr = new TH1D("h_1v_rescale_bs2derr", "rescaled #sigma(dist2d(SV, beamspot)) (cm)", 100, 0, 0.005); //Alec added
+  TH1D* h_1v_w = new TH1D("h_w", ";event weight;events", 100, 0, 10); //Alec added
   TH2D* h_1v_xy  = new TH2D("h_1v_xy", "only-one-vertex events;x0 (cm);y0 (cm)", 250, -1.0, 1.0, 250, -1.0, 1.0);
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1000, 0, 2.0);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1000, 0, 2.0);
   TH2D* h_1v_dbv_dz = new TH2D("h_1v_dbv_dz", "only-one-vertex events;d_{BV} (cm); d_{z} (cm)", 1000, 0, 2.0, 1000, 0, 2.0);
+  TH2D* h_1v_dbv_bs2derr = new TH2D("h_1v_dbv_bs2derr", "only-one-vertex events;d_{BV} (cm); #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 2.0, 100, 0, 0.005); //Alec added
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1D* h_1v_npu = new TH1D("h_1v_npu", "only-one-vertex events;# PU interactions;events", 100, 0, 100);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
@@ -443,18 +1191,57 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi_{JV};jet-vertex pairs", 100, -3.1416, 3.1416);
   TH1F* h_1v_dphijvpt = new TH1F("h_1v_dphijvpt", "only-one-vertex events;p_{T}-weighted #Delta#phi_{JV};jet-vertex pairs", 100, -3.1416, 3.1416);
   TH1F* h_1v_dphijvmin = new TH1F("h_1v_dphijvmin", "only-one-vertex events;#Delta#phi_{JV}^{min};events", 50, 0, 3.1416);
+  TH1F* h_1v_costh2_onlytks0 = new TH1F("h_1v_costh2_onlytks0", "only-one-vertex events;cos(angle2{flight,momentum}) (only tracks, no jets);events", 302, -1.001, 1.001); //Alec added
+  TH1F* h_1v_costh20 = new TH1F("h_1v_costh20", "only-one-vertex events;cos(angle2{flight,momentum});events", 302, -1.001, 1.001); //Alec added, we don't want bins wider than 0.0075 due to granularity
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 100, 0., 4.0);
+  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 200, 0., 4.0); //was 100, 0, 4.0
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
+  //checkpoint
+  std::vector<double>  dbv_value_vector; //background template construction npu correction: define vectors for making a list of dbv values and errors
+  std::vector<double>  dbv_value_vector_npult20;
+  std::vector<double>  dbv_value_vector_npugt20lt30;
+  std::vector<double>  dbv_value_vector_npugt30lt40;
+  std::vector<double>  dbv_value_vector_npugt40;
+  std::vector<double>  dbv_weight_vector;
+  std::vector<double>  dbv_weight_vector_npult20;
+  std::vector<double>  dbv_weight_vector_npugt20lt30;
+  std::vector<double>  dbv_weight_vector_npugt30lt40;
+  std::vector<double>  dbv_weight_vector_npugt40;
+  std::vector<int>  dbv_npubinid_vector;
 
+  std::vector<double>  dbv_value_vector_btag_npult20;
+  std::vector<double>  dbv_value_vector_btag_npugt20lt30;
+  std::vector<double>  dbv_value_vector_btag_npugt30lt40;
+  std::vector<double>  dbv_value_vector_btag_npugt40;
+  std::vector<double>  dbv_value_vector_nobtag_npult20;
+  std::vector<double>  dbv_value_vector_nobtag_npugt20lt30;
+  std::vector<double>  dbv_value_vector_nobtag_npugt30lt40;
+  std::vector<double>  dbv_value_vector_nobtag_npugt40;
+
+  std::vector<double>  dbv_weight_vector_btag_npult20;
+  std::vector<double>  dbv_weight_vector_btag_npugt20lt30;
+  std::vector<double>  dbv_weight_vector_btag_npugt30lt40;
+  std::vector<double>  dbv_weight_vector_btag_npugt40;
+  std::vector<double>  dbv_weight_vector_nobtag_npult20;
+  std::vector<double>  dbv_weight_vector_nobtag_npugt20lt30;
+  std::vector<double>  dbv_weight_vector_nobtag_npugt30lt40;
+  std::vector<double>  dbv_weight_vector_nobtag_npugt40;
+
+  //loops over each sample defined above 
   int ns = (int)samples.size();
   for (int i = 0; i < ns; ++i) {
     mfv::MiniNtuple nt;
-    TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
+    TString iteration_sample_name = samples[i];
+    TString fn;
+    if (iteration_sample_name.Contains("20161")) {fn = TString::Format("%s/%s.root", file_path_20161, samples[i]);}
+    if (iteration_sample_name.Contains("20162")) {fn = TString::Format("%s/%s.root", file_path_20162, samples[i]);}
+    if (iteration_sample_name.Contains("2017")) {fn = TString::Format("%s/%s.root", file_path_2017, samples[i]);}
+    if (iteration_sample_name.Contains("2018")) {fn = TString::Format("%s/%s.root", file_path_2018, samples[i]);}
+    //TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
     std::cout << fn.Data() << "\n";
     TFile* f = TFile::Open(fn);
     if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
@@ -468,46 +1255,177 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     std::string st_name = samples[i];
 
-    // 20161 must come before 2016 in these conditionals
+    // 20161 must come before 2016 in these conditionals, values from BTagging.cc
     if (st_name.find("20161") != std::string::npos) {
-      bdisc_cut_value = 0.6502;
+      //bdisc_cut_value = 0.0508; //loose
+      //bdisc_cut_value = 0.2598; //medium
+      bdisc_cut_value = 0.6502; //tight, originally used
     } 
     else if (st_name.find("20162") != std::string::npos) {
-      bdisc_cut_value = 0.6377;
+      //bdisc_cut_value = 0.0480; //loose
+      //bdisc_cut_value = 0.2489;
+      bdisc_cut_value = 0.6377; //tight, originally used
     } 
     else if (st_name.find("2017") != std::string::npos) {
-      bdisc_cut_value = 0.7476;
+      //bdisc_cut_value = 0.0532; //loose
+      //bdisc_cut_value = 0.3040;
+      bdisc_cut_value = 0.7476; //tight, originally used
     } 
     else if (st_name.find("2018") != std::string::npos) {
-      bdisc_cut_value = 0.7100;
+      //bdisc_cut_value = 0.0490; //loose
+      //bdisc_cut_value = 0.2783;
+      bdisc_cut_value = 0.7100; //tight, originally used
     } 
-
+    //std::cout << "b discrimination value: " << bdisc_cut_value << std::endl;
     mfv::read_from_tree(t, nt);
+    //std::cout << "read from minitree" << std::endl;
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
+      //if (nt.rescale_bs2derr0 > 0.0035) continue; //Alec added, bs2derr cut normally .005cm in MFVNeutralino/python/VertexSelector_cfi.py, but we can further constrain here
+      //if (nt.rescale_bs2derr1 > 0.0035) continue; //Alec added
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
-      if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value) < 1)) continue;
+      if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value,-1) < 1)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
-      const float w = weights[i] * nt.weight;
+      //std::cout << "established cuts" << std::endl;
+      const float w = weights[i] * nt.weight; //THIS IS WHERE THE WEIGHTS ARE APPLIED
+      //std::cout << "sample weight: " << weights[i] << ", event weight: " << nt.weight << std::endl;
 
+      double v0_track_sumpt = 0; //start of sumpt & m5 variables for cuts
+      double v1_track_sumpt = 0;
+      double v0_track_sump = 0;
+      double v0_track_sumE = 0;
+      double v0_track_m5 = 0;
+      double v1_track_sump = 0;
+      double v1_track_sumE = 0;
+      double v1_track_m5 = 0; //end of sumpt & m5 variable for cuts
       if (nt.nvtx == 1) {
+	//std::cout << "1-vertex event" << std::endl;
+	//start of sumpt & m5 cut
+	for (int k = 0; k < nt.ntk0; ++k) {
+	  //std::cout << "beginning of loop for sumpt & m5 cut, " << nt.tk0_px[1] << std::endl;
+	  v0_track_sumpt += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k)); //PROBLEM!!!!
+	  //std::cout << "added track pt to sumpt" << std::endl;
+	  v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
+	  v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.1396*0.1396); //0.1396 is pi+- mass
+	}
+	//std::cout << "finished sumpt and m5 loop" << std::endl;
+	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sump*v0_track_sump);
+	if (v0_track_sumpt < 10) continue;
+	if (v0_track_m5 < 5.5) continue; //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	//std::cout << "finished sumpt and m5 cut" << std::endl;
         float temp_dbv      = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         //float temp_dbv      = sqrt((nt.x0-nt.bsx)*(nt.x0-nt.bsx) + (nt.y0-nt.bsy)*(nt.y0-nt.bsy));
         float temp_dbv_pv   = sqrt((nt.x0-nt.pvx)*(nt.x0-nt.pvx) + (nt.y0-nt.pvy)*(nt.y0-nt.pvy));
 
+	dbv_value_vector.push_back(temp_dbv);
+	dbv_weight_vector.push_back(w);
+
+	/*if (temp_dbv > 0.6 and tree_path == "mfvMiniTree/t") {
+	  std::cout << "dbv > 0.6 1-vertex event in btag=" << p.btags() << " category!" <<std::endl;
+	  std::cout << "dbv: " << temp_dbv << ", run: " << nt.run << ", lumi: " << nt.lumi << ", event: " << nt.event << std::endl;
+	}*/
+	//std::cout << "starting npu and btag binning" << std::endl;
         h_1v_dbv->Fill(temp_dbv, w);
-        h_1v_xy->Fill(nt.x0, nt.y0, w);
-        
-        bool skip_hw = (w > 15.0);
-        if (not skip_hw) {
-          if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(temp_dbv_pv, w);
-          if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(temp_dbv_pv, w);
-          h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
-          h_1v_npu->Fill(nt.npu, w);
-          h_1v_njets->Fill(nt.njets, w);
-          h_1v_ht40->Fill(nt.ht(40.), w);
+	//background template construction npu correction: assign dbv values to bins in npu for dbv pairing later
+	if (nt.npu <= 20) {
+	  h_1v_dbv_npult20->Fill(temp_dbv, w);
+	  dbv_value_vector_npult20.push_back(temp_dbv);
+	  dbv_weight_vector_npult20.push_back(w);
+	  //dbv_npubinid_vector.push_back(1);
+	}
+	else if (nt.npu > 20 and nt.npu <= 30) {
+	  h_1v_dbv_npugt20lt30->Fill(temp_dbv, w);
+	  dbv_value_vector_npugt20lt30.push_back(temp_dbv);
+          dbv_weight_vector_npugt20lt30.push_back(w);
+	  //dbv_npubinid_vector.push_back(2);
+	}
+	else if (nt.npu > 30 and nt.npu <= 40) {
+          h_1v_dbv_npugt30lt40->Fill(temp_dbv, w);
+	  dbv_value_vector_npugt30lt40.push_back(temp_dbv);
+          dbv_weight_vector_npugt30lt40.push_back(w);
+	  //dbv_npubinid_vector.push_back(3);
         }
+	else {
+          h_1v_dbv_npugt40->Fill(temp_dbv, w);
+	  dbv_value_vector_npugt40.push_back(temp_dbv);
+          dbv_weight_vector_npugt40.push_back(w);
+	  //dbv_npubinid_vector.push_back(4);
+        }
+	//background template construction npu correction: assign dbv values to bins in npu now also for with btagging
+	//if (j<10) {
+	//  std::cout << "npu: " << nt.npu << ", p.btags: " << p.btags() << std::endl;
+	//}
+	if (nt.npu <= 20 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+          dbv_value_vector_btag_npult20.push_back(temp_dbv);
+          dbv_weight_vector_btag_npult20.push_back(w);
+          dbv_npubinid_vector.push_back(1);
+        }
+        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+          dbv_value_vector_btag_npugt20lt30.push_back(temp_dbv);
+          dbv_weight_vector_btag_npugt20lt30.push_back(w);
+          dbv_npubinid_vector.push_back(2);
+        }
+        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+          dbv_value_vector_btag_npugt30lt40.push_back(temp_dbv);
+          dbv_weight_vector_btag_npugt30lt40.push_back(w);
+          dbv_npubinid_vector.push_back(3);
+        }
+        else if (nt.npu > 40 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+          dbv_value_vector_btag_npugt40.push_back(temp_dbv);
+          dbv_weight_vector_btag_npugt40.push_back(w);
+          dbv_npubinid_vector.push_back(4);
+        }
+	else if (nt.npu <= 20 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+          dbv_value_vector_nobtag_npult20.push_back(temp_dbv);
+          dbv_weight_vector_nobtag_npult20.push_back(w);
+          dbv_npubinid_vector.push_back(5);
+        }
+        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+          dbv_value_vector_nobtag_npugt20lt30.push_back(temp_dbv);
+          dbv_weight_vector_nobtag_npugt20lt30.push_back(w);
+          dbv_npubinid_vector.push_back(6);
+        }
+        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+          dbv_value_vector_nobtag_npugt30lt40.push_back(temp_dbv);
+          dbv_weight_vector_nobtag_npugt30lt40.push_back(w);
+          dbv_npubinid_vector.push_back(7);
+        }
+        else if (nt.npu > 40 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+          dbv_value_vector_nobtag_npugt40.push_back(temp_dbv);
+          dbv_weight_vector_nobtag_npugt40.push_back(w);
+          dbv_npubinid_vector.push_back(8);
+        }
+
+	h_1v_bs2derr->Fill(nt.bs2derr0, w);
+	h_1v_rescale_bs2derr->Fill(nt.rescale_bs2derr0, w);
+	h_1v_w->Fill(nt.weight);
+        h_1v_xy->Fill(nt.x0, nt.y0, w);
+	h_1v_dbv_bs2derr->Fill(temp_dbv, nt.bs2derr0, w);
+
+	//const TVector3 pv = nt.pvs().pos(0);
+	//const TVector3 pos = nt.svs().pos(isv);
+	//const TVector3 flight = pos - pv;
+	//const TVector3 flight2(flight.X(), flight.Y(), 0);
+	//edm::Handle<MFVVertexAuxCollection> vertices; //Alec work in progress
+	//const MFVVertexAux& v0 = vertices->at(0);
+	//const TVector3 flight2(nt.x0, nt.y0, 0);
+	//const TLorentzVector p4 = nt.p4();
+	//const TVector3 pperp(p4.X(), p4.Y(), 0);
+	//const double costh2 = pperp.Unit().Dot(flight2.Unit());
+	//float double costh2 = nt.costhtksjetsntkmombs0.push_back(v0.costhmombs(mfv::PTracksPlusJetsByNtracks));
+	float costh2_onlytks0 = nt.costhtkonlymombs0;
+	float costh20 = nt.costhtksjetsntkmombs0;
+	//std::cout << "cos of the angle between displacement and momentum: " << costh20 << std::endl;
+	h_1v_costh2_onlytks0->Fill(nt.costhtkonlymombs0, w);
+	h_1v_costh20->Fill(nt.costhtksjetsntkmombs0, w);
+        
+	if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(temp_dbv_pv, w);
+	if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(temp_dbv_pv, w);
+	h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
+	h_1v_npu->Fill(nt.npu, w);
+	h_1v_njets->Fill(nt.njets, w);
+	h_1v_ht40->Fill(nt.ht(40.), w);
         double dphijvmin = M_PI;
         for (int k = 0; k < nt.njets; ++k) {
           h_1v_phij->Fill(nt.jet_phi[k], w);
@@ -522,6 +1440,22 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       }
 
       if (nt.nvtx >= 2 && nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0 && nt.ntk1 >= min_ntracks1 && nt.ntk1 <= max_ntracks1) {
+	//std::cout << "2-vertex event" << std::endl;
+	//start of sumpt & m5 cut
+        for (int k = 0; k < nt.ntk0; ++k) {
+          v0_track_sumpt += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k));
+	  v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
+          v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.1396*0.1396);
+        }
+	for (int l = 0; l < nt.ntk1; ++l) {
+          v1_track_sumpt += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l));
+	  v1_track_sump += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l) + nt.p_tk1_pz->at(l)*nt.p_tk1_pz->at(l));
+          v1_track_sumE += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l) + nt.p_tk1_pz->at(l)*nt.p_tk1_pz->at(l) + 0.1396*0.1396);
+        }
+	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sump*v0_track_sump);
+	v1_track_m5 = sqrt(v1_track_sumE*v1_track_sumE - v1_track_sump*v1_track_sump);
+        if (v0_track_sumpt < 10 || v1_track_sumpt < 10) continue;
+	if (v0_track_m5 < 5.5 || v1_track_m5 < 5.5) continue;  //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
         double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
@@ -538,7 +1472,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         //printf("ibkg %i %s 2v event j %i weight %f * %f = %f dbv %f %f dvv %f npu %i\n", i, samples[i], j, weights[i], nt.weight, w, dbv0, dbv1, dvv, nt.npu);
       }
     }
-
+    //std::cout << "finished loop over 1 and 2 vertex events" << std::endl;
     f->Close();
     delete f;
   }
@@ -547,14 +1481,15 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   for (TH1* h : { h_1v_dbv0, h_1v_dbv1})
     for (int ibin = 0; ibin <= h->GetNbinsX()+1; ++ibin)
       if (h->GetBinContent(ibin) < 0) {
-        printf("\e[1;31mdbv histogram %s has negative content %f in bin %i\e[0m\n", h->GetName(), h->GetBinContent(ibin), ibin);
+        //printf("\e[1;31mdbv histogram %s has negative content %f in bin %i\e[0m\n", h->GetName(), h->GetBinContent(ibin), ibin);
         h->SetBinContent(ibin, 0);
       }
 
   //construct dvvc
-  TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
-  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 100, 0, 1.);
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 100, 0, 4.0);
+  TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 200, 0, 2.0); //was 1250, 0, 2.5
+  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 100, 0, M_PI); //was (100, 0, 1.) changed during dphijj fit addition
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0); //was 100, 0 ,4.0
+  TH1F* h_c1v_sumdbv_w_errorbars = new TH1F("h_c1v_sumdbv_w_errorbars", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
@@ -563,21 +1498,31 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   //TF1* f_dphi = new TF1("f_dphi", "(abs(x)-[0])**[1] + [2]", 0, M_PI);
   //f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
-  TF1* f_dphi = new TF1("f_dphi", "[1] + [2] + 1.0/[0]", 0, M_PI);
+  TF1* f_dphi = new TF1("f_dphi", "[1] + [2] + 1.0/[0]", 0, M_PI); //M_PI stands for the physical constant pi
   dphi_pdf_c = M_PI;
-  f_dphi->SetParameters(dphi_pdf_c, 0.0, 0.0);
+  f_dphi->SetParameters(dphi_pdf_c, 0.0, 0.0); //background template construction: define function of angular separation between displaced vertices, here it is always 1/pi
   
   TF1* i_dphi = 0;
   TF1* i_dphi2 = 0;
+  TF1* fit_dphijj = 0;
+  TF1* func_dphijj = 0;
   if (p.vary_dphi()) {
-    i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
-    i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
-    i_dphi2 = new TF1("i_dphi2", "x/3.14159", 0, M_PI);
+    //i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
+    //i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+    //i_dphi2 = new TF1("i_dphi2", "x/3.14159", 0, M_PI);
+    //Alec added below
+    fit_dphijj = new TF1("fit_dphijj", "(-3.14159<x && x<-0.6)*([2]*x**2+[1]*x+[0]) + (3.14159>x && x>0.6)*([2]*x**2-[1]*x+[0])", -M_PI, M_PI);
+    fit_dphijj->SetParameters(10,10,5);
+    h_1v_dphijj->Fit(fit_dphijj,"R");
+    //func_dphijj = new TF1("fit_dphijj", "(-3.14159<x && x<0)*([2]*x**2+[1]*x+[0]) + (3.14159>x && x>=0)*([2]*x**2-[1]*x+[0])", -M_PI, M_PI);
+    func_dphijj = new TF1("func_dphijj", "(3.14159>x && x>=0)*([2]*x**2-[1]*x+[0])", 0, M_PI);
+    func_dphijj->SetParameters(fit_dphijj->GetParameter(0), fit_dphijj->GetParameter(1), fit_dphijj->GetParameter(2));
+    //std::cout << fit_dphijj->GetParameter(0) <<  fit_dphijj->GetParameter(1) << fit_dphijj->GetParameter(2) << std::endl;
   }
 
-  TFile* jet_angle_file = TFile::Open(jet_angle_fname);
+  //TFile* jet_angle_file = TFile::Open(jet_angle_fname); //This is not used in this file
 
-  TH1F* h_eff_2d = 0;
+  TH1F* h_eff_2d = 0; //background template construction: create vertexing efficiency histogram from the vpeffs files based on number max number of tracks 
   if (p.clearing_from_eff()) {
     TFile* eff_file = TFile::Open(eff_file_name_2d);
     if (!eff_file || !eff_file->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
@@ -595,24 +1540,162 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   int outofbin2 = 0;
   int outofbin3 = 0;
 
-  const int nsamples = 20*int(h_1v_dbv->GetEntries());
-  printf("sampling %i times (should be %i)\n", nsamples, 20*int(h_1v_dbv->Integral()));
+  //random sampling for sumdbv background template
+  const int nsamples = 1*int(h_1v_dbv->GetEntries());
+  printf("sampling %i times (should be %i if no MC weights)\n", nsamples, 1*int(h_1v_dbv->Integral()));
   double events_after_eff = 0;
+
+  //systematic sampling of each dbv entry with all others
+  /*const int nsamples = dbv_value_vector.size();
+  printf("sampling %i times\n", nsamples);
+  double events_after_eff = 0;*/
+
+  //signal contamination insertion
+  /*if (p.ntracks() == 3 or p.ntracks() == 4 or p.ntracks() == 5) {
+    TString ntracks_string = std::to_string(p.ntracks());
+    TString contam_dir = "./ULV30BvetoLHTm_neuM400cT10mm_signonneg_p005bs2derrcut_run2/2v_from_jets_run2_"+ntracks_string+"track_default_ULV30BvetoLHTm.root";
+    std::cout << "SIGNAL CONTAMINATION APPLIED!" << std::endl;
+    std::cout << "Contaminating this background with signal from: " << contam_dir << std::endl;
+    TString h_contam_name0 = "h_1v_dbv0";
+    TString h_contam_name1 = "h_1v_dbv1";
+    TFile * fcontam = TFile::Open(contam_dir);
+    TH1D * h_contam0 = (TH1D*)fcontam->Get(h_contam_name0);
+    TH1D * h_contam1 = (TH1D*)fcontam->Get(h_contam_name1);
+    h_contam0->Scale(.01);
+    h_contam1->Scale(.01);
+    h_1v_dbv0->Add(h_contam0);
+    h_1v_dbv1->Add(h_contam1);
+  }*/
+  //start loop with random seed
+  //std::random_device rd;
+  //std::mt19937 gen(rd());
+
+  //always start with the same seed
+  //std::mt19937 gen(42);
+  std::mt19937 gen(73);
+  //checkpoint
+  std::uniform_int_distribution<> dist(0, dbv_value_vector.size() - 1);
+  std::uniform_int_distribution<> dist1(0, dbv_value_vector_btag_npult20.size() - 1);
+  std::uniform_int_distribution<> dist2(0, dbv_value_vector_btag_npugt20lt30.size() - 1);
+  std::uniform_int_distribution<> dist3(0, dbv_value_vector_btag_npugt30lt40.size() - 1);
+  std::uniform_int_distribution<> dist4(0, dbv_value_vector_btag_npugt40.size() - 1);
+  std::uniform_int_distribution<> dist5(0, dbv_value_vector_nobtag_npult20.size() - 1);
+  std::uniform_int_distribution<> dist6(0, dbv_value_vector_nobtag_npugt20lt30.size() - 1);
+  std::uniform_int_distribution<> dist7(0, dbv_value_vector_nobtag_npugt30lt40.size() - 1);
+  std::uniform_int_distribution<> dist8(0, dbv_value_vector_nobtag_npugt40.size() - 1);
+  std::cout << "Start looping through samples" << std::endl;
+  //std::vector<std::string>  dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
+  std::vector<std::vector<int>> dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
   for (int ij = 0; ij < nsamples; ++ij) {
-    double dbv0 = h_1v_dbv0->GetRandom();
+    if (ij == 500000) {std::cout << "made it to 500,000th sample" << std::endl;}
+    if (ij == 1000000) {std::cout << "made it to 1,000,000th sample" << std::endl;}
+    double dbv0 = h_1v_dbv0->GetRandom();  //background template construction: get random entries in dbv histograms
     double dbv1 = h_1v_dbv1->GetRandom();
+    /*int binx0 = -1;
+    int binx1 = -1;
+    double dbv0_error = 0;
+    double dbv1_error = 0;
+    double sumdbv_error_entry = 0;
+    h_1v_dbv0->GetBinWithContent(dbv0,binx0);
+    h_1v_dbv1->GetBinWithContent(dbv1,binx1);
+    h_1v_dbv0->GetBinError(binx0);
+    h_1v_dbv1->GetBinError(binx1);
+    sumdbv_error_entry = sqrt(dbv0_error*dbv0_error + dbv1_error*dbv1_error);*/
+    //
+    //new for constructing background template
+    //
+    //random sampling for sumdbv background template
+    int randomIndex0 = dist(gen);
+    //int randomIndex1 = dist(gen);
+    double dbv0_entry = dbv_value_vector[ij];
+    //double dbv1_entry = dbv_value_vector[randomIndex1];
+    double dbv0_weight_entry = dbv_weight_vector[ij];
+    //double dbv1_weight_entry = dbv_weight_vector[randomIndex1];
 
-    h_c1v_dbv->Fill(dbv0);
-    h_c1v_dbv->Fill(dbv1);
+    //pileup study
+    double dbv1_entry;
+    double dbv1_weight_entry;
+    //std::cout << "Start of dbv1 assignment if statements." << std::endl;
+    //std::cout << "npuid: " << dbv_npubinid_vector[ij] << std::endl;
+    if (dbv_npubinid_vector[ij] == 1) {
+      int randomIndex1 = dist1(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_btag_npult20[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_btag_npult20[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 2) {
+      int randomIndex1 = dist2(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_btag_npugt20lt30[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_btag_npugt20lt30[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 3) {
+      int randomIndex1 = dist3(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_btag_npugt30lt40[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_btag_npugt30lt40[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 4) {
+      int randomIndex1 = dist4(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_btag_npugt40[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_btag_npugt40[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 5) {
+      int randomIndex1 = dist5(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_nobtag_npult20[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_nobtag_npult20[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 6) {
+      int randomIndex1 = dist6(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_nobtag_npugt20lt30[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_nobtag_npugt20lt30[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 7) {
+      int randomIndex1 = dist7(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_nobtag_npugt30lt40[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_nobtag_npugt30lt40[randomIndex1];
+    }
+    else if (dbv_npubinid_vector[ij] == 8) {
+      int randomIndex1 = dist8(gen);
+      //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
+      dbv1_entry = dbv_value_vector_nobtag_npugt40[randomIndex1];
+      dbv1_weight_entry = dbv_weight_vector_nobtag_npugt40[randomIndex1];
+    }
+    //std::cout << ", dbv1_entry: " << dbv1_entry << ", dbv1_weight_entry: " << dbv1_weight_entry << std::endl;
+    //if (ij < 10) {
+    //  std::cout << "pair of dbv values: " << dbv0_entry << " and " << dbv1_entry <<std::endl;
+    //}
 
-    double dphi   = f_dphi->GetRandom();
+    double sumdbv_entry = dbv0_entry + dbv1_entry;
+    double sumdbv_bin = h_c1v_sumdbv_w_errorbars->FindBin(sumdbv_entry);
+    //double sumdbv_w_entry = sqrt(dbv0_weight_entry*dbv0_weight_entry + dbv1_weight_entry*dbv1_weight_entry); //we think this was wrong
+    double sumdbv_w_entry = dbv0_weight_entry*dbv1_weight_entry;
 
-    double dvvc   = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
-    double sumdbv = dbv0 + dbv1;
+    //systematic sampling of each dbv entry with all others
+    /*double dbv0_entry = dbv_value_vector[ij];
+    double dbv1_entry;
+    double dbv0_weight_entry = dbv_weight_vector[ij];
+    double dbv1_weight_entry;
+    double sumdbv_entry;
+    double sumdbv_w_entry;*/
+
+    h_c1v_dbv->Fill(dbv0_entry);
+    h_c1v_dbv->Fill(dbv1_entry);
+
+    double dphi   = f_dphi->GetRandom(); //background template construction: get random angle (dphi) between the random dbv pair, always 1/pi (set above)
+
+    double dvv_entry = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi));
+    double dvvc   = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi)); //background template construction: compute 2D distance between 2 random dbv pair vertices with dphi angular separation (1/pi)
+    double sumdbv = dbv0 + dbv1; //background template construction: sum random dbv pair to find sumdbv
 
     if (p.vary_dphi()) {
-      double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
-      double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
+      //double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);//Alec commented
+      double dphi2 = func_dphijj->GetRandom(); //Alec added
+      double dvvc2 = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi2));
       if (dvvc < 0.04) ++bin1;
       if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
       if (dvvc >= 0.07) ++bin3;
@@ -624,24 +1707,60 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
       dphi = dphi2;
       dvvc = dvvc2;
+      dvv_entry = dvvc2;
     }
 
-    double prob  = 1;
+    double prob  = 1; //background template construction: 
     if (p.clearing_from_eff()) {
       prob = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvvc));
       prob *= p.extra_eff_2d(dvvc);
     }
+    double prob_sumdbv_w_errorbars  = 1; //background template construction:
+    if (p.clearing_from_eff()) {
+      prob_sumdbv_w_errorbars = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvv_entry));
+      prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
+    }
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-    h_c1v_dvv->Fill(dvvc, prob);
-    h_c1v_sumdbv->Fill(sumdbv, prob);
+    h_c1v_dvv->Fill(dvv_entry, prob);  //errors not propagated properly just for dvv here
+    h_c1v_sumdbv->Fill(sumdbv_entry, prob); //background template construction: fill histogram with constructed value and weight
+    //h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, sqrt(prob_sumdbv_w_errorbars*prob_sumdbv_w_errorbars + sumdbv_w_entry*sumdbv_w_entry));
+    h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*sumdbv_w_entry);
+    //random sampling for sumdbv background template
+    /*if (std::find(dbv_check_vector[sumdbv_bin].begin(), dbv_check_vector[sumdbv_bin].end(), randomIndex0) != dbv_check_vector[sumdbv_bin].end()) {
+      h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*pow(2*h_c1v_sumdbv_w_errorbars->GetBinError(sumdbv_bin)*sumdbv_w_entry+pow(sumdbv_w_entry,2),0.5));
+    }
+    else if (std::find(dbv_check_vector[sumdbv_bin].begin(), dbv_check_vector[sumdbv_bin].end(), randomIndex1) != dbv_check_vector[sumdbv_bin].end()) {
+      h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*pow(2*h_c1v_sumdbv_w_errorbars->GetBinError(sumdbv_bin)*sumdbv_w_entry+pow(sumdbv_w_entry,2),0.5));
+    }
+    else {
+      h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*sumdbv_w_entry);
+    }
+    dbv_check_vector[sumdbv_bin].push_back(randomIndex0);
+    dbv_check_vector[sumdbv_bin].push_back(randomIndex1);*/
+
+    //systematic sampling of each dbv entry with all others
+    /*for (int k = ij; k < nsamples; ++k) {
+      if (ij != k) {
+	dbv1_entry = dbv_value_vector[k];
+	dbv1_weight_entry = dbv_weight_vector[k];
+	sumdbv_entry = dbv0_entry + dbv1_entry;
+	sumdbv_w_entry = sqrt(dbv0_weight_entry*dbv0_weight_entry + dbv1_weight_entry*dbv1_weight_entry);
+	h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*sumdbv_w_entry);
+      }
+    }*/
+
     h_c1v_absdphivv->Fill(fabs(dphi), prob);
-    h_c1v_dbv0->Fill(dbv0, prob);
-    h_c1v_dbv1->Fill(dbv1, prob);
-    h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, prob);
+    h_c1v_dbv0->Fill(dbv0_entry, prob);
+    h_c1v_dbv1->Fill(dbv1_entry, prob);
+    h_c1v_dbv1_dbv0->Fill(dbv0_entry, dbv1_entry, prob);
 
     events_after_eff += prob;
   }
+  //set bin errors for constructed sumdbv histogram
+  std::cout << "End looping through samples" << std::endl;
+
+
   printf("events before efficiency correction = %d, events after efficiency correction = %f, integrated efficiency correction = %f\n", nsamples, events_after_eff, events_after_eff/nsamples);
 
   TString cb_cbbar = TString::Format("%s, %f", out_fn, events_after_eff/nsamples);
@@ -663,10 +1782,20 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TFile* fh = TFile::Open(out_fn, "recreate");
 
   h_1v_dbv->Write();
+  h_1v_dbv_npult20->Write();
+  h_1v_dbv_npugt20lt30->Write();
+  h_1v_dbv_npugt30lt40->Write();
+  h_1v_dbv_npugt40->Write();
+  h_1v_costh2_onlytks0->Write(); //Alec added
+  h_1v_costh20->Write(); //Alec added
+  h_1v_bs2derr->Write(); //Alec added
+  h_1v_rescale_bs2derr->Write(); //Alec added
+  h_1v_w->Write(); //Alec added
   h_1v_xy->Write();
   h_1v_dbv0->Write();
   h_1v_dbv1->Write();
   h_1v_dbv_dz->Write();
+  h_1v_dbv_bs2derr->Write(); //Alec added
   h_1v_phiv->Write();
   h_1v_npu->Write();
   h_1v_njets->Write();
@@ -689,6 +1818,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dvv->Write();
   //h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
   h_c1v_sumdbv->Write();
+  h_c1v_sumdbv_w_errorbars->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
@@ -736,6 +1866,26 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   c_sumdbv->SetTicky();
   c_sumdbv->Write();
 
+  TCanvas* c_sumdbv_w_errorbars = new TCanvas("c_sumdbv_w_errorbars", "c_sumdbv_w_errorbars", 700, 700);
+  TLegend* l_sumdbv_w_errorbars = new TLegend(0.35,0.75,0.85,0.85);
+  h_2v_sumdbv->SetTitle(";#Sigmad_{BV} (cm);events");
+  h_2v_sumdbv->SetLineColor(kBlue);
+  h_2v_sumdbv->SetLineWidth(3);
+  h_2v_sumdbv->Scale(1./h_2v_sumdbv->Integral());
+  h_2v_sumdbv->SetStats(0);
+  h_2v_sumdbv->Draw();
+  l_sumdbv_w_errorbars->AddEntry(h_2v_sumdbv, "two-vertex events");
+  h_c1v_sumdbv_w_errorbars->SetLineColor(kRed);
+  h_c1v_sumdbv_w_errorbars->SetLineWidth(3);
+  h_c1v_sumdbv_w_errorbars->Scale(1./h_c1v_sumdbv_w_errorbars->Integral());
+  h_c1v_sumdbv_w_errorbars->SetStats(0);
+  h_c1v_sumdbv_w_errorbars->Draw("sames");
+  l_sumdbv_w_errorbars->AddEntry(h_c1v_sumdbv_w_errorbars, "constructed from only-one-vertex events");
+  l_sumdbv_w_errorbars->SetFillColor(0);
+  l_sumdbv_w_errorbars->Draw();
+  c_sumdbv_w_errorbars->SetTickx();
+  c_sumdbv_w_errorbars->SetTicky();
+  c_sumdbv_w_errorbars->Write();
 
   TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
   TLegend* l_absdphivv = new TLegend(0.25,0.75,0.75,0.85);
@@ -764,17 +1914,29 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     h_eff_2d->Write();
   }
   if (p.vary_dphi()) {
-    i_dphi->Write();
-    i_dphi2->Write();
+    //i_dphi->Write();
+    //i_dphi2->Write();
+    fit_dphijj->Write();
+    func_dphijj->Write();
   }
 
   fh->Close();
 
   delete h_1v_dbv;
+  delete h_1v_dbv_npult20;
+  delete h_1v_dbv_npugt20lt30;
+  delete h_1v_dbv_npugt30lt40;
+  delete h_1v_dbv_npugt40;
+  delete h_1v_costh2_onlytks0; //Alec added
+  delete h_1v_costh20; //Alec added
+  delete h_1v_bs2derr; //Alec added
+  delete h_1v_rescale_bs2derr; //Alec added
+  delete h_1v_w; //Alec added
   delete h_1v_xy;
   delete h_1v_dbv0;
   delete h_1v_dbv1;
   delete h_1v_dbv_dz;
+  delete h_1v_dbv_bs2derr; //Alec added
   delete h_1v_phiv;
   delete h_1v_npu;
   delete h_1v_njets;
@@ -793,10 +1955,12 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_2v_npu;
   delete c_dvv;
   delete c_sumdbv;
+  delete c_sumdbv_w_errorbars;
   delete c_absdphivv;
   delete h_c1v_dbv;
   delete h_c1v_dvv;
   delete h_c1v_sumdbv;
+  delete h_c1v_sumdbv_w_errorbars;
   delete h_c1v_absdphivv;
   delete h_c1v_dbv0;
   delete h_c1v_dbv1;
@@ -814,7 +1978,7 @@ int main(int argc, const char* argv[]) {
     const char* outfn  = "2v_from_jets.root";
     const char* drawfn = "2v_from_jets.png";
     const int ntracks  = argc >= 3 ? atoi(argv[2]) : 3;
-    const char* year  = argc >= 4 ? argv[3] : "2017";
+    const char* year  = argc >= 4 ? argv[3] : "run2"; //change depending on year run
     const int ibkg  = argc >= 5 ? atoi(argv[4]) : -999;
 
     ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
@@ -864,7 +2028,7 @@ int main(int argc, const char* argv[]) {
  
   // This for loop runs over simulated background 
   
-  for (const char* year : { "run2",}) { //{"20161", "20162", "2017", "2018", "2017p8", "run2"}) {
+  for (const char* year : { "run2",}) { //{"20161", "20162", "2017", "2018", "2017p8", "run2"}) { //change depending on year run
     for (int ntracks : { 3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
 
