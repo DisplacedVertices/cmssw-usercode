@@ -9,7 +9,7 @@ from JMTucker.MFVNeutralino.TriggerFilter_cfi import bjet_paths_2016, bjet_paths
 def for_trigger_helper(paths):
     return [p[:-1] if p.endswith('*') else p for p in paths]
 
-if year == 2016:
+if year == 20161 or year == 20162:
     bjet_paths_for_trigger_helper = for_trigger_helper(bjet_paths_2016)
     lepton_paths_for_trigger_helper = for_trigger_helper(lepton_paths_2016)
 elif year == 2017:
