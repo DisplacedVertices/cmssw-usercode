@@ -73,6 +73,8 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
                                max_track_d3dipverr = cms.double(-1),
                                jumble_tracks = cms.bool(False),
                                remove_tracks_frac = cms.double(-1),
+                               displaced_track_eff = cms.bool(False), # drop tracks per AN-21-201 App. D; set in NtupleCommon based on settings.is_mc
+                               displaced_track_eff_coef = cms.double(-1), # <0: use the year's central value; >=0: override, for the +-1sigma variations
                                histos = cms.untracked.bool(True),
                                verbose = cms.untracked.bool(False),
                                )
