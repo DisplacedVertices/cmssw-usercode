@@ -1,12 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 #from JMTucker.MFVNeutralino.NtupleCommon import *
 
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_BTagDispJet_vetoLepHT_triggers, use_Lepton_triggers
 is_mc = False
 study_20pc = False
-#use_Lepton_triggers = True
-#use_btag_vetoLepHT_triggers = False
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_btag_vetoLepHT_triggers, use_Lepton_triggers
 dataset += '_ntkseeds'
 #sample_files(process, 'qcdht2000_2017', dataset, 1)
 #sample_files(process, 'EGamma_2018A', dataset, 1)
@@ -40,7 +38,7 @@ process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCuts * process.mfvVe
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers or use_btag_vetoLepHT_triggers:
+    if use_BTagDispJet_vetoLepHT_triggers :
         if is_mc:
             #samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=True, bjet=False) # no data currently; no sliced ttbar since inclusive is used
             samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)

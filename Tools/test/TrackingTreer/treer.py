@@ -1,5 +1,5 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_btag_vetoLepHT_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_BTagDispJet_vetoLepHT_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 settings = CMSSWSettings()
 settings.is_mc = True
 
@@ -37,9 +37,7 @@ process.tt.track_ref_getter.tracks_maps_srcs = []
 process.p = cms.Path(process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-if use_btag_triggers :
-    setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
-elif use_btag_vetoLepHT_triggers :
+if use_BTagDispJet_vetoLepHT_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto leptons and HT novtx', event_filter_jes_mult=0)
 elif use_MET_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='met only', event_filter_jes_mult=0, event_filter_require_vertex = False)
@@ -57,7 +55,7 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers or use_btag_vetoLepHT_triggers :
+    if use_BTagDispJet_vetoLepHT_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
         #samples = Samples.BTagCSV_data_samples_2017 + Samples.DisplacedJet_data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
         samples = Samples.BTagCSV_data_samples_2016APV

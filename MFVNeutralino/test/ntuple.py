@@ -18,8 +18,17 @@ settings.keep_gen = False
 settings.keep_tk = False
 
 
-if use_btag_vetoLepHT_triggers :
-    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # default for displacement trigger analysis!
+if settings.is_mc and (use_BTag_triggers or use_DispJet_triggers):
+    raise RuntimeError('use_BTag_triggers and use_DispJet_triggers are data-only trigger schemes')
+if not settings.is_mc and use_BTagDispJet_vetoLepHT_triggers:
+    raise RuntimeError('For data, run use_BTag_triggers and use_DispJet_triggers separately to make the primary datasets orthogonal')
+
+if use_BTagDispJet_vetoLepHT_triggers:
+    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT' # inclusive MC; data uses the two orthogonal streams below
+elif use_BTag_triggers:
+    settings.event_filter = 'btag only veto leptons and HT' # BTag/JetHT owns trigger overlaps
+elif use_DispJet_triggers:
+    settings.event_filter = 'dispjet only veto btag and leptons and HT' # DispJet trigger, veto any fired BTag trigger
 elif use_MET_triggers :
     settings.event_filter = 'met only'
 elif use_Lepton_triggers :
@@ -55,12 +64,21 @@ cmssw_from_argv(process)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_vetoLepHT_triggers :
-        if settings.is_mc :
-            #samples = [getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_2017')]
-            samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)
-        else :
-            samples = pick_samples(dataset, BTagCSV_data=True, DisplacedJet_data=True)
+    if use_BTagDispJet_vetoLepHT_triggers:
+        if not settings.is_mc:
+            sys.exit('In ntuple.py, use_BTagDispJet_vetoLepHT_triggers should only be used for MC. For data, run use_BTag_triggers and use_DispJet_triggers separately.')
+        #samples = [getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0400_2017')]
+        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)
+
+    elif use_BTag_triggers:
+        if settings.is_mc:
+            sys.exit('In ntuple.py, use_BTag_triggers should not be set with is_mc True!')
+        samples = pick_samples(dataset, BTagCSV_data=True)
+
+    elif use_DispJet_triggers:
+        if settings.is_mc:
+            sys.exit('In ntuple.py, use_DispJet_triggers should not be set with is_mc True!')
+        samples = pick_samples(dataset, DisplacedJet_data=True)
 
     elif use_Lepton_triggers :
         if not settings.is_mc :
@@ -84,7 +102,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         print 'trigger scenario not set properly in ntuple.py, please double check! Submitting some jobs nonetheless...'
         samples = [getattr(Samples, 'wjetstolnu_2j_2017')]
     
-    json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
+    json_filename = 'ana_run2_displacement_trigger.json' if (use_BTagDispJet_vetoLepHT_triggers or use_BTag_triggers or use_DispJet_triggers) else 'ana_run2.json'
     set_splitting(samples, dataset, 'ntuple', data_json=json_path(json_filename), limit_ttbar=True)
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier, ttH_duplicate_check_modifier)
