@@ -93,19 +93,19 @@ def _set_signal_stuff(sample):
     br_h_llps = 1.0
     # All exotic higgs samples use the .xlsx here - https://gitlab.cern.ch/LHCHIGGSXS/LHCHXSWG1/crosssections
     if (sample.name.startswith('WplusH')):
-        sample.xsec = 0.89954*br_h_llps # W+H inclusive, MH=125
+        sample.xsec = 3*(9.541e-02)*br_h_llps # W+H->lvH, once for each lepton flavor (inclusive W+H 0.8502 times BR(W->lv)), MH=125
     elif (sample.name.startswith('WminusH')):
-        sample.xsec = 0.56823*br_h_llps # W-H inclusive, MH=125
+        sample.xsec = 3*(5.981e-02)*br_h_llps # same reasoning as above (inclusive W-H 0.5328)
     elif (sample.name.startswith('ggZH')):
-        sample.xsec = 0.1305*br_h_llps # gg-initiated ZH inclusive, MH=125
+        sample.xsec = 3*(3.995e-03)*br_h_llps # gg-initiated ZH->llH, once for each lepton flavor (inclusive ggZH 0.1184 times BR(Z->ll)), MH=125
     elif (sample.name.startswith('ZH')):
-        sample.xsec = 0.81829*br_h_llps # qq-initiated ZH inclusive (total ZH 0.94879 minus gg component 0.1305), MH=125
+        sample.xsec = 3*(2.596e-02)*br_h_llps # qq-initiated ZH->llH (total ZH per flavor 2.996e-02 minus gg component 3.995e-03), MH=125
     elif sample.name.startswith('ttHToLLPs') or sample.name.startswith('ttHToSSTo'):
-        sample.xsec = 0.5925 * br_h_llps # ttH, MH=125
+        sample.xsec = 0.5306 * br_h_llps # ttH, MH=125
     elif sample.name.startswith('VBFHToSSTo'):
-        sample.xsec = 4.112 * br_h_llps # VBF H, MH=125
+        sample.xsec = 3.813 * br_h_llps # VBF H, MH=125
     elif (sample.name.startswith('ggHToSS')):
-        sample.xsec = 51.72 * br_h_llps # ggH, MH=125
+        sample.xsec = 48.09 * br_h_llps # ggH, MH=125
     else:
         #print(sample.name)
         sample.xsec = 1e-3

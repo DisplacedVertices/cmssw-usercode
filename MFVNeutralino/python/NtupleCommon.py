@@ -326,6 +326,8 @@ def miniaod_ntuple_process(settings):
     # process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
     # process.mfvVertexTracks.min_track_pt = 1.0
 
+    process.mfvVertexTracks.displaced_track_eff = settings.is_mc
+
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
