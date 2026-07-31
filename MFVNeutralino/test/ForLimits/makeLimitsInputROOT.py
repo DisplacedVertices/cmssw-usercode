@@ -278,6 +278,9 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         h_sumdbv_tot    = ROOT.TH1D(n(sig_id, "sumdbv"),       "", 800, 0, 8)
         h_sumdbv_nw_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_nw", "", 800, 0, 8)  # No-weight version
 
+        h_allw_tot = ROOT.TH1D(n(sig_id, "allw"),       "", 200, 0, 0.002) # All events in MiniTree
+        h_sigw_tot = ROOT.TH1D(n(sig_id, "sigw"),       "", 200, 0, 0.002) # All signal region events
+
         for sig in siggrp.sig_ls:
             if debug:
                 print("  sub-sig:", sig.fn)

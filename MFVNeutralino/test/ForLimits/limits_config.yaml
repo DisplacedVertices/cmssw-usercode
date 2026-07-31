@@ -5,7 +5,7 @@
 # ============================================================
 
 # Runtime: override with --year and --channel CLI flags
-year: "2018"    # one of: 20161, 20162, 2017, 2018
+year: "2017"    # one of: 20161, 20162, 2017, 2018
 channel: "lep"  # "lep" or "bjet"
 debug: true     # verbose output while running
 
@@ -33,9 +33,9 @@ signal:
 # point --bkg-template-dir at your own templates.
 background:
   lep:
-    filename: "2v_from_jets_run2_5track_default_ULV30Lepm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30Lepm.root"
   bjet:
-    filename: "2v_from_jets_run2_5track_default_ULV30BvetoLHTm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30BvetoLHTm.root"
 
 # ---- Output paths -------------------------------------------
 # root_output: the intermediate ROOT file holding histograms
