@@ -281,7 +281,9 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         h_allw_tot = ROOT.TH1D(n(sig_id, "allw"),       "", 400, 0, 0.004) # All events in MiniTree
         h_sigw_tot = ROOT.TH1D(n(sig_id, "sigw"),       "", 400, 0, 0.004) # All signal region events
 
+        wt_id = int(-1)
         for sig in siggrp.sig_ls:
+            wt_id += 1
             if debug:
                 print("  sub-sig:", sig.fn)
             t = ROOT.TChain("mfvMiniTree/t")
@@ -300,14 +302,14 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             ROOT.TH1.AddDirectory(1)
             h_child    = ROOT.TH1D(n(sig_id, "child_sumdbv"),       "", 800, 0, 8)
             h_child_nw = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_nw", "", 800, 0, 8)
-            h_allw_subsig = ROOT.TH1D(n(sig_id, "allw_subsig"),       "", 400, 0, 0.004)
-            h_sigw_subsig = ROOT.TH1D(n(sig_id, "sigw_subsig"),       "", 400, 0, 0.004)
+            h_allw_subsig = ROOT.TH1D(n(sig_id, "allw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
+            h_sigw_subsig = ROOT.TH1D(n(sig_id, "sigw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
 
             t.Draw("sumdbv>>%s" % n(sig_id, "child_sumdbv"),       "weight*(nvtx>=2)")
             t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_nw"), "1.0*(nvtx>=2)")
 
-            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig")), str(this_scale)+"*weight")
-            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig")), str(this_scale)+"*weight*(nvtx>=2)")
+            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig") + "_sig" + str(wt_id)), str(this_scale)+"*weight")
+            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig") + "_sig" + str(wt_id)), str(this_scale)+"*weight*(nvtx>=2)")
 
             ROOT.TH1.AddDirectory(0)
             h_child.SetDirectory(0)
@@ -318,6 +320,10 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             h_sumdbv_nw_tot.Add(h_child_nw)
             h_allw_tot.Add(h_allw_subsig)
             h_sigw_tot.Add(h_sigw_subsig)
+
+            f.cd()
+            h_allw_subsig.Write()
+            h_sigw_subsig.Write()
 
             sumw         += this_sumw
             ngen         += this_ngen
