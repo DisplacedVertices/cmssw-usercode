@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = '_tag003' # this is our ntuple numbering scheme, and we should make tags of our code each time
+ntuple_version_ = '_tag004' # this is our ntuple numbering scheme, and we should make tags of our code each time
 
 # Inclusive trigger schemes used for MC and for post-ntupling processing.
 # The orthogonal (BTag/JetHT and DispJet data streams) and (Electron and Muon data streams) 
