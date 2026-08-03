@@ -5,7 +5,7 @@
 # ============================================================
 
 # Runtime: override with --year and --channel CLI flags
-year: "2017"    # one of: 20161, 20162, 2017, 2018
+year: "2018"    # one of: 20161, 20162, 2017, 2018
 channel: "lep"  # "lep" or "bjet"
 debug: true     # verbose output while running
 
