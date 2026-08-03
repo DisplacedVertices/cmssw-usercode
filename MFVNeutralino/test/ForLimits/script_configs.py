@@ -43,7 +43,7 @@ _lep_sigs = [
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",
     "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
-    "VH",  # Signal clusters are treated similarly to signals
+    "VHToSSTodddd", "VH",  # Signal clusters are treated similarly to signals
 ]
 
 # Signals that fire the displaced (b-jet) trigger
@@ -62,7 +62,7 @@ sig = {
     # VH = ZH + WH+ + WH- + ggZH summed. All four must be present at a given lifetime/mass
     # for the cluster to be built.
     "sig_grps": {
-        "VH": ["ZHToSSTodddd", "WminusHToSSTodddd", "WplusHToSSTodddd", "ggZHToSSTodddd"],
+        "VHToSSTodddd": ["ZHToSSTodddd", "WminusHToSSTodddd", "WplusHToSSTodddd", "ggZHToSSTodddd"],
     },
     # Cluster members that are also generated on a wider lifetime grid than the rest of the
     # cluster. WplusH and WminusH only exist at 6 lifetimes, ggZH at 12, so a point where
@@ -76,6 +76,7 @@ sig = {
             "ttHToLLPs_dddd": {"ggHToSSTodddd"},
         },
         "lep": {
+            "VHToSSTodddd":      {"VH"},
             "ttHToLLPs_bbbb":    {"VH"},
             "ttHToLLPs_dddd":    {"VH"},
             "ggZHToSSTobbbb":    {"VH"},
@@ -95,7 +96,7 @@ sig = {
         # AN Sec 6.2.3: the electron SF uncertainty applies to the lepton-triggered channel only.
         "lep_effi": {
             "procs": frozenset([
-                "VH",
+                "VHToSSTodddd",
                 "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
                 "ggZHToSSTobbbb", "ggZHToSSTodddd",
                 "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
@@ -104,7 +105,7 @@ sig = {
         },
         # Process-specific theory systematics (year- and bin-correlated, no CMS_EXO24035_ prefix)
         "qcd_scale_ren_ggH": {"procs": frozenset(["ggHToSSTodddd"]), "channels": None},
-        "qcd_scale_fac_VH":  {"procs": frozenset(["VH"]),            "channels": None},
+        "qcd_scale_fac_VH":  {"procs": frozenset(["VHToSSTodddd"]),            "channels": None},
     },
 }
 
