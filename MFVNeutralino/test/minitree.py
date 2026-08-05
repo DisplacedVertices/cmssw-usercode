@@ -5,25 +5,19 @@ study_20pc = True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'WplusHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', dataset, 1)
-#sample_files(process, 'mfv_stopld_tau000100um_M0200_2018' if is_mc else 'JetHT2017B', dataset, 1)
-#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/100000/177D06A8-D7E8-E14A-8FB8-E638820EDFF3.root')
 #max_events(process, 100)
-input_files(process, '/store/group/lpclonglived/joeyr/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30BvetoLHTm_20161/250222_142639/0000/ntuple_1.root')
+input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
-# Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
-'''
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True),
-    SkipEvent = cms.untracked.vstring("ProductNotFound"),
-)
-
-# Explicitly skip the bad event (run:lumi:event)
-process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
-'''
+# Workaround for weird vertexing bug that appears very rarely in signal MC
+if is_mc : 
+    process.options = cms.untracked.PSet(
+        wantSummary = cms.untracked.bool(True),
+        SkipEvent = cms.untracked.vstring("ProductNotFound"),
+    )
 
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :

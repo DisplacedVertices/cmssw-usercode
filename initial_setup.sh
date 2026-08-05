@@ -5,6 +5,9 @@ cmsenv
 git cms-init --upstream-only
 #git clone https://github.com/DisplacedVertices/cmssw-usercode.git JMTucker # we can pull via https but not push. Leaving this here in case someone doesn't have ssh keys set up...
 git clone git@github.com:DisplacedVertices/cmssw-usercode.git JMTucker
+cd JMTucker
+git checkout UL_Lepton
+cd -
 
 # dependencies for Rochester corrections
 git clone ssh://git@gitlab.cern.ch:7999/akhukhun/roccor.git RoccoR
@@ -17,9 +20,10 @@ mv EgammaPostRecoTools/python/EgammaPostRecoTools.py RecoEgamma/EgammaTools/pyth
 git clone -b ULSSfiles_correctScaleSysMC git@github.com:jainshilpi/EgammaAnalysis-ElectronTools.git EgammaAnalysis/ElectronTools/data/
 git cms-addpkg EgammaAnalysis/ElectronTools
 
+# workaround for malformed EDM ParameterSet provenance in very small number of data ntuples
+git cms-addpkg IOPool/Input
+git apply JMTucker/IOPool.patch
 
-cd JMTucker
-git checkout UL_Lepton
 
 cd ..
 scram b -j 4

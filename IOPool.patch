@@ -1,0 +1,40 @@
+diff --git a/IOPool/Input/src/RootFile.cc b/IOPool/Input/src/RootFile.cc
+index d30689cb51d9..f3c49618666f 100644
+--- a/IOPool/Input/src/RootFile.cc
++++ b/IOPool/Input/src/RootFile.cc
+@@ -391,22 +391,25 @@ namespace edm {
+     } else {
+       // Merge into the parameter set registry.
+       pset::Registry& psetRegistry = *pset::Registry::instance();
+-      try {
+-        for (auto const& psetEntry : psetMap) {
++      for (auto const& psetEntry : psetMap) {
++        try {
+           ParameterSet pset(psetEntry.second.pset());
+           pset.setID(psetEntry.first);
+           // For thread safety, don't update global registries when a secondary source opens a file.
+           if (inputType != InputType::SecondarySource) {
+             psetRegistry.insertMapped(pset);
+           }
+-        }
+-      } catch (edm::Exception const& iExcept) {
+-        if (iExcept.categoryCode() == edm::errors::Configuration) {
+-          edm::Exception exception(edm::errors::FormatIncompatibility);
+-          exception << iExcept.message();
+-          exception.addContext("Creating ParameterSets from file");
+-          throw exception;
+-        } else {
++        } catch (edm::Exception const& iExcept) {
++          if (iExcept.categoryCode() == edm::errors::Configuration) {
++            edm::LogWarning("MalformedInputParameterSet")
++                << "NOTE!! Displaced vertices workaround: Skipping malformed ParameterSet "
++                << psetEntry.first
++                << " while opening file "
++                << file()
++                << "\nOriginal exception:\n"
++                << iExcept.explainSelf();
++            continue;
++          }
+           throw;
+         }
+       }
