@@ -38,3 +38,31 @@ index d30689cb51d9..f3c49618666f 100644
            throw;
          }
        }
+diff --git a/IOPool/Input/src/RootTree.cc b/IOPool/Input/src/RootTree.cc
+index a02cd5f8ffe1..196346a6e7d9 100644
+--- a/IOPool/Input/src/RootTree.cc
++++ b/IOPool/Input/src/RootTree.cc
+@@ -2,6 +2,7 @@
+ #include "RootDelayedReader.h"
+ #include "FWCore/Utilities/interface/EDMException.h"
+ #include "FWCore/Utilities/interface/Exception.h"
++#include "FWCore/MessageLogger/interface/MessageLogger.h"
+ #include "DataFormats/Provenance/interface/BranchDescription.h"
+ #include "InputFile.h"
+ #include "TTree.h"
+@@ -415,7 +416,14 @@ namespace edm {
+     }
+     rawTreeCache_->StartLearningPhase();
+     rawTreeCache_->SetEntryRange(rawStart, rawEnd);
+-    rawTreeCache_->AddBranch("*", kTRUE);
++    try {
++      rawTreeCache_->AddBranch("*", kTRUE);
++    } catch (cms::Exception const& ex) {
++      edm::LogWarning("TTreeCache")
++        << "NOTE!! Displaced vertices workaround: Could not add all branches to TTreeCache; "
++        << "continuing without wildcard cache training. Original exception:\n"
++        << ex.explainSelf();
++    }
+     rawTreeCache_->StopLearningPhase();
+     treeCache_->StartLearningPhase();
+     treeCache_->SetEntryRange(treeStart, tree_->GetEntries());
