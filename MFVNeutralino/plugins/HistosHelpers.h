@@ -21,7 +21,7 @@ namespace pt_helpers {
     pt_keep
   };
 
-  static const bool filter_seed_tracks_w_low_pt = true; // Flag for filtering all low-pT seed tracks. Turn on to filter tracks.
+  static const bool filter_seed_tracks_w_low_pt = false; // Flag for filtering all low-pT seed tracks. Turn on to filter tracks.
 
   static const float pt_cut = 4.0; // GeV
 
@@ -52,7 +52,7 @@ namespace pt_helpers {
   }
 
 
-  static const bool remove_vertex_w_low_pt_track = true;
+  static const bool remove_vertex_w_low_pt_track = false;
 
   template <typename VertexAuxT>
   inline bool remove_vertex(const VertexAuxT& aux) {
