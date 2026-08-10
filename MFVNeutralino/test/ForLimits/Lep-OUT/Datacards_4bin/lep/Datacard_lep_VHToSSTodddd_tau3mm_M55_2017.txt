@@ -1,0 +1,34 @@
+# sample id in ROOT file 17
+# filename = VHToSSTodddd_tau3mm_M55_2017.root
+# total sig rate = 6.3475e+00
+imax 4
+jmax 1
+kmax 12
+________
+bin             b20170    b20171    b20172    b20173
+observation       0      0      0      0
+________
+bin             b20170    b20171    b20172    b20173            b20170    b20171    b20172    b20173
+process       sig201717  sig201717  sig201717  sig201717           bkg2017   bkg2017   bkg2017   bkg2017
+process           0      0      0      0              1      1      1      1
+rate         0.0236927430893 1.67431249102 4.31818994611 0.331304566331         0.000117266680383 0.00072535716328 0.00110879527218 4.88728009377e-05
+________
+
+lumi_13TeV_1718               lnN    1.006  1.006  1.006  1.006              -      -      -      -
+lumi_13TeV_correlated         lnN    1.009  1.009  1.009  1.009              -      -      -      -
+lumi_2017                     lnN     1.02   1.02   1.02   1.02              -      -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01   1.01              -      -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06   1.06              -      -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN   1.1994 1.1994 1.1994 1.1994              -      -      -      -
+
+
+
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau3mm_M55_2017b1 gmN 27     0.000877509003306      -      -      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau3mm_M55_2017b2 gmN 1959        - 0.000854677126608      -      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau3mm_M55_2017b3 gmN 6248        -      - 0.000691131553475      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau3mm_M55_2017b4 gmN 514         -      -      - 0.000644561413095              -      -      -      -
+QCDscale_fac_VH               lnN   1.0102910924574209/0.9827494817518247 0.9814422690498587/1.004672108184384 1.0191442065727698/0.9977834287949922 1.0/1.0              -      -      -      -
+CMS_EXO24035_tk_reco_eff_13TeV lnN   1.00322/0.993497 1.0183/0.972243 1.01686/0.975201 1.01686/0.975201              -      -      -      -
+
+
+

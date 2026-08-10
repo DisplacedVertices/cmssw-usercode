@@ -136,7 +136,7 @@ def cmd_hadd_data():
         hadd_or_merge('Lepton_data_2016.root', ['Lepton_data_20161.root', 'Lepton_data_20162.root'])
         hadd_or_merge('Lepton_data_2017.root', ['SingleMuon2017.root', 'SingleElectron2017.root'])
         hadd_or_merge('Lepton_data_2018.root', ['SingleMuon2018.root', 'EGamma2018.root'])
-        hadd_or_merge('Lepton_data_run2.root', ['Lepton_data_2016.root', 'Lepton_data_2017.root', 'Lepton_data_2018.root'])
+        #hadd_or_merge('Lepton_data_run2.root', ['Lepton_data_2016.root', 'Lepton_data_2017.root', 'Lepton_data_2018.root'])
 
 cmd_merge_data = cmd_hadd_data
 
@@ -381,8 +381,8 @@ def cmd_effsprint(year_to_use=2017):
 def cmd_histos():
     #cmd_report_data()
     cmd_hadd_data()
-    cmd_merge_background(year_to_use=20161)
-    cmd_merge_background(year_to_use=20162)
+    #cmd_merge_background(year_to_use=20161)
+    #cmd_merge_background(year_to_use=20162)
     cmd_merge_background(year_to_use=2017)
     cmd_merge_background(year_to_use=2018)
     #cmd_effsprint()

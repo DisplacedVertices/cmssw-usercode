@@ -1,0 +1,33 @@
+# sample id in ROOT file 9
+# filename = VHToSSTodddd_tau300um_M15_2017.root
+# total sig rate = 7.6451e-03
+imax 4
+jmax 1
+kmax 11
+________
+bin             b20170    b20171    b20172    b20173
+observation       0      0      0      0
+________
+bin             b20170    b20171    b20172    b20173            b20170    b20171    b20172    b20173
+process       sig20179  sig20179  sig20179  sig20179           bkg2017   bkg2017   bkg2017   bkg2017
+process           0      0      0      0              1      1      1      1
+rate         0.0 0.00474430995244 0.00290078834574 0.0         0.000117266680383 0.00072535716328 0.00110879527218 4.88728009377e-05
+________
+
+lumi_13TeV_1718               lnN    1.006  1.006  1.006  1.006              -      -      -      -
+lumi_13TeV_correlated         lnN    1.009  1.009  1.009  1.009              -      -      -      -
+lumi_2017                     lnN     1.02   1.02   1.02   1.02              -      -      -      -
+CMS_eff_e_id_13TeV            lnN     1.01   1.01   1.01   1.01              -      -      -      -
+CMS_pileup_13TeV              lnN     1.03   1.04   1.06   1.06              -      -      -      -
+CMS_EXO24035_vtx_reco_TM_13TeV lnN      2.0    2.0    2.0    2.0              -      -      -      -
+
+
+
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau300um_M15_2017b1 gmN 0      0.000695008936199      -      -      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau300um_M15_2017b2 gmN 4           - 0.00118607748811      -      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau300um_M15_2017b3 gmN 7           -      - 0.000414398335106      -              -      -      -      -
+CMS_EXO24035_mc_stat_VHToSSTodddd_tau300um_M15_2017b4 gmN 0           -      -      - 0.000695008936199              -      -      -      -
+CMS_EXO24035_tk_reco_eff_13TeV lnN   0.999904/1.00002 1.0/1.0 1.0/1.0 1.0/1.0              -      -      -      -
+
+
+
