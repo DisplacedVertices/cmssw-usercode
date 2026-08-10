@@ -4,8 +4,8 @@ from JMTucker.Tools.Year import year
 ntuple_version_ = '_tag002' # this is our ntuple numbering scheme, and we should make tags of our code each time
 
 # trigger schemes we are currently using
-use_btag_vetoLepHT_triggers = False
-use_Lepton_triggers = True
+use_btag_vetoLepHT_triggers = True
+use_Lepton_triggers = False
 
 # trigger schemes for data, to avoid double counting of PDs
 use_Muon_triggers = False
