@@ -82,36 +82,14 @@ def get_reco_effi(nuis_name, siginfo, debug_mode=False):
     Bjet channel: flat 5% working placeholder per AN Sec. 6.2.1 (Table 39/40).
     Lep channel: per-bin asymmetric values from dedicated VH scale factor tables.
     """
-    if siginfo.trig_type == "bjet":
-        # AN working placeholder: flat 5% symmetric lnN for all bjet signals
-        if debug_mode:
-            print("tk_reco_eff: using flat 5% placeholder for bjet signal")
-        return [sth.NuisanceInfo(nuis_name, [1.05] * siginfo.nbins, make_updn=False,
-                                 sep_yrs=False, corr=True, nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)]
 
-    # Lep channel: per-bin asymmetric values from VH scale factor tables
-    pickle_locs = interp_pickle_triple(nuis_name)
-
-    up_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[0])
-    up_arr  = up_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
-    if up_arr is None:
-        print("*" * 90)
-        print("*** FABRICATED NUISANCE: tk_reco_eff UP not found for %s, writing all 1.0"
-              % siginfo.return_nuis_key())
-        print("*" * 90)
-        up_arr = [1.0] * siginfo.nbins
-
-    dn_ntab = sth.NuisanceTable(proc="VH", pickle_loc=pickle_locs[1])
-    dn_arr  = dn_ntab.get_point_from_fn(siginfo.fn.replace(siginfo.proc, "VH"))
-    if dn_arr is None:
-        print("*" * 90)
-        print("*** FABRICATED NUISANCE: tk_reco_eff DOWN not found for %s, writing all 1.0"
-              % siginfo.return_nuis_key())
-        print("*" * 90)
-        dn_arr = [1.0] * siginfo.nbins
-
-    if debug_mode:
-        print("Identified trk-reco fractional uncertainties:", up_arr, dn_arr)
+    if year in ("20161", "20162"):
+        up_arr = [1.0, 1.01, 1.04, 1.07]
+        dn_arr = [1.0, 0.99, 0.96, 0.90]
+    elif year in ("2017", "2018"):
+        up_arr = [1.0, 1.01, 1.02, 1.04]
+        dn_arr = [1.0, 0.99, 0.95, 0.90]
+    else: raise Exception("Year not recognized: " + year)
 
     up_nuis = sth.NuisanceInfo(nuis_name, up_arr, make_updn=False, sep_yrs=False, corr=True,
                                nuis_type="special", nbins=siginfo.nbins, ana_spec=True,

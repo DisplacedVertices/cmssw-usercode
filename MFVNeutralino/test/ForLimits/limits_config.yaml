@@ -54,11 +54,6 @@ datacard_output:
 nuisance_tables:
   vtx_reco_TM:    "NuisTabStore_TrkMvr/pickle"
   disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
-  tk_reco_eff:
-    base: "NuisTabStore_TrkRec/"
-    ct_prefix: "ct_pickle"
-    up_prefix: "up_pickle"
-    dn_prefix: "dn_pickle"
   fac_scale_VH_csv: "TheoryTables/fac_scale_shape_bins.csv"
 
 # ---- Observed events (set to 0 for blind analysis) -----------

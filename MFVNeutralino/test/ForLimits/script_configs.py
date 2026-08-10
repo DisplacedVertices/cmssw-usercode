@@ -178,12 +178,6 @@ obs = {k: list(v) for k, v in _cfg["observations"].items()}
 nuisance_table_paths = {
     "vtx_reco_TM":       _abs(_cfg["nuisance_tables"]["vtx_reco_TM"]),
     "disp_trig_uncerts": _abs(_cfg["nuisance_tables"]["disp_trig_uncerts"]),
-    "tk_reco_eff": {
-        "base":      _abs(_cfg["nuisance_tables"]["tk_reco_eff"]["base"]),
-        "ct_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["ct_prefix"],
-        "up_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["up_prefix"],
-        "dn_prefix": _cfg["nuisance_tables"]["tk_reco_eff"]["dn_prefix"],
-    },
     "fac_scale_VH_csv": _abs(_cfg["nuisance_tables"]["fac_scale_VH_csv"]),
 }
 
