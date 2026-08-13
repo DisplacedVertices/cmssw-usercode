@@ -332,8 +332,8 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                                 kappa = sum(sig_norm_ls) / h_sig_cts.Integral()
                             else:
                                 max_meanw = -1.0
-                                for i in range(len(siggrp.sig_ls)):
-                                    _h_sigw = f.Get("h_sig%s_allw_subsig_%s_sig%d" % (sig_id, year, i))
+                                for sig_i in range(len(siggrp.sig_ls)):
+                                    _h_sigw = f.Get("h_sig%s_allw_subsig_%s_sig%d" % (sig_id, year, sig_i))
                                     this_meanw = _h_sigw.GetMean() if _h_sigw else 0.0
                                     if this_meanw > max_meanw:
                                         max_meanw = this_meanw

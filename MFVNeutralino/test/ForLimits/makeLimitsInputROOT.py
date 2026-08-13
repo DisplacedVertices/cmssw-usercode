@@ -280,8 +280,8 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
 
         h_allw_tot = ROOT.TH1D(n(sig_id, "allw"),       "", 400, 0, 0.004) # All events in MiniTree
         h_sigw_tot = ROOT.TH1D(n(sig_id, "sigw"),       "", 400, 0, 0.004) # All signal region events
-        h_allw_tot.StatOverflows(ROOT.kTRUE)
-        h_sigw_tot.StatOverflows(ROOT.kTRUE)
+        h_allw_tot.SetStatOverflows(ROOT.kTRUE)
+        h_sigw_tot.SetStatOverflows(ROOT.kTRUE)
 
         wt_id = int(0)
         for sig in siggrp.sig_ls:
@@ -305,14 +305,14 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             h_child_nw = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_nw", "", 800, 0, 8)
             h_allw_subsig = ROOT.TH1D(n(sig_id, "allw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
             h_sigw_subsig = ROOT.TH1D(n(sig_id, "sigw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
-            h_allw_subsig.StatOverflows(ROOT.kTRUE)
-            h_sigw_subsig.StatOverflows(ROOT.kTRUE)
+            h_allw_subsig.SetStatOverflows(ROOT.kTRUE)
+            h_sigw_subsig.SetStatOverflows(ROOT.kTRUE)
 
             t.Draw("sumdbv>>%s" % n(sig_id, "child_sumdbv"),       "weight*(nvtx>=2)")
             t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_nw"), "1.0*(nvtx>=2)")
 
-            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig") + "_sig" + str(wt_id)), str(this_scale)+"*weight")
-            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig") + "_sig" + str(wt_id)), str(this_scale)+"*weight*(nvtx>=2)")
+            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig") + "_sig" + str(wt_id)), "1.0")
+            t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig") + "_sig" + str(wt_id)), "1.0*(nvtx>=2)")
 
             ROOT.TH1.AddDirectory(0)
             h_child.SetDirectory(0)

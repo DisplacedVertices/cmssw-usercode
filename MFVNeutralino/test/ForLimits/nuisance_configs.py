@@ -21,6 +21,11 @@ pickle_prefixes = {
 }
 
 pickle_triple_prefixes = {
+    "example": {
+        "base":    "location of pickle files",
+        "up":      "filename of up pickle",
+        "dn":      "filename of down pickle",
+    },
 }
 
 year_remaps = {
