@@ -1,0 +1,54 @@
+README
+(Written by Yuqing)
+
+## Executable: StackedPlotter
+
+Execute with ROOT enabled.
+
+Does not require Apptainer (and I haven't tested it in Apptainer).
+
+
+## What is Plotted?
+
+Data: displayed in black points with error bars
+
+MC: it can stack an arbitrary number of MC plots (I have tested with up to 5). The histograms are filled, and the fill colors can be adjusted.
+
+Signal: it can overlay an arbitrary number of signals (I have only tested 1). Each signal can be calculated as the weighted sum of an arbitrary number of sub-signals (I have tested up to 4).
+
+Other amenities:
+-Ratio plot on the bottom is the bin-wise data/MC ratio. By default, the y-axis of the ratio plot shows +/-50% around the central value (i.e. the number shown in "Scale"), unless 50% is overridden by a larger number.
+-"Scale" displays the integral of data / MC. The integral does not account for overflow and underflow bins
+-The curent assumption is to scale MC to 20% data.
+-Data and MC mean and 16% and 84% percentiles are shown.
+-The plots display overflow bins by default, unless this is turned off. All numerical quantities are calculated before overflow bins are moved.
+Most numerical values are adjustable.
+
+*Important: the file structurings must be identical across all ROOT files accessed, else the code will crash.
+
+
+## Config Overrides:
+
+There are a series of Boolean flags specified in configs.C. The recommended flags are true everywhere, except set scale_ratio to false. Under make_plot(), there are currently checks to ensure certain Boolean flags aren't set to unwanted values.
+
+The function init_configs() fills values into pre-declared variables (declarations are the first block of code under StackedPlotter()). init_configs is required for configs that differ between lep and bjet triggers. Fill the quantities in as maps.
+
+init_override_exact_keys() and init_override_keys() specify histogram-specific overrides. The default behavior is to plot MC and data with the full x-axis displayed, and y-axis set such that both plots can be seen in full. The override keys allow changing the x-axis limit, y-axis limit, making the ratio plot display a larger range, and setting a log-scale in y.
+
+
+## Other Script Controls
+
+The code reads a Cartesian grid of histogram names, through the line starting "const vector<string> yrs = {"2017", "2018"};" in StackedPlotter().
+
+Output location is currently specified by out_fn_tag, which is hard coded as a directory starting "./". This should be changed if you want another directory.
+
+The output format can be changed by changing the ".PNG" or ".PDF" in the filename.
+
+
+## Local Tests
+
+Under StackedPlotter(), the Boolean flag make_all_TH1 controls how hnames_by_histType is filled. hnames_by_histType is a map that stores the histograms to write. If make_all_TH1=true, it will make every histogram available. If false, it fills it in manually under the "else" block.
+
+get_all_hnames() optionally takes a vector match_keys. If provided, it only accepts a histogram name if any member of match_keys is a substring.
+
+
