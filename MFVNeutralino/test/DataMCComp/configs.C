@@ -5,7 +5,7 @@
 using namespace std;
 
 
-const string trig = "lep"; // "lep" or "bjet"
+const string trig = "bjet"; // "lep" or "bjet"
 
 // Flags
 const int perc_dat = 20; // Percent unblinded
@@ -70,13 +70,13 @@ void init_configs(
 
   const map<string, string> fn_root_configs = {
     {"lep",  "/uscms/home/yuqingwu/nobackup/crabdirs/26-07-15-Histos_tag002Lepm-pT4GeVCut-VtxEtaDz-2DPlots/"},
-    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/26-07-20-Histos_tag001BvetoLHTm-JoeyDir-SomeCorruptedOutputs/"}
+    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/Histos_tag004BvetoLHTm/"}
   };
   fn_root = get_config_value(fn_root_configs, trig, "fn_root_configs");
 
   const map<string, string> data_prefix_configs = {
     {"lep",  "Lepton_data_"},
-    {"bjet", "BJet_data_"}
+    {"bjet", "Bjet_data_"}
   };
   dat_prefix = fn_root + get_config_value(data_prefix_configs, trig, "data_prefix_configs");
 
@@ -93,7 +93,7 @@ void init_configs(
     }},
     {"bjet", {
       "ttbar_btagpresel",
-      "qcd_btagpresel"
+      "qcd_btagpresel",
     }}
   };
   samplenames = get_config_value(samplenames_configs, trig, "samplenames_configs");
@@ -106,13 +106,13 @@ void init_configs(
 
   const map<string, vector<EColor>> linecolors_configs = {
     {"lep",  {kRed, kGreen, kBlue, kYellow, kMagenta}},
-    {"bjet", {kRed, kGreen}}
+    {"bjet", {kGreen, kYellow}}
   };
   linecolors = get_config_value(linecolors_configs, trig, "linecolors_configs");
 
   const map<string, vector<int>> linecol_mods_configs = {
     {"lep",  {-6, -6, -3, -3, -5}},
-    {"bjet", {-6, -6}}
+    {"bjet", {-6, -3}}
   };
   linecol_mods = get_config_value(linecol_mods_configs, trig, "linecol_mods_configs");
 
@@ -154,7 +154,7 @@ void init_configs(
 
   const map<string, vector<string>> siglabels_configs = {
     {"lep",  {"VH, 55GeV, 10mm"}},
-    {"bjet", {"MFV-Neu Example"}}
+    {"bjet", {"MFV-Neu, 800GeV, 10mm"}}
   };
   siglabels = get_config_value(siglabels_configs, trig, "siglabels_configs");
 
@@ -170,7 +170,7 @@ void init_configs(
   };
   sigcol_mods = get_config_value(sigcol_mods_configs, trig, "sigcol_mods_configs");
 
-  out_fn_tag = "./" + trig_tag + "-OUT-PNG/";
+  out_fn_tag = "/uscms/home/yuqingwu/nobackup/DV-testing/26-08_BjetOverlay/" + trig_tag + "-OUT-PNG/";
 
   cout << "Loaded config:" << endl;
   cout << "  trig_tag = " << trig_tag << endl;
