@@ -390,7 +390,9 @@ struct MFVVertexAux {
   double track_eta_err(int i) const { return track_err(i, reco::TrackBase::i_lambda) * track_p(i) / track_pt(i); }
   double track_phi_err(int i) const { return track_err(i, reco::TrackBase::i_phi); }
   double track_dxy_err(int i) const { return track_err(i, reco::TrackBase::i_dxy); }
+  double track_dxy_rescale_err(int i) const { return track_rescale_dxyerr[i]; }
   double track_dxy_nsigma(int i) const { return fabs(track_dxy[i] / track_dxy_err(i)); }
+  double track_dxy_rescale_nsigma(int i) const { return fabs(track_dxy[i] / track_rescale_dxyerr[i]); }
   double track_dz_err(int i) const { return track_err(i, reco::TrackBase::i_dsz) * track_p(i) / track_pt(i); }
 
   double track_chi2dof(int i) const { return track_chi2[i] / track_ndof[i]; }
@@ -665,11 +667,27 @@ struct MFVVertexAux {
     return v;
   }
 
+  std::vector<float> track_dxy_rescale_errs() const {
+    std::vector<float> v;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (use_track(i))
+        v.push_back(track_dxy_rescale_err(i));
+    return v;
+  }
+
   std::vector<float> track_dxy_nsigmas() const {
     std::vector<float> v;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
       if (use_track(i))
         v.push_back(track_dxy_nsigma(i));
+    return v;
+  }
+
+  std::vector<float> track_dxy_rescale_nsigmas() const {
+    std::vector<float> v;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (use_track(i))
+        v.push_back(track_dxy_rescale_nsigma(i));
     return v;
   }
 
@@ -718,10 +736,10 @@ struct MFVVertexAux {
   float trackdxyavg() const { return _avg(track_dxy); }
   float trackdxyrms() const { return _rms(track_dxy); }
 
-  float trackdxynsigmamin() const { return _min(track_dxy_nsigmas()); }
-  float trackdxynsigmamax() const { return _max(track_dxy_nsigmas()); }
-  float trackdxynsigmaavg() const { return _avg(track_dxy_nsigmas()); }
-  float trackdxynsigmarms() const { return _rms(track_dxy_nsigmas()); }
+  float trackdxynsigmamin() const { return _min(track_dxy_rescale_nsigmas()); }
+  float trackdxynsigmamax() const { return _max(track_dxy_rescale_nsigmas()); }
+  float trackdxynsigmaavg() const { return _avg(track_dxy_rescale_nsigmas()); }
+  float trackdxynsigmarms() const { return _rms(track_dxy_rescale_nsigmas()); }
 
   float trackdzmin() const { return _min(track_dz); }
   float trackdzmax() const { return _max(track_dz); }
@@ -743,10 +761,10 @@ struct MFVVertexAux {
   float trackphierravg() const { return _avg(track_phi_errs()); }
   float trackphierrrms() const { return _rms(track_phi_errs()); }
 
-  float trackdxyerrmin() const { return _min(track_dxy_errs()); }
-  float trackdxyerrmax() const { return _max(track_dxy_errs()); }
-  float trackdxyerravg() const { return _avg(track_dxy_errs()); }
-  float trackdxyerrrms() const { return _rms(track_dxy_errs()); }
+  float trackdxyerrmin() const { return _min(track_dxy_rescale_errs()); }
+  float trackdxyerrmax() const { return _max(track_dxy_rescale_errs()); }
+  float trackdxyerravg() const { return _avg(track_dxy_rescale_errs()); }
+  float trackdxyerrrms() const { return _rms(track_dxy_rescale_errs()); }
 
   float trackdzerrmin() const { return _min(track_dz_errs()); }
   float trackdzerrmax() const { return _max(track_dz_errs()); }

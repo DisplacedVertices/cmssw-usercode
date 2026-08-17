@@ -233,15 +233,15 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
   hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
 
-  hs.add("trackdxynsigmamin", "SV min{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
-  hs.add("trackdxynsigmamax", "SV max{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
-  hs.add("trackdxynsigmaavg", "SV avg{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
-  hs.add("trackdxynsigmarms", "SV rms{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmamin", "SV min{rescaled N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmamax", "SV max{rescaled N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmaavg", "SV avg{rescaled N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmarms", "SV rms{rescaled N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
 
-  hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.004);
-  hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
-  hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
-  hs.add("trackdxyerrrms", "SV rms{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
+  hs.add("trackdxyerrmin", "SV min{rescaled #sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.004);
+  hs.add("trackdxyerrmax", "SV max{rescaled #sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
+  hs.add("trackdxyerravg", "SV avg{rescaled #sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
+  hs.add("trackdxyerrrms", "SV rms{rescaled #sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
 
   hs.add("trackdzerrmin", "SV min{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.01);
   hs.add("trackdzerrmax", "SV max{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
@@ -313,9 +313,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("track%i_pt_err",        i), TString::Format("track%i #sigma(p_{T})/p_{T}",         i), 200,  0,      2);
     hs.add(TString::Format("track%i_eta_err",       i), TString::Format("track%i #sigma(#eta)",                i), 200,  0,      0.02);
     hs.add(TString::Format("track%i_phi_err",       i), TString::Format("track%i #sigma(#phi)",                i), 200,  0,      0.02);
-    hs.add(TString::Format("track%i_dxy_err",       i), TString::Format("track%i #sigma(dxy) (cm)",            i), 100,  0,      0.1);
+    hs.add(TString::Format("track%i_dxy_err",       i), TString::Format("track%i rescaled #sigma(dxy) (cm)",   i), 100,  0,      0.1);
     hs.add(TString::Format("track%i_dz_err",        i), TString::Format("track%i #sigma(dz) (cm)",             i), 100,  0,      0.1);
-    hs.add(TString::Format("track%i_nsigmadxy",     i), TString::Format("track%i n#sigma(dxy)",                i), 400,  0,     40);
+    hs.add(TString::Format("track%i_nsigmadxy",     i), TString::Format("track%i rescaled n#sigma(dxy)",       i), 400,  0,     40);
     hs.add(TString::Format("track%i_chi2dof",       i), TString::Format("track%i #chi^{2}/dof",                i), 100,  0,     10);
     hs.add(TString::Format("track%i_npxhits",       i), TString::Format("track%i number of pixel hits",        i),  12,  0,     12);
     hs.add(TString::Format("track%i_nsthits",       i), TString::Format("track%i number of strip hits",        i),  28,  0,     28);
@@ -348,9 +348,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_pt_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_pt_err", exc), TString::Format(";%s SV tracks #sigma(p_{T})/p_{T};arb. units", exc), 200, 0, 2);
     h_sv_track_eta_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_eta_err", exc), TString::Format(";%s SV tracks #sigma(#eta);arb. units", exc), 200, 0, 0.02);
     h_sv_track_phi_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_phi_err", exc), TString::Format(";%s SV tracks #sigma(#phi);arb. units", exc), 200, 0, 0.02);
-    h_sv_track_dxy_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_dxy_err", exc), TString::Format(";%s SV tracks #sigma(dxy) (cm);arb. units", exc), 100, 0, 0.1);
+    h_sv_track_dxy_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_dxy_err", exc), TString::Format(";%s SV tracks rescaled #sigma(dxy) (cm);arb. units", exc), 100, 0, 0.1);
     h_sv_track_dz_err[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_dz_err", exc), TString::Format(";%s SV tracks #sigma(dz) (cm);arb. units", exc), 100, 0, 0.1);
-    h_sv_track_nsigmadxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nsigmadxy", exc), TString::Format(";%s SV tracks n#sigma(dxy);arb. units", exc), 400, 0, 40);
+    h_sv_track_nsigmadxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nsigmadxy", exc), TString::Format(";%s SV tracks rescaled n#sigma(dxy);arb. units", exc), 400, 0, 40);
     h_sv_track_chi2dof[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_chi2dof", exc), TString::Format(";%s SV tracks #chi^{2}/dof;arb. units", exc), 100, 0, 10);
     h_sv_track_npxhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_npxhits", exc), TString::Format(";%s SV tracks number of pixel hits;arb. units", exc), 12, 0, 12);
     h_sv_track_nsthits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nsthits", exc), TString::Format(";%s SV tracks number of strip hits;arb. units", exc), 28, 0, 28);
@@ -741,9 +741,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill(h_sv_track_pt_err, isv, aux.track_pt_err[i], w);
       fill(h_sv_track_eta_err, isv, aux.track_eta_err(i), w);
       fill(h_sv_track_phi_err, isv, aux.track_phi_err(i), w);
-      fill(h_sv_track_dxy_err, isv, aux.track_dxy_err(i), w);
+      fill(h_sv_track_dxy_err, isv, aux.track_dxy_rescale_err(i), w);
       fill(h_sv_track_dz_err, isv, aux.track_dz_err(i), w);
-      fill(h_sv_track_nsigmadxy, isv, aux.track_dxy[i] / aux.track_dxy_err(i), w);
+      fill(h_sv_track_nsigmadxy, isv, aux.track_dxy_rescale_nsigma(i), w);
       fill(h_sv_track_chi2dof, isv, aux.track_chi2dof(i), w);
       fill(h_sv_track_npxhits, isv, aux.track_npxhits(i), w);
       fill(h_sv_track_nsthits, isv, aux.track_nsthits(i), w);
@@ -772,9 +772,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           v[TString::Format("track%i_pt_err",        i).Data()] = aux.track_pt_err[itk_pt[i].first];
           v[TString::Format("track%i_eta_err",       i).Data()] = aux.track_eta_err(itk_pt[i].first);
           v[TString::Format("track%i_phi_err",       i).Data()] = aux.track_phi_err(itk_pt[i].first);
-          v[TString::Format("track%i_dxy_err",       i).Data()] = aux.track_dxy_err(itk_pt[i].first);
+          v[TString::Format("track%i_dxy_err",       i).Data()] = aux.track_dxy_rescale_err(itk_pt[i].first);
           v[TString::Format("track%i_dz_err",        i).Data()] = aux.track_dz_err(itk_pt[i].first);
-          v[TString::Format("track%i_nsigmadxy",     i).Data()] = aux.track_dxy[itk_pt[i].first] / aux.track_dxy_err(itk_pt[i].first);
+          v[TString::Format("track%i_nsigmadxy",     i).Data()] = aux.track_dxy_rescale_nsigma(itk_pt[i].first);
           v[TString::Format("track%i_chi2dof",       i).Data()] = aux.track_chi2dof(itk_pt[i].first);
           v[TString::Format("track%i_npxhits",       i).Data()] = aux.track_npxhits(itk_pt[i].first);
           v[TString::Format("track%i_nsthits",       i).Data()] = aux.track_nsthits(itk_pt[i].first);
