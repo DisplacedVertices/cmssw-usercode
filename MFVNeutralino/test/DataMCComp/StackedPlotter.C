@@ -474,10 +474,10 @@ int StackedPlotter() {
     signames, sigxsecs, sigBRs, siglabels, sigcolors, sigcol_mods
   );
 
-  const vector<string> yrs = {"2017", "2018"};
+  const vector<string> yrs = {"2016", "2017", "2018"};
   const vector<string> ntrks = {"3"};
   const vector<string> histTypes = {"EventHistos", "VertexHistos"};
-  const vector<string> variants = {"PreSel", "OnlyOneVtx"};//, "FullSel"};
+  const vector<string> variants = {"PreSel", "OnlyOneVtx", "FullSel"};
 
   const bool make_all_TH1 = true; // If true, it makes all available TH1 objects
 
