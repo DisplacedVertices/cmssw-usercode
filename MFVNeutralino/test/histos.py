@@ -5,8 +5,7 @@ study_20pc = True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
-#input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
-input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ntuple_tag003BvetoLHTm_2017/260724_000200/0000/ntuple_30.root')
+input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
