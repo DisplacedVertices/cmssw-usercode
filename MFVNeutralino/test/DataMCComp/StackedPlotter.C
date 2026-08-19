@@ -56,13 +56,15 @@ int make_plot(
   TLatex* perc_tl = new TLatex(); // For data percent
   TLatex* sig_tl = new TLatex(); // Signal scaling
   TLatex* brl_tl = new TLatex(); // Branch label (ex. 2017 PreSel)
+  TLatex* mn_dat_tl = new TLatex(); // Data mean/std
+  TLatex* mn_mc_tl = new TLatex(); // MC mean/std
   TLatex* rat_tl = new TLatex(); // Ratio label
-  vector<TLatex*> tls = {tl, perc_tl, sig_tl, brl_tl, rat_tl};
+  vector<TLatex*> tls = {tl, perc_tl, sig_tl, brl_tl, rat_tl, mn_dat_tl, mn_mc_tl};
   int ntl = tls.size(); // Number TLatex() objects
   
   // Make names
   const string hloc = "Ntk" + ntrk + "mfv" + fkey + "/" + hname;
-  //if (debug) {cout << hloc << endl;};
+  if (debug) {cout << hloc << endl;};
 
 
   // Search overrides
@@ -250,6 +252,14 @@ int make_plot(
     format_tlx(tlx);
   };
   rat_tl->SetTextSize(rat_tl->GetTextSize()*3); // Ratio text needs to be blown up
+  if (mn_dat_tl) {
+    string mn_dat_txt = "Dat: " + format_mean_std(mn_val_dat, h_dat->GetStdDev());
+    mn_dat_tl->DrawLatex(0.40, 0.85, mn_dat_txt.c_str());
+  }
+  if (mn_mc_tl) {
+    string mn_mc_txt = "MC: " + format_mean_std(mn_val_mc, h_mc_stat->GetStdDev());
+    mn_mc_tl->DrawLatex(0.40, 0.80, mn_mc_txt.c_str());
+  }
   if (tl) {
     if (scale) {
       tl->DrawLatex(0.66, 0.58, Form("Scale: %.3f", scale_factor));
@@ -488,8 +498,10 @@ int StackedPlotter() {
     get_all_hnames(hnames_by_histType, histTypes, yrs[0], ntrks[0], variants[0], dat_prefix, dat_suffix);
   } else {
     hnames_by_histType["EventHistos"] = {
-      "h_jet_pt_0", "h_jet_phi_0",
-      "h_nbtags_2", "h_nbtags_2", "h_vertex_seed_track_dxy"
+      "h_vertex_seed_track_pt", "h_vertex_seed_track_eta",
+      "h_vertex_seed_track_err_dxy",
+      //"h_jet_pt_0", "h_jet_phi_0",
+      //"h_nbtags_2", "h_nbtags_2", "h_vertex_seed_track_dxy"
     };
     hnames_by_histType["VertexHistos"] = {
       "h_sv_all_track_nsigmadxy",
