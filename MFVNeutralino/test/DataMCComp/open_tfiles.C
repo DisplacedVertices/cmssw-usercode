@@ -19,15 +19,15 @@ void open_mc_dat_tfiles(TFile*& f_dat, vector<TFile*>& tfiles, const string& yr,
   for (int i=0; i<nbkg; i++) {
     fn_mc[i] = mc_prefix + samplenames[i] + "_" + yr + mc_suffix;
   }
-  if (debug) {cout << fn_dat << endl;};
-
   
   // Data
   f_dat = TFile::Open(fn_dat.c_str(), "READ");
+  if (debug) {cout << fn_dat << endl;};
 
   // MC
   for (int i=0; i<nbkg; i++) {
     tfiles[i] = TFile::Open(fn_mc[i].c_str(), "READ");
+    if (debug) {cout << fn_mc[i] << endl;};
   }
 
 
