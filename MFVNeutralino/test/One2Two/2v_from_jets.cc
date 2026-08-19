@@ -53,7 +53,44 @@ EOF
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h" //Alec added
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h" //Alec added from here
+#include "TH2.h"
+#include "TMath.h"
+#include <math.h>
+#include "JMTucker/MFVNeutralino/interface/NtupleFiller.h" //fails without lboost added to the Makefile
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalTrajectoryExtrapolatorToLine.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/TrackBase.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h" //fails without lboost added to the Makefile
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
+#include "JMTucker/MFVNeutralino/interface/VertexerParams.h"
+#include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include <TRandom3.h> //Alec added to here
 
 int dvv_nbins = 100;
 double dvv_bin_width = 0.01;
@@ -61,6 +98,8 @@ std::vector<TString> cb_cbbar_vector = {};
 const std::string ulversion = "ULV30Lepm"; //Use for Lepton triggered samples
 //const std::string ulversion = "ULV30BvetoLHTm"; //Use for bjet triggered samples
 bool use_signal = false;
+bool use_dvv3D = true;
+bool c1v_vertexer = true;
 
 struct ConstructDvvcParameters {
   int ibkg_begin_;
@@ -1154,7 +1193,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   }
   //TString eff_file_name_2d = TString::Format("/afs/cern.ch/user/p/pekotamn/crabdirs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
   //TString eff_file_name_2d = TString::Format("/uscms/home/alecduqu/mfv_ScaleFactors/src/JMTucker/MFVNeutralino/test/One2Two/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
-  TString eff_file_name_2d = TString::Format("./vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  TString eff_file_name_2d = TString::Format("./vpeffsd2d%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  TString eff_file_name_3d = TString::Format("./vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
   TString jet_angle_fname = TString::Format("background_lw_2017.root"); //This is not ultimately used anywhere
 
   const char* eff_hist = "maxtk3";
@@ -1176,8 +1216,10 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1D* h_1v_dbv_npugt40 = new TH1D("h_1v_dbv_npugt40", "only-one-vertex events;d_{BV} (cm);events", 200, 0, 2.0);
   TH1D* h_1v_bs2derr = new TH1D("h_1v_bs2derr", "#sigma(dist2d(SV, beamspot)) (cm)", 100, 0, 0.005); //Alec added
   TH1D* h_1v_rescale_bs2derr = new TH1D("h_1v_rescale_bs2derr", "rescaled #sigma(dist2d(SV, beamspot)) (cm)", 100, 0, 0.005); //Alec added
-  TH1D* h_1v_w = new TH1D("h_w", ";event weight;events", 100, 0, 10); //Alec added
+  TH1D* h_1v_w = new TH1D("h_1v__w", ";event weight;events", 100, 0, 10); //Alec added
   TH2D* h_1v_xy  = new TH2D("h_1v_xy", "only-one-vertex events;x0 (cm);y0 (cm)", 250, -1.0, 1.0, 250, -1.0, 1.0);
+  TH1D* h_1v_z = new TH1D("h_1v_z", ";z (cm);events", 250, -1, 1); //Alec added
+  TH1D* h_1v_dz = new TH1D("h_1v_dz", ";z distance from pv to sv (cm);events", 250, -1, 1); //Alec added
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1000, 0, 2.0);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1000, 0, 2.0);
   TH2D* h_1v_dbv_dz = new TH2D("h_1v_dbv_dz", "only-one-vertex events;d_{BV} (cm); d_{z} (cm)", 1000, 0, 2.0, 1000, 0, 2.0);
@@ -1196,21 +1238,23 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_2v_dvv3D = new TH1F("h_2v_dvv3D", "two-vertex events;3D d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 200, 0., 4.0); //was 100, 0, 4.0
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
   //checkpoint
   std::vector<double>  dbv_value_vector; //background template construction npu correction: define vectors for making a list of dbv values and errors
-  std::vector<double>  dbv_value_vector_npult20;
-  std::vector<double>  dbv_value_vector_npugt20lt30;
-  std::vector<double>  dbv_value_vector_npugt30lt40;
-  std::vector<double>  dbv_value_vector_npugt40;
+  std::vector<double>  z_value_vector;
+  //std::vector<double>  dbv_value_vector_npult20;
+  //std::vector<double>  dbv_value_vector_npugt20lt30;
+  //std::vector<double>  dbv_value_vector_npugt30lt40;
+  //std::vector<double>  dbv_value_vector_npugt40;
   std::vector<double>  dbv_weight_vector;
-  std::vector<double>  dbv_weight_vector_npult20;
-  std::vector<double>  dbv_weight_vector_npugt20lt30;
-  std::vector<double>  dbv_weight_vector_npugt30lt40;
-  std::vector<double>  dbv_weight_vector_npugt40;
+  //std::vector<double>  dbv_weight_vector_npult20;
+  //std::vector<double>  dbv_weight_vector_npugt20lt30;
+  //std::vector<double>  dbv_weight_vector_npugt30lt40;
+  //std::vector<double>  dbv_weight_vector_npugt40;
   std::vector<int>  dbv_npubinid_vector;
 
   std::vector<double>  dbv_value_vector_btag_npult20;
@@ -1221,6 +1265,15 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   std::vector<double>  dbv_value_vector_nobtag_npugt20lt30;
   std::vector<double>  dbv_value_vector_nobtag_npugt30lt40;
   std::vector<double>  dbv_value_vector_nobtag_npugt40;
+
+  std::vector<double>  z_value_vector_btag_npult20;
+  std::vector<double>  z_value_vector_btag_npugt20lt30;
+  std::vector<double>  z_value_vector_btag_npugt30lt40;
+  std::vector<double>  z_value_vector_btag_npugt40;
+  std::vector<double>  z_value_vector_nobtag_npult20;
+  std::vector<double>  z_value_vector_nobtag_npugt20lt30;
+  std::vector<double>  z_value_vector_nobtag_npugt30lt40;
+  std::vector<double>  z_value_vector_nobtag_npugt40;
 
   std::vector<double>  dbv_weight_vector_btag_npult20;
   std::vector<double>  dbv_weight_vector_btag_npugt20lt30;
@@ -1285,7 +1338,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       //if (nt.rescale_bs2derr0 > 0.0035) continue; //Alec added, bs2derr cut normally .005cm in MFVNeutralino/python/VertexSelector_cfi.py, but we can further constrain here
       //if (nt.rescale_bs2derr1 > 0.0035) continue; //Alec added
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
-      if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value,-1) < 1)) continue;
+      //if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value,-1) < 1)) continue; //nbtags calls CSV we want DeepJet, see MiniNtuple.h
+      if ((p.btags() == 0 && nt.nbtags_old(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags_old(bdisc_cut_value,-1) < 1)) continue; //nbtags_old correctly calls DeepJet
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
       //std::cout << "established cuts" << std::endl;
       const float w = weights[i] * nt.weight; //THIS IS WHERE THE WEIGHTS ARE APPLIED
@@ -1293,32 +1347,47 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
       double v0_track_sumpt = 0; //start of sumpt & m5 variables for cuts
       double v1_track_sumpt = 0;
-      double v0_track_sump = 0;
+      //double v0_track_sump = 0;
+      double v0_track_sumpx = 0;
+      double v0_track_sumpy = 0;
+      double v0_track_sumpz = 0;
       double v0_track_sumE = 0;
       double v0_track_m5 = 0;
-      double v1_track_sump = 0;
+      //double v1_track_sump = 0;
+      double v1_track_sumpx = 0;
+      double v1_track_sumpy = 0;
+      double v1_track_sumpz = 0;
       double v1_track_sumE = 0;
       double v1_track_m5 = 0; //end of sumpt & m5 variable for cuts
       if (nt.nvtx == 1) {
 	//std::cout << "1-vertex event" << std::endl;
 	//start of sumpt & m5 cut
+	
 	for (int k = 0; k < nt.ntk0; ++k) {
 	  //std::cout << "beginning of loop for sumpt & m5 cut, " << nt.tk0_px[1] << std::endl;
-	  v0_track_sumpt += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k)); //PROBLEM!!!!
+	  v0_track_sumpt += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k));
 	  //std::cout << "added track pt to sumpt" << std::endl;
-	  v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
-	  v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.1396*0.1396); //0.1396 is pi+- mass
+	  //v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
+	  v0_track_sumpx += nt.p_tk0_px->at(k);
+	  v0_track_sumpy += nt.p_tk0_py->at(k);
+	  v0_track_sumpz += nt.p_tk0_pz->at(k);
+	  v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.13957*0.13957); //0.13957 is pi+- mass
+	  if (c1v_vertexer) {
+	    //FINISH HERE FOR THE VERTEXER ON CONSTRUCTED C1V EVENTS!!!!!!!!!
+	  }
 	}
 	//std::cout << "finished sumpt and m5 loop" << std::endl;
-	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sump*v0_track_sump);
+	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sumpx*v0_track_sumpx - v0_track_sumpy*v0_track_sumpy - v0_track_sumpz*v0_track_sumpz);
 	if (v0_track_sumpt < 10) continue;
 	if (v0_track_m5 < 5.5) continue; //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	
 	//std::cout << "finished sumpt and m5 cut" << std::endl;
         float temp_dbv      = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         //float temp_dbv      = sqrt((nt.x0-nt.bsx)*(nt.x0-nt.bsx) + (nt.y0-nt.bsy)*(nt.y0-nt.bsy));
         float temp_dbv_pv   = sqrt((nt.x0-nt.pvx)*(nt.x0-nt.pvx) + (nt.y0-nt.pvy)*(nt.y0-nt.pvy));
 
 	dbv_value_vector.push_back(temp_dbv);
+	z_value_vector.push_back(nt.z0-nt.pvz);
 	dbv_weight_vector.push_back(w);
 
 	/*if (temp_dbv > 0.6 and tree_path == "mfvMiniTree/t") {
@@ -1328,7 +1397,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	//std::cout << "starting npu and btag binning" << std::endl;
         h_1v_dbv->Fill(temp_dbv, w);
 	//background template construction npu correction: assign dbv values to bins in npu for dbv pairing later
-	if (nt.npu <= 20) {
+	/*if (nt.npu <= 20) {
 	  h_1v_dbv_npult20->Fill(temp_dbv, w);
 	  dbv_value_vector_npult20.push_back(temp_dbv);
 	  dbv_weight_vector_npult20.push_back(w);
@@ -1351,48 +1420,56 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	  dbv_value_vector_npugt40.push_back(temp_dbv);
           dbv_weight_vector_npugt40.push_back(w);
 	  //dbv_npubinid_vector.push_back(4);
-        }
+        }*/
 	//background template construction npu correction: assign dbv values to bins in npu now also for with btagging
 	//if (j<10) {
 	//  std::cout << "npu: " << nt.npu << ", p.btags: " << p.btags() << std::endl;
 	//}
-	if (nt.npu <= 20 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+	if (nt.npu <= 20 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) { //originally used nt.nbtags but this calls CSV, we want DeepJet which is called by nt.nbtags_old
           dbv_value_vector_btag_npult20.push_back(temp_dbv);
+	  z_value_vector_btag_npult20.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npult20.push_back(w);
           dbv_npubinid_vector.push_back(1);
         }
-        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt20lt30.push_back(temp_dbv);
+	  z_value_vector_btag_npugt20lt30.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt20lt30.push_back(w);
           dbv_npubinid_vector.push_back(2);
         }
-        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt30lt40.push_back(temp_dbv);
+	  z_value_vector_btag_npugt30lt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt30lt40.push_back(w);
           dbv_npubinid_vector.push_back(3);
         }
-        else if (nt.npu > 40 and nt.nbtags(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npu > 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt40.push_back(temp_dbv);
+	  z_value_vector_btag_npugt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt40.push_back(w);
           dbv_npubinid_vector.push_back(4);
         }
-	else if (nt.npu <= 20 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+	else if (nt.npu <= 20 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npult20.push_back(temp_dbv);
+	  z_value_vector_nobtag_npult20.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npult20.push_back(w);
           dbv_npubinid_vector.push_back(5);
         }
-        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt20lt30.push_back(temp_dbv);
+	  z_value_vector_nobtag_npugt20lt30.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt20lt30.push_back(w);
           dbv_npubinid_vector.push_back(6);
         }
-        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt30lt40.push_back(temp_dbv);
+	  z_value_vector_nobtag_npugt30lt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt30lt40.push_back(w);
           dbv_npubinid_vector.push_back(7);
         }
-        else if (nt.npu > 40 and nt.nbtags(bdisc_cut_value,-1) < 1) {
+        else if (nt.npu > 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt40.push_back(temp_dbv);
+	  z_value_vector_nobtag_npugt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt40.push_back(w);
           dbv_npubinid_vector.push_back(8);
         }
@@ -1400,6 +1477,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	h_1v_bs2derr->Fill(nt.bs2derr0, w);
 	h_1v_rescale_bs2derr->Fill(nt.rescale_bs2derr0, w);
 	h_1v_w->Fill(nt.weight);
+	h_1v_z->Fill(nt.z0, w);
+	h_1v_dz->Fill(nt.z0 - nt.pvz, w);
         h_1v_xy->Fill(nt.x0, nt.y0, w);
 	h_1v_dbv_bs2derr->Fill(temp_dbv, nt.bs2derr0, w);
 
@@ -1442,20 +1521,28 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       if (nt.nvtx >= 2 && nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0 && nt.ntk1 >= min_ntracks1 && nt.ntk1 <= max_ntracks1) {
 	//std::cout << "2-vertex event" << std::endl;
 	//start of sumpt & m5 cut
+	
         for (int k = 0; k < nt.ntk0; ++k) {
           v0_track_sumpt += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k));
-	  v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
+	  //v0_track_sump += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k));
+	  v0_track_sumpx += nt.p_tk0_px->at(k);
+          v0_track_sumpy += nt.p_tk0_py->at(k);
+          v0_track_sumpz += nt.p_tk0_pz->at(k);
           v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.1396*0.1396);
         }
 	for (int l = 0; l < nt.ntk1; ++l) {
           v1_track_sumpt += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l));
-	  v1_track_sump += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l) + nt.p_tk1_pz->at(l)*nt.p_tk1_pz->at(l));
+	  //v1_track_sump += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l) + nt.p_tk1_pz->at(l)*nt.p_tk1_pz->at(l));
+	  v1_track_sumpx += nt.p_tk1_px->at(l);
+          v1_track_sumpy += nt.p_tk1_py->at(l);
+          v1_track_sumpz += nt.p_tk1_pz->at(l);
           v1_track_sumE += sqrt(nt.p_tk1_px->at(l)*nt.p_tk1_px->at(l) + nt.p_tk1_py->at(l)*nt.p_tk1_py->at(l) + nt.p_tk1_pz->at(l)*nt.p_tk1_pz->at(l) + 0.1396*0.1396);
         }
-	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sump*v0_track_sump);
-	v1_track_m5 = sqrt(v1_track_sumE*v1_track_sumE - v1_track_sump*v1_track_sump);
+	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sumpx*v0_track_sumpx - v0_track_sumpy*v0_track_sumpy - v0_track_sumpz*v0_track_sumpz);
+	v1_track_m5 = sqrt(v1_track_sumE*v1_track_sumE - v1_track_sumpx*v1_track_sumpx - v1_track_sumpy*v1_track_sumpy - v1_track_sumpz*v1_track_sumpz);
         if (v0_track_sumpt < 10 || v1_track_sumpt < 10) continue;
 	if (v0_track_m5 < 5.5 || v1_track_m5 < 5.5) continue;  //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	
         double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
@@ -1464,6 +1551,10 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
         if (dvv > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_2v_dvv->Fill(dvv, w);
+	double dvv3D = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1) + (nt.z0-nt.z1)*(nt.z0-nt.z1)); //Alec added
+	if (dvv3D > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv3D = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width; //Alec added
+	h_2v_dvv3D->Fill(dvv3D, w); //Alec added
+	
         h_2v_sumdbv->Fill(dbv0+dbv1, w);
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_dphivv->Fill(dphi, w);
@@ -1521,6 +1612,14 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   }
 
   //TFile* jet_angle_file = TFile::Open(jet_angle_fname); //This is not used in this file
+
+  TH1F* h_eff_3d = 0; //background template construction: create vertexing efficiency histogram from the vpeffs files based on number max number of tracks
+  if (p.clearing_from_eff()) {
+    TFile* eff_file = TFile::Open(eff_file_name_3d);
+    if (!eff_file || !eff_file->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
+    h_eff_3d = (TH1F*)eff_file->Get(eff_hist);
+    h_eff_3d->SetBinContent(h_eff_3d->GetNbinsX()+1, h_eff_3d->GetBinContent(h_eff_3d->GetNbinsX()));
+  }
 
   TH1F* h_eff_2d = 0; //background template construction: create vertexing efficiency histogram from the vpeffs files based on number max number of tracks 
   if (p.clearing_from_eff()) {
@@ -1586,6 +1685,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   std::cout << "Start looping through samples" << std::endl;
   //std::vector<std::string>  dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
   std::vector<std::vector<int>> dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
+  //double sumdbv_test = 0;
   for (int ij = 0; ij < nsamples; ++ij) {
     if (ij == 500000) {std::cout << "made it to 500,000th sample" << std::endl;}
     if (ij == 1000000) {std::cout << "made it to 1,000,000th sample" << std::endl;}
@@ -1608,12 +1708,14 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     int randomIndex0 = dist(gen);
     //int randomIndex1 = dist(gen);
     double dbv0_entry = dbv_value_vector[ij];
+    double z0_entry = z_value_vector[ij];
     //double dbv1_entry = dbv_value_vector[randomIndex1];
     double dbv0_weight_entry = dbv_weight_vector[ij];
     //double dbv1_weight_entry = dbv_weight_vector[randomIndex1];
 
     //pileup study
     double dbv1_entry;
+    double z1_entry;
     double dbv1_weight_entry;
     //std::cout << "Start of dbv1 assignment if statements." << std::endl;
     //std::cout << "npuid: " << dbv_npubinid_vector[ij] << std::endl;
@@ -1621,59 +1723,73 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       int randomIndex1 = dist1(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npult20[randomIndex1];
+      z1_entry = z_value_vector_btag_npult20[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npult20[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 2) {
       int randomIndex1 = dist2(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt20lt30[randomIndex1];
+      z1_entry = z_value_vector_btag_npugt20lt30[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt20lt30[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 3) {
       int randomIndex1 = dist3(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt30lt40[randomIndex1];
+      z1_entry = z_value_vector_btag_npugt30lt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt30lt40[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 4) {
       int randomIndex1 = dist4(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt40[randomIndex1];
+      z1_entry = z_value_vector_btag_npugt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt40[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 5) {
       int randomIndex1 = dist5(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npult20[randomIndex1];
+      z1_entry = z_value_vector_nobtag_npult20[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npult20[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 6) {
       int randomIndex1 = dist6(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt20lt30[randomIndex1];
+      z1_entry = z_value_vector_nobtag_npugt20lt30[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt20lt30[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 7) {
       int randomIndex1 = dist7(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt30lt40[randomIndex1];
+      z1_entry = z_value_vector_nobtag_npugt30lt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt30lt40[randomIndex1];
     }
     else if (dbv_npubinid_vector[ij] == 8) {
       int randomIndex1 = dist8(gen);
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt40[randomIndex1];
+      z1_entry = z_value_vector_nobtag_npugt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt40[randomIndex1];
     }
-    //std::cout << ", dbv1_entry: " << dbv1_entry << ", dbv1_weight_entry: " << dbv1_weight_entry << std::endl;
-    //if (ij < 10) {
-    //  std::cout << "pair of dbv values: " << dbv0_entry << " and " << dbv1_entry <<std::endl;
-    //}
 
     double sumdbv_entry = dbv0_entry + dbv1_entry;
     double sumdbv_bin = h_c1v_sumdbv_w_errorbars->FindBin(sumdbv_entry);
     //double sumdbv_w_entry = sqrt(dbv0_weight_entry*dbv0_weight_entry + dbv1_weight_entry*dbv1_weight_entry); //we think this was wrong
     double sumdbv_w_entry = dbv0_weight_entry*dbv1_weight_entry;
+
+    //std::cout << ", dbv1_entry: " << dbv1_entry << ", dbv1_weight_entry: " << dbv1_weight_entry << std::endl;
+    /*if (ij < 10) {
+      std::cout << "pair of dbv values: " << dbv0_entry << " and " << dbv1_entry << " sum to: " << sumdbv_entry <<std::endl;
+      sumdbv_test += sumdbv_entry;
+    }
+    if (ij == 10) {
+      std::cout << "sumdbv_test value: " << sumdbv_test/10 << std::endl;
+      std::cout << "Should be about 0.1252 for default" << std::endl;
+    }*/
 
     //systematic sampling of each dbv entry with all others
     /*double dbv0_entry = dbv_value_vector[ij];
@@ -1689,6 +1805,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     double dphi   = f_dphi->GetRandom(); //background template construction: get random angle (dphi) between the random dbv pair, always 1/pi (set above)
 
     double dvv_entry = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi));
+    double dvv3D_entry = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi) + (z0_entry - z1_entry)*(z0_entry - z1_entry));
     double dvvc   = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi)); //background template construction: compute 2D distance between 2 random dbv pair vertices with dphi angular separation (1/pi)
     double sumdbv = dbv0 + dbv1; //background template construction: sum random dbv pair to find sumdbv
 
@@ -1716,16 +1833,28 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       prob *= p.extra_eff_2d(dvvc);
     }
     double prob_sumdbv_w_errorbars  = 1; //background template construction:
-    if (p.clearing_from_eff()) {
+    if (p.clearing_from_eff() and use_dvv3D) {
+      prob_sumdbv_w_errorbars = h_eff_3d->GetBinContent(h_eff_3d->FindBin(dvv3D_entry));
+      //prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
+    }
+    else if (p.clearing_from_eff()) {
       prob_sumdbv_w_errorbars = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvv_entry));
-      prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
+      //prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
+    }
+
+    double btag_weight = 1; //REMEMBER TO FINISH/ADJUST THIS!!!!!!!!!
+    if (dbv_npubinid_vector[ij] < 5) {
+      btag_weight = 99/80;
+    }
+    else {
+      btag_weight = 1/20;
     }
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
     h_c1v_dvv->Fill(dvv_entry, prob);  //errors not propagated properly just for dvv here
     h_c1v_sumdbv->Fill(sumdbv_entry, prob); //background template construction: fill histogram with constructed value and weight
     //h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, sqrt(prob_sumdbv_w_errorbars*prob_sumdbv_w_errorbars + sumdbv_w_entry*sumdbv_w_entry));
-    h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*sumdbv_w_entry);
+    h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, btag_weight*prob_sumdbv_w_errorbars*sumdbv_w_entry);
     //random sampling for sumdbv background template
     /*if (std::find(dbv_check_vector[sumdbv_bin].begin(), dbv_check_vector[sumdbv_bin].end(), randomIndex0) != dbv_check_vector[sumdbv_bin].end()) {
       h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*pow(2*h_c1v_sumdbv_w_errorbars->GetBinError(sumdbv_bin)*sumdbv_w_entry+pow(sumdbv_w_entry,2),0.5));
@@ -1791,6 +1920,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_1v_bs2derr->Write(); //Alec added
   h_1v_rescale_bs2derr->Write(); //Alec added
   h_1v_w->Write(); //Alec added
+  h_1v_z->Write();
+  h_1v_dz->Write();
   h_1v_xy->Write();
   h_1v_dbv0->Write();
   h_1v_dbv1->Write();
@@ -1808,6 +1939,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_2v_dbv->Write();
   h_2v_dbv1_dbv0->Write();
   h_2v_dvv->Write();
+  h_2v_dvv3D->Write(); //Alec added
   h_2v_sumdbv->Write();
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
@@ -1932,6 +2064,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_1v_bs2derr; //Alec added
   delete h_1v_rescale_bs2derr; //Alec added
   delete h_1v_w; //Alec added
+  delete h_1v_z;
+  delete h_1v_dz;
   delete h_1v_xy;
   delete h_1v_dbv0;
   delete h_1v_dbv1;
@@ -1949,6 +2083,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_2v_dbv;
   delete h_2v_dbv1_dbv0;
   delete h_2v_dvv;
+  delete h_2v_dvv3D; //Alec added
   delete h_2v_sumdbv;
   delete h_2v_dphivv;
   delete h_2v_absdphivv;
