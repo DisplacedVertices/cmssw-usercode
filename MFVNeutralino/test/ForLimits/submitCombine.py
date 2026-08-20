@@ -24,7 +24,7 @@ Prerequisites
 
 Usage
   python submitCombine.py --tag 4bin --out-dir DIR --method asymptotic   # all signals
-  python submitCombine.py --tag 4bin --out-dir DIR --subset VH,mfv_neu   # selected processes
+  python submitCombine.py --tag 4bin --out-dir DIR --subset VHToSSTodddd,mfv_neu   # selected processes
   python submitCombine.py --tag 4bin --out-dir DIR --dry-run             # list, don't submit
   python submitCombine.py --tag 4bin --out-dir DIR --skip-existing       # skip completed
   Run asymptotic before hybridnew, it uses the asymptotic result to set rMax.
@@ -203,7 +203,7 @@ def find_hypotheses():
         prefix = "Datacard_%s_" % ch
         for fn in sorted(glob.glob(os.path.join(ch_dir, prefix + "*.txt"))):
             bn   = os.path.basename(fn).replace(".txt", "")
-            rest = bn[len(prefix):]          # "VH_tau1mm_M15_2018"
+            rest = bn[len(prefix):]          # "VHToSSTodddd_tau1mm_M15_2018"
             parts = rest.rsplit("_", 1)
             if len(parts) != 2:
                 continue
@@ -298,7 +298,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--subset",  default=None,
-                    help="Comma-separated process names to include, e.g. VH,mfv_neu")
+                    help="Comma-separated process names to include, e.g. VHToSSTodddd,mfv_neu")
     ap.add_argument("--dry-run", action="store_true",
                     help="Write job files but do not call condor_submit")
     ap.add_argument("--skip-existing", action="store_true",

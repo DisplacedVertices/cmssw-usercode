@@ -33,9 +33,9 @@ signal:
 # point --bkg-template-dir at your own templates.
 background:
   lep:
-    filename: "2v_from_jets_run2_5track_default_ULV30Lepm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30Lepm.root"
   bjet:
-    filename: "2v_from_jets_run2_5track_default_ULV30BvetoLHTm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30BvetoLHTm.root"
 
 # ---- Output paths -------------------------------------------
 # root_output: the intermediate ROOT file holding histograms
@@ -54,11 +54,6 @@ datacard_output:
 nuisance_tables:
   vtx_reco_TM:    "NuisTabStore_TrkMvr/pickle"
   disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
-  tk_reco_eff:
-    base: "NuisTabStore_TrkRec/"
-    ct_prefix: "ct_pickle"
-    up_prefix: "up_pickle"
-    dn_prefix: "dn_pickle"
   fac_scale_VH_csv: "TheoryTables/fac_scale_shape_bins.csv"
 
 # ---- Observed events (set to 0 for blind analysis) -----------

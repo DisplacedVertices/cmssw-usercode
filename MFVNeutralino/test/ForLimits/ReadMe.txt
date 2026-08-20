@@ -84,8 +84,8 @@ wrote the cards into this ForLimits directory.
 Useful flags:
   --dry-run          write job files but don't submit
   --skip-existing    skip hypotheses that already have output
-  --subset VH,mfv_neu   only submit these processes
-  --sig-id VH_tau1mm_M15   only submit this one hypothesis
+  --subset VHToSSTodddd,mfv_neu   only submit these processes
+  --sig-id VHToSSTodddd_tau1mm_M15   only submit this one hypothesis
   --limit 5          cap at N jobs (good for testing)
 
 The --tag 4bin flag routes everything through Datacards_4bin/, CombineOutput_4bin/, CombineCondor_4bin/.
@@ -103,7 +103,7 @@ Run inside CMSSW_14_1_0_pre4 (has scipy + matplotlib).
         --out-dir /path/to/output/LimitPlots_4bin
 
 Add --comparison-dir LimitPlots_4bin_Comparison to also make HybridNew vs Asymptotic overlays.
-Add --subset VH,mfv_neu to only plot specific processes.
+Add --subset VHToSSTodddd,mfv_neu to only plot specific processes.
 
 
 NUISANCE TABLES

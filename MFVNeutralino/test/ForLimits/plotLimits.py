@@ -22,7 +22,7 @@ HepData reference (ins1861146, old high-HT displaced vertex analysis):
   where obs[i][j] = observed limit at ctau_mm[i], mass_gev[j].
 
 Usage
-  python3 plotLimits.py [--subset VH,mfv_neu] [--out-dir LimitPlots]
+  python3 plotLimits.py [--subset VHToSSTodddd,mfv_neu] [--out-dir LimitPlots]
 """
 import os
 import sys
@@ -81,7 +81,7 @@ _EXTRA_THEORY_CSV = {
 
 
 PROC_LABELS = {
-    "VH":                  r"WH + ZH (incl. gg),  H$\to$SS$\to$dddd",
+    "VHToSSTodddd":        r"WH + ZH (incl. gg),  H$\to$SS$\to$dddd",
     "ggZHToSSTobbbb":      r"ggZH,  H$\to$SS$\to$bbbb",
     "ggHToSSTodddd":       r"ggH,  H$\to$SS$\to$dddd",
     "ttHToLLPs_bbbb":      r"ttH,  H$\to$SS$\to$bbbb",
@@ -100,7 +100,7 @@ _2D_VSCALE = {
     "mfv_stopdbardbar": (0.1,   10.0,  1e5),
     "mfv_stopbbarbbar": (0.1,   10.0,  1e5),
     # Higgs: pivot at SM benchmark BR=1%; range covers 0.1%-100% (well beyond any limit)
-    "VH":               (1e-3,  0.01,  1.0),
+    "VHToSSTodddd":     (1e-3,  0.01,  1.0),
     "ggZHToSSTobbbb":   (1e-3,  0.01,  1.0),
     "ggHToSSTodddd":    (1e-3,  0.01,  1.0),
     "ttHToLLPs_bbbb":   (1e-3,  0.01,  1.0),
@@ -148,7 +148,7 @@ def ctau_to_mm(s):
 
 
 def parse_sig_id(sig_id):
-    """'VH_tau1mm_M15' -> ('VH', '1mm', '15')"""
+    """'VHToSSTodddd_tau1mm_M15' -> ('VHToSSTodddd', '1mm', '15')"""
     parts = sig_id.split("_tau")
     if len(parts) != 2:
         return None, None, None
@@ -1123,7 +1123,7 @@ def main():
         plot_1d(proc, data[proc], args.out_dir, hepdata)
         plot_1d_vs_mass_all(proc, data[proc], args.out_dir)
         plot_1d_vs_mass_pairs(proc, data[proc], args.out_dir, hepdata)
-        if proc in ("ggHToSSTodddd", "VH"):
+        if proc in ("ggHToSSTodddd", "VHToSSTodddd"):
             plot_1d_vs_mass_ctau_pair(proc, data[proc], args.out_dir, 1.0, 10.0)
         plot_2d(proc, data[proc], args.out_dir, hepdata)
         if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
