@@ -115,12 +115,24 @@ int make_plot(
 
   // Scaling
   double denom = 0.0;
-  for (auto& h : hists) denom += h->Integral();
-  const double scale_factor = h_dat->Integral() / denom;
+  double int_dat = 0.0;
+  double interr_dat = 0.0;
+  double interr_mc_sq = 0.0;
+  double interr_mc = 0.0;
+  for (auto& h : hists) {
+    double this_interr_mc = 0.0;
+    denom += h->IntegralAndError(0, h->GetNbinsX()+1, this_interr_mc);
+    interr_mc_sq += pow(this_interr_mc, 2);
+  }
+  int_dat = h_dat->IntegralAndError(0, h_dat->GetNbinsX()+1, interr_dat);
+  const double scale_factor = int_dat / denom;
+  interr_mc = sqrt(interr_mc_sq);
   if (debug) {
-    cout << "MC yield: " << denom << endl << "Data yield: " << h_dat->Integral() << endl << "Scale factor: " << scale_factor << endl;
+    cout << "MC yield: " << denom << " +/- " << interr_mc << endl;
+    cout << "Data yield: " << int_dat << " +/- " << interr_dat << endl;
+    cout << "Scale factor: " << scale_factor << endl;
   };
-  if (scale && h_dat->Integral()!=0) {
+  if (scale && int_dat!=0) {
     for (auto& h : hists) h->Scale(scale_factor);
   }
 
@@ -148,7 +160,7 @@ int make_plot(
       h_rat->SetBinError(i, 0.0);
     };
   };
-  if (scale && not(scale_ratio) && h_dat->Integral()!=0) {
+  if (scale && not(scale_ratio) && int_dat!=0) {
     h_rat->Scale(scale_factor);
   };
   // FORMAT Ratio
@@ -159,7 +171,7 @@ int make_plot(
   if (not scale_ratio && h_dat->Integral()!=0) {rat_avg = scale_factor;};
   double ratio_ylim = 0.50;
   if (raty_settings[0] != "") {ratio_ylim = max(ratio_ylim, stod(raty_settings[0]));};
-  if (h_dat->Integral()!=0) {
+  if (int_dat!=0) {
     h_rat->SetMaximum( min(h_rat->GetBinContent(h_rat->GetMaximumBin())*(1+gStyle->GetHistTopMargin()), (1+ratio_ylim)*rat_avg) );
     h_rat->SetMinimum( max(max(h_rat->GetBinContent(h_rat->GetMinimumBin())*(1-gStyle->GetHistTopMargin()), (1-ratio_ylim)*rat_avg) , 0.0));
   };
@@ -179,10 +191,10 @@ int make_plot(
     for (int i=0; i<nsig; i++) {
       sum_signal_hists(hsigs[i], fs_sig[i], sigxsecs[i], sigBRs[i], yr, hloc);
       if (scale_sig) {
-        if (h_dat->Integral()!=0) {
-          hsigs[i]->Scale(h_dat->Integral() / hsigs[i]->Integral()); // Sig is scaled to data
-        } else if (h_mc_stat->Integral()!=0) {
-          hsigs[i]->Scale(h_mc_stat->Integral() / hsigs[i]->Integral());
+        if (int_dat!=0) {
+          hsigs[i]->Scale(int_dat / hsigs[i]->Integral(0, hsigs[i]->GetNbinsX()+1)); // Sig is scaled to data
+        } else if (h_mc_stat->Integral(0, h_mc_stat->GetNbinsX()+1)!=0) {
+          hsigs[i]->Scale(h_mc_stat->Integral(0, h_mc_stat->GetNbinsX()+1) / hsigs[i]->Integral(0, hsigs[i]->GetNbinsX()+1));
         };
       };
       // FORMAT SIGNAL
@@ -498,13 +510,15 @@ int StackedPlotter() {
     get_all_hnames(hnames_by_histType, histTypes, yrs[0], ntrks[0], variants[0], dat_prefix, dat_suffix);
   } else {
     hnames_by_histType["EventHistos"] = {
-      "h_vertex_seed_track_pt", "h_vertex_seed_track_eta",
-      "h_vertex_seed_track_err_dxy",
-      //"h_jet_pt_0", "h_jet_phi_0",
-      //"h_nbtags_2", "h_nbtags_2", "h_vertex_seed_track_dxy"
+      // "h_vertex_seed_track_pt", "h_vertex_seed_track_eta", // Check plot formatting
+      // "h_vertex_seed_track_err_dxy",
+      "h_n_vertex_seed_tracks", "h_vertex_seed_track_err_dxy", "h_vertex_seed_track_err_dxy_barrel", "h_vertex_seed_track_err_dxy_endcap", // Calculate integrals
+      "h_vertex_seed_track_eta",
     };
     hnames_by_histType["VertexHistos"] = {
-      "h_sv_all_track_nsigmadxy",
+      // "h_sv_all_track_nsigmadxy", // Check plot formatting
+      "h_sv_all_x", // Calculate integrals
+      "h_sv_all_track_nsigmadxy", "h_sv_all_track_npxlayers",
     };
   };
 
