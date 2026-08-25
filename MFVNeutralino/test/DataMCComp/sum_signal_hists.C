@@ -1,7 +1,7 @@
 void sum_signal_hists(TH1F*& h_sig, vector<vector<TFile*>>& fs_sig, const vector<float>& sigxsecs, const float sigBR, const string& yr, const string& hloc) {
   
   const map<string,float> lumis = { // in pb^{-1}
-    {"20161", 19502},
+    {"20161", 19502}, // This is NOT correct for bjet (differs by a few %), change if non-rescaled signal is ever needed
     {"20162", 16812},
     {"2017", 42068},
     {"2018", 59561},
