@@ -10,6 +10,23 @@ _btagpresel = bool_from_argv('btagpresel')
 _metpresel = bool_from_argv('metpresel')
 _presel_s = '_qcdlepenrich' if _qcdlepenrich else '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else '_btagpresel' if _btagpresel else ''
 
+def _set_int_lumis():
+    lumis = {
+        20161: AnalysisConstants.int_lumi_20161,
+        20162: AnalysisConstants.int_lumi_20162,
+    }
+    if _btagpresel:
+        lumis[2017] = AnalysisConstants.int_lumi_bjet_trig_2017,
+        lumis[2018] = AnalysisConstants.int_lumi_bjet_trig_2018,
+    else:
+        lumis[2017] = AnalysisConstants.int_lumi_2017,
+        lumis[2018] = AnalysisConstants.int_lumi_2018,
+    if year not in lumis:
+        raise ValueError("Lumi for year {0} not found".format(year))
+    return lumis
+
+lumis = _set_int_lumis()
+
 ####
 
 def cmd_hadd_vertexer_histos():
@@ -230,8 +247,8 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:
-      for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
-                            ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
+      for year_s, scale in [('_2017', -lumis[2017] * AnalysisConstants.scale_factor_2017),
+                            ('_2018', -lumis[2018] * AnalysisConstants.scale_factor_2018)]:
   
           year = int(year_s[1:])
           print 'scaling to', year, scale
@@ -262,16 +279,16 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
     else:
         if year_to_use==2017:
             year_s = '_2017'
-            scale = -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+            scale = -lumis[2017] * AnalysisConstants.scale_factor_2017
         elif year_to_use==2018:
             year_s = '_2018'
-            scale = -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
+            scale = -lumis[2018] * AnalysisConstants.scale_factor_2018
         elif year_to_use==20162:
             year_s = '_20162'
-            scale = -AnalysisConstants.int_lumi_20162 * AnalysisConstants.scale_factor_20162
+            scale = -lumis[20162] * AnalysisConstants.scale_factor_20162
         elif year_to_use==20161:
             year_s = '_20161'
-            scale = -AnalysisConstants.int_lumi_20161 * AnalysisConstants.scale_factor_20161
+            scale = -lumis[20161] * AnalysisConstants.scale_factor_20161
         else:
             raise RuntimeError("Year {0} not available!".format(year_to_use))
   
@@ -427,7 +444,7 @@ def cmd_trigeff():
 def cmd_trigeff_merge():
     permissive = bool_from_argv('permissive')
     print colors.yellow('using *_2017* for 2018')
-    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017), ('_2018', -AnalysisConstants.int_lumi_2018):
+    for year_s, scale in ('_2017', -lumis[2017]), ('_2018', -lumis[2018]):
         for wqcd_s in '', '_wqcd':
             files = _background_samples(trigeff=True)
             #if not wqcd_s:
