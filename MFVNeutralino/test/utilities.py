@@ -21,8 +21,6 @@ def _set_int_lumis():
     else:
         lumis[2017] = AnalysisConstants.int_lumi_2017,
         lumis[2018] = AnalysisConstants.int_lumi_2018,
-    if year not in lumis:
-        raise ValueError("Lumi for year {0} not found".format(year))
     return lumis
 
 lumis = _set_int_lumis()
