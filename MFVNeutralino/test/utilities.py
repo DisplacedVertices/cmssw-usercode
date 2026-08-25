@@ -13,14 +13,14 @@ _presel_s = '_qcdlepenrich' if _qcdlepenrich else '_leptonpresel' if _leptonpres
 def _set_int_lumis():
     lumis = {
         20161: AnalysisConstants.int_lumi_20161,
-        20162: AnalysisConstants.int_lumi_20162,
+        20162: AnalysisConstants.int_lumi_20162
     }
     if _btagpresel:
-        lumis[2017] = AnalysisConstants.int_lumi_bjet_trig_2017,
-        lumis[2018] = AnalysisConstants.int_lumi_bjet_trig_2018,
+        lumis[2017] = AnalysisConstants.int_lumi_bjet_trig_2017
+        lumis[2018] = AnalysisConstants.int_lumi_bjet_trig_2018
     else:
-        lumis[2017] = AnalysisConstants.int_lumi_2017,
-        lumis[2018] = AnalysisConstants.int_lumi_2018,
+        lumis[2017] = AnalysisConstants.int_lumi_2017
+        lumis[2018] = AnalysisConstants.int_lumi_2018
     return lumis
 
 lumis = _set_int_lumis()
