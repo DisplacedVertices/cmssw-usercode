@@ -391,7 +391,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, qcd_lep=False, ttbar=False, all_signal=False, all_lep_signal=False, all_bjet_signal=False, span_signal=False, data=False, BTagCSV_data=False, Lepton_data=False, Muon_data=False, Electron_data=False, JetHT_data=False, DisplacedJet_data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, met=False, diboson=False):
+                 qcd=False, qcd_lep=False, ttbar=False, all_signal=False, all_lep_signal=False, all_bjet_signal=False, custom_bjet_signal=False, span_signal=False, data=False, BTagCSV_data=False, Lepton_data=False, Muon_data=False, Electron_data=False, JetHT_data=False, DisplacedJet_data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, met=False, diboson=False):
 
     if all_signal :
         sys.exit('all_signal has been replaced with all_lep_signal and all_bjet_signal, please fix and try again. Exiting.')

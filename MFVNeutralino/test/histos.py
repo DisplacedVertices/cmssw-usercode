@@ -149,7 +149,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if  use_BTagDispJet_vetoLepHT_triggers:
         if is_mc :
-            samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)
+            samples = pick_samples(dataset, custom_bjet_signal=True, qcd=True, ttbar=True)
             pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
         else :
             samples = pick_samples(dataset, BTagCSV_data=True, DisplacedJet_data=True)
