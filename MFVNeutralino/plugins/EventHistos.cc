@@ -255,6 +255,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_vertex_seed_track_err_phi;
   TH1F* h_vertex_seed_track_err_dxy;
   TH1F* h_vertex_seed_track_err_dz;
+  TH1F* h_vertex_seed_track_nsigmadxy;
   TH1F* h_vertex_seed_track_npxhits;
   TH1F* h_vertex_seed_track_nsthits;
   TH1F* h_vertex_seed_track_nhits;
@@ -412,8 +413,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_vertex_seed_track_err_pt = fs->make<TH1F>("h_vertex_seed_track_err_pt", ";vertex seed track #sigma(p_{T})/p_{T} (GeV);tracks/0.005", 100, 0, 0.5);
   h_vertex_seed_track_err_eta = fs->make<TH1F>("h_vertex_seed_track_err_eta", ";vertex seed track #sigma(#eta);tracks/5e-5", 100, 0, 0.005);
   h_vertex_seed_track_err_phi = fs->make<TH1F>("h_vertex_seed_track_err_phi", ";vertex seed track #sigma(#phi);tracks/5e-5", 100, 0, 0.005);
-  h_vertex_seed_track_err_dxy = fs->make<TH1F>("h_vertex_seed_track_err_dxy", ";vertex seed track #sigma(dxy) (cm);tracks/3 #mum", 100, 0, 0.03);
+  h_vertex_seed_track_err_dxy = fs->make<TH1F>("h_vertex_seed_track_err_dxy", ";vertex seed track rescaled #sigma(dxy) (cm);tracks/3 #mum", 100, 0, 0.03);
   h_vertex_seed_track_err_dz = fs->make<TH1F>("h_vertex_seed_track_err_dz", ";vertex seed track #sigma(dz) (cm);tracks/15 #mum", 100, 0, 0.15);
+  h_vertex_seed_track_nsigmadxy = fs->make<TH1F>("h_vertex_seed_track_nsigmadxy", ";vertex seed track rescaled n#sigma(dxy);tracks/arb. units", 400, -100, 100);
   h_vertex_seed_track_npxhits = fs->make<TH1F>("h_vertex_seed_track_npxhits", ";vertex seed track # pixel hits;tracks", 10, 0, 10);
   h_vertex_seed_track_nsthits = fs->make<TH1F>("h_vertex_seed_track_nsthits", ";vertex seed track # strip hits;tracks", 50, 0, 50);
   h_vertex_seed_track_nhits = fs->make<TH1F>("h_vertex_seed_track_nhits", ";vertex seed track # hits;tracks", 60, 0, 60);
@@ -1207,8 +1209,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_vertex_seed_track_err_pt->Fill(mevent->vertex_seed_track_err_pt[i] / mevent->vertex_seed_track_pt(i), w);
     h_vertex_seed_track_err_eta->Fill(mevent->vertex_seed_track_err_eta[i], w);
     h_vertex_seed_track_err_phi->Fill(mevent->vertex_seed_track_err_phi[i], w);
-    h_vertex_seed_track_err_dxy->Fill(mevent->vertex_seed_track_err_dxy[i], w);
+    h_vertex_seed_track_err_dxy->Fill(mevent->vertex_seed_track_rescale_err_dxy[i], w);
     h_vertex_seed_track_err_dz->Fill(mevent->vertex_seed_track_err_dz[i], w);
+    h_vertex_seed_track_nsigmadxy->Fill(mevent->vertex_seed_track_dxy[i]/mevent->vertex_seed_track_rescale_err_dxy[i], w);
     h_vertex_seed_track_npxhits->Fill(mevent->vertex_seed_track_npxhits(i), w);
     h_vertex_seed_track_nsthits->Fill(mevent->vertex_seed_track_nsthits(i), w);
     h_vertex_seed_track_nhits->Fill(mevent->vertex_seed_track_nhits(i), w);
