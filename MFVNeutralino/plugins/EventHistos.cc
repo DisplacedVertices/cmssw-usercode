@@ -91,8 +91,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_decay_llp0_llp1_quark_sumpt;
   TH2F* h_sum_matched_jetpt_llp;
 
+  */
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
+  /*
 
   TH1F* h_npu;
 
@@ -163,7 +165,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_nbtags_v_bquark_code[3];
   TH1F* h_jet_bdisc_csv;
   TH1F* h_jet_bdisc_deepcsv;
-  TH1F* h_jet_bdisc_deepflav;
+  static const int MAX_NJETS_FOR_BDISC = 4;
+  TH1F* h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC+1];
   TH2F* h_jet_bdisc_deepflav_v_bquark_code;
   TH1F* h_bjet_pt;
   TH1F* h_bjet_eta;
@@ -340,6 +343,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_sum_matched_jetpt_llp = fs->make<TH2F>("h_sum_matched_jetpt_llp", ";max sum p_{T} of LLP-matched jets (GeV);min sum p_{T} of LLP-matched jets (GeV)", 100, 0, 1000, 100, 0, 1000);
 
 
+  */
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
 
@@ -353,6 +357,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
   }
+  /*
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 120, 0, 120);
 
@@ -462,7 +467,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   }
   h_jet_bdisc_csv = fs->make<TH1F>("h_jet_bdisc_csv", ";jets' csv score;jets/0.02", 51, 0, 1.02);
   h_jet_bdisc_deepcsv = fs->make<TH1F>("h_jet_bdisc_deepcsv", ";jets' deepcsv score;jets/0.02", 51, 0, 1.02);
-  h_jet_bdisc_deepflav = fs->make<TH1F>("h_jet_bdisc_deepflav", ";jets' deepflavour score;jets/0.02", 51, 0, 1.02);
+  for (int i = 0; i < MAX_NJETS_FOR_BDISC+1; ++i) {
+    TString ijet = i == MAX_NJETS_FOR_BDISC ? TString("all") : TString::Format("%i", i);
+    h_jet_bdisc_deepflav[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepflav_%s", ijet.Data()), TString::Format(";deepflavour score of jet #%s;jets/0.02", ijet.Data()), 51, 0, 1.02);
+  }
+  //h_jet_bdisc_deepflav = fs->make<TH1F>("h_jet_bdisc_deepflav", ";jets' deepflavour score;jets/0.02", 51, 0, 1.02);
   h_jet_bdisc_deepflav_v_bquark_code = fs->make<TH2F>("h_jet_bdisc_deepflav_v_bquark_code", ";b quark code;jets' b discriminator", 3, 0, 3, 51, 0, 1.02);
   h_bjet_pt = fs->make<TH1F>("h_bjet_pt", ";bjets p_{T} (GeV);bjets/10 GeV", 150, 0, 1500);
   h_bjet_eta = fs->make<TH1F>("h_bjet_eta", ";bjets #eta (rad);bjets/.05", 120, -3, 3);
@@ -853,6 +862,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  */
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -863,6 +873,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
     if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
   }
+  /*
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -1199,7 +1210,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       continue;
     h_jet_bdisc_csv->Fill(mevent->jet_bdisc_csv[ijet], w);
     h_jet_bdisc_deepcsv->Fill(mevent->jet_bdisc_deepcsv[ijet], w);
-    h_jet_bdisc_deepflav->Fill(mevent->jet_bdisc_deepflav[ijet], w);
+    h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC]->Fill(mevent->jet_bdisc_deepflav[ijet], w);
+    if (ijet < MAX_NJETS_FOR_BDISC) {
+      h_jet_bdisc_deepflav[ijet]->Fill(mevent->jet_bdisc_deepflav[ijet], w);
+    };
     h_jet_bdisc_deepflav_v_bquark_code->Fill(mevent->gen_flavor_code, mevent->jet_bdisc_deepflav[ijet], w);
     if (mevent->is_btagged(ijet, ibtag)) {
       h_bjet_pt->Fill(mevent->jet_pt[ijet], w);
@@ -1292,7 +1306,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     fill_general_eta(h_vertex_seed_track_nstlayers, mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_nstlayers(i), w);
     fill_general_eta(h_vertex_seed_track_nlayers, mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_nlayers(i), w);
 
-    /*
     double match_threshold = 1.3;
     int jet_index = 255;
     for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
@@ -1307,9 +1320,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (jet_index != 255) {
       track_which_jet.push_back((int) jet_index);
     }
-    */
   }
-  /*
   int njet_seedtrack = 0;
   for (size_t i = 0; i<mevent->jet_id.size(); ++i){
     int n_seedtrack = std::count(track_which_jet.begin(), track_which_jet.end(), i);
@@ -1318,7 +1329,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_nseedtrack[i]->Fill(n_seedtrack, w);
   }
   h_jet_nseedtrack[MAX_NJETS]->Fill(njet_seedtrack, w);
-  */
 }
 
 DEFINE_FWK_MODULE(MFVEventHistos);
