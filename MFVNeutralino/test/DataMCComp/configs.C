@@ -70,7 +70,7 @@ void init_configs(
 
   const map<string, string> fn_root_configs = {
     {"lep",  "/uscms/home/yuqingwu/nobackup/crabdirs/26-07-15-Histos_tag002Lepm-pT4GeVCut-VtxEtaDz-2DPlots/"},
-    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/Histos_tag004BvetoLHTm/"}
+    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/26-08-26-Histos_tag004BvetoLHTm-IsMCCorrect/"}
   };
   fn_root = get_config_value(fn_root_configs, trig, "fn_root_configs");
 
@@ -127,7 +127,7 @@ void init_configs(
     }},
     {"bjet", {
       {
-        "mfv_neu_tau010000um_M0800_"
+        "ggHToSSTodddd_tau1mm_M55_"
       }
     }}
   };
@@ -154,7 +154,7 @@ void init_configs(
 
   const map<string, vector<string>> siglabels_configs = {
     {"lep",  {"VH, 55GeV, 10mm"}},
-    {"bjet", {"MFV-Neu, 800GeV, 10mm"}}
+    {"bjet", {"ggH, 55GeV, 1mm"}}
   };
   siglabels = get_config_value(siglabels_configs, trig, "siglabels_configs");
 
