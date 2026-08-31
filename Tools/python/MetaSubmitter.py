@@ -404,7 +404,7 @@ def pick_samples(dataset, both_years=False,
         all_lep_signal = False
         all_bjet_signal = False
 
-    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_lep_signal', 'all_bjet_signal', 'span_signal', 'data', 'BTagCSV_data', 'Lepton_data', 'Muon_data', 'Electron_data', 'JetHT_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
+    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_lep_signal', 'all_bjet_signal', 'custom_bjet_signal', 'span_signal', 'data', 'BTagCSV_data', 'Lepton_data', 'Muon_data', 'Electron_data', 'JetHT_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
