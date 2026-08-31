@@ -501,7 +501,7 @@ int StackedPlotter() {
   const vector<string> histTypes = {"EventHistos", "VertexHistos"};
   const vector<string> variants = {"PreSel", "OnlyOneVtx", "FullSel"};
 
-  const bool make_all_TH1 = false; // If true, it makes all available TH1 objects
+  const bool make_all_TH1 = true; // If true, it makes all available TH1 objects
 
 
   map<string, vector<string>> hnames_by_histType;
