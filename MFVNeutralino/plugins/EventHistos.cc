@@ -133,6 +133,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvsmindz_minscore;
   TH1F* h_pvsmaxdz_minscore;
 
+  */
   TH1F* h_njets;
   TH1F* h_njets20;
   static const int MAX_NJETS = 10;
@@ -151,10 +152,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetmu_pairdphi;
   TH1F* h_jetmu_pairdr;
   
+  /*
   TH1F* h_met;
   TH1F* h_metphi;
   TH1F* h_metnomu;
   TH1F* h_metnomuphi;
+  */
 
   TH1F* h_nbtags[3];
   TH2F* h_nbtags_v_bquark_code[3];
@@ -167,6 +170,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bjet_phi;
   TH1F* h_bjet_energy;
   TH1F* h_bjet_pairdphi;
+  /*
 
 
   TH1F* h_nmuons;
@@ -389,6 +393,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvsmindz_minscore = fs->make<TH1F>("h_pvmindz_minscore", ";min primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
   h_pvsmaxdz_minscore = fs->make<TH1F>("h_pvmaxdz_minscore", ";max primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
 
+  */
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
   h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
   for (int i = 0; i < MAX_NJETS+1; ++i) {
@@ -408,7 +413,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetel_pairdr = fs->make<TH1F>("h_jetel_pairdr", ";jet electron pair #DeltaR (rad);jetel pairs/.063", 100, 0, 6.3);
   h_jetmu_pairdphi = fs->make<TH1F>("h_jetmu_pairdphi", ";jet muon pair #Delta#phi (rad);jetmu pairs/.063", 100, -3.1416, 3.1416);
   h_jetmu_pairdr = fs->make<TH1F>("h_jetmu_pairdr", ";jet muon pair #DeltaR (rad);jetmu pairs/.063", 100, 0, 6.3);
-  */
 
   // pT filtering
   const std::string seed_track_pt_tag = filter_seed_tracks_w_low_pt ? pt_region_tags[int(pt_keep)] : "";
@@ -449,6 +453,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_metnomu = fs->make<TH1F>("h_metnomu", ";METNoMu (GeV);events/5 GeV", 500, 0, 2500);
   h_metnomuphi = fs->make<TH1F>("h_metnomuphi", ";METNoMu #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  */
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
   for (int i = 0; i < 3; ++i) {
@@ -464,6 +469,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bjet_phi = fs->make<TH1F>("h_bjet_phi", ";bjets #phi (rad);bjets/.063", 100, -3.1416, 3.1416);
   h_bjet_energy = fs->make<TH1F>("h_bjet_energy", ";bjets E (GeV);bjets/10 GeV", 150, 0, 1500);
   h_bjet_pairdphi = fs->make<TH1F>("h_bjet_pairdphi", ";bjet pair #Delta#phi (rad);bjet pairs/.063", 100, -3.1416, 3.1416);
+  /*
 
   //lepton histos
   h_nmuons = fs->make<TH1F>("h_nmuons", ";# of muons;events", 10, 0, 10);
@@ -911,6 +917,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_pvsmaxdz_minscore->Fill(maxdz_minscore, w);
   }
 
+  */
   h_njets->Fill(mevent->njets(), w);
   h_njets20->Fill(mevent->njets(20), w);
 
@@ -936,6 +943,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }
+  /*
 
   std::vector<float> all_lep_sigmadxy;
   std::vector<float> all_lep_pt;
@@ -1131,6 +1139,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_sellepton_nsigma_v_pt->Fill(all_sellep_pt[i], all_sellep_sigmadxy[i]);
     }
   }
+  */
   
   // // now to check the relation between jets and electrons/muons
   // // only considering selected leptons (pt, eta, iso) 
@@ -1172,11 +1181,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
   }
+  /*
   
   h_met->Fill(mevent->met(), w);
   h_metphi->Fill(mevent->metphi(), w);
   h_metnomu->Fill(mevent->metNoMu(), w);
   h_metnomuphi->Fill(mevent->metNoMuphi(), w);
+  */
 
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
@@ -1206,7 +1217,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  */
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
   std::vector<int> track_which_jet;
