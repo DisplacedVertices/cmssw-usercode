@@ -5,12 +5,12 @@ import numpy as np
 
 #lep = 'lep' in sys.argv
 #bjet = 'bjet' in sys.argv
-lep = True
-bjet = False
+lep = False
+bjet = True
 
 if bjet :
-    presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/' 
-    sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/'  
+    presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-01-Histos_tag004BvetoLHTm-PltBtagJetTrig/' 
+    sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-01-Histos_tag004BvetoLHTm-PltBtagJetTrig/'  
 if lep :
     #presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
     #sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
@@ -46,7 +46,7 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
+npresel, enpresel = get_integral(presel_f.Get('Ntk3mfvEventHistosPreSel/h_n_vertex_seed_tracks'))
 
 print 'year:', year
 print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
@@ -59,8 +59,8 @@ sum2_en2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
 sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     
     sum_n1v += n1v
     sum_n2v += n2v 
@@ -77,8 +77,8 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    print('%smfvEventHistosFullSel/h_npu' % ntk)
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    print('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk)
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk))
     sum_n2v += n2v
     sum2_en2v += (en2v**2) 
 
@@ -86,8 +86,8 @@ print 'n2 = %8.0f'%(sum_n2v)
 print 'en2 = %f'%(math.sqrt(sum2_en2v)) 
 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poisson = poisson_interval(n2v)
     effn1v = n1v/sum_n1v
     eeffn1v = np.sqrt((effn1v*(1.0-effn1v))/sum_n1v)
@@ -109,9 +109,9 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % tracks[0]))
+    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % tracks[1]))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk))
     n2v_poisson = poisson_interval(n2v)
     effn1v0 = n1v0/sum_n1v
     eeffn1v0 = np.sqrt((effn1v0*(1.0-effn1v0))/sum_n1v)
