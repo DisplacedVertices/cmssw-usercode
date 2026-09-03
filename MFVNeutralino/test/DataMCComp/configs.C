@@ -70,7 +70,7 @@ void init_configs(
 
   const map<string, string> fn_root_configs = {
     {"lep",  "/uscms/home/yuqingwu/nobackup/crabdirs/26-07-15-Histos_tag002Lepm-pT4GeVCut-VtxEtaDz-2DPlots/"},
-    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/26-08-28-Histos_tag004BvetoLHTm-wJetInfo/"}
+    {"bjet", "/uscms/home/yuqingwu/nobackup/crabdirs/26-09-01-Histos_tag004BvetoLHTm-PltBtagJetTrig/"}
   };
   fn_root = get_config_value(fn_root_configs, trig, "fn_root_configs");
 
