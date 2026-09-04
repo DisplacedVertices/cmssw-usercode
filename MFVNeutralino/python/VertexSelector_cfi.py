@@ -41,7 +41,6 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      min_missdistjetsntkpvsig = cms.double(0),
                                      min_missdisttksjetsntkpvsig = cms.double(0),
                                      min_sumpt2           = cms.double(0),
-                                     min_sumpt            = cms.double(0),
                                      min_maxtrackpt       = cms.double(0),
                                      min_maxm1trackpt     = cms.double(0),
                                      max_trackdxyerrmin   = cms.double(1e9),
@@ -119,8 +118,6 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 5,
     min_bsbs2ddist = 0.01,
     max_rescale_bs2derr = 0.005,
-    min_tkonlymass = 5.5,
-    min_sumpt = 10.0,
     )
 
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)
