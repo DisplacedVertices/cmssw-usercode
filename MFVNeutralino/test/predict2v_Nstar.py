@@ -118,7 +118,7 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     effn1v1 = n1v1/sum_n1v
     eeffn1v1 = np.sqrt((effn1v1*(1.0-effn1v1))/sum_n1v)
     pred = (2*(effn1v0)*(effn1v1))*sum_n2v
-    err_ratv0v1 = effn1v0*effn1v0*np.sqrt( (eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 )
+    err_ratv0v1 = effn1v0*effn1v1*np.sqrt( (eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 )
     pred_n2v_propagated_stat_err =  pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_ratv0v1/(effn1v0*effn1v1))**2))
     epred = pred_n2v_propagated_stat_err    
     rat, erat = interval_to_vpme(*propagate_ratio(n2v, pred, en2v, epred))
