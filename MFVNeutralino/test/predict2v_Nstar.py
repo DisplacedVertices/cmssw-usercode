@@ -90,7 +90,7 @@ for ntk in 3,4,5:
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poisson = poisson_interval(n2v)
     effn1v = n1v/sum_n1v
-    eeffn1v = np.sqrt((effn1v*(1.0-effn1v))/sum_n1v)
+    eeffn1v = np.sqrt(((1.0-2*effn1v)*en1v**2+effn1v**2*sum2_en1v) / sum_n1v**2)
     pred = (effn1v**2) * sum_n2v
     err_rat2 = 2*(effn1v**2)*(eeffn1v/effn1v)
     pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
@@ -114,9 +114,9 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
     n2v_poisson = poisson_interval(n2v)
     effn1v0 = n1v0/sum_n1v
-    eeffn1v0 = np.sqrt((effn1v0*(1.0-effn1v0))/sum_n1v)
+    eeffn1v0 = np.sqrt(((1.0-2*effn1v0)*en1v0**2+effn1v0**2*sum2_en1v) / sum_n1v**2)
     effn1v1 = n1v1/sum_n1v
-    eeffn1v1 = np.sqrt((effn1v1*(1.0-effn1v1))/sum_n1v)
+    eeffn1v1 = np.sqrt(((1.0-2*effn1v1)*en1v1**2+effn1v1**2*sum2_en1v) / sum_n1v**2)
     pred = (2*(effn1v0)*(effn1v1))*sum_n2v
     err_ratv0v1 = effn1v0*effn1v1*np.sqrt( (eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 )
     pred_n2v_propagated_stat_err =  pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_ratv0v1/(effn1v0*effn1v1))**2))
