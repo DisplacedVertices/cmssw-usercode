@@ -23,10 +23,9 @@ signal:
     file_key: "condor_*tau*/minitree_0.root"
 
 # ---- Input background paths ---------------------------------
-# Local copies of the MC Run 2 background templates (copied from alecduqu's One2Two).
+# Local copies of the MC background templates (copied from alecduqu's One2Two), per year.
 # Per-year files (2v_from_jets_{year}_5track_default_*.root) are also present in
-# BackgroundTemplates/{lep,bjet}/ for reference; only the run2-combined files are
-# currently used (no {year} placeholder in filename → .format(year) is a no-op).
+# BackgroundTemplates/{lep,bjet}/; The code will substitute the year into the filename pattern.
 # TODO: replace with data-driven per-year estimates when available after unblinding.
 # The folder is the required --bkg-template-dir argument; only the filename lives here.
 # BackgroundTemplates_EXAMPLE/ in this directory is a reference copy, not an input --

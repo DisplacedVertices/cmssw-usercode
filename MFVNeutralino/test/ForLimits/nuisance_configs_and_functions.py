@@ -42,7 +42,8 @@ def _init_for_year(yr):
 # ---------------------------------------------------------------------------
 
 def interp_pickle_triple(nn):
-    """Given nuisance name (e.g. 'tk_reco_eff'), return (up_path, dn_path)."""
+    """Given nuisance name (e.g. 'tk_reco_eff'), return (up_path, dn_path). This code
+    is NOT currently used."""
     loc_dict = ns_conf.pickle_triple_prefixes[nn]
     base = loc_dict["base"]
     return base + loc_dict["up"], base + loc_dict["dn"]
@@ -77,10 +78,8 @@ def get_mc_stat(nuis_name, siginfo, debug_mode=False):
 
 
 def get_reco_effi(nuis_name, siginfo, debug_mode=False):
-    """Track reconstruction efficiency uncertainty.
-
-    Bjet channel: flat 5% working placeholder per AN Sec. 6.2.1 (Table 39/40).
-    Lep channel: per-bin asymmetric values from dedicated VH scale factor tables.
+    """Track reconstruction efficiency uncertainty. Values are obtained from the AN, and represent
+    our most conservative estimates.
     """
 
     if year in ("20161", "20162"):

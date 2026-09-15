@@ -113,13 +113,10 @@ They live in the repo, so they need no path argument. Same for the VH factorizat
 scale table, TheoryTables/fac_scale_shape_bins.csv -- everyone should be on the same
 copy of that one.
 
-To regenerate the pickles (usually not needed). Note turn_TrkRec_to_2darr.py does NOT
-currently work: uncerts_trkrec.py still holds 3-bin lists while the config is 4-bin, so it
-fails on the array size. See the review notes:
+To regenerate the pickles (usually not needed):
 
     python turn_7p4p1_to_2darr.py    # displaced trigger uncertainties
     python turn_TrkMvr_to_2darr.py   # TrackMover vertex reco uncertainties
-    python turn_TrkRec_to_2darr.py   # track reco efficiency (VH only)
 
 
 PYTHON VERSIONS
