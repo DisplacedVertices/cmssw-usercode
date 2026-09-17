@@ -371,8 +371,8 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
 
   std::vector<double> vec_vtx_nsigmadxy4 = {};
   for (int i = 0; i < vtx.ntracks(); ++i) {
-    if (fabs(vtx.track_dxy[i] / vtx.track_dxy_err(i)) > 4.0)
-       vec_vtx_nsigmadxy4.push_back(fabs(vtx.track_dxy[i] / vtx.track_dxy_err(i)));
+    if (fabs(vtx.track_dxy[i] / vtx.track_dxy_rescale_err(i)) > 4.0)
+       vec_vtx_nsigmadxy4.push_back(fabs(vtx.track_dxy[i] / vtx.track_dxy_rescale_err(i)));
   }
 
   return 
