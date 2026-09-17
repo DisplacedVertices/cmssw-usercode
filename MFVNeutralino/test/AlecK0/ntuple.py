@@ -3,8 +3,8 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-if use_btag_triggers :
-    settings.event_filter = 'bjets OR displaced dijet' # for new trigger studies
+if use_BTagDispJet_vetoLepHT_triggers :
+    settings.event_filter = 'bjets OR displaced dijet veto leptons and HT'
 elif use_MET_triggers :
   settings.event_filter = 'met only novtx'
 else:
@@ -71,7 +71,7 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    if use_btag_triggers :
+    if use_BTagDispJet_vetoLepHT_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=True, BTagCSV_data=True)
         #samples = Samples.mfv_signal_samples_2017 + Samples.mfv_stopdbardbar_samples_2017 + Samples.mfv_stopbbarbbar_samples_2017
     elif use_MET_triggers:

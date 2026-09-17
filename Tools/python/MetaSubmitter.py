@@ -209,7 +209,7 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=10, limit_ttbar=False):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=3, limit_ttbar=False):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
             'SingleMuon': 3,
@@ -286,15 +286,17 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             match = re.match(r"([A-Za-z]+)(201\d{1}[A-Za-z]*)", name)
             if match:
                 name = match.group(1)
-            sample.files_per = d.get(sample.name, 10000)
+            sample.files_per = d.get(sample.name, 10)
 
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
         d = {'miniaod': {
                 'signal':           ( 5,    7500),
-                'JetHT':            (15, 1350000),
+                'JetHT':            (3, 1350000),
+                'BTagCSV':          (3, 1350000),
+                'DisplacedJet':     (1, 1350000),
+                'Lepton':           (5, 1350000),
                 'MET':              (15, 1350000),
-                'Lepton':           (15, 1350000),
                 'qcdht0300_2017':   (5, 3130000),
                 'qcdht0500_2017':   (3, 3130000),
                 'qcdht0700_2017':   (5, 3130000),
@@ -336,13 +338,13 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 name = 'DisplacedJet'
             elif 'MET' in name:
                 name = 'MET'
-            elif 'Lepton' in name:
+            elif 'Lepton' in name or 'Muon' in name or 'Electron' in name or 'EGamma' in name:
                 name = 'Lepton'
             elif sample.is_signal:
                 name = 'signal'
                 sample.split_by = 'events'
 
-            sample.files_per, sample.events_per = d[dataset].get(name, (5, 100000))
+            sample.files_per, sample.events_per = d[dataset].get(name, (3, 100000))
 
             if jobtype == 'trackmover':
                 if name.startswith('ttbarht'):

@@ -75,6 +75,7 @@ private:
   const double min_missdistjetsntkpvsig;
   const double min_missdisttksjetsntkpvsig;
   const double min_sumpt2;
+  const double min_sumpt;
   const double min_maxtrackpt;
   const double min_maxm1trackpt;
   const double max_trackdxyerrmin;
@@ -178,6 +179,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_missdistjetsntkpvsig(cfg.getParameter<double>("min_missdistjetsntkpvsig")),
     min_missdisttksjetsntkpvsig(cfg.getParameter<double>("min_missdisttksjetsntkpvsig")),
     min_sumpt2(cfg.getParameter<double>("min_sumpt2")),
+    min_sumpt(cfg.getParameter<double>("min_sumpt")),
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
     max_trackdxyerrmin(cfg.getParameter<double>("max_trackdxyerrmin")),
@@ -402,6 +404,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.missdistpvsig(mfv::PJetsByNtracks) >= min_missdistjetsntkpvsig &&
     vtx.missdistpvsig(mfv::PTracksPlusJetsByNtracks) >= min_missdisttksjetsntkpvsig &&
     vtx.sumpt2() >= min_sumpt2 &&
+    vtx.sumpt() >= min_sumpt &&
     vtx.maxtrackpt() >= min_maxtrackpt &&
     vtx.maxmntrackpt(1) >= min_maxm1trackpt &&
     vtx.trackdxyerrmin() < max_trackdxyerrmin &&

@@ -193,6 +193,8 @@ def cs_analyze(d,
                     ret = -4
                 elif 'Job was held' in line:
                     ret = -5
+                elif 'job removed by SYSTEM_PERIODIC_REMOVE' in line:
+                    ret = 999999 # treat as "prob", since it is a positive number
                 else:
                     mo = _ab_re.search(line)
                     if not mo:
@@ -243,7 +245,7 @@ def cs_analyze(d,
 
         result.returns[job] = ret
 
-        if ret > 0:
+        if ret > 0 and ret != 999999:
             stdout_fn = os.path.join(d, 'stdout.%i' % job)
             for line in open(stdout_fn):
                 mo = _cmsRun_re.search(line)

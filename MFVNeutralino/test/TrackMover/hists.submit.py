@@ -1,6 +1,6 @@
 from JMTucker.Tools.MetaSubmitter import *
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 
 version = 'onnormdzulv30lepmumv8'
 dataset = 'trackmover' + version

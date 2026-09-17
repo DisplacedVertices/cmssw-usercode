@@ -1,6 +1,6 @@
 from JMTucker.Tools.MetaSubmitter import *
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 
 dataset = 'ntuple_K0_DYmuontrig_masswide' #Alec added these three lines
 samples = pick_samples(dataset, Lepton_data=True, leptonic=True, diboson=True, qcd_lep=False, ttbar=True, all_signal=False)#Alec set qcd_lep=False, qcd negligible to Z and K

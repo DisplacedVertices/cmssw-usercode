@@ -2,7 +2,8 @@ import os
 from JMTucker.Tools.ROOTTools import *
 
 version = 'ULV11Bm'
-path = '/uscms_data/d3/shogan/crab_dirs/VertexerPairEffsULV11_3d_Bm_May06'  # Has btag/disp dijet triggers. New vertexer
+#path = '/uscms_data/d3/shogan/crab_dirs/VertexerPairEffsULV11_3d_Bm_May06'  # Has btag/disp dijet triggers. New vertexer
+path = '/uscms/home/alecduqu/crab_dirs/VertexerPairEffs_tag001Lepm'
 
 set_style()
 
@@ -14,10 +15,11 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-for is_mc in True,: #False:
+for is_mc in True,: #CHANGE TO TRUE OR FALSE DEPENDING ON WHAT YOU ARE RUNNING!!!!
     #for year in '2017',:
-    for year in '2017p8',:
-        in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
+    for year in 'run2',:
+        #in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
+        in_fn = os.path.join(path, ('Lepton_data_%s.root') % year)
         in_f = ROOT.TFile(in_fn)
 
         for ntkseeds in True, False:

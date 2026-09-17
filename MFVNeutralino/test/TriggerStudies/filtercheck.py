@@ -16,8 +16,8 @@ from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
 sef('pTrigger', mode = 'trigger jets only')
 sef('pTriggerMET', mode = 'trigger met only', name_ex = 'met')
-#sef('pTriggerBjets', mode = 'trigger bjets only',name_ex = 'bjets')
-#sef('pTriggerDispDijet', mode = 'trigger displaced dijet only',name_ex = 'displaced_dijet')
+#sef('pTriggerBTag', mode = 'trigger btag only', name_ex = 'btag')
+#sef('pTriggerDispJet', mode = 'trigger dispjet only', name_ex = 'dispjet')
 #sef('pTriggerOR', mode = 'trigger HT OR bjets OR displaced dijet', name_ex = 'HT_OR_bjets_OR_displaced_dijet')
 #sef('pJets',    mode = 'jets only novtx',   name_ex = 'NoVtx') # be sure to generate a different name for each subsequent use
 #sef('pNoJESUp', mode = 'jets only novtx',   name_ex = 'NoJESUp', event_filter_jes_mult = 0)

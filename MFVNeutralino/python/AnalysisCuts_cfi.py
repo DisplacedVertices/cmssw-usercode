@@ -1,9 +1,7 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_btag_vetoLepHT_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
 
-if use_btag_triggers:
-  apply_presel = cms.int32(6)  
-elif use_btag_vetoLepHT_triggers:
+if use_BTagDispJet_vetoLepHT_triggers or use_BTag_triggers or use_DispJet_triggers:
   apply_presel = cms.int32(6)  
 elif use_MET_triggers:
   apply_presel = cms.int32(5)
@@ -25,14 +23,14 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                require_trigbit  = cms.bool(True),
                                require_trig_obj_match = cms.bool(False), # note only implemented for PF/calo jets. We found it to be inefficient for the displacement triggers in 2016 for some reason
                                require_gen_sumdbv  = cms.bool(False),
-                               require_bjet_psel   = cms.bool(True) if use_btag_triggers or use_btag_vetoLepHT_triggers else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
+                               require_bjet_psel   = cms.bool(True) if (use_BTagDispJet_vetoLepHT_triggers or use_BTag_triggers or use_DispJet_triggers) else cms.bool(False) , # Used to turn on/off the nbjet requirement in bjet-trigger presel
                                require_isomu27 = cms.bool(False),
                                study_btag_sf       = cms.bool(False),
                                study_btag_sfvar    = cms.int32(0), # Only used if above bool = True. Set to +1 for up-var, -1 for dn-var, 0 for central val
                                dijet_agnostic      = cms.bool(False),
                                bjet_agnostic       = cms.bool(False),
                                bjet_veto           = cms.bool(False),
-                               leptonht_veto       = cms.bool(True) if  use_btag_vetoLepHT_triggers else cms.bool(False),
+                               leptonht_veto       = cms.bool(True) if (use_BTagDispJet_vetoLepHT_triggers or use_BTag_triggers or use_DispJet_triggers) else cms.bool(False),
                                study_jer           = cms.bool(False),
                                study_jes           = cms.bool(False),
                                jes_jer_var_up      = cms.bool(False), # Only used if study_jer or study_jes is true. True = var_up, False = var_down

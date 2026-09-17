@@ -3,17 +3,24 @@ from JMTucker.Tools.general import *
 import pandas as pd
 import numpy as np
 
-lep = 'lep' in sys.argv
-bjet = 'bjet' in sys.argv
+#lep = 'lep' in sys.argv
+#bjet = 'bjet' in sys.argv
+lep = True
+bjet = False
 
 if bjet :
     presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/' 
     sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/'  
 if lep :
-    presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
-    sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
-data = bool_from_argv('data')
-year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
+    #presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
+    #sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
+    #presel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
+    #sel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
+    presel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
+    sel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
+#data = bool_from_argv('data')
+data = False
+year = '2018' if len(sys.argv) < 2 else sys.argv[1]
 trigname = 'NA' if len(sys.argv) < 3 else sys.argv[2] 
 print("trig channel: %s" % trigname)
 if data:
@@ -25,7 +32,9 @@ else:
     if bjet :
         fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
     if lep :
-        fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
+        #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
+        fn, presel_scale = 'background_%s.root' % year, 1.
+        #fn, presel_scale = 'ttbar_%s.root' % year, 1.
 def propagate_product(x, y, ex, ey):
     p = x * y
     e = p * ((ex / x)**2 + (ey / y)**2)**0.5

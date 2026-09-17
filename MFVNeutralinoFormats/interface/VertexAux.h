@@ -322,6 +322,7 @@ struct MFVVertexAux {
   std::vector<short> track_inpv;
   std::vector<float> track_dxy;
   std::vector<float> track_dxy_old; //not taking into account beamspot slope //Abby change
+  std::vector<float> track_rescale_dxyerr;
   std::vector<float> track_dz;
   std::vector<double> track_vx;
   std::vector<double> track_vy;
@@ -332,6 +333,16 @@ struct MFVVertexAux {
   std::vector<double> track_chi2;
   std::vector<double> track_ndof;
   std::vector<reco::TrackBase::CovarianceMatrix> track_cov;
+
+  // MiniAOD gen matching annotation, filled by MFVVertexAuxProducer when enabled.
+  // prunedGenParticles indices are used for track_gen_mother_key / track_gen_b_key.
+  // Values are -1/0/large when no good gen match exists or matching is disabled.
+  std::vector<int>   track_gen_pdgid;
+  std::vector<float> track_gen_deltapoverp;
+  std::vector<int>   track_gen_mother_key;
+  std::vector<int>   track_gen_mother_pdgid;
+  std::vector<int>   track_gen_b_key;
+  std::vector<int>   track_gen_b_pdgid;
   // next are expensive to compute so store them anyway
   std::vector<float> track_pt_err;
   std::vector<float> track_eta;
@@ -391,6 +402,7 @@ struct MFVVertexAux {
     track_injet.push_back(0);
     track_inpv.push_back(0);
     track_dxy.push_back(0);
+    track_rescale_dxyerr.push_back(0);
     track_dz.push_back(0);
     track_vx.push_back(0);
     track_vy.push_back(0);
@@ -401,6 +413,12 @@ struct MFVVertexAux {
     track_chi2.push_back(0);
     track_ndof.push_back(0);
     track_cov.push_back(reco::TrackBase::CovarianceMatrix());
+    track_gen_pdgid.push_back(0);
+    track_gen_deltapoverp.push_back(1e9);
+    track_gen_mother_key.push_back(-1);
+    track_gen_mother_pdgid.push_back(0);
+    track_gen_b_key.push_back(-1);
+    track_gen_b_pdgid.push_back(0);
   }
 
   bool tracks_ok() const {
@@ -412,6 +430,7 @@ struct MFVVertexAux {
       n == track_injet.size() &&
       n == track_inpv.size() &&
       n == track_dxy.size() &&
+      n == track_rescale_dxyerr.size() &&
       n == track_dz.size() &&
       n == track_vx.size() &&
       n == track_vy.size() &&
@@ -421,7 +440,13 @@ struct MFVVertexAux {
       n == track_pz.size() &&
       n == track_chi2.size() &&
       n == track_ndof.size() &&
-      n == track_cov.size();
+      n == track_cov.size() &&
+      n == track_gen_pdgid.size() &&
+      n == track_gen_deltapoverp.size() &&
+      n == track_gen_mother_key.size() &&
+      n == track_gen_mother_pdgid.size() &&
+      n == track_gen_b_key.size() &&
+      n == track_gen_b_pdgid.size();
   }
 
   TLorentzVector track_p4(int i, float assumed_mass=0) const {

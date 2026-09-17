@@ -13,7 +13,7 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   muons_src = cms.InputTag('slimmedMuons'),
                                   muon_cut = cms.string(jtupleParams.muonCut.value()),
                                   primary_vertex_src = cms.InputTag('offlineSlimmedPrimaryVertices'), #goodOfflinePrimaryVertices
-                                  isMC = cms.bool(True),
-                                  year = cms.int32(-1),
+                                  isMC = cms.bool(True), # note that these get set in NtupleCommon
+                                  year = cms.int32(-1), # note that these get set in NtupleCommon
                                   prints = cms.untracked.int32(0),
                                   )

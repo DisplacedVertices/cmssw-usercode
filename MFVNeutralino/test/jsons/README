@@ -18,8 +18,6 @@
 
 - Once confident, drop the "_new" from the files, and make use of them in our code.
 
-- Just keep in mind that the 1pc and 10pc files are based on the old jsons, so we should be a little careful, or do the detailed work to actually update them.
-
 - To calculate lumi, copy the files to lxplus and use brilcalc via:
 
 source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
@@ -80,6 +78,26 @@ This gave me:
 (perhaps we use this smaller json for all of the 2018 displacement trigger channel, for simplicity? We lose 10% of the lumi for the other paths, but otherwise it's messy)
 
 
+
+For the 20pc files, I checked with brilcalc and found exactly what I expected:
+
+[13:22][lxplus962 ~]$ brilcalc lumi -c "offline" -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_20pc.json
+
+Summary: 
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 513   | 1315 | 135187 | 134760 | 28.976353118      | 27.588605510     |
++-------+------+--------+--------+-------------------+------------------+
+
+[13:24][lxplus962 ~]$ brilcalc lumi -c "offline" -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i ana_run2_displacement_trigger_20pc.json 
+
+#Summary: 
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 467   | 1188 | 125579 | 125166 | 26.868103183      | 25.557401829     |
++-------+------+--------+--------+-------------------+------------------+
 
 
 # Original instructions

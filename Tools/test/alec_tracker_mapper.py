@@ -1,6 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_BTagDispJet_vetoLepHT_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -42,7 +42,7 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        )
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-if use_btag_triggers :
+if use_BTagDispJet_vetoLepHT_triggers :
     event_filter = setup_event_filter(process,
                               path_name = '',
                               trigger_filter = 'bjets OR displaced dijet veto HT',
@@ -87,7 +87,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     dataset = 'miniaod'
     #dataset = 'TrackingTreerUL16APV'
 
-    if use_btag_triggers :
+    if use_BTagDispJet_vetoLepHT_triggers :
 #        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=False, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
         #samples = Samples.mfv_stopdbardbar_samples_2017  Alec commented
         samples = Samples.BTagCSV_data_samples_2016APV + Samples.DisplacedJet_data_samples_2016APV + Samples.ttbar_samples_2016APV + Samples.qcd_samples_2016APV
@@ -100,7 +100,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2016.json'), 16)
 
     outputname = 'TrackerMapperUL16APV'
-    if use_btag_triggers :
+    if use_BTagDispJet_vetoLepHT_triggers :
         outputname += 'BtagTriggered'
     outputname += 'ULV1'
     ms = MetaSubmitter(outputname, dataset=dataset)

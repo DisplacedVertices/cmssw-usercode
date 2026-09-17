@@ -22,8 +22,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
-#include "JMTucker/Tools/interface/Year.h" //Alec added
-#include <TRandom3.h>
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVVertexTracks : public edm::EDFilter {
 public:
@@ -83,6 +82,8 @@ private:
   const double max_track_d3dipverr;
   const bool jumble_tracks;
   const double remove_tracks_frac;
+  const bool displaced_track_eff;
+  double displaced_track_eff_coef;
   const bool histos;
   const bool verbose;
   const std::string module_label;
@@ -302,6 +303,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     max_track_d3dipverr(cfg.getParameter<double>("max_track_d3dipverr")),
     jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
     remove_tracks_frac(cfg.getParameter<double>("remove_tracks_frac")),
+    displaced_track_eff(cfg.getParameter<bool>("displaced_track_eff")),
+    displaced_track_eff_coef(cfg.getParameter<double>("displaced_track_eff_coef")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
@@ -316,8 +319,15 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexTracks", "can't use_non_pv_tracks || use_non_pvs_tracks if !use_primary_vertices");
 
   edm::Service<edm::RandomNumberGenerator> rng;
-  if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
+  if ((jumble_tracks || remove_tracks_frac > 0 || displaced_track_eff) && !rng.isAvailable())
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling or removing tracks!\n";
+
+  if (displaced_track_eff && displaced_track_eff_coef < 0) {
+    const int year = MFVNEUTRALINO_YEAR;
+    if      (year == 20161 || year == 20162) displaced_track_eff_coef = 1.24;
+    else if (year == 2017  || year == 2018)  displaced_track_eff_coef = 1.12;
+    else throw cms::Exception("MFVVertexTracks") << "no displaced track efficiency coefficient for year " << year;
+  }
 
   produces<std::vector<reco::TrackRef>>("all");
   produces<std::vector<reco::TrackRef>>("seed");
@@ -662,7 +672,13 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     std::random_shuffle(all_tracks->begin(), all_tracks->end(), random_converter);
   }
 
-  //TRandom3 *r3 = new TRandom3(); //Alec added
+  const bool drop_displaced_tracks = displaced_track_eff && !event.isRealData();
+  CLHEP::HepRandomEngine* displaced_track_eff_engine = 0;
+  if (drop_displaced_tracks) {
+    edm::Service<edm::RandomNumberGenerator> rng;
+    displaced_track_eff_engine = &rng->getEngine(event.streamID());
+  }
+
   for (size_t i = 0, ie = all_tracks->size(); i < ie; ++i) {
     const reco::TrackRef& tk = (*all_tracks)[i];
     // only jmt::TrackRescaler::w_SingleLep needs the second argument for general vs. ele vs. mu tracks
@@ -685,37 +701,14 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const int nsthits = tk->hitPattern().numberOfValidStripHits();
     const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
-    //if (r3->Uniform(0,1) > track_recon_eff) continue; //Alec added from here
-    //2016 tracking uncertainty: -1.26 +- 0.21
-    //2017 and 2018 tracking uncertainty: -1.12 +- 0.11
-    /*double track_recon_eff_coef;
-    const int year_cmon = MFVNEUTRALINO_YEAR;
-    if (year_cmon == 20161 || year_cmon == 20162) {
-      track_recon_eff_coef = 1.26;
-      //std::cout << "DISCARDING TRACKS BASED ON 2016 TRACKING INEFFICIENCY STUDY" << std::endl;
+    // Here we drop tracks based off the displaced track prescription in the AN
+    // data/MC efficiency ratio is 1 - coef*dxy^2
+    if (drop_displaced_tracks) {
+      const double adxy = std::min(fabs(dxybs), 0.3);
+      if (displaced_track_eff_engine->flat() > 1 - displaced_track_eff_coef*adxy*adxy)
+        continue;
     }
-    else if (year_cmon == 2017 || year_cmon == 2018) {
-      //track_recon_eff_coef = 1.12;
-      track_recon_eff_coef = 1.23; //varied up by 1sigma
-      //std::cout << "DISCARDING TRACKS BASED ON 2017p8 TRACKING INEFFICIENCY STUDY" << std::endl;
-    }
-    else {
-      std::cout << "Error: data year was not properly defined." << std::endl;
-    }
-    const double track_recon_eff = 1-track_recon_eff_coef*fabs(dxybs)*fabs(dxybs);
-    const double rand_0to1 = r3->Uniform(0,1);
-    if (fabs(dxybs) < .3) {
-      if (rand_0to1 > track_recon_eff) {
-       continue;
-      }
-    }
-    else {
-      if (rand_0to1 > (1-track_recon_eff_coef*.3*.3)) {
-       continue;
-      }
-    }*/
-    //Alec added to here
-    
+
     int min_r = 2000000000;
     for (int i = 1; i <= 4; ++i)
       if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
@@ -741,8 +734,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       
       if (!use_cheap) return false;
 
-      //if (r3->Uniform(0,1) > 1-1.11786*dxybs*dxybs) return false; //Alec added
-      
       if (primary_vertex && (max_track_dxyipverr > 0 || max_track_d3dipverr > 0)) {
         reco::TransientTrack ttk = tt_builder->build(tk);
         if (max_track_dxyipverr > 0) {

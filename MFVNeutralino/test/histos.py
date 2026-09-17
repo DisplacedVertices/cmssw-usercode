@@ -1,26 +1,21 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
+study_20pc = True
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_btag_triggers, use_btag_vetoLepHT_triggers 
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
-#input_files(process, '/store/group/lpclonglived/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/NtupleOnnormdzULV30Bm_NoEF_20161/250122_131504/0000/ntuple_0.root')
-#input_files(process, '/store/group/lpclonglived/pkotamni/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleOnnormdzULV30Lepm_2017/250101_200106/0000/ntuple_0.root')
-input_files(process, '/uscms/home/pkotamni/work/CMSSW_10_6_27/src/JMTucker/MFVNeutralino/test/ntuple.root')
+input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
-# Hack to get around weird vertexing bug in WminusHToSSTodddd_tau10mm_M40_20162 - Uncomment when running this point
-'''
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True),
-    SkipEvent = cms.untracked.vstring("ProductNotFound"),
-)
-
-# Explicitly skip the bad event (run:lumi:event)
-process.source.eventsToSkip = cms.untracked.VEventRange("1:1:189")
-'''
+# Workaround for weird vertexing bug that appears very rarely in signal MC
+if is_mc : 
+    process.options = cms.untracked.PSet(
+        wantSummary = cms.untracked.bool(True),
+        SkipEvent = cms.untracked.vstring("ProductNotFound"),
+    )
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -29,25 +24,27 @@ process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 #process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
-import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
-SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
+#import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+#SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
-#process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
+# If we want these, we should at minimum make use of the Ntk criteria (to avoid accidentally looking at presel plots w/ 5-tracks per vertex before unblinding).
+# I think (but have not dug to confirm) that "presel" includes the AnalysisCuts w/o any vertex cuts while "no cuts" is purely the event filter + possibly trigger
+#process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
+#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts ) # just trigger for now
+#
+process.Ntk3mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False) # (used by "process.EX1pPreSel" below)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.Ntk3mfvEventHistosPreSel)
 
-process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts ) # just trigger for now
+#nm1s = [
+#    ('Ntracks', 'min_ntracks = 0'),
+#    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
+#    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
+#    ]
 
-process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
-
-nm1s = [
-    ('Ntracks', 'min_ntracks = 0'),
-    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
-    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
-    ]
+nm1s = []
 
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
@@ -68,6 +65,7 @@ for ntk in ntks:
         EX1 = 'Ntk4or5'
     else:
         EX1 = 'Ntk%i' % ntk
+        EX3 = ''
 
     if EX1:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
@@ -81,16 +79,13 @@ for ntk in ntks:
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
 process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2EX3)
-process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2EX3min_svdist2d = 0.04)
 
 process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
-process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
 
 process.EX1mfvVertexHistosPreSel     = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
-process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
 process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel * process.EX1mfvVertexHistosPreSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
@@ -99,7 +94,6 @@ process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx 
     if 2 in nvs:
         exec '''
 process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    * process.EX1mfvEventHistosFullSel    * process.EX1mfvVertexHistosFullSel)
-process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
     for name, cut in nm1s:
@@ -146,26 +140,41 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
+    if use_BTag_triggers or use_DispJet_triggers:
+        sys.exit('In histos.py, use_BTag_triggers and use_DispJet_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). After merging the orthogonal data streams, use use_BTagDispJet_vetoLepHT_triggers.')
+
     if use_Muon_triggers or use_Electron_triggers :
         sys.exit('In histos.py, use_Muon_triggers and use_Electron_triggers should not be used (they are only needed for the MiniAOD -> ntuple step). Instead, do use_Lepton_triggers.')
 
-    if  use_btag_vetoLepHT_triggers:
-        samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True) # BTagCSV_data=True, DisplacedJet_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+    if  use_BTagDispJet_vetoLepHT_triggers:
+        if is_mc :
+            samples = pick_samples(dataset, all_bjet_signal=True, qcd=True, ttbar=True)
+            pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        else :
+            samples = pick_samples(dataset, BTagCSV_data=True, DisplacedJet_data=True)
+            pset_modifier = None
 
     elif use_Lepton_triggers :
-        samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True) # Muon_data=True, Electron_data=True when we include data
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        if is_mc :
+            samples = pick_samples(dataset, all_lep_signal=True, qcd_lep=True, leptonic=True, ttbar=True, diboson=True)
+            pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
+        else :
+            samples = pick_samples(dataset, Muon_data=True, Electron_data=True)
+            pset_modifier = None
 
     else :
         print 'trigger scenario not set properly in minitree.py, please double check! Submitting some jobs nonetheless...'
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
 
-    json_filename = 'ana_run2_displacement_trigger.json' if use_btag_vetoLepHT_triggers else 'ana_run2.json'
+    json_filename = 'ana_run2_displacement_trigger.json' if use_BTagDispJet_vetoLepHT_triggers else 'ana_run2.json'
+    if study_20pc : 
+        json_filename = json_filename.replace(".json", "_20pc.json")
+    print "json file is:", json_filename
+
     set_splitting(samples, dataset, 'histos', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('Histos_' + version,
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
