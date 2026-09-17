@@ -318,12 +318,6 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
             sig_cts_hname = "h_sig%s_ngen_perbin_%s" % (sig_id, year)
             h_sig_cts = f.Get(sig_cts_hname)
 
-            _h_ngen     = f.Get("h_sig%s_ngen_total_%s"    % (sig_id, year))
-            _h_sigyield = f.Get("h_sig%s_sigyield_total_%s" % (sig_id, year))
-            _ngen_total     = _h_ngen.GetBinContent(1)     if _h_ngen     else 0.0
-            _sigyield_total = _h_sigyield.GetBinContent(1) if _h_sigyield else 0.0
-            _w_empty = (_sigyield_total / _ngen_total) if _ngen_total > 0 else 0.0
-
             for i in range(nbins):
                 strls = []
                 for j in range(nbins):
@@ -334,7 +328,16 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                         if count > 0:
                             kappa = sig_norm_ls[j] / count
                         else:
-                            kappa = _w_empty
+                            if h_sig_cts.Integral()>0.0:
+                                kappa = sum(sig_norm_ls) / h_sig_cts.Integral()
+                            else:
+                                max_meanw = -1.0
+                                for sig_i in range(len(siggrp.sig_ls)):
+                                    _h_sigw = f.Get("h_sig%s_allw_subsig_%s_sig%d" % (sig_id, year, sig_i))
+                                    this_meanw = _h_sigw.GetMean() if _h_sigw else 0.0
+                                    if this_meanw > max_meanw:
+                                        max_meanw = this_meanw
+                                kappa = max_meanw
                         strls.append(kappa)
                 new_lines += turn_info_to_line(
                     dc_names[i],

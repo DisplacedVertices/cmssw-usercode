@@ -23,19 +23,18 @@ signal:
     file_key: "condor_*tau*/minitree_0.root"
 
 # ---- Input background paths ---------------------------------
-# Local copies of the MC Run 2 background templates (copied from alecduqu's One2Two).
+# Local copies of the MC background templates (copied from alecduqu's One2Two), per year.
 # Per-year files (2v_from_jets_{year}_5track_default_*.root) are also present in
-# BackgroundTemplates/{lep,bjet}/ for reference; only the run2-combined files are
-# currently used (no {year} placeholder in filename → .format(year) is a no-op).
+# BackgroundTemplates/{lep,bjet}/; The code will substitute the year into the filename pattern.
 # TODO: replace with data-driven per-year estimates when available after unblinding.
 # The folder is the required --bkg-template-dir argument; only the filename lives here.
 # BackgroundTemplates_EXAMPLE/ in this directory is a reference copy, not an input --
 # point --bkg-template-dir at your own templates.
 background:
   lep:
-    filename: "2v_from_jets_run2_5track_default_ULV30Lepm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30Lepm.root"
   bjet:
-    filename: "2v_from_jets_run2_5track_default_ULV30BvetoLHTm.root"
+    filename: "2v_from_jets_{}_5track_default_ULV30BvetoLHTm.root"
 
 # ---- Output paths -------------------------------------------
 # root_output: the intermediate ROOT file holding histograms
@@ -54,11 +53,6 @@ datacard_output:
 nuisance_tables:
   vtx_reco_TM:    "NuisTabStore_TrkMvr/pickle"
   disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
-  tk_reco_eff:
-    base: "NuisTabStore_TrkRec/"
-    ct_prefix: "ct_pickle"
-    up_prefix: "up_pickle"
-    dn_prefix: "dn_pickle"
   fac_scale_VH_csv: "TheoryTables/fac_scale_shape_bins.csv"
 
 # ---- Observed events (set to 0 for blind analysis) -----------
