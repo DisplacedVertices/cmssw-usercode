@@ -1,0 +1,63 @@
+# ============================================================
+# Limit framework configuration
+# Edit paths and runtime settings here. Physics configuration
+# (signal groupings, nuisance definitions) lives in script_configs.py.
+# ============================================================
+
+# Runtime: override with --year and --channel CLI flags
+year: "2018"    # one of: 20161, 20162, 2017, 2018
+channel: "lep"  # "lep" or "bjet"
+debug: true     # verbose output while running
+
+# ---- Binning -------------------------------------------------
+# Units: cm.  Four bins: [0, 0.1, 0.4, 2.0, 4.0] cm
+bins: [0., 0.1, 0.4, 2.0, 4.0]
+nbins: 4
+
+# ---- Input signal MiniTrees ---------------------------------
+# The folder is the required --minitree-dir argument; only the glob pattern lives here.
+signal:
+  lep:
+    file_key: "condor_*tau*/minitree_0.root"
+  bjet:
+    file_key: "condor_*tau*/minitree_0.root"
+
+# ---- Input background paths ---------------------------------
+# Local copies of the MC background templates (copied from alecduqu's One2Two), per year.
+# Per-year files (2v_from_jets_{year}_5track_default_*.root) are also present in
+# BackgroundTemplates/{lep,bjet}/; The code will substitute the year into the filename pattern.
+# TODO: replace with data-driven per-year estimates when available after unblinding.
+# The folder is the required --bkg-template-dir argument; only the filename lives here.
+# BackgroundTemplates_EXAMPLE/ in this directory is a reference copy, not an input --
+# point --bkg-template-dir at your own templates.
+background:
+  lep:
+    filename: "2v_from_jets_{}_5track_default_ULV30Lepm.root"
+  bjet:
+    filename: "2v_from_jets_{}_5track_default_ULV30BvetoLHTm.root"
+
+# ---- Output paths -------------------------------------------
+# root_output: the intermediate ROOT file holding histograms
+# datacard_output: the final .txt combine datacards
+# Both are made under the required --out-dir argument, as <out-dir>/<subdir>/<channel>/
+root_output:
+  subdir: "LimitsInput_4bin"
+  filename: "limitsinput"
+
+datacard_output:
+  subdir: "Datacards_4bin"
+  prefix: "Datacard_"
+  suffix: ".txt"
+
+# ---- Nuisance table paths (relative to ForLimits/ directory) ----
+nuisance_tables:
+  vtx_reco_TM:    "NuisTabStore_TrkMvr/pickle"
+  disp_trig_uncerts: "NuisTabStore_7p4p1/pickle"
+  fac_scale_VH_csv: "TheoryTables/fac_scale_shape_bins.csv"
+
+# ---- Observed events (set to 0 for blind analysis) -----------
+observations:
+  "20161": [0, 0, 0, 0]
+  "20162": [0, 0, 0, 0]
+  "2017":  [0, 0, 0, 0]
+  "2018":  [0, 0, 0, 0]

@@ -1,4 +1,7 @@
 *.root
+*.pkl
+*.png
+*.pdf
 out.*
 crab
 crab.cfg
@@ -6,3 +9,22 @@ plots
 events_to_debug
 temp
 *.haddlog
+ForLimits/Datacards/
+ForLimits/LimitsInput/
+ForLimits/CombineOutput/
+ForLimits/CombineCondor/
+ForLimits/LimitPlots/
+ForLimits/BinningStudy/datacards/
+ForLimits/BinningStudy/datacards_systs/
+ForLimits/BinningStudy/combine_output/
+ForLimits/BinningStudy/combine_output_systs/
+ForLimits/BinningStudy/condor_hybridnew/
+ForLimits/BinningStudy/root_output/
+ForLimits/BinningStudy/__pycache__/
+ForLimits/BinningStudy/*.pyc
+ForLimits/BinningStudy/*.log
+ForLimits/BinningStudy/*.err
+
+# Reference copy of the background templates, shipped so people can see the layout
+!ForLimits/BackgroundTemplates_EXAMPLE/*/*.root
+!ForLimits/NuisTabStore_*/*.pkl
