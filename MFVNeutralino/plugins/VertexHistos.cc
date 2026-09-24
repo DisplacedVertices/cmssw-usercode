@@ -86,7 +86,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_svdist2d_no_shared_jets;
   TH1F* h_absdeltaphi01_shared_jets;
   TH1F* h_absdeltaphi01_no_shared_jets;
-  */
 
   TH2F* h_sv_track_corr_2d[sv_num_indices][corr_2d_num_axes][corr_2d_num_axes];
 
@@ -116,6 +115,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_npxlayers[sv_num_indices][eta_num_regions];
   TH1F* h_sv_track_injet[sv_num_indices][eta_num_regions];
   TH1F* h_sv_track_inpv[sv_num_indices][eta_num_regions];
+  */
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
@@ -365,7 +365,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
     h_sv_bs2derr_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 500, 0, 2.5, 100, 0, 0.05);
     h_pvrho_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_pvrho_sv_%s_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);dist2d(PV, beamspot)) (cm)", exc), 5000, 0, 2.5, 200, 0, 0.1);
-    */
 
     const std::string vtx_pt_tag = remove_vertex_w_low_pt_track ? pt_region_tags[int(pt_keep)] : ""; // Throw out vtx with low-pT tracks?
     for (int i = 0; i < corr_2d_num_axes; ++i) {
@@ -427,11 +426,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       h_sv_track_nstlayers[j][i] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nstlayers%s", exc, eta_region_tags[i]), TString::Format(";%s %s SV tracks number of strip layers", eta_region_names[i], exc), 20, 0, 20);
       h_sv_track_injet[j][i] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet%s", exc, eta_region_tags[i]), TString::Format(";%s %s SV tracks in-jet?", eta_region_names[i], exc), 2, 0, 2);
       h_sv_track_inpv[j][i] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv%s", exc, eta_region_tags[i]), TString::Format(";%s %s SV tracks in-PV?", eta_region_names[i], exc), 10, -1, 9);
-      */
     }
+      */
   }
-
   /*
+
   h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
@@ -822,6 +821,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         aux.track_dz[i],
         aux.track_dz_err(i),
       };
+      /*
       for (int j=0; j < corr_2d_num_axes; ++j) {
         for (int k=0; k < corr_2d_num_axes; ++k) {
           if (j==k) {continue;};
@@ -854,6 +854,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       vtx_hist_fill_eta(h_sv_track_nstlayers[sv_all], aux.track_eta[i], aux.track_nstlayers(i), w);
       vtx_hist_fill_eta(h_sv_track_injet[sv_all], aux.track_eta[i], aux.track_injet[i], w);
       vtx_hist_fill_eta(h_sv_track_inpv[sv_all], aux.track_eta[i], aux.track_inpv[i], w);
+      */
     }
 
     if (max_ntrackplots > 0) {
