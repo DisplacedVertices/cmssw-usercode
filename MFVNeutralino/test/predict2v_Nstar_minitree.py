@@ -117,7 +117,7 @@ for ntk in 3,4,5:
         eratl, erath =  [n2v_temp / 1 for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
     else:
         eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
-    print '%5d %11.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %.2f PI: [%4.2f, %4.2f]' % (ntk, n1v, en1v, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+    print '%5d %11.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, en1v, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
 print
 print '%8s %16s %16s %19s %15s %35s' % ('ntracks', 'n1v0', 'n1v1', 'pred n2v', 'n2v', 'ratio')
 
@@ -150,4 +150,4 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     erat = rat * np.sqrt((eeffn2v/effn2v)**2 + frac2_ratv0v1)
     eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
 
-    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %4.2f PI: [%4.2f, %4.2f]' % (ntkspervtx[0], 'x', ntkspervtx[1], n1v0, en1v0, n1v1, en1v1, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntkspervtx[0], 'x', ntkspervtx[1], n1v0, en1v0, n1v1, en1v1, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
