@@ -91,8 +91,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_decay_llp0_llp1_quark_sumpt;
   TH2F* h_sum_matched_jetpt_llp;
 
+  */
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
+  /*
 
   TH1F* h_npu;
 
@@ -133,6 +135,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvsmindz_minscore;
   TH1F* h_pvsmaxdz_minscore;
 
+  */
   TH1F* h_njets;
   TH1F* h_njets20;
   static const int MAX_NJETS = 10;
@@ -151,10 +154,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetmu_pairdphi;
   TH1F* h_jetmu_pairdr;
   
+  /*
   TH1F* h_met;
   TH1F* h_metphi;
   TH1F* h_metnomu;
   TH1F* h_metnomuphi;
+  */
 
   TH1F* h_nbtags[3];
   TH2F* h_nbtags_v_bquark_code[3];
@@ -168,6 +173,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bjet_phi;
   TH1F* h_bjet_energy;
   TH1F* h_bjet_pairdphi;
+  /*
 
 
   TH1F* h_nmuons;
@@ -245,12 +251,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_genmatchele_dBV;
   TH1F* h_dau_genmu_dBV;
   TH1F* h_dau_genele_dBV;
+  */
 
   TH2F* h_vertex_seed_track_corr_2d[corr_2d_num_axes][corr_2d_num_axes];
   
-  */
   TH1F* h_n_vertex_seed_tracks[eta_num_regions];
-  /*
   TH1F* h_vertex_seed_track_chi2dof[eta_num_regions];
   TH1F* h_vertex_seed_track_q[eta_num_regions];
   TH1F* h_vertex_seed_track_pt[eta_num_regions];
@@ -276,7 +281,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_vertex_seed_track_npxlayers[eta_num_regions];
   TH1F* h_vertex_seed_track_nstlayers[eta_num_regions];
   TH1F* h_vertex_seed_track_nlayers[eta_num_regions];
-  */
 
 };
 
@@ -341,6 +345,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_sum_matched_jetpt_llp = fs->make<TH2F>("h_sum_matched_jetpt_llp", ";max sum p_{T} of LLP-matched jets (GeV);min sum p_{T} of LLP-matched jets (GeV)", 100, 0, 1000, 100, 0, 1000);
 
 
+  */
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
 
@@ -354,6 +359,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
   }
+  /*
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 120, 0, 120);
 
@@ -394,6 +400,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvsmindz_minscore = fs->make<TH1F>("h_pvmindz_minscore", ";min primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
   h_pvsmaxdz_minscore = fs->make<TH1F>("h_pvmaxdz_minscore", ";max primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
 
+  */
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
   h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
   for (int i = 0; i < MAX_NJETS+1; ++i) {
@@ -415,19 +422,15 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetmu_pairdr = fs->make<TH1F>("h_jetmu_pairdr", ";jet muon pair #DeltaR (rad);jetmu pairs/.063", 100, 0, 6.3);
 
   // pT filtering
-  */
   const std::string seed_track_pt_tag = filter_seed_tracks_w_low_pt ? pt_region_tags[int(pt_keep)] : "";
-  /*
   for (int i=0; i < corr_2d_num_axes; ++i) {
     for (int j=0; j < corr_2d_num_axes; ++j) {
       h_vertex_seed_track_corr_2d[i][j] = fs->make<TH2F>(TString::Format("h_vertex_seed_track_corr_2d%s_vs%s%s", corr_2d_tags[i], corr_2d_tags[j], seed_track_pt_tag.c_str()), TString::Format(";all seed track %s;all seed track %s", corr_2d_ax_labels[i], corr_2d_ax_labels[j]), corr_2d_bins[i][0], corr_2d_bins[i][1], corr_2d_bins[i][2], corr_2d_bins[j][0], corr_2d_bins[j][1], corr_2d_bins[j][2]);
     }
   }
   h_vertex_seed_track_eta = fs->make<TH1F>(TString::Format("h_vertex_seed_track_eta%s", seed_track_pt_tag.c_str()), ";all seed track #eta;tracks/0.052", 100, -2.6, 2.6);
-  */
   for (int i = 0; i < eta_num_regions; ++i) {
     h_n_vertex_seed_tracks[i] = fs->make<TH1F>(TString::Format("h_n_vertex_seed_tracks%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s # all seed tracks;events", eta_region_names[i]), 100, 0, 100);
-    /*
     h_vertex_seed_track_chi2dof[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_chi2dof%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track #chi^{2}/dof;tracks/1", eta_region_names[i]), 10, 0, 10);
     h_vertex_seed_track_q[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_q%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track charge;tracks", eta_region_names[i]), 3, -1, 2);
     h_vertex_seed_track_pt[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_pt%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track p_{T} (GeV);tracks/GeV", eta_region_names[i]), 600, 0, 300);
@@ -449,17 +452,17 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_vertex_seed_track_npxlayers[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_npxlayers%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track # pixel layers;tracks", eta_region_names[i]), 10, 0, 10);
     h_vertex_seed_track_nstlayers[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_nstlayers%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track # strip layers;tracks", eta_region_names[i]), 20, 0, 20);
     h_vertex_seed_track_nlayers[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_track_nlayers%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s all seed track # layers;tracks", eta_region_names[i]), 30, 0, 30);
-    */
   }
-  /*
   // h_vertex_seed_track_pt_barrel = fs->make<TH1F>("h_vertex_seed_track_pt_barrel", ";all seed track p_{T} (GeV) barrel;tracks/GeV", 300, 0, 300);
   // h_vertex_seed_track_pt_endcap = fs->make<TH1F>("h_vertex_seed_track_pt_endcap", ";all seed track p_{T} (GeV) endcap;tracks/GeV", 300, 0, 300);
   h_vertex_seed_track_phi_v_eta = fs->make<TH2F>(TString::Format("h_vertex_seed_track_phi_v_eta%s", seed_track_pt_tag.c_str()), ";all seed track #eta;all seed track #phi", 26, -2.6, 2.6, 24, -M_PI, M_PI);
 
+  /*
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 500, 0, 2500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_metnomu = fs->make<TH1F>("h_metnomu", ";METNoMu (GeV);events/5 GeV", 500, 0, 2500);
   h_metnomuphi = fs->make<TH1F>("h_metnomuphi", ";METNoMu #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  */
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
   for (int i = 0; i < 3; ++i) {
@@ -863,6 +866,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  */
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -873,6 +877,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
     if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
   }
+  /*
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -927,6 +932,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_pvsmaxdz_minscore->Fill(maxdz_minscore, w);
   }
 
+  */
   h_njets->Fill(mevent->njets(), w);
   h_njets20->Fill(mevent->njets(20), w);
 
@@ -952,6 +958,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }
+  /*
 
   std::vector<float> all_lep_sigmadxy;
   std::vector<float> all_lep_pt;
@@ -1147,6 +1154,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_sellepton_nsigma_v_pt->Fill(all_sellep_pt[i], all_sellep_sigmadxy[i]);
     }
   }
+  */
   
   // // now to check the relation between jets and electrons/muons
   // // only considering selected leptons (pt, eta, iso) 
@@ -1188,11 +1196,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
   }
+  /*
   
   h_met->Fill(mevent->met(), w);
   h_metphi->Fill(mevent->metphi(), w);
   h_metnomu->Fill(mevent->metNoMu(), w);
   h_metnomuphi->Fill(mevent->metNoMuphi(), w);
+  */
 
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
@@ -1226,7 +1236,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  */
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
   std::vector<int> track_which_jet;
   
@@ -1245,7 +1254,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < eta_num_regions; ++i) {
     h_n_vertex_seed_tracks[i]->Fill(n_vertex_seed_tracks_eta[i], w);
   }
-  /*
   // h_n_vertex_seed_tracks->Fill(n_vertex_seed_tracks, w);
   for (size_t i = 0; i < n_vertex_seed_tracks; ++i) {
     if (filter_seed_tracks_w_low_pt && get_general_pt_region(mevent->vertex_seed_track_pt(i)) == pt_none) {
@@ -1327,7 +1335,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_nseedtrack[i]->Fill(n_seedtrack, w);
   }
   h_jet_nseedtrack[MAX_NJETS]->Fill(njet_seedtrack, w);
-  */
 }
 
 DEFINE_FWK_MODULE(MFVEventHistos);
