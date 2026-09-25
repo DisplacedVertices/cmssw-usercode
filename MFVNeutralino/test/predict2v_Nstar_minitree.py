@@ -102,23 +102,22 @@ print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
     n2v, en2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
-    n2v_poisson = poisson_interval(n2v)
+    n2v_poisson = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1v = n1v/sum_n1v
-    eeffn1v = np.sqrt((effn1v*(1.0-effn1v))/sum_n1v)
+    eeffn1v = np.sqrt(((1.0-2*effn1v)*en1v**2+effn1v**2*sum2_en1v) / sum_n1v**2)
     pred = (effn1v**2) * sum_n2v
     err_rat2 = 2*(effn1v**2)*(eeffn1v/effn1v)
-    if sum_n2v == 0:
-        pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/1)**2 + (err_rat2/(effn1v**2))**2))
-    else:
-        pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
+    pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
     epred = pred_n2v_propagated_stat_err
+    effn2v = n2v/sum_n2v
+    eeffn2v = np.sqrt(((1.0-2*effn2v)*en2v**2+effn2v**2*sum2_en2v) / sum_n2v**2)
+    rat = n2v/pred
+    erat = rat * np.sqrt( (eeffn2v/effn2v)**2 + 4*(eeffn1v/effn1v)**2 )
     if pred == 0:
-        rat, erat = interval_to_vpme(*propagate_ratio(n2v, 1, en2v, epred))
-        eratl, erath =  [n2v_temp / 1 for n2v_temp in n2v_poisson]    
+        eratl, erath =  [n2v_temp / 1 for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
     else:
-        rat, erat = interval_to_vpme(*propagate_ratio(n2v, pred, en2v, epred))
-        eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] 
-    print '%5d %11.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %.2f PI: [%4.2f, %4.2f]' % (ntk, n1v, en1v, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+        eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
+    print '%5d %11.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, en1v, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
 print
 print '%8s %16s %16s %19s %15s %35s' % ('ntracks', 'n1v0', 'n1v1', 'pred n2v', 'n2v', 'ratio')
 
@@ -134,26 +133,21 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
 
     n1v0, en1v0 = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[0] == 5 else '%s' % tracks[0])), 2, 2, x_are_bins=True)
     n1v1, en1v1 = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[1] == 5 else '%s' % tracks[1])), 2, 2, x_are_bins=True)
+    n1v_oth = sum_n1v - n1v0 - n1v1
+    en1v_oth = np.sqrt(sum2_en1v - en1v0**2 - en1v1**2)
     
     n2v, en2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('%sexact' % ntk)))
 
-    n2v_poisson = poisson_interval(n2v)
+    n2v_poisson = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1v0 = n1v0/sum_n1v
-    eeffn1v0 = np.sqrt((effn1v0*(1.0-effn1v0))/sum_n1v)
     effn1v1 = n1v1/sum_n1v
-    eeffn1v1 = np.sqrt((effn1v1*(1.0-effn1v1))/sum_n1v)
+    effn2v = n2v/sum_n2v
+    eeffn2v = np.sqrt(((1.0-2*effn2v)*en2v**2+effn2v**2*sum2_en2v) / sum_n2v**2)
     pred = (2*(effn1v0)*(effn1v1))*sum_n2v
-    err_ratv0v1 = effn1v0*effn1v0*np.sqrt( (eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 )
-    if sum_n2v == 0:
-        pred_n2v_propagated_stat_err =  pred * (np.sqrt( ( np.sqrt(sum2_en2v)/1)**2 + (err_ratv0v1/(effn1v0*effn1v1))**2))
-    else:
-        pred_n2v_propagated_stat_err =  pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_ratv0v1/(effn1v0*effn1v1))**2))
-    epred = pred_n2v_propagated_stat_err
-    if pred == 0:
-        rat, erat = interval_to_vpme(*propagate_ratio(n2v, 1, en2v, epred))
-        eratl, erath =  [n2v_temp / 1 for n2v_temp in n2v_poisson]
-    else:
-        rat, erat = interval_to_vpme(*propagate_ratio(n2v, pred, en2v, epred))
-        eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] 
+    frac2_ratv0v1 = (1.0-2*effn1v0)**2*(en1v0/n1v0)**2 + (1.0-2*effn1v1)**2*(en1v1/n1v1)**2 + 4*(en1v_oth/sum_n1v)**2
+    epred = pred * np.sqrt(sum2_en2v/(sum_n2v)**2 + frac2_ratv0v1)
+    rat = n2v/pred
+    erat = rat * np.sqrt((eeffn2v/effn2v)**2 + frac2_ratv0v1)
+    eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
 
-    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %4.2f PI: [%4.2f, %4.2f]' % (ntkspervtx[0], 'x', ntkspervtx[1], n1v0, en1v0, n1v1, en1v1, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntkspervtx[0], 'x', ntkspervtx[1], n1v0, en1v0, n1v1, en1v1, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
