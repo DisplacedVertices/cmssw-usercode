@@ -7,7 +7,7 @@ ntuple_version_ = '_tag002' # this is our ntuple numbering scheme, and we should
 # The orthogonal (BTag/JetHT and DispJet data streams) and (Electron and Muon data streams) 
 # are each merged again before
 # these common offline analysis cuts are applied.
-use_BTagDispJet_vetoLepHT_triggers = False
+use_btag_vetoLepHT_triggers = False
 use_Lepton_triggers = True
 
 # trigger schemes for data, to avoid double counting of PDs
