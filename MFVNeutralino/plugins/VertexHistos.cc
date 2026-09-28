@@ -832,7 +832,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       vtx_hist_fill_eta(h_sv_track_pt_err[sv_all], aux.track_eta[i], aux.track_pt_err[i], w);
       vtx_hist_fill_eta(h_sv_track_eta_err[sv_all], aux.track_eta[i], aux.track_eta_err(i), w);
       vtx_hist_fill_eta(h_sv_track_phi_err[sv_all], aux.track_eta[i], aux.track_phi_err(i), w);
-      vtx_hist_fill_eta(h_sv_track_dxy_err[sv_all], aux.track_eta[i], aux.track_dxy_rescale_err(i), w);
+      vtx_hist_fill_eta(h_sv_track_dxy_err[sv_all], aux.track_eta[i], aux.track_dxy_err(i), w);
       vtx_hist_fill_eta(h_sv_track_dz_err[sv_all], aux.track_eta[i], aux.track_dz_err(i), w);
       vtx_hist_fill_eta(h_sv_track_nsigmadxy[sv_all], aux.track_eta[i], aux.track_dxy_nsigma(i), w);
       vtx_hist_fill_eta(h_sv_track_chi2dof[sv_all], aux.track_eta[i], aux.track_chi2dof(i), w);
