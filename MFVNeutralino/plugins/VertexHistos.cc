@@ -828,6 +828,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           h_sv_track_corr_2d[sv_all][j][k]->Fill(corr_2d_entries[j], corr_2d_entries[k], w);
         }
       }
+      /*
       vtx_hist_fill_eta(h_sv_track_weight[sv_all], aux.track_eta[i], aux.track_weight(i), w);
       vtx_hist_fill_eta(h_sv_track_q[sv_all], aux.track_eta[i], aux.track_q(i), w);
       vtx_hist_fill_eta(h_sv_track_pt[sv_all], aux.track_eta[i], aux.track_pt(i), w);
@@ -854,6 +855,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       vtx_hist_fill_eta(h_sv_track_nstlayers[sv_all], aux.track_eta[i], aux.track_nstlayers(i), w);
       vtx_hist_fill_eta(h_sv_track_injet[sv_all], aux.track_eta[i], aux.track_injet[i], w);
       vtx_hist_fill_eta(h_sv_track_inpv[sv_all], aux.track_eta[i], aux.track_inpv[i], w);
+      */
     }
 
     if (max_ntrackplots > 0) {
