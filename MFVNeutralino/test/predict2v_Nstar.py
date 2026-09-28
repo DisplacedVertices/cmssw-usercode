@@ -5,8 +5,8 @@ import numpy as np
 
 #lep = 'lep' in sys.argv
 #bjet = 'bjet' in sys.argv
-lep = False
-bjet = True
+lep = True
+bjet = False
 
 if bjet :
     presel_path = '~/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/' 
@@ -16,8 +16,8 @@ if lep :
     #sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
     #presel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
     #sel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
-    presel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
-    sel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
+    presel_path = '~/nobackup/crabdirs/26-09-24-Histos_tag004Lepm-NoSumptM5Cuts-OneEvtPlot/'
+    sel_path = '~/nobackup/crabdirs/26-09-24-Histos_tag004Lepm-NoSumptM5Cuts-OneEvtPlot/'
 #data = bool_from_argv('data')
 data = False
 year = '2018' if len(sys.argv) < 2 else sys.argv[1]
@@ -33,7 +33,7 @@ else:
         fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
     if lep :
         #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
-        fn, presel_scale = 'background_%s.root' % year, 1.
+        fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
         #fn, presel_scale = 'ttbar_%s.root' % year, 1.
 def propagate_product(x, y, ex, ey):
     p = x * y
