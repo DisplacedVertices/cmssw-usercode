@@ -5,12 +5,12 @@ import numpy as np
 
 #lep = 'lep' in sys.argv
 #bjet = 'bjet' in sys.argv
-lep = True
-bjet = False
+lep = False
+bjet = True
 
 if bjet :
-    presel_path = '~/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/' 
-    sel_path = '~/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/'  
+    presel_path = '~/nobackup/crabdirs/26-09-01-Histos_tag004BvetoLHTm-PltBtagJetTrig/' 
+    sel_path = '~/nobackup/crabdirs/26-09-01-Histos_tag004BvetoLHTm-PltBtagJetTrig/'  
 if lep :
     #presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
     #sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
