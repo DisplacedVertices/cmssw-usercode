@@ -107,8 +107,10 @@ for ntk in 3,4,5:
     eeffn1v = np.sqrt(((1.0-2*effn1v)*en1v**2+effn1v**2*sum2_en1v) / sum_n1v**2)
     pred = (effn1v**2) * sum_n2v
     err_rat2 = 2*(effn1v**2)*(eeffn1v/effn1v)
-    pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
-    epred = pred_n2v_propagated_stat_err
+    if sum_n2v == 0:
+        epred = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/1)**2 + (err_rat2/(effn1v**2))**2)) 
+    else:
+        epred = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
     effn2v = n2v/sum_n2v
     eeffn2v = np.sqrt(((1.0-2*effn2v)*en2v**2+effn2v**2*sum2_en2v) / sum_n2v**2)
     rat = n2v/pred
@@ -145,7 +147,10 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     eeffn2v = np.sqrt(((1.0-2*effn2v)*en2v**2+effn2v**2*sum2_en2v) / sum_n2v**2)
     pred = (2*(effn1v0)*(effn1v1))*sum_n2v
     frac2_ratv0v1 = (1.0-2*effn1v0)**2*(en1v0/n1v0)**2 + (1.0-2*effn1v1)**2*(en1v1/n1v1)**2 + 4*(en1v_oth/sum_n1v)**2
-    epred = pred * np.sqrt(sum2_en2v/(sum_n2v)**2 + frac2_ratv0v1)
+    if sum_n2v == 0:
+        epred = pred * np.sqrt(sum2_en2v/(1)**2 + frac2_ratv0v1)
+    else:
+        epred = pred * np.sqrt(sum2_en2v/(sum_n2v)**2 + frac2_ratv0v1)
     rat = n2v/pred
     erat = rat * np.sqrt((eeffn2v/effn2v)**2 + frac2_ratv0v1)
     eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] # FIXME - Do NOT use for MC
