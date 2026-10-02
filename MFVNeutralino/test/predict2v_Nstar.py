@@ -40,10 +40,10 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
+npresel, err_npresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
 
 print 'year:', year
-print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
+print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
 print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
 #See these evernotes(https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579) for the details of this new-simplified calculation 
@@ -97,7 +97,7 @@ for ntk in 3,4,5:
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
     print '%8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
-print '%16s %16s %19s %15s %35s' % ('n1v0', 'n1v1', 'pred n2v', 'n2v', 'ratio')
+print '%16s %16s %19s %15s %35s' % ('n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     tracks = [int(i) for i in ntk if i.isdigit()]
