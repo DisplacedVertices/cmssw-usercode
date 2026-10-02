@@ -12,10 +12,6 @@ if bjet :
     presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/' 
     sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/'  
 if lep :
-    #presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
-    #sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_OnnormdzULV30Lepm'
-    #presel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
-    #sel_path = '~/crab_dirs/Histos_LepIPCut_Lepton_SF_2018correctionsLepm_noef'
     presel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
     sel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
 #data = bool_from_argv('data')
@@ -32,9 +28,7 @@ else:
     if bjet :
         fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
     if lep :
-        #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
-        fn, presel_scale = 'background_%s.root' % year, 1.
-        #fn, presel_scale = 'ttbar_%s.root' % year, 1.
+        fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
 def propagate_product(x, y, ex, ey):
     p = x * y
     e = p * ((ex / x)**2 + (ey / y)**2)**0.5
@@ -46,29 +40,29 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
+npresel, err_npresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
 
 print 'year:', year
-print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
+print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
 print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
 #See these evernotes(https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579) for the details of this new-simplified calculation 
-sum_n1v = 0 #total input(MC or observed) 1-vtx events
-sum_n2v = 0 #total input(MC or observed) 2-vtx events
-sum2_en2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
-sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
+tot_n1v = 0 #total input(MC or observed) 1-vtx events
+tot_n2v = 0 #total input(MC or observed) 2-vtx events
+var_n1v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
+var_n2v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     
-    sum_n1v += n1v
-    sum_n2v += n2v 
-    sum2_en2v += (en2v**2)
-    sum2_en1v += (en1v**2)
+    tot_n1v += n1v
+    tot_n2v += n2v
+    var_n2v += (err_n2v**2)
+    var_n1v += (err_n1v**2)
 
-print 'n1 = %8.0f'%(sum_n1v)
-print 'en1 = %f'%(math.sqrt(sum2_en1v)) 
+print 'n1 = %8.0f'%(tot_n1v)
+print 'err_n1 = %f'%(math.sqrt(var_n1v))
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     tracks = [int(i) for i in ntk if i.isdigit()]
     ntktot = sum(tracks)
@@ -78,28 +72,32 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
         else:
             tracks[i] = 'Ntk%s' % n
     print('%smfvEventHistosFullSel/h_npu' % ntk)
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
-    sum_n2v += n2v
-    sum2_en2v += (en2v**2) 
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    tot_n2v += n2v
+    var_n2v += (err_n2v**2)
 
-print 'n2 = %8.0f'%(sum_n2v)
-print 'en2 = %f'%(math.sqrt(sum2_en2v)) 
+print 'n2 = %8.0f'%(tot_n2v)
+print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
+
+print 'Warning: do NOT use the values marked PI (Poissonian Interval) for anything except data.'
 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v_poisson = poisson_interval(n2v)
-    effn1v = n1v/sum_n1v
-    eeffn1v = np.sqrt((effn1v*(1.0-effn1v))/sum_n1v)
-    pred = (effn1v**2) * sum_n2v
-    err_rat2 = 2*(effn1v**2)*(eeffn1v/effn1v)
-    pred_n2v_propagated_stat_err = pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_rat2/(effn1v**2))**2)) 
-    epred = pred_n2v_propagated_stat_err
-    rat, erat = interval_to_vpme(*propagate_ratio(n2v, pred, en2v, epred))
-    eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] 
-    print '%8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %.2f PI: [%4.2f, %4.2f]' % (n1v, en1v, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
+    effn1v = n1v/tot_n1v
+    err_effn1v = np.sqrt(((1.0-2*effn1v)*err_n1v**2+effn1v**2*var_n1v) / tot_n1v**2)
+    pred = (effn1v**2) * tot_n2v
+    var_fracvNN = (2*(effn1v**2)*(err_effn1v/effn1v))**2
+    err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
+    effn2v = n2v/tot_n2v
+    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    rat = n2v/pred
+    err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
+    err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
+    print '%8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
-print '%16s %16s %19s %15s %35s' % ('n1v0', 'n1v1', 'pred n2v', 'n2v', 'ratio')
+print '%16s %16s %19s %15s %35s' % ('n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     tracks = [int(i) for i in ntk if i.isdigit()]
@@ -109,19 +107,21 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
-    n2v_poisson = poisson_interval(n2v)
-    effn1v0 = n1v0/sum_n1v
-    eeffn1v0 = np.sqrt((effn1v0*(1.0-effn1v0))/sum_n1v)
-    effn1v1 = n1v1/sum_n1v
-    eeffn1v1 = np.sqrt((effn1v1*(1.0-effn1v1))/sum_n1v)
-    pred = (2*(effn1v0)*(effn1v1))*sum_n2v
-    err_ratv0v1 = effn1v0*effn1v0*np.sqrt( (eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 )
-    pred_n2v_propagated_stat_err =  pred * (np.sqrt( ( np.sqrt(sum2_en2v)/sum_n2v)**2 + (err_ratv0v1/(effn1v0*effn1v1))**2))
-    epred = pred_n2v_propagated_stat_err    
-    rat, erat = interval_to_vpme(*propagate_ratio(n2v, pred, en2v, epred))
-    eratl, erath =  [n2v_temp / pred for n2v_temp in n2v_poisson] 
+    n1vN, err_n1vN = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
+    n1vM, err_n1vM = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
+    n1v_oth = tot_n1v - n1vN - n1vM
+    err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
+    effn1vN = n1vN/tot_n1v
+    effn1vM = n1vM/tot_n1v
+    effn2v = n2v/tot_n2v
+    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    pred = (2*(effn1vN)*(effn1vM))*tot_n2v
+    var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
+    err_pred = pred * np.sqrt(var_n2v/(tot_n2v)**2 + var_fracvNM)
+    rat = n2v/pred
+    err_rat = rat * np.sqrt((err_effn2v/effn2v)**2 + var_fracvNM)
+    err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
-    print '%8.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %4.2f PI: [%4.2f, %4.2f]' % (n1v0, en1v0, n1v1, en1v1, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
+    print '%8.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
