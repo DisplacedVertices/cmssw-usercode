@@ -103,14 +103,14 @@ def cmd_hadd_data():
             year_eras = [
             ('20161', 'BCDEF'),
             ('20162', 'FGH'),  
-            ('2017', 'CDE'), 
+            ('2017', 'CDEF'), 
             ('2018', 'ABCD'),
             ]
         elif ds == 'BTagCSV':
             year_eras = [
             ('20161', 'BCDEF'),
             ('20162', 'FGH'),  
-            ('2017', 'CDE'), 
+            ('2017', 'CDEF'), 
             ]
         elif ds == 'JetHT':
             year_eras = [
