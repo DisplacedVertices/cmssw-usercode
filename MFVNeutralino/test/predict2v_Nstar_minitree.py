@@ -66,7 +66,7 @@ print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
 tot_n1v = 0 #total input(MC or observed) 1-vtx events
 tot_n2v = 0 #total input(MC or observed) 2-vtx events
 var_n1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed)
-var_n2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
+var_n2v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
 
 for ntk in 3,4,5:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
@@ -78,7 +78,7 @@ for ntk in 3,4,5:
     var_n1v += (err_n1v**2)
 
 print 'n1 = %8.0f'%(tot_n1v)
-print 'en1 = %f'%(math.sqrt(var_n1v)) 
+print 'err_n1 = %f'%(math.sqrt(var_n1v)) 
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     tracks = [int(i) for i in ntk if i.isdigit()]
     ntktot = sum(tracks)
@@ -94,7 +94,7 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     var_n2v += (err_n2v**2) 
 
 print 'n2 = %8.0f'%(tot_n2v)
-print 'en2 = %f'%(math.sqrt(var_n2v)) 
+print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
 for ntk in 3,4,5:
