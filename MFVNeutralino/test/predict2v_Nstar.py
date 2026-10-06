@@ -46,11 +46,15 @@ print 'year:', year
 print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
 print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
-#See these evernotes(https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579) for the details of this new-simplified calculation 
+#See these evernotes for an explanation of the calculations:
+#Error of efficiencies (replacement of the Binomial error): https://www.evernote.com/client/web#/notes/b4b263d9-3aef-4116-4c27-0cb66c582ca3
+#Errors relating to N+M-trk events, and ratios: https://share.evernote.com/note/4a8218f4-569c-391d-3f91-9ed9b44ab02a
+#Descriptions of the variables used by the previous code version: https://share.evernote.com/note/a3ac74f7-7416-dda2-1015-59791328824e
+#Evernotes written by previous authors of this code: https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579
 tot_n1v = 0 #total input(MC or observed) 1-vtx events
 tot_n2v = 0 #total input(MC or observed) 2-vtx events
-var_n1v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
-var_n2v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
+var_n1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
+var_n2v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
 
 for ntk in 3,4,5:
     n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
