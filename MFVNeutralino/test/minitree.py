@@ -1,12 +1,13 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-is_mc = True # for blinding
-study_20pc = True
+is_mc = False # for blinding
+study_20pc = False
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_MET_triggers, use_Lepton_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'WplusHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #max_events(process, 100)
 input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
+#input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105610/0000/ntuple_181.root')
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
 
@@ -21,11 +22,11 @@ if is_mc :
 
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :
-    del process.pMiniTreeNtk4
-    del process.pMiniTreeNtk3or4
+    #del process.pMiniTreeNtk4
+    #del process.pMiniTreeNtk3or4
     del process.pMiniTreeNtk3or5
     del process.pMiniTreeNtk4or5
-    del process.pMiniTreeNtk3or4exact
+    #del process.pMiniTreeNtk3or4exact
     del process.pMiniTreeNtk3or5exact
     del process.pMiniTreeNtk4or5exact
     del process.pMiniTree
@@ -69,7 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('MiniTree' + version,
+    cs = CondorSubmitter('MiniTree' + version + '2_100pc_3and4trk',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
