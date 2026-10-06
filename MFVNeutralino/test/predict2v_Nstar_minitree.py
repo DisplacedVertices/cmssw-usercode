@@ -110,9 +110,9 @@ for ntk in 3,4,5:
     pred = (effn1v**2) * tot_n2v
     var_fracvNN = (2*(effn1v**2)*(err_effn1v/effn1v))**2
     if tot_n2v == 0:
-        err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/1)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2)) 
+        err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/1)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2)) # set #2-vtx events to 1
     else:
-        err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2)) 
+        err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
     effn2v = n2v/tot_n2v
     err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
     rat = n2v/pred
@@ -150,7 +150,7 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     pred = (2*(effn1vN)*(effn1vM))*tot_n2v
     var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
     if tot_n2v == 0:
-        err_pred = pred * np.sqrt(var_n2v/1 + var_fracvNM)
+        err_pred = pred * np.sqrt(var_n2v + var_fracvNM) # set #2-vtx events to 1
     else:
         err_pred = pred * np.sqrt(var_n2v/(tot_n2v)**2 + var_fracvNM)
     rat = n2v/pred
