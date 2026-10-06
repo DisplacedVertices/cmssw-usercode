@@ -1,11 +1,11 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-is_mc = True # for blinding
-study_20pc = True
+is_mc = False # for blinding
+study_20pc = False
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_Lepton_triggers, use_BTagDispJet_vetoLepHT_triggers, use_BTag_triggers, use_DispJet_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
-input_files(process, 'root://cmseos.fnal.gov//store/group/lpcdisplacedvertices/joeyr/SingleMuon/Ntuple_tag004Lepm_2018/260731_105613/0000/ntuple_221.root')
+sample_files(process, 'ttbar_2017', dataset, 1)
 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
@@ -51,7 +51,7 @@ nvs = [0,1,2]
 
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :
-    ntks = [3]
+    ntks = [3,4,7]
     nvs = [0,1,2]
 
 for ntk in ntks:
