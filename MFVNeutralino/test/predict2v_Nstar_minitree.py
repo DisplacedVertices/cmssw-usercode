@@ -18,25 +18,25 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-presel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
-sel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
+#presel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
+#sel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
 
 #btag triggers
-#presel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm'
-#sel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
 #sel_path = '/uscms/home/alecduqu/crab_dirs'
 
-data = bool_from_argv('data')
+data = True
 year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
 print("variation: %s" % varname)
 
 if data:
     #fn, presel_scale = 'SingleLepton%s.root' % year, 1.
-    fn, presel_scale = 'BTagDispl%s.root' % year, 1.
+    fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
 else:
     #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
@@ -144,8 +144,12 @@ for ntk in ntk2_ls:
 
     n1vN, err_n1vN = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[0] == 5 else '%s' % tracks[0])), 2, 2, x_are_bins=True)
     n1vM, err_n1vM = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[1] == 5 else '%s' % tracks[1])), 2, 2, x_are_bins=True)
-    n1v_oth = tot_n1v - n1vN - n1vM
-    err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
+    if not data:
+        n1v_oth = tot_n1v - n1vN - n1vM
+        err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
+    else:
+        n1v_oth = 0
+        err_n1v_oth = 0
     
     n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('%sexact' % ntk)))
 
@@ -155,7 +159,10 @@ for ntk in ntk2_ls:
     effn2v = n2v/tot_n2v
     err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
     pred = (2*(effn1vN)*(effn1vM))*tot_n2v
-    var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
+    if not data:
+        var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
+    else:
+        var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2
     if tot_n2v == 0:
         err_pred = pred * np.sqrt(var_n2v + var_fracvNM) # set #2-vtx events to 1
     else:
