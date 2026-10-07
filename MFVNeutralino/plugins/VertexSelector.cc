@@ -129,6 +129,7 @@ private:
   const int max_nsingleclusterspb025;
   const int max_nsingleclusterspb050;
   const double min_avgnconstituents;
+  const bool invert_min_tkonlymass_AND_min_sumpt;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
@@ -231,7 +232,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_nsingleclusterspertk(cfg.getParameter<double>("max_nsingleclusterspertk")),
     max_nsingleclusterspb025(cfg.getParameter<int>("max_nsingleclusterspb025")),
     max_nsingleclusterspb050(cfg.getParameter<int>("max_nsingleclusterspb050")),
-    min_avgnconstituents(cfg.getParameter<double>("min_avgnconstituents"))
+    min_avgnconstituents(cfg.getParameter<double>("min_avgnconstituents")),
+    invert_min_tkonlymass_AND_min_sumpt(cfg.getParameter<bool>("invert_min_tkonlymass_AND_min_sumpt"))
 {
   if (use_mva)
     throw cms::Exception("NotImplemented", "use_mva true and mva is disabled");
@@ -375,6 +377,10 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
        vec_vtx_nsigmadxy4.push_back(fabs(vtx.track_dxy[i] / vtx.track_dxy_rescale_err(i)));
   }
 
+  // invert the (pass min tkonlymass AND pass min sumpt) requirement
+  bool pass_min_tkonlymass_AND_sumpt = (vtx.mass[mfv::PTracksOnly] >= min_tkonlymass) && (vtx.sumpt() >= min_sumpt);
+  if(pass_min_tkonlymass_AND_sumpt == invert_min_tkonlymass_AND_min_sumpt) return false;
+
   return 
     vtx.ntracks() >= min_ntracks &&
     vtx.ntracks() <= max_ntracks &&
@@ -390,7 +396,6 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.chi2dof() < max_chi2dof &&
     vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
     fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
-    vtx.mass[mfv::PTracksOnly] >= min_tkonlymass &&
     vtx.pt[mfv::PJetsByNtracks] >= min_jetsntkpt &&
     fabs(vtx.eta[mfv::PJetsByNtracks]) < max_absjetsntketa &&
     vtx.mass[mfv::PJetsByNtracks] >= min_jetsntkmass &&
@@ -404,7 +409,6 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.missdistpvsig(mfv::PJetsByNtracks) >= min_missdistjetsntkpvsig &&
     vtx.missdistpvsig(mfv::PTracksPlusJetsByNtracks) >= min_missdisttksjetsntkpvsig &&
     vtx.sumpt2() >= min_sumpt2 &&
-    vtx.sumpt() >= min_sumpt &&
     vtx.maxtrackpt() >= min_maxtrackpt &&
     vtx.maxmntrackpt(1) >= min_maxm1trackpt &&
     vtx.trackdxyerrmin() < max_trackdxyerrmin &&
