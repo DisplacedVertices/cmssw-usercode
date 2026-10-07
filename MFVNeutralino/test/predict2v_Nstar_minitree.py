@@ -18,12 +18,12 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-#presel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
-#sel_path = '/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004Lepm2_100pc_3and4trk-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004Lepm2_100pc_3and4trk-Joey-Data'
 
 #btag triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
@@ -35,8 +35,8 @@ varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations t
 print("variation: %s" % varname)
 
 if data:
-    #fn, presel_scale = 'SingleLepton%s.root' % year, 1.
-    fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
+    fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
+    #fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
 else:
     #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
