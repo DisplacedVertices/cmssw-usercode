@@ -70,7 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'minitree', data_json=json_path(json_filename))
 
-    cs = CondorSubmitter('MiniTree' + version + '2_100pc_3and4trk',
+    cs = CondorSubmitter('MiniTree' + version + '3_100pc_3and4trk_inverted_mass_and_sumpt',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
