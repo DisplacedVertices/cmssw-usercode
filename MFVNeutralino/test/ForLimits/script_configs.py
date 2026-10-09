@@ -41,16 +41,18 @@ datacard = {
 # Lepton trigger signals (mfv_neu excluded -- no hard-scatter lepton).
 _lep_sigs = [
     "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
+    "WminusHToSSTobbbb", "WplusHToSSTobbbb", "ZHToSSTobbbb",
     "ggZHToSSTobbbb", "ggZHToSSTodddd",
-    "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
-    "VHToSSTodddd", "VH",  # Signal clusters are treated similarly to signals
+    "ttHToSSTo4b", "ttHToSSTo4d", "ttHToSSTo2b2d", "ttHToSSTo4s",
+    "VHToSSTodddd", "VHToSSTobbbb", "VH",  # Signal clusters are treated similarly to signals
 ]
 
 # Signals that fire the displaced (b-jet) trigger
 _bjet_sigs = [
-    "ggHToSSTodddd", "mfv_neu",
+    "ggHToSSTodddd", "ggHToSSTobbbb", "mfv_neu",
     "mfv_stopbbarbbar", "mfv_stopdbardbar",
-    "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
+    "ttHToSSTo4b", "ttHToSSTo4d", "ttHToSSTo2b2d", "ttHToSSTo4s",
+    "VBFHToSSTo4b", "VBFHToSSTo4d", "VBFHToSSTo2b2d", "VBFHToSSTo4s",
 ]
 
 sig = {
@@ -63,27 +65,41 @@ sig = {
     # for the cluster to be built.
     "sig_grps": {
         "VHToSSTodddd": ["ZHToSSTodddd", "WminusHToSSTodddd", "WplusHToSSTodddd", "ggZHToSSTodddd"],
+        "VHToSSTobbbb": ["ZHToSSTobbbb", "WminusHToSSTobbbb", "WplusHToSSTobbbb", "ggZHToSSTobbbb"],
     },
     # Cluster members that are also generated on a wider lifetime grid than the rest of the
     # cluster. WplusH and WminusH only exist at 6 lifetimes, ggZH at 12, so a point where
     # only ggZH exists is not a broken cluster, it is simply not a VH point and gets skipped.
     # Any other member sitting alone IS a broken cluster and raises.
-    "sig_grp_wide_members": frozenset(["ggZHToSSTodddd"]),
+    "sig_grp_wide_members": frozenset(["ggZHToSSTodddd", "ggZHToSSTobbbb"]),
     # Nuisance aliases: use when a dedicated table doesn't exist for a process
     "aliases": {
         "bjet": {
-            "ttHToLLPs_bbbb": {"ggHToSSTodddd"},
-            "ttHToLLPs_dddd": {"ggHToSSTodddd"},
+            "ggHToSSTobbbb": {"ggHToSSTodddd"},
+            "ttHToSSTo4b":  {"ggHToSSTodddd"},
+            "ttHToSSTo4d":  {"ggHToSSTodddd"},
+            "VBFHToSSTo4b": {"ggHToSSTodddd"},
+            "VBFHToSSTo4d": {"ggHToSSTodddd"},
+            "ttHToSSTo2b2d":  {"ggHToSSTodddd"},
+            "ttHToSSTo4s":    {"ggHToSSTodddd"},
+            "VBFHToSSTo2b2d": {"ggHToSSTodddd"},
+            "VBFHToSSTo4s":   {"ggHToSSTodddd"},
         },
         "lep": {
             "VHToSSTodddd":      {"VH"},
-            "ttHToLLPs_bbbb":    {"VH"},
-            "ttHToLLPs_dddd":    {"VH"},
+            "VHToSSTobbbb":      {"VH"},
+            "ttHToSSTo4b":       {"VH"},
+            "ttHToSSTo4d":       {"VH"},
+            "ttHToSSTo2b2d":     {"VH"},
+            "ttHToSSTo4s":       {"VH"},
             "ggZHToSSTobbbb":    {"VH"},
             "ggZHToSSTodddd":    {"VH"},
             "WminusHToSSTodddd": {"VH"},
             "WplusHToSSTodddd":  {"VH"},
             "ZHToSSTodddd":      {"VH"},
+            "WminusHToSSTobbbb": {"VH"},
+            "WplusHToSSTobbbb":  {"VH"},
+            "ZHToSSTobbbb":      {"VH"},
         },
     },
     # Nuisances that only apply to specific processes.
@@ -96,16 +112,17 @@ sig = {
         # AN Sec 6.2.3: the electron SF uncertainty applies to the lepton-triggered channel only.
         "lep_effi": {
             "procs": frozenset([
-                "VHToSSTodddd",
+                "VHToSSTodddd", "VHToSSTobbbb",
                 "WminusHToSSTodddd", "WplusHToSSTodddd", "ZHToSSTodddd",
+                "WminusHToSSTobbbb", "WplusHToSSTobbbb", "ZHToSSTobbbb",
                 "ggZHToSSTobbbb", "ggZHToSSTodddd",
-                "ttHToLLPs_bbbb", "ttHToLLPs_dddd",
+                "ttHToSSTo4b", "ttHToSSTo4d", "ttHToSSTo2b2d", "ttHToSSTo4s",
             ]),
             "channels": frozenset(["lep"]),
         },
         # Process-specific theory systematics (year- and bin-correlated, no CMS_EXO24035_ prefix)
-        "qcd_scale_ren_ggH": {"procs": frozenset(["ggHToSSTodddd"]), "channels": None},
-        "qcd_scale_fac_VH":  {"procs": frozenset(["VHToSSTodddd"]),            "channels": None},
+        "qcd_scale_ren_ggH": {"procs": frozenset(["ggHToSSTodddd", "ggHToSSTobbbb"]), "channels": None},
+        "qcd_scale_fac_VH":  {"procs": frozenset(["VHToSSTodddd", "VHToSSTobbbb"]),   "channels": None},
     },
 }
 

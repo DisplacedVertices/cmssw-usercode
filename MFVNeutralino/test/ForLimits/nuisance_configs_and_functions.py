@@ -71,7 +71,7 @@ def make_anticorr_bkg(val, dp=4, in_is_b1=True):
 def get_mc_stat(nuis_name, siginfo, debug_mode=False):
     """Signal MC stat, gmN per bin per year. Name carries the signal point: gmN's sideband
     count is part of the parameter identity, so shared names make combineCards refuse to merge."""
-    point = "%s_tau%s_M%s" % (siginfo.proc, siginfo.lifetime, siginfo.mass)
+    point = "%s_%s_tau%s_M%s" % (siginfo.proc, siginfo.trig_type, siginfo.lifetime, siginfo.mass)
     nuis = sth.NuisanceInfo(nuis_name + "_" + point, 1.2, make_updn=False, sep_yrs=True,
                             corr=False, nuis_type="GammaN", nbins=siginfo.nbins, ana_spec=True, extrapolate_last=False)
     return [nuis]

@@ -19,8 +19,8 @@ template_norms = {
         "bjet": [
             ac.scaled_int_lumi_20161,
             ac.scaled_int_lumi_20162,
-            ac.scaled_int_lumi_2017,
-            ac.scaled_int_lumi_2018],
+            ac.scaled_int_lumi_bjet_trig_2017,
+            ac.scaled_int_lumi_bjet_trig_2018],
     },
     "old_lumis": [19664., 16978., 40610., 59683.], # Derived from AnalysisConstants.h. I feel like if these != new lumis, we need corrections.
 }

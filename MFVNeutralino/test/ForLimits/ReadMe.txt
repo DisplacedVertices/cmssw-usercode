@@ -91,8 +91,6 @@ Useful flags:
 The --tag 4bin flag routes everything through Datacards_4bin/, CombineOutput_4bin/, CombineCondor_4bin/.
 Those are looked for in this directory unless you pass --out-dir, which must be the same
 --out-dir you gave makeLimitsInputROOT.py, otherwise combine runs on a different set of cards.
-ttH signals still get submitted, but combineCards fails on them (negative signal rate corner
-case) and the job is skipped with a WARNING. Nothing filters them out up front.
 
 
 PLOTTING
