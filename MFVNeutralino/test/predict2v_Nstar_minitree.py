@@ -18,12 +18,12 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004Lepm2_100pc_3and4trk-Joey-Data'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004Lepm2_100pc_3and4trk-Joey-Data'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
 
 #btag triggers
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-06-MiniTree_tag004BvetoLHTm2_100pc_3and4trk-Joey-Data'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
