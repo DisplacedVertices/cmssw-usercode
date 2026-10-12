@@ -121,7 +121,10 @@ for ntk in ntk_ls:
     else:
         err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
     effn2v = n2v/tot_n2v
-    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    if effn2v!=1:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    else:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*(var_n2v+1)) / tot_n2v**2)
     rat = n2v/pred
     err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
     if pred == 0:
