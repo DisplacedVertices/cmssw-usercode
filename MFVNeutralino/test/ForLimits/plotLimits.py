@@ -98,6 +98,7 @@ PROC_LABELS = {
 }
 
 _SUSY_PROCS = {"mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"}
+_EWK_LABEL = r"RPV SUSY,  $\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$,  $\tilde{\chi}^{0}\to tbs$"
 
 # (vmin, vref, vmax) in fb for the 2D color scale; vref is the white pivot on RdBu_r.
 # Unspecified processes fall back to geometric-mean auto-scaling.
@@ -256,8 +257,13 @@ def _load_theory_xsec_csv(csv_path):
     return masses, xsec_fb
 
 
+def _load_theory_unc_frac(csv_path):
+    rows = [eval(l.strip()) for l in open(csv_path) if l.strip()]
+    return np.array([r[2] for r in rows], dtype=float) / 100.0
+
+
 def _interp_theory_xsec_fb(mass_gev, masses, xsec_fb):
-    """Log-log interpolation/extrapolation of theory XS in fb at mass_gev."""
+    """Log-log interpolation of theory XS in fb at mass_gev."""
     lm  = np.log(masses)
     lxs = np.log(xsec_fb)
     return float(np.exp(np.interp(np.log(float(mass_gev)), lm, lxs)))
@@ -363,12 +369,18 @@ def _draw_ref_curve_vsmass(ax, proc):
         if not csv_path or not os.path.exists(csv_path):
             return False
         masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
-        label = r"$\tilde{g}\tilde{g}$ NLO+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
+        label = r"$\tilde{g}\tilde{g}$ NNLO$_{\mathrm{approx}}$+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
+        unc = _load_theory_unc_frac(csv_path)
+        ax.fill_between(masses_csv, xsec_fb_csv * (1 - unc), xsec_fb_csv * (1 + unc),
+                        color="black", alpha=0.15, lw=0, zorder=2)
         ax.plot(masses_csv, xsec_fb_csv, color="black", lw=1.5, ls="--",
                 label=label, zorder=3)
         extra_path = _EXTRA_THEORY_CSV.get(proc)
         if extra_path and os.path.exists(extra_path):
             em, exs = _load_theory_xsec_csv(extra_path)
+            eunc = _load_theory_unc_frac(extra_path)
+            ax.fill_between(em, exs * (1 - eunc), exs * (1 + eunc),
+                            color="dimgray", alpha=0.15, lw=0, zorder=2)
             ax.plot(em, exs, color="dimgray", lw=1.5, ls=":",
                     label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO-NNLL", zorder=3)
         return True
@@ -390,8 +402,8 @@ def _draw_ref_lines_ctau(ax, proc, masses_sorted, color_list):
     return True
 
 
-def _annotate_proc(ax, proc):
-    _proc_label = PROC_LABELS.get(proc, proc)
+def _annotate_proc(ax, proc, label=None):
+    _proc_label = label or PROC_LABELS.get(proc, proc)
     _norm = _PROC_NORM_NOTES.get(proc, "")
     _annot = _proc_label + ("\n" + _norm if _norm else "")
     ax.text(0.0, -0.13, _annot,
@@ -648,7 +660,7 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
 
 def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
     """Per-mass σ×B² [fb] threshold where r=1 is the physical exclusion boundary.
-    SUSY: σ_theory_NLO from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
+    SUSY: σ_theory from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
     theory_csv overrides the SUSY default (for EWK variant plots).
     """
     if proc in _SUSY_PROCS:
@@ -710,8 +722,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
                     grid_obs[i, j] = ent["obs"]
 
     log_ctaus = np.log10(ctau_vals)
-    # Extend 0.7 decades left of the first data point so the contour closes
-    log_ctau_lo = log_ctaus[0] - 0.7
+    log_ctau_lo = log_ctaus[0]
     fine_lct  = np.linspace(log_ctau_lo, log_ctaus[-1], 200)
     fine_mass = np.linspace(mass_vals[0],  mass_vals[-1],  200)
     fine_ctau = 10.0 ** fine_lct
@@ -731,7 +742,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     fine_obs_s = fine_obs * scale_fine[np.newaxis, :] if fine_obs is not None else None
 
     # Exclusion threshold per mass: σ×B² [fb] value at which r=1 boundary is physical.
-    # For SUSY this is σ_theory_NLO(mass); for H→SS it equals σ_ref_fb (= scales).
+    # For SUSY this is σ_theory(mass); for H→SS it equals σ_ref_fb (= scales).
     thresholds  = _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=theory_csv)
     thresh_fine = np.interp(fine_mass, mass_vals, thresholds)
 
@@ -822,7 +833,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax, proc)
-    _annotate_proc(ax, proc)
+    _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
     _save(fig, os.path.join(out_dir, "%s_2D%s.pdf" % (proc, fname_suffix)))
 
 
@@ -1052,7 +1063,7 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
         cbar_label = _ylabel(proc) + "  [HybridNew]"
 
     log_ctaus   = np.log10(ctau_vals)
-    log_ctau_lo = log_ctaus[0] - 0.7
+    log_ctau_lo = log_ctaus[0]
     fine_lct    = np.linspace(log_ctau_lo, log_ctaus[-1], 200)
     fine_mass   = np.linspace(mass_vals[0], mass_vals[-1], 200)
     fine_ctau   = 10.0 ** fine_lct
@@ -1107,7 +1118,7 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax, proc)
-    _annotate_proc(ax, proc)
+    _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
     _save(fig, os.path.join(out_dir, "%s_2D_compare%s.pdf" % (proc, fname_suffix)))
 
 

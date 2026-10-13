@@ -171,6 +171,10 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
     -OUTPUTS-
     f will store new histograms; sig_nums, sig_scales and sig_fake_corrs will be added to
     """
+    # Intentional stop: adapt to the new MiniTree layout so every MiniTree file of a sample is read, then remove this raise.
+    raise NotImplementedError(
+        "Signal MiniTree input must be adapted before producing limits: MiniTree jobs write several files "
+        "per sample, but file_key in limits_config.yaml reads only minitree_0.root, which drops MC events.")
     sig_fn_syntax = config.sig[sig_type]["folder"] + config.sig[sig_type]["file_key"]
     candidate_files = sorted(glob(sig_fn_syntax))
     sig_id = 0

@@ -62,11 +62,11 @@ def _decay(sample):
         'WminusHToSSTobbbb' : r'W^{\minus}H \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
         'ttHToSSTo4b'   : r't\bar{t}H \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
         'ttHToSSTo4d'   : r't\bar{t}H \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
-        'ttHToSSTo2b2d' : r't\bar{t}H \rightarrow SS \rightarrow b\bar{b}d\bar{d}',
+        'ttHToSSTo2b2d' : r't\bar{t}H \rightarrow SS,\ \mathcal{B}(S \rightarrow b\bar{b}) = \mathcal{B}(S \rightarrow d\bar{d}) = 50\%',
         'ttHToSSTo4s'   : r't\bar{t}H \rightarrow SS \rightarrow s\bar{s}s\bar{s}',
         'VBFHToSSTo4b'  : r'VBFH \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
         'VBFHToSSTo4d'  : r'VBFH \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
-        'VBFHToSSTo2b2d': r'VBFH \rightarrow SS \rightarrow b\bar{b}d\bar{d}',
+        'VBFHToSSTo2b2d': r'VBFH \rightarrow SS,\ \mathcal{B}(S \rightarrow b\bar{b}) = \mathcal{B}(S \rightarrow d\bar{d}) = 50\%',
         'VBFHToSSTo4s'  : r'VBFH \rightarrow SS \rightarrow s\bar{s}s\bar{s}',
         }[_model(s)]
     year = int(s.rsplit('_')[-1])
@@ -94,11 +94,11 @@ def _set_signal_stuff(sample):
     br_h_llps = 0.01
     # All exotic higgs samples use the .xlsx here - https://gitlab.cern.ch/LHCHIGGSXS/LHCHXSWG1/crosssections
     if (sample.name.startswith('WplusH')):
-        sample.xsec = 3*(9.631e-02)*br_h_llps # W+H->lvH, once for each lepton flavor (inclusive W+H 0.8502 times BR(W->lv)), MH=125
+        sample.xsec = 3*(9.631e-02)*br_h_llps # W+H->lvH, once for each lepton flavor, MH=125
     elif (sample.name.startswith('WminusH')):
-        sample.xsec = 3*(6.052e-02)*br_h_llps # same reasoning as above (inclusive W-H 0.5328)
+        sample.xsec = 3*(6.052e-02)*br_h_llps # same reasoning as above
     elif (sample.name.startswith('ggZH')):
-        sample.xsec = 3*(3.978e-03)*br_h_llps # gg-initiated ZH->llH, once for each lepton flavor (inclusive ggZH 0.1184 times BR(Z->ll)), MH=125
+        sample.xsec = 3*(3.978e-03)*br_h_llps # gg-initiated ZH->llH, once for each lepton flavor, MH=125
     elif (sample.name.startswith('ZH')):
         sample.xsec = 3*(2.602e-02)*br_h_llps # qq-initiated ZH->llH (total ZH per flavor 3.000e-02 minus gg component 3.978e-03), MH=125
     elif sample.name.startswith('ttHToSSTo'):
@@ -2613,7 +2613,7 @@ Bjetsignal_samples_run2 = [
     MCSample('mfv_neu_tau001000um_M0400_run2', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 43000), 
     MCSample('mfv_stopdbardbar_tau001000um_M0200_run2',  '/StopStopbarTo2Dbar2D_M-200_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v3/MINIAODSIM', 50000), 
     MCSample('mfv_stopdbardbar_tau000300um_M0400_run2',  '/StopStopbarTo2Dbar2D_M-400_CTau-300um_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 197000), 
-    MCSample('ggHToSSTodddd_tau1mm_M55_run2',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 529403, filter_eff=0.082), 
+    MCSample('ggHToSSTodddd_tau1mm_M55_run2',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 525699, filter_eff=0.082), 
 ]
 
 ZHToSSTodddd_samples_2018 = [ 
