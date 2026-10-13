@@ -68,9 +68,8 @@ sig = {
         "VHToSSTobbbb": ["ZHToSSTobbbb", "WminusHToSSTobbbb", "WplusHToSSTobbbb", "ggZHToSSTobbbb"],
     },
     # Cluster members that are also generated on a wider lifetime grid than the rest of the
-    # cluster. WplusH and WminusH only exist at 6 lifetimes, ggZH at 12, so a point where
-    # only ggZH exists is not a broken cluster, it is simply not a VH point and gets skipped.
-    # Any other member sitting alone IS a broken cluster and raises.
+    # cluster, so a point where only ggZH exists is not a broken cluster, it is simply not a
+    # VH point and gets skipped. Any other member sitting alone IS a broken cluster and raises.
     "sig_grp_wide_members": frozenset(["ggZHToSSTodddd", "ggZHToSSTobbbb"]),
     # Nuisance aliases: use when a dedicated table doesn't exist for a process
     "aliases": {

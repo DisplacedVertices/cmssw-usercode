@@ -203,10 +203,9 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
                     missing = [s for s in sig_str_ls if not os.path.exists(s)]
                     if (missing and len(missing) == len(members) - 1
                             and siginfo.proc in config.sig["sig_grp_wide_members"]):
-                        # A wide-grid member sitting on its own: ggZH is generated at 12
-                        # lifetimes where ZH and W+-H only exist at 6, so this is not a broken
-                        # cluster, it is simply not a point where the cluster exists. Any other
-                        # member alone falls through to the raise below.
+                        # A wide-grid member sitting on its own is not a broken cluster, it is
+                        # simply not a point where the cluster exists. Any other member alone
+                        # falls through to the raise below.
                         print("Not a %s point, only %s exists here, skipping: %s"
                               % (sc, siginfo.proc, siginfo.return_nuis_key()))
                         break
