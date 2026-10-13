@@ -382,7 +382,7 @@ def _draw_ref_curve_vsmass(ax, proc):
             ax.fill_between(em, exs * (1 - eunc), exs * (1 + eunc),
                             color="dimgray", alpha=0.15, lw=0, zorder=2)
             ax.plot(em, exs, color="dimgray", lw=1.5, ls=":",
-                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO-NNLL", zorder=3)
+                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO+NNLL", zorder=3)
         return True
     # Higgs: reference line at BR benchmark
     if proc not in _SUSY_PROCS:

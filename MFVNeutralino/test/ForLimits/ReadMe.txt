@@ -67,8 +67,8 @@ patterns) is shared config and normally does not need editing. The 4-bin setup i
 If you only have some of the signals that is fine, the code runs over whatever it finds.
 Signal clusters like VH are the exception: all four of ZH, W+H, W-H and ggZH are summed into
 one process, so two or three of the four present is an error rather than a silent skip. A point
-where only ggZH exists is skipped with a message, since ggZH is generated at 12 lifetimes and
-W+-H only at 6, so those are simply not VH points.
+where only ggZH exists is skipped with a message, since ggZH is generated at more lifetimes than
+ZH and W+-H (7 for 4d and 10 for 4b, vs 6), so those are simply not VH points.
 
 
 RUNNING COMBINE (el9, CMSSW_14_1_0_pre4)
