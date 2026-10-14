@@ -280,6 +280,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         ROOT.TH1.AddDirectory(1)
         h_sumdbv_tot    = ROOT.TH1D(n(sig_id, "sumdbv"),       "", 800, 0, 8)
         h_sumdbv_nw_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_nw", "", 800, 0, 8)  # No-weight version
+        h_sumdbv_w2_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_w2", "", 800, 0, 8)
 
         h_allw_tot = ROOT.TH1D(n(sig_id, "allw"),       "", 400, 0, 0.004) # All events in MiniTree
         h_sigw_tot = ROOT.TH1D(n(sig_id, "sigw"),       "", 400, 0, 0.004) # All signal region events
@@ -306,6 +307,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             ROOT.TH1.AddDirectory(1)
             h_child    = ROOT.TH1D(n(sig_id, "child_sumdbv"),       "", 800, 0, 8)
             h_child_nw = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_nw", "", 800, 0, 8)
+            h_child_w2 = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_w2", "", 800, 0, 8)
             h_allw_subsig = ROOT.TH1D(n(sig_id, "allw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
             h_sigw_subsig = ROOT.TH1D(n(sig_id, "sigw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
             h_allw_subsig.SetStatOverflows(ROOT.kTRUE)
@@ -313,6 +315,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
 
             t.Draw("sumdbv>>%s" % n(sig_id, "child_sumdbv"),       "weight*(nvtx>=2)")
             t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_nw"), "1.0*(nvtx>=2)")
+            t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_w2"), "weight*weight*(nvtx>=2)")
 
             t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig") + "_sig" + str(wt_id)), "1.0")
             t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig") + "_sig" + str(wt_id)), "1.0*(nvtx>=2)")
@@ -320,10 +323,13 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             ROOT.TH1.AddDirectory(0)
             h_child.SetDirectory(0)
             h_child_nw.SetDirectory(0)
+            h_child_w2.SetDirectory(0)
             h_child.Scale(this_scale)
+            h_child_w2.Scale(this_scale * this_scale)
 
             h_sumdbv_tot.Add(h_child)
             h_sumdbv_nw_tot.Add(h_child_nw)
+            h_sumdbv_w2_tot.Add(h_child_w2)
             h_allw_tot.Add(h_allw_subsig)
             h_sigw_tot.Add(h_sigw_subsig)
 
@@ -337,6 +343,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             t.Reset()
             h_child    = ROOT.TH1D()
             h_child_nw = ROOT.TH1D()
+            h_child_w2 = ROOT.TH1D()
             h_allw_subsig = ROOT.TH1D()
             h_sigw_subsig = ROOT.TH1D()
 
@@ -349,6 +356,14 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
 
         h_sig_nw = h_sumdbv_nw_tot.Rebin(nbins, n(sig_id, "ngen_perbin"), bins)
         move_overflow_into_last_bin(h_sig_nw)
+
+        h_sig_w2 = h_sumdbv_w2_tot.Rebin(nbins, n(sig_id, "sumw2_perbin"), bins)
+        move_overflow_into_last_bin(h_sig_w2)
+        h_sig_neff = h_sig_nw.Clone(n(sig_id, "neff_perbin"))
+        for i in range(1, nbins + 1):
+            sw, sw2 = h_sig.GetBinContent(i), h_sig_w2.GetBinContent(i)
+            h_sig_neff.SetBinContent(i, sw * sw / sw2 if sw > 0 and sw2 > 0 else 0.0)
+            h_sig_neff.SetBinError(i, 0.0)
 
         if r_f_corr is not None:
             h_sig.Scale(float(r_f_corr))
@@ -375,7 +390,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         move_overflow_into_last_bin(h_allw_tot)
         move_overflow_into_last_bin(h_sigw_tot)
         f.cd()
-        for h in [h_sig, h_sig_nw, h_sumw_hist, h_ngen_hist, h_sigyield_hist, h_allw_tot, h_sigw_tot]:
+        for h in [h_sig, h_sig_nw, h_sig_neff, h_sumw_hist, h_ngen_hist, h_sigyield_hist, h_allw_tot, h_sigw_tot]:
             h.SetTitle(siggrp.proc + "_" + year)
             h.Write()
             if debug:

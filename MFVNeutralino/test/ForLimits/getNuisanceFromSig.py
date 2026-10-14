@@ -50,8 +50,7 @@ nuis_replacements = {
     "lep": {},
 }
 
-# disabled until CRs unblinded
-nuis_bkg = set()
+nuis_bkg = set(["bkg_norm", "bkg_shape"])
 nuis_bkg_replacements = {}
 
 
@@ -97,6 +96,7 @@ def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
     elif nuis_name == "pileup":        new_nuis = nsfc.get_bkg_pileup("CMS_pileup", debug_mode=debug_mode)
     elif nuis_name == "sig_cont":      new_nuis = nsfc.get_bkg_sig_cont(nuis_name, debug_mode=debug_mode)
     elif nuis_name == "bkg_norm":      new_nuis = nsfc.get_bkg_bkg_norm("bkg_norm", debug_mode=debug_mode)
+    elif nuis_name == "bkg_shape":     new_nuis = nsfc.get_bkg_shape_closure("bkg_shape", debug_mode=debug_mode)
     elif nuis_name == "n2v_unc":       new_nuis = nsfc.get_bkg_n2v_unc("num_vtx_pair_unc", debug_mode=debug_mode)
     else:
         raise Exception("Error: background nuisance name not implemented for " + nuis_name)

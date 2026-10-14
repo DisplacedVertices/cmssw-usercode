@@ -269,8 +269,13 @@ def get_bkg_sig_cont(nuis_name, debug_mode=False):
 
 
 def get_bkg_bkg_norm(nuis_name, debug_mode=False):
-    return [sth.NuisanceInfo(nuis_name, 1.15, make_updn=False,
-                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
+    return [sth.NuisanceInfo(nuis_name + "_" + sig_type, sb_conf.bkg_norm_uncs[sig_type], make_updn=False,
+                             sep_yrs=True, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
+
+
+def get_bkg_shape_closure(nuis_name, debug_mode=False):
+    return [sth.NuisanceInfo(nuis_name + "_" + sig_type, sb_conf.bkg_shape_uncs[sig_type], make_updn=False,
+                             sep_yrs=True, corr=False, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_n2v_unc(nuis_name, debug_mode=False):

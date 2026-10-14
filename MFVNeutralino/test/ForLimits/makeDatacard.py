@@ -317,16 +317,21 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
             dc_names = make_nuis_dcnm(nuis, siggrp)
             sig_cts_hname = "h_sig%s_ngen_perbin_%s" % (sig_id, year)
             h_sig_cts = f.Get(sig_cts_hname)
+            h_sig_neff = f.Get("h_sig%s_neff_perbin_%s" % (sig_id, year))
 
             for i in range(nbins):
                 strls = []
+                n_gmn = int(h_sig_cts.GetBinContent(i + 1))
                 for j in range(nbins):
                     if j != i:
                         strls.append(None)
                     else:
                         count = h_sig_cts.GetBinContent(j + 1)
                         if count > 0:
-                            kappa = sig_norm_ls[j] / count
+                            neff = h_sig_neff.GetBinContent(j + 1) if h_sig_neff else 0.0
+                            if neff > 0 and sig_norm_ls[j] > 0:
+                                n_gmn = max(1, int(round(neff)))
+                            kappa = sig_norm_ls[j] / n_gmn
                         else:
                             if h_sig_cts.Integral()>0.0:
                                 kappa = sum(sig_norm_ls) / h_sig_cts.Integral()
@@ -341,7 +346,7 @@ def return_special_lines(f, ns_ls, sig_norm_ls, siggrp, sig_id, write_sig=True):
                         strls.append(kappa)
                 new_lines += turn_info_to_line(
                     dc_names[i],
-                    "gmN " + pad(str(int(h_sig_cts.GetBinContent(i + 1))), 5),
+                    "gmN " + pad(str(n_gmn), 5),
                     strls, write_sig
                 )
             continue
