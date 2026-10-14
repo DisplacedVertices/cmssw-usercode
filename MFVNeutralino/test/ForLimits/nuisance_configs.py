@@ -30,7 +30,7 @@ pickle_triple_prefixes = {
 
 year_remaps = {
     "vtx_reco_TM":       {"20161": "20161-2", "20162": "20161-2", "2017": "2017-8", "2018": "2017-8"},
-    "disp_trig_uncerts": {"20161": "2016",    "20162": "2016APV",  "2017": "2017",   "2018": "2018"},
+    "disp_trig_uncerts": {"20161": "2016APV", "20162": "2016",     "2017": "2017",   "2018": "2018"},
 }
 
 fac_scale_VH_csv_path = _ntpaths["fac_scale_VH_csv"]

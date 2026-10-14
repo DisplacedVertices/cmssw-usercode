@@ -171,6 +171,10 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
     -OUTPUTS-
     f will store new histograms; sig_nums, sig_scales and sig_fake_corrs will be added to
     """
+    # Intentional stop: adapt to the new MiniTree layout so every MiniTree file of a sample is read, then remove this raise.
+    raise NotImplementedError(
+        "Signal MiniTree input must be adapted before producing limits: MiniTree jobs write several files "
+        "per sample, but file_key in limits_config.yaml reads only minitree_0.root, which drops MC events.")
     sig_fn_syntax = config.sig[sig_type]["folder"] + config.sig[sig_type]["file_key"]
     candidate_files = sorted(glob(sig_fn_syntax))
     sig_id = 0
@@ -199,10 +203,9 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
                     missing = [s for s in sig_str_ls if not os.path.exists(s)]
                     if (missing and len(missing) == len(members) - 1
                             and siginfo.proc in config.sig["sig_grp_wide_members"]):
-                        # A wide-grid member sitting on its own: ggZH is generated at 12
-                        # lifetimes where ZH and W+-H only exist at 6, so this is not a broken
-                        # cluster, it is simply not a point where the cluster exists. Any other
-                        # member alone falls through to the raise below.
+                        # A wide-grid member sitting on its own is not a broken cluster, it is
+                        # simply not a point where the cluster exists. Any other member alone
+                        # falls through to the raise below.
                         print("Not a %s point, only %s exists here, skipping: %s"
                               % (sc, siginfo.proc, siginfo.return_nuis_key()))
                         break

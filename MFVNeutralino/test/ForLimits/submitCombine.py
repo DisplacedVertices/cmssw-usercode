@@ -212,7 +212,16 @@ def find_hypotheses():
                 continue
             hyps.setdefault(sig_base, {})
             hyps[sig_base]["%s_%s" % (ch, year)] = fn
-    return hyps
+    by_channel = {}
+    for sig_base, cards in hyps.items():
+        chans = set(k.split("_")[0] for k in cards)
+        if len(chans) == 1:
+            by_channel[sig_base] = cards
+            continue
+        proc, rest = sig_base.split("_tau", 1)
+        for ch in chans:
+            by_channel["%s_%s_tau%s" % (proc, ch, rest)] = {k: v for k, v in cards.items() if k.startswith(ch + "_")}
+    return by_channel
 
 
 def _write_job(sig_id, cards, dry_run, method="hybridnew"):

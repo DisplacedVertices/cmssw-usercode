@@ -83,15 +83,22 @@ _EXTRA_THEORY_CSV = {
 PROC_LABELS = {
     "VHToSSTodddd":        r"WH + ZH (incl. gg),  H$\to$SS$\to$dddd",
     "ggZHToSSTobbbb":      r"ggZH,  H$\to$SS$\to$bbbb",
+    "VHToSSTobbbb":        r"WH + ZH (incl. gg),  H$\to$SS$\to$bbbb",
     "ggHToSSTodddd":       r"ggH,  H$\to$SS$\to$dddd",
-    "ttHToLLPs_bbbb":      r"ttH,  H$\to$SS$\to$bbbb",
-    "ttHToLLPs_dddd":      r"ttH,  H$\to$SS$\to$dddd",
+    "ggHToSSTobbbb":       r"ggH,  H$\to$SS$\to$bbbb",
+    "ttHToSSTo4b_lep":     r"ttH (lepton-triggered),  H$\to$SS$\to$bbbb",
+    "ttHToSSTo4d_lep":     r"ttH (lepton-triggered),  H$\to$SS$\to$dddd",
+    "ttHToSSTo4b_bjet":    r"ttH (displacement-triggered),  H$\to$SS$\to$bbbb",
+    "ttHToSSTo4d_bjet":    r"ttH (displacement-triggered),  H$\to$SS$\to$dddd",
+    "VBFHToSSTo4b":        r"VBF H,  H$\to$SS$\to$bbbb",
+    "VBFHToSSTo4d":        r"VBF H,  H$\to$SS$\to$dddd",
     "mfv_neu":             r"RPV SUSY,  $\tilde{g}\to tbs$",
     "mfv_stopdbardbar":    r"RPV SUSY,  $\tilde{t}\to\bar{d}\bar{d}$",
     "mfv_stopbbarbbar":    r"RPV SUSY,  $\tilde{t}\to\bar{b}\bar{b}$",
 }
 
 _SUSY_PROCS = {"mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"}
+_EWK_LABEL = r"RPV SUSY,  $\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$,  $\tilde{\chi}^{0}\to tbs$"
 
 # (vmin, vref, vmax) in fb for the 2D color scale; vref is the white pivot on RdBu_r.
 # Unspecified processes fall back to geometric-mean auto-scaling.
@@ -103,8 +110,14 @@ _2D_VSCALE = {
     "VHToSSTodddd":     (1e-3,  0.01,  1.0),
     "ggZHToSSTobbbb":   (1e-3,  0.01,  1.0),
     "ggHToSSTodddd":    (1e-3,  0.01,  1.0),
-    "ttHToLLPs_bbbb":   (1e-3,  0.01,  1.0),
-    "ttHToLLPs_dddd":   (1e-3,  0.01,  1.0),
+    "ggHToSSTobbbb":    (1e-3,  0.01,  1.0),
+    "VHToSSTobbbb":     (1e-3,  0.01,  1.0),
+    "ttHToSSTo4b_lep":  (1e-3,  0.01,  1.0),
+    "ttHToSSTo4d_lep":  (1e-3,  0.01,  1.0),
+    "ttHToSSTo4b_bjet": (1e-3,  0.01,  1.0),
+    "ttHToSSTo4d_bjet": (1e-3,  0.01,  1.0),
+    "VBFHToSSTo4b":     (1e-3,  0.01,  1.0),
+    "VBFHToSSTo4d":     (1e-3,  0.01,  1.0),
 }
 
 # BR(H→SS) benchmark used as datacard normalization and as reference line on plots.
@@ -127,6 +140,11 @@ def _sig_scale_fb(proc, mass=None):
 _COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
 
 _RUN2_LUMI = r"137.9 fb$^{-1}$ (13 TeV)"
+_RUN2_LUMI_DISP_TRIG = r"127.8 fb$^{-1}$ (13 TeV)"
+_LUMI_2016 = r"36.3 fb$^{-1}$ (13 TeV)"
+_DISP_TRIG_PROCS = {"ggHToSSTodddd", "ggHToSSTobbbb", "ttHToSSTo4b_bjet", "ttHToSSTo4d_bjet", "mfv_neu", "mfv_stopdbardbar", "mfv_stopbbarbbar"}
+_2016_ONLY_PROCS = {"VBFHToSSTo4b", "VBFHToSSTo4d"}
+_TABLE_ONLY_MODELS = {"ttHToSSTo2b2d", "ttHToSSTo4s", "VBFHToSSTo2b2d", "VBFHToSSTo4s"}
 
 # Per-process normalization footnote shown in the plot annotation box.
 _PROC_NORM_NOTES = {}
@@ -239,8 +257,13 @@ def _load_theory_xsec_csv(csv_path):
     return masses, xsec_fb
 
 
+def _load_theory_unc_frac(csv_path):
+    rows = [eval(l.strip()) for l in open(csv_path) if l.strip()]
+    return np.array([r[2] for r in rows], dtype=float) / 100.0
+
+
 def _interp_theory_xsec_fb(mass_gev, masses, xsec_fb):
-    """Log-log interpolation/extrapolation of theory XS in fb at mass_gev."""
+    """Log-log interpolation of theory XS in fb at mass_gev."""
     lm  = np.log(masses)
     lxs = np.log(xsec_fb)
     return float(np.exp(np.interp(np.log(float(mass_gev)), lm, lxs)))
@@ -346,14 +369,20 @@ def _draw_ref_curve_vsmass(ax, proc):
         if not csv_path or not os.path.exists(csv_path):
             return False
         masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
-        label = r"$\tilde{g}\tilde{g}$ NLO+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
+        label = r"$\tilde{g}\tilde{g}$ NNLO$_{\mathrm{approx}}$+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
+        unc = _load_theory_unc_frac(csv_path)
+        ax.fill_between(masses_csv, xsec_fb_csv * (1 - unc), xsec_fb_csv * (1 + unc),
+                        color="black", alpha=0.15, lw=0, zorder=2)
         ax.plot(masses_csv, xsec_fb_csv, color="black", lw=1.5, ls="--",
                 label=label, zorder=3)
         extra_path = _EXTRA_THEORY_CSV.get(proc)
         if extra_path and os.path.exists(extra_path):
             em, exs = _load_theory_xsec_csv(extra_path)
+            eunc = _load_theory_unc_frac(extra_path)
+            ax.fill_between(em, exs * (1 - eunc), exs * (1 + eunc),
+                            color="dimgray", alpha=0.15, lw=0, zorder=2)
             ax.plot(em, exs, color="dimgray", lw=1.5, ls=":",
-                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO-NNLL", zorder=3)
+                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO+NNLL", zorder=3)
         return True
     # Higgs: reference line at BR benchmark
     if proc not in _SUSY_PROCS:
@@ -373,8 +402,8 @@ def _draw_ref_lines_ctau(ax, proc, masses_sorted, color_list):
     return True
 
 
-def _annotate_proc(ax, proc):
-    _proc_label = PROC_LABELS.get(proc, proc)
+def _annotate_proc(ax, proc, label=None):
+    _proc_label = label or PROC_LABELS.get(proc, proc)
     _norm = _PROC_NORM_NOTES.get(proc, "")
     _annot = _proc_label + ("\n" + _norm if _norm else "")
     ax.text(0.0, -0.13, _annot,
@@ -393,9 +422,15 @@ def _mass_xlabel(proc):
     return "Mass [GeV]"
 
 
-def _cms_label(ax):
+def _cms_label(ax, proc):
     if _HAS_MPLHEP:
-        hep.cms.label("Preliminary", data=False, ax=ax, fontsize=12, rlabel=_RUN2_LUMI)
+        if proc in _2016_ONLY_PROCS:
+            rlabel = _LUMI_2016
+        elif proc in _DISP_TRIG_PROCS:
+            rlabel = _RUN2_LUMI_DISP_TRIG
+        else:
+            rlabel = _RUN2_LUMI
+        hep.cms.label("Preliminary", data=False, ax=ax, fontsize=12, rlabel=rlabel)
 
 
 def _band(lims_list, key, fallback_key=None):
@@ -456,7 +491,7 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
     ax.set_ylabel(_ylabel(proc))
     ax.legend(fontsize=9, ncol=2)
     ax.grid(True, which="both", ls=":", alpha=0.4)
-    _cms_label(ax)
+    _cms_label(ax, proc)
     _annotate_proc(ax, proc)
     _save(fig, os.path.join(out_dir, "%s_1D.pdf" % proc))
 
@@ -506,7 +541,7 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
     ax.set_ylabel(_ylabel(proc))
     ax.legend(fontsize=9, ncol=2)
     ax.grid(True, which="both", ls=":", alpha=0.4)
-    _cms_label(ax)
+    _cms_label(ax, proc)
     _annotate_proc(ax, proc)
     _save(fig, os.path.join(out_dir, "%s_1D_vsmass.pdf" % proc))
 
@@ -579,7 +614,7 @@ def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
         ax.set_ylabel(_ylabel(proc))
         ax.legend(fontsize=9)
         ax.grid(True, which="both", ls=":", alpha=0.4)
-        _cms_label(ax)
+        _cms_label(ax, proc)
         _annotate_proc(ax, proc)
         tag = "%s_vs_%s" % (_format_ctau(c1), _format_ctau(c2))
         _save(fig, os.path.join(out_dir, "%s_1D_vsmass_%s.pdf" % (proc, tag)))
@@ -613,7 +648,7 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
     ax.set_ylabel(_ylabel(proc))
     ax.legend(fontsize=9)
     ax.grid(True, which="both", ls=":", alpha=0.4)
-    _cms_label(ax)
+    _cms_label(ax, proc)
     _annotate_proc(ax, proc)
     tag = "%s_vs_%s" % (_format_ctau(c1), _format_ctau(c2))
     _save(fig, os.path.join(out_dir, "%s_1D_vsmass_%s.pdf" % (proc, tag)))
@@ -625,7 +660,7 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
 
 def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
     """Per-mass σ×B² [fb] threshold where r=1 is the physical exclusion boundary.
-    SUSY: σ_theory_NLO from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
+    SUSY: σ_theory from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
     theory_csv overrides the SUSY default (for EWK variant plots).
     """
     if proc in _SUSY_PROCS:
@@ -687,8 +722,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
                     grid_obs[i, j] = ent["obs"]
 
     log_ctaus = np.log10(ctau_vals)
-    # Extend 0.7 decades left of the first data point so the contour closes
-    log_ctau_lo = log_ctaus[0] - 0.7
+    log_ctau_lo = log_ctaus[0]
     fine_lct  = np.linspace(log_ctau_lo, log_ctaus[-1], 200)
     fine_mass = np.linspace(mass_vals[0],  mass_vals[-1],  200)
     fine_ctau = 10.0 ** fine_lct
@@ -708,7 +742,7 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     fine_obs_s = fine_obs * scale_fine[np.newaxis, :] if fine_obs is not None else None
 
     # Exclusion threshold per mass: σ×B² [fb] value at which r=1 boundary is physical.
-    # For SUSY this is σ_theory_NLO(mass); for H→SS it equals σ_ref_fb (= scales).
+    # For SUSY this is σ_theory(mass); for H→SS it equals σ_ref_fb (= scales).
     thresholds  = _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=theory_csv)
     thresh_fine = np.interp(fine_mass, mass_vals, thresholds)
 
@@ -798,8 +832,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     ax.set_ylabel("Mass [GeV]")
     ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
     ax.grid(True, which="both", ls=":", alpha=0.3)
-    _cms_label(ax)
-    _annotate_proc(ax, proc)
+    _cms_label(ax, proc)
+    _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
     _save(fig, os.path.join(out_dir, "%s_2D%s.pdf" % (proc, fname_suffix)))
 
 
@@ -845,6 +879,22 @@ def read_limits_method(sig_id, method):
     except Exception as exc:
         print("Could not read %s %s: %s" % (sig_id, method, exc))
         return None
+
+
+def write_limits_table(proc, mass_data_m, out_dir):
+    scale = _sig_scale_fb(proc)
+    out_fn = os.path.join(out_dir, "%s_limits.txt" % proc)
+    with open(out_fn, "w") as fh:
+        fh.write("# %s: 95%% CL expected upper limit on B(H->SS)\n" % proc)
+        fh.write("# mass_GeV ctau_mm asymptotic_exp asymptotic_-1sigma asymptotic_+1sigma hybridnew_exp\n")
+        for mass in sorted(mass_data_m, key=float):
+            for ctau in sorted(mass_data_m[mass]):
+                a = mass_data_m[mass][ctau].get("AsymptoticLimits", {})
+                h = mass_data_m[mass][ctau].get("HybridNew", {})
+                vals = [a.get("exp"), a.get("dn1"), a.get("up1"), h.get("exp")]
+                fh.write("%s %g %s\n" % (mass, ctau, " ".join(
+                    "%.4g" % (v * scale) if v is not None else "nan" for v in vals)))
+    print("Wrote %s" % out_fn)
 
 
 def collect_all_methods():
@@ -949,7 +999,7 @@ def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir, hepdata=None):
         ax.set_title(r"$c\tau = %s$" % _format_ctau(ctau), fontsize=12)
         ax.legend(fontsize=10)
         ax.grid(True, which="both", ls=":", alpha=0.4)
-        _cms_label(ax)
+        _cms_label(ax, proc)
         _annotate_proc(ax, proc)
         ctau_tag = _format_ctau(ctau).replace(".", "p")
         _save(fig, os.path.join(out_dir, "%s_compare_%s.pdf" % (proc, ctau_tag)))
@@ -1013,7 +1063,7 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
         cbar_label = _ylabel(proc) + "  [HybridNew]"
 
     log_ctaus   = np.log10(ctau_vals)
-    log_ctau_lo = log_ctaus[0] - 0.7
+    log_ctau_lo = log_ctaus[0]
     fine_lct    = np.linspace(log_ctau_lo, log_ctaus[-1], 200)
     fine_mass   = np.linspace(mass_vals[0], mass_vals[-1], 200)
     fine_ctau   = 10.0 ** fine_lct
@@ -1067,8 +1117,8 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     ax.set_ylabel("Mass [GeV]")
     ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
     ax.grid(True, which="both", ls=":", alpha=0.3)
-    _cms_label(ax)
-    _annotate_proc(ax, proc)
+    _cms_label(ax, proc)
+    _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
     _save(fig, os.path.join(out_dir, "%s_2D_compare%s.pdf" % (proc, fname_suffix)))
 
 
@@ -1111,10 +1161,14 @@ def main():
     # ggZH is always grouped into VH; never plot it standalone
     _skip_procs = {"ggZHToSSTodddd", "ggZHToSSTobbbb"}
 
+    table_data = collect_all_methods()
     for proc in sorted(data):
         if proc in _skip_procs:
             continue
         if subset and proc not in subset:
+            continue
+        if proc.split("_")[0] in _TABLE_ONLY_MODELS:
+            write_limits_table(proc, table_data.get(proc, {}), args.out_dir)
             continue
         n_masses = len(data[proc])
         n_pts    = sum(len(v) for v in data[proc].values())
@@ -1138,7 +1192,7 @@ def main():
         print("\n--- Generating HybridNew vs Asymptotic comparison plots ---")
         data_m = collect_all_methods()
         for proc in sorted(data_m):
-            if proc in _skip_procs:
+            if proc in _skip_procs or proc.split("_")[0] in _TABLE_ONLY_MODELS:
                 continue
             if subset and proc not in subset:
                 continue
