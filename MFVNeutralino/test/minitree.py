@@ -22,15 +22,20 @@ if is_mc :
 
 # blind data events with >= 4 tracks per vertex until we're ready
 if not is_mc :
+    # this block was our original blinding strategy, now we can move to the one further below to unblind
+    # single >=5-trk vertices while keeping higher multiplicities blind
     #del process.pMiniTreeNtk4
     #del process.pMiniTreeNtk3or4
-    del process.pMiniTreeNtk3or5
-    del process.pMiniTreeNtk4or5
+    #del process.pMiniTreeNtk3or5
+    #del process.pMiniTreeNtk4or5
     #del process.pMiniTreeNtk3or4exact
-    del process.pMiniTreeNtk3or5exact
-    del process.pMiniTreeNtk4or5exact
-    del process.pMiniTree
+    #del process.pMiniTreeNtk3or5exact
+    #del process.pMiniTreeNtk4or5exact
+    #del process.pMiniTree
 
+    process.mfvAnalysisCutsGE1Vtx.max_nvertex = 1 # 5-track 2-vertex blind
+    process.mfvAnalysisCutsGE1VtxNtk3or5.max_nvertex = 1 # 5-track 2-vertex blind
+    process.mfvAnalysisCutsGE1VtxNtk4or5.max_nvertex = 1 # 5-track 2-vertex blind
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
