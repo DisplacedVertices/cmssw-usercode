@@ -122,7 +122,7 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_rescale_bs2derr = 0.005,
     min_tkonlymass = 5.5,
     min_sumpt = 10.0,
-    invert_min_tkonlymass_AND_min_sumpt = True, # only when we want to invert the two cuts
+    #invert_min_tkonlymass_AND_min_sumpt = True, # only when we want to invert the two cuts
     )
 
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)
