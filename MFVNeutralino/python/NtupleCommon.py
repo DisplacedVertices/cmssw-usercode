@@ -7,8 +7,8 @@ ntuple_version_ = '_tag004' # this is our ntuple numbering scheme, and we should
 # The orthogonal (BTag/JetHT and DispJet data streams) and (Electron and Muon data streams) 
 # are each merged again before
 # these common offline analysis cuts are applied.
-use_BTagDispJet_vetoLepHT_triggers = False
-use_Lepton_triggers = True
+use_BTagDispJet_vetoLepHT_triggers = True
+use_Lepton_triggers = False
 
 # Data-only trigger schemes used at the MiniAOD -> ntuple step to avoid double
 # counting between primary datasets. BTag/JetHT owns events that fire both the
