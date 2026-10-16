@@ -116,7 +116,10 @@ for ntk in ntk_ls_2v:
     else:
         raise Exception
     rat = n2v/pred
-    err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
+    if effn2v!=0:
+        err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
+    else:
+        err_rat = 0 # FIXME - I need a patch for 0 observations
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
     print '%8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
@@ -147,7 +150,10 @@ for ntk in ntk2_ls:
     var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
     err_pred = pred * np.sqrt(var_n2v/(tot_n2v)**2 + var_fracvNM)
     rat = n2v/pred
-    err_rat = rat * np.sqrt((err_effn2v/effn2v)**2 + var_fracvNM)
+    if effn2v!=0:
+        err_rat = rat * np.sqrt((err_effn2v/effn2v)**2 + var_fracvNM)
+    else:
+        err_rat = 0 # FIXME - I need a patch for 0 observations
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
     print '%8.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
