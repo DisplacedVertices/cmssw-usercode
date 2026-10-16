@@ -156,12 +156,8 @@ for ntk in ntk2_ls:
 
     n1vN, err_n1vN = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[0] == 5 else '%s' % tracks[0])), 2, 2, x_are_bins=True)
     n1vM, err_n1vM = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[1] == 5 else '%s' % tracks[1])), 2, 2, x_are_bins=True)
-    if not data:
-        n1v_oth = tot_n1v - n1vN - n1vM
-        err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
-    else:
-        n1v_oth = 0
-        err_n1v_oth = 0
+    n1v_oth = tot_n1v - n1vN - n1vM
+    err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
     
     n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('%sexact' % ntk)))
 
