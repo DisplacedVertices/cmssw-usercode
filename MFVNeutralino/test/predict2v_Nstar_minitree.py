@@ -18,8 +18,8 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
 
 #btag triggers
 #presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
