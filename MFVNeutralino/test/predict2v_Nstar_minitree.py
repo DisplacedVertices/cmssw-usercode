@@ -18,12 +18,12 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004Lepm4_unblind_5trk_1vtx-Joey-Data'
 
 #btag triggers
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-09-MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt-Joey-Data'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
@@ -35,8 +35,8 @@ varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations t
 print("variation: %s" % varname)
 
 if data:
-    fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
-    #fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
+    #fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
+    fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
 else:
     #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
@@ -113,9 +113,12 @@ print 'n2 = %8.0f'%(tot_n2v)
 print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
-for ntk in ntk_ls_2v:
+for ntk in ntk_ls:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
-    n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
+    if ntk in ntk_ls_2v:
+        n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
+    else:
+        n2v, err_n2v = 0.0, 0.0
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1v = n1v/tot_n1v
     err_effn1v = np.sqrt(((1.0-2*effn1v)*err_n1v**2+effn1v**2*var_n1v) / tot_n1v**2)
@@ -125,6 +128,9 @@ for ntk in ntk_ls_2v:
         err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/1)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2)) # set #2-vtx events to 1
     else:
         err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
+    if ntk not in ntk_ls_2v:
+        print "Printing predicted and error for %s-trk 2-vtx events: %9.5f +- %6.5f" % (ntk, pred, err_pred)
+        continue
     effn2v = n2v/tot_n2v
     if effn2v!=0 and effn2v!=1:
         err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
