@@ -58,15 +58,20 @@ var_n2v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
 
 if data:
     ntk_ls = [3,4]
+    ntk_ls_2v = [3,4]
     ntk2_ls = ['Ntk3or4']
 else:
     ntk_ls = [3,4,5]
+    ntk_ls_2v = [3,4,5]
     ntk2_ls = ['Ntk3or4', 'Ntk3or5', 'Ntk4or5']
 
 for ntk in ntk_ls:
     n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    
+    if ntk in ntk_ls_2v:
+        n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    else:
+        n2v, err_n2v = 0.0, 0.0
+
     tot_n1v += n1v
     tot_n2v += n2v
     var_n2v += (err_n2v**2)
@@ -92,7 +97,7 @@ print 'err_n2 = %f'%(math.sqrt(var_n2v))
 
 print 'Warning: do NOT use the values marked PI (Poissonian Interval) for anything except data.'
 
-for ntk in ntk_ls:
+for ntk in ntk_ls_2v:
     n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
