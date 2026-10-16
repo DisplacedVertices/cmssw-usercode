@@ -198,8 +198,7 @@ def get_qcd_scale_ren_ggH(nuis_name, siginfo, debug_mode=False):
 def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
     """Factorization scale shape uncertainty for VH (ZH/WH+/WH-), year-correlated.
 
-    Per-bin kappas from the CSV, all four bins; only low-stats bins are forced to 1.0.
-    Missing signal points fall back to kappa=1.0 (no systematic applied).
+    Per-bin kappas from the CSV, all four bins.
     """
     table  = thytab.get_fac_scale_VH_table()
     mass   = siginfo.return_mass_as_int()
@@ -208,10 +207,10 @@ def get_qcd_scale_fac_VH(nuis_name, siginfo, debug_mode=False):
 
     if result is None:
         if debug_mode:
-            print("QCDscale_fac_VH: no entry for mass=%d ctau=%d year=%s; using 1.0" % (
-                mass, ctau, year))
-        kup = [1.0] * siginfo.nbins
-        kdn = [1.0] * siginfo.nbins
+            print("QCDscale_fac_VH: no entry for mass=%d ctau=%d year=%s; using flat %.2f" % (
+                mass, ctau, year, ns_conf.fac_scale_VH_flat))
+        kup = [ns_conf.fac_scale_VH_flat] * siginfo.nbins
+        kdn = [1.0 / ns_conf.fac_scale_VH_flat] * siginfo.nbins
     else:
         kup = list(result[0])[:siginfo.nbins]
         kdn = list(result[1])[:siginfo.nbins]
@@ -270,12 +269,12 @@ def get_bkg_sig_cont(nuis_name, debug_mode=False):
 
 def get_bkg_bkg_norm(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name + "_" + sig_type, sb_conf.bkg_norm_uncs[sig_type], make_updn=False,
-                             sep_yrs=True, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
+                             sep_yrs=False, corr=True, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_shape_closure(nuis_name, debug_mode=False):
     return [sth.NuisanceInfo(nuis_name + "_" + sig_type, sb_conf.bkg_shape_uncs[sig_type], make_updn=False,
-                             sep_yrs=True, corr=False, nbins=nbins, ana_spec=True, extrapolate_last=False)]
+                             sep_yrs=False, corr=False, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
 def get_bkg_n2v_unc(nuis_name, debug_mode=False):

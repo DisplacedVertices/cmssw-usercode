@@ -2,7 +2,6 @@ from __future__ import print_function
 import argparse
 import os
 import sys
-from glob import glob
 
 import ROOT
 import numpy as np
@@ -108,7 +107,7 @@ def make_bkg(f):
     """
     bkg_fn = os.path.join(
         config.bkg[sig_type]["folder"],
-        config.bkg[sig_type]["fn"].format(year)
+        config.bkg[sig_type]["fn"].format("run2")
     )
     if debug:
         print("Opening bkg file:", bkg_fn)
@@ -129,13 +128,19 @@ def make_bkg(f):
             print("  observed bin %d = %d" % (i, v))
     new_bkg_hs.append(h_observed)
 
-    # Full Run 2 MC background -- shape normalized to per-year n2v from sig_and_bkg_configs.py
     h_bkg_sumdbv = to_TH1D(bkg_f.Get("h_c1v_sumdbv_w_errorbars"), "h_bkg_sumdbv_%s" % year)
-    scale_num = sb_conf.template_norms["n2v"][sig_type][year_id]
+    n2v_run2 = sb_conf.template_norms["n2v_5x5_run2"][sig_type]
+    split_region, era_split = sb_conf.template_norms["n2v_era_split"][sig_type]
+    if n2v_run2 is None or era_split is None:
+        raise ValueError("Set the Run 2 5x5 and per-era %s predicted yields for %s in sig_and_bkg_configs.py"
+                         % (split_region, sig_type))
+    era_frac = era_split[year_id] / sum(era_split)
+    scale_num = n2v_run2 * era_frac
     scale_den = h_bkg_sumdbv.Integral()
     h_bkg_sumdbv.Scale(scale_num / scale_den)
     if debug:
-        print("Bkg Sum_dBV rescaled %.3g -> %.3g" % (scale_den, scale_num))
+        print("Bkg Sum_dBV rescaled %.3g -> %.3g (%s share %.4f of Run 2 %.4g)"
+              % (scale_den, scale_num, split_region, era_frac, n2v_run2))
 
     if config.debug_settings["scale_bkg_fake"]:
         h_bkg_sumdbv.Scale(config.debug_settings["bkg_fake_sf"])
@@ -171,12 +176,13 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
     -OUTPUTS-
     f will store new histograms; sig_nums, sig_scales and sig_fake_corrs will be added to
     """
-    # Intentional stop: adapt to the new MiniTree layout so every MiniTree file of a sample is read, then remove this raise.
-    raise NotImplementedError(
-        "Signal MiniTree input must be adapted before producing limits: MiniTree jobs write several files "
-        "per sample, but file_key in limits_config.yaml reads only minitree_0.root, which drops MC events.")
-    sig_fn_syntax = config.sig[sig_type]["folder"] + config.sig[sig_type]["file_key"]
-    candidate_files = sorted(glob(sig_fn_syntax))
+    with open(config.sig[sig_type]["minitree_list"]) as fh:
+        listed = [line.strip() for line in fh if line.strip()]
+    folder = os.path.join(os.path.normpath(config.sig[sig_type]["folder"]), "")
+    candidate_files = sorted(p for p in listed if p.startswith(folder))
+    if not candidate_files:
+        raise Exception("No MiniTrees under %s are listed in %s"
+                        % (folder, config.sig[sig_type]["minitree_list"]))
     sig_id = 0
     built_clusters = set()
     wrong_channel = 0   # samples found that belong to the other trigger channel

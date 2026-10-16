@@ -6,7 +6,7 @@ import nuisance_configs as ns_conf
 
 def load_fac_scale_VH_table(csv_path):
     """Parse fac_scale_shape_bins.csv into {(mass_gev, ctau_um, year): ([kup_b0..b3], [kdn_b0..b3])}.
-    Kappas are the ZH/W+H/W-H yield-weighted average; low_bin-flagged bins are forced to 1.0."""
+    Kappas are the ZH/W+H/W-H yield-weighted average."""
     NBINS_CSV = 4
     NBINS_ALL = 4
 
@@ -42,8 +42,8 @@ def load_fac_scale_VH_table(csv_path):
                 kup.append(sum_ku / total_n)
                 kdn.append(sum_kd / total_n)
             else:
-                kup.append(1.0)
-                kdn.append(1.0)
+                kup.append(ns_conf.fac_scale_VH_flat)
+                kdn.append(1.0 / ns_conf.fac_scale_VH_flat)
         table[key] = (kup, kdn)
     return table
 

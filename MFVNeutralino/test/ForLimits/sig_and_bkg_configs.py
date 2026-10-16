@@ -6,9 +6,13 @@ template_norms = {
         "lep": [52.19, 77.35, 442.23, 694.77],
         "bjet": [1004.1395, 434.13558, 187.79967, 276.98182],
     },
-    "n2v": {
-        "lep": [0.001, 0.012, 0.002, 0.034],  # 0.001 (20161) is a placeholder -- update when lepton bkg estimate for 20161 is available
-        "bjet": [0.258, 0.062, 0.078, 0.122],
+    "n2v_5x5_run2": {
+        "lep": None,
+        "bjet": None,
+    },
+    "n2v_era_split": {
+        "lep": ("3x4", None),
+        "bjet": ("4x4", None),
     },
     "lumi": {
         "lep": [

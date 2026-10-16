@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 """
 Discover all signal datacards under <out-dir>/Datacards_<tag>/, group them by
-(proc, ctau, mass), and submit one Condor job per hypothesis that runs:
-  1. combine -M AsymptoticLimits -- 95% CL expected/observed limits
-  2. combine -M FitDiagnostics   -- best-fit signal strength + s+b shapes
+(proc, ctau, mass), and submit one Condor job per hypothesis.
 
 Cards are merged locally by combineCards.py before submission (requires the
 CMSSW_14_1_0_pre4 environment to be active when running this script).
@@ -64,6 +62,7 @@ COMBINE_TARBALL  = os.environ.get(
 CVMFS_CMSSW14    = "/cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw/CMSSW_14_1_0/src"
 
 YEARS    = ("20161", "20162", "2017", "2018")
+YEARS_VBF = ("20161", "20162")
 CHANNELS = ("lep", "bjet")
 
 # ---------------------------------------------------------------------------
@@ -107,7 +106,7 @@ SIG={sig_id}
 echo "=== HybridNew Asimov expected: $SIG ==="
 combine -M HybridNew --frequentist --testStat LHC \\
     -T 20000 --fork 2 -t -1 -s 1234 \\
-    --rMax {rmax} \\
+    --rMax {rmax} --rAbsAcc 0 \\
     --name $SIG \\
     workspace_$SIG.root -v 0
 echo "=== Done: $SIG ==="
@@ -235,21 +234,20 @@ def _write_job(sig_id, cards, dry_run, method="hybridnew"):
     combined_card = os.path.join(condor_dir, "combined_%s.txt" % sig_id)
     workspace     = os.path.join(condor_dir, "workspace_%s.root" % sig_id)
     if not dry_run:
-        if not os.path.exists(workspace):
-            import shutil
-            for tool in ("combineCards.py", "text2workspace.py"):
-                if not shutil.which(tool):
-                    print("ERROR: %s not in PATH; workspace missing for %s -- skipping" % (tool, sig_id))
-                    return False
-            ret = subprocess.call("combineCards.py %s > %s" % (card_args, combined_card), shell=True)
-            if ret != 0:
-                print("WARNING: combineCards.py failed for %s -- skipping" % sig_id)
+        import shutil
+        for tool in ("combineCards.py", "text2workspace.py"):
+            if not shutil.which(tool):
+                print("ERROR: %s not in PATH; cannot build workspace for %s -- skipping" % (tool, sig_id))
                 return False
-            ret = subprocess.call(
-                "text2workspace.py %s -m 125 -o %s" % (combined_card, workspace), shell=True)
-            if ret != 0:
-                print("WARNING: text2workspace.py failed for %s -- skipping" % sig_id)
-                return False
+        ret = subprocess.call("combineCards.py %s > %s" % (card_args, combined_card), shell=True)
+        if ret != 0:
+            print("WARNING: combineCards.py failed for %s -- skipping" % sig_id)
+            return False
+        ret = subprocess.call(
+            "text2workspace.py %s -m 125 -o %s" % (combined_card, workspace), shell=True)
+        if ret != 0:
+            print("WARNING: text2workspace.py failed for %s -- skipping" % sig_id)
+            return False
 
     job_sh  = os.path.join(condor_dir, "run.sh")
     log_pfx = os.path.join(condor_dir, "job")
@@ -347,14 +345,31 @@ def main():
         print("No datacards found under %s" % DATACARD_DIR)
         sys.exit(1)
 
-    n = 0
-    n_skip = 0
+    selected = []
     for sig_id in sorted(hyps):
         proc = sig_id.split("_tau")[0]
+        base, _, ch = proc.rpartition("_")
         if args.sig_id and sig_id != args.sig_id:
             continue
-        if subset and proc not in subset:
+        if subset and proc not in subset and not (ch in CHANNELS and base in subset):
             continue
+        selected.append(sig_id)
+
+    incomplete = {}
+    for sig_id in selected:
+        need = YEARS_VBF if sig_id.startswith("VBFHToSS") else YEARS
+        have = set(k.rsplit("_", 1)[1] for k in hyps[sig_id])
+        if have != set(need):
+            incomplete[sig_id] = (sorted(set(need) - have), sorted(have - set(need)))
+    if incomplete:
+        for sig_id, (missing, extra) in sorted(incomplete.items()):
+            print("ERROR: %s has eras missing %s, unexpected %s" % (sig_id, missing, extra))
+        raise SystemExit("%d hypotheses do not have a datacard for every era; nothing submitted"
+                         % len(incomplete))
+
+    n = 0
+    n_skip = 0
+    for sig_id in selected:
         if args.skip_existing:
             if args.method == "asymptotic":
                 out_fn = os.path.join(COMBINE_OUT, sig_id,
