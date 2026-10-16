@@ -107,7 +107,14 @@ for ntk in ntk_ls_2v:
     var_fracvNN = (2*(effn1v**2)*(err_effn1v/effn1v))**2
     err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
     effn2v = n2v/tot_n2v
-    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    if effn2v!=0 and effn2v!=1:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    elif effn2v==0:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
+    elif effn2v==1:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*(var_n2v+1)) / tot_n2v**2)
+    else:
+        raise Exception
     rat = n2v/pred
     err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
@@ -132,7 +139,10 @@ for ntk in ntk2_ls:
     effn1vN = n1vN/tot_n1v
     effn1vM = n1vM/tot_n1v
     effn2v = n2v/tot_n2v
-    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    if effn2v!=0:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    else effn2v==0:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
     pred = (2*(effn1vN)*(effn1vM))*tot_n2v
     var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
     err_pred = pred * np.sqrt(var_n2v/(tot_n2v)**2 + var_fracvNM)

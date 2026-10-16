@@ -73,15 +73,20 @@ var_n1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed)
 var_n2v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
 
 if data:
-    ntk_ls = [3,4]
-    ntk2_ls = ['Ntk3or4']
+    ntk_ls = [3,4,5]
+    ntk_ls_2v = [3,4]
+    ntk2_ls = ['Ntk3or4', 'Ntk3or5', 'Ntk4or5']
 else:
     ntk_ls = [3,4,5]
+    ntk_ls_2v = [3,4,5]
     ntk2_ls = ['Ntk3or4', 'Ntk3or5', 'Ntk4or5']
 
 for ntk in ntk_ls:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
-    n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
+    if ntk in ntk_ls_2v:
+        n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
+    else:
+        n2v, err_n2v = 0.0, 0.0
     
     tot_n1v += n1v
     tot_n2v += n2v 
@@ -108,7 +113,7 @@ print 'n2 = %8.0f'%(tot_n2v)
 print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
-for ntk in ntk_ls:
+for ntk in ntk_ls_2v:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
     n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
@@ -121,10 +126,14 @@ for ntk in ntk_ls:
     else:
         err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
     effn2v = n2v/tot_n2v
-    if effn2v!=1:
+    if effn2v!=0 and effn2v!=1:
         err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
-    else:
+    elif effn2v==0:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
+    elif effn2v==1:
         err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*(var_n2v+1)) / tot_n2v**2)
+    else:
+        raise Exception
     rat = n2v/pred
     err_rat = rat * np.sqrt( (err_effn2v/effn2v)**2 + 4*(err_effn1v/effn1v)**2 )
     if pred == 0:
@@ -160,7 +169,10 @@ for ntk in ntk2_ls:
     effn1vN = n1vN/tot_n1v
     effn1vM = n1vM/tot_n1v
     effn2v = n2v/tot_n2v
-    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    if effn2v!=0:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
+    else:
+        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
     pred = (2*(effn1vN)*(effn1vM))*tot_n2v
     var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
     if tot_n2v == 0:
