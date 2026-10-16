@@ -132,10 +132,9 @@ for ntk in ntk_ls:
         print "Printing predicted and error for %s-trk 2-vtx events: %9.5f +- %6.5f" % (ntk, pred, err_pred)
         continue
     effn2v = n2v/tot_n2v
-    if effn2v!=0 and effn2v!=1:
+    if err_n2v == 0: err_n2v = 1.0
+    if effn2v!=1:
         err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
-    elif effn2v==0:
-        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
     elif effn2v==1:
         err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*(var_n2v+1)) / tot_n2v**2)
     else:
@@ -174,10 +173,8 @@ for ntk in ntk2_ls:
     effn1vN = n1vN/tot_n1v
     effn1vM = n1vM/tot_n1v
     effn2v = n2v/tot_n2v
-    if effn2v!=0:
-        err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
-    else:
-        err_effn2v = np.sqrt(((1.0-2*effn2v)*1+effn2v**2*var_n2v) / tot_n2v**2)
+    if err_n2v == 0: err_n2v = 1.0
+    err_effn2v = np.sqrt(((1.0-2*effn2v)*err_n2v**2+effn2v**2*var_n2v) / tot_n2v**2)
     pred = (2*(effn1vN)*(effn1vM))*tot_n2v
     var_fracvNM = (1.0-2*effn1vN)**2*(err_n1vN/n1vN)**2 + (1.0-2*effn1vM)**2*(err_n1vM/n1vM)**2 + 4*(err_n1v_oth/tot_n1v)**2
     if tot_n2v == 0:
