@@ -9,11 +9,11 @@ lep = True
 bjet = False
 
 if bjet :
-    presel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/' 
-    sel_path = '~/nobackup/crabdirs/Histos_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm/'  
+    presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/' 
+    sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/'  
 if lep :
-    presel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
-    sel_path = '~/crab_dirs/Histos_LepIPCut_halfmc_Lepton_SF_2018correctionsLepm_noef'
+    presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-29-Histos_tag004Lepm-SumptM5CutsOn-Newest/'
+    sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-29-Histos_tag004Lepm-SumptM5CutsOn-Newest/'
 #data = bool_from_argv('data')
 data = False
 year = '2018' if len(sys.argv) < 2 else sys.argv[1]
@@ -40,7 +40,7 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 
-npresel, err_npresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_npu'))
+npresel, err_npresel = get_integral(presel_f.Get('Ntk3mfvEventHistosPreSel/h_n_vertex_seed_tracks'))
 
 print 'year:', year
 print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
@@ -64,8 +64,8 @@ else:
     ntk2_ls = ['Ntk3or4', 'Ntk3or5', 'Ntk4or5']
 
 for ntk in ntk_ls:
-    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     
     tot_n1v += n1v
     tot_n2v += n2v
@@ -82,8 +82,8 @@ for ntk in ntk2_ls:
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    print('%smfvEventHistosFullSel/h_npu' % ntk)
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    print('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk)
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk))
     tot_n2v += n2v
     var_n2v += (err_n2v**2)
 
@@ -93,8 +93,8 @@ print 'err_n2 = %f'%(math.sqrt(var_n2v))
 print 'Warning: do NOT use the values marked PI (Poissonian Interval) for anything except data.'
 
 for ntk in ntk_ls:
-    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1v = n1v/tot_n1v
     err_effn1v = np.sqrt(((1.0-2*effn1v)*err_n1v**2+effn1v**2*var_n1v) / tot_n1v**2)
@@ -118,11 +118,11 @@ for ntk in ntk2_ls:
             tracks[i] = ''
         else:
             tracks[i] = 'Ntk%s' % n
-    n1vN, err_n1vN = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1vM, err_n1vM = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
+    n1vN, err_n1vN = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % tracks[0]))
+    n1vM, err_n1vM = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % tracks[1]))
     n1v_oth = tot_n1v - n1vN - n1vM
     err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ntk))
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1vN = n1vN/tot_n1v
     effn1vM = n1vM/tot_n1v
