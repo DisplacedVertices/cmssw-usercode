@@ -134,7 +134,7 @@ def make_bkg(f):
     if n2v_run2 is None or era_split is None:
         raise ValueError("Set the Run 2 5x5 and per-era %s predicted yields for %s in sig_and_bkg_configs.py"
                          % (split_region, sig_type))
-    era_frac = era_split[year_id] / sum(era_split)
+    era_frac = float(era_split[year_id]) / sum(era_split)
     scale_num = n2v_run2 * era_frac
     scale_den = h_bkg_sumdbv.Integral()
     h_bkg_sumdbv.Scale(scale_num / scale_den)
