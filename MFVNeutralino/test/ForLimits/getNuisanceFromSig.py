@@ -50,7 +50,7 @@ nuis_replacements = {
     "lep": {},
 }
 
-nuis_bkg = set(["bkg_norm", "bkg_shape"])
+nuis_bkg = set(["bkg_norm", "bkg_shape", "bkg_stat"])
 nuis_bkg_replacements = {}
 
 
@@ -87,7 +87,7 @@ def get_nuis_fromname(nuis_name, siginfo, nuis_ls, debug_mode=False):
     nuis_ls += new_nuis
 
 
-def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
+def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, bkg_stat, debug_mode=False):
     new_nuis = []
 
     if   nuis_name == "bkg_jet_ang":   new_nuis = nsfc.get_bkg_jet_ang("dphiVV", debug_mode=debug_mode)
@@ -97,6 +97,7 @@ def get_bkg_nuis_fromname(nuis_name, nuis_bkg_ls, debug_mode=False):
     elif nuis_name == "sig_cont":      new_nuis = nsfc.get_bkg_sig_cont(nuis_name, debug_mode=debug_mode)
     elif nuis_name == "bkg_norm":      new_nuis = nsfc.get_bkg_bkg_norm("bkg_norm", debug_mode=debug_mode)
     elif nuis_name == "bkg_shape":     new_nuis = nsfc.get_bkg_shape_closure("bkg_shape", debug_mode=debug_mode)
+    elif nuis_name == "bkg_stat":      new_nuis = nsfc.get_bkg_stat("bkg_stat", bkg_stat, debug_mode=debug_mode)
     elif nuis_name == "n2v_unc":       new_nuis = nsfc.get_bkg_n2v_unc("num_vtx_pair_unc", debug_mode=debug_mode)
     else:
         raise Exception("Error: background nuisance name not implemented for " + nuis_name)
@@ -158,7 +159,7 @@ def get_nuis_fromsig(siginfo, nuis_ls, debug_mode=False):
             nuis.print_diagnostics()
 
 
-def get_nuis_frombkg(nuis_bkg_ls, debug_mode=False):
+def get_nuis_frombkg(nuis_bkg_ls, bkg_stat, debug_mode=False):
     """Build the nuisance list for the background estimate.
 
     -INPUTS-
@@ -174,7 +175,7 @@ def get_nuis_frombkg(nuis_bkg_ls, debug_mode=False):
         print("Nuisances identified:", nuis_set, "\n")
 
     for nuis in sorted(nuis_set):
-        get_bkg_nuis_fromname(nuis, nuis_bkg_ls, debug_mode=debug_mode)
+        get_bkg_nuis_fromname(nuis, nuis_bkg_ls, bkg_stat, debug_mode=debug_mode)
 
     if debug_mode:
         print("Nuisances that produced a BKG Nuisance object:")

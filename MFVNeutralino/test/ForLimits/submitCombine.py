@@ -71,6 +71,8 @@ CHANNELS = ("lep", "bjet")
 
 # AsymptoticLimits: analytic CLs, fast (~5s), produces bands + median.
 # Output: higgsCombine{sig}.AsymptoticLimits.mH120.root + combine.log
+_ASYMPTOTIC_CMD = "combine -M AsymptoticLimits {workspace} --name {sig_id} --run blind -v 0"
+
 _JOB_SH_ASYMPTOTIC = """\
 #!/bin/bash
 set -e
@@ -84,9 +86,7 @@ export LD_LIBRARY_PATH=/srv/combine_env/lib:$LD_LIBRARY_PATH
 
 SIG={sig_id}
 echo "=== AsymptoticLimits: $SIG ==="
-combine -M AsymptoticLimits workspace_$SIG.root \\
-    --name $SIG --run blind -v 0 \\
-    2>&1 | tee combine.log
+{combine_cmd} 2>&1 | tee combine.log
 echo "=== Done: $SIG ==="
 """
 
@@ -188,6 +188,20 @@ def _makedirs(path):
         os.makedirs(path)
 
 
+def _signal_rate(card):
+    proc_ids, rates = [], []
+    with open(card) as fh:
+        for line in fh:
+            t = line.split()
+            if not t:
+                continue
+            if t[0] == "process" and all(x.lstrip("-").isdigit() for x in t[1:]):
+                proc_ids = [int(x) for x in t[1:]]
+            elif t[0] == "rate":
+                rates = [float(x) for x in t[1:]]
+    return sum(r for i, r in zip(proc_ids, rates) if i <= 0)
+
+
 def find_hypotheses():
     """Return {sig_base: {ch_year: card_path}} for every available datacard.
 
@@ -223,7 +237,7 @@ def find_hypotheses():
     return by_channel
 
 
-def _write_job(sig_id, cards, dry_run, method="hybridnew"):
+def _write_job(sig_id, cards, dry_run, method="hybridnew", local=False):
     work_dir   = os.path.join(COMBINE_OUT, sig_id)
     condor_dir = os.path.join(CONDOR_DIR,  sig_id)
     _makedirs(work_dir)
@@ -235,7 +249,7 @@ def _write_job(sig_id, cards, dry_run, method="hybridnew"):
     workspace     = os.path.join(condor_dir, "workspace_%s.root" % sig_id)
     if not dry_run:
         import shutil
-        for tool in ("combineCards.py", "text2workspace.py"):
+        for tool in ("combineCards.py", "text2workspace.py") + (("combine",) if local else ()):
             if not shutil.which(tool):
                 print("ERROR: %s not in PATH; cannot build workspace for %s -- skipping" % (tool, sig_id))
                 return False
@@ -258,6 +272,7 @@ def _write_job(sig_id, cards, dry_run, method="hybridnew"):
             fh.write(_JOB_SH_ASYMPTOTIC.format(
                 cvmfs_cmssw14 = CVMFS_CMSSW14,
                 sig_id        = sig_id,
+                combine_cmd   = _ASYMPTOTIC_CMD.format(workspace="workspace_%s.root" % sig_id, sig_id=sig_id),
             ))
         os.chmod(job_sh, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
         with open(jdl_fn, "w") as fh:
@@ -292,13 +307,20 @@ def _write_job(sig_id, cards, dry_run, method="hybridnew"):
                 sig_id          = sig_id,
             ))
 
-    if not dry_run:
+    if dry_run:
+        print("  [dry-run] %s  (%d cards: %s)" % (sig_id, len(cards), ", ".join(sorted(cards))))
+    elif local:
+        ret = subprocess.call(_ASYMPTOTIC_CMD.format(workspace=workspace, sig_id=sig_id) + " > combine.log 2>&1",
+                              shell=True, cwd=work_dir)
+        if ret != 0:
+            print("WARNING: combine failed for %s -- see %s" % (sig_id, os.path.join(work_dir, "combine.log")))
+            return False
+        print("  [local] %s done" % sig_id)
+    else:
         ret = subprocess.call("condor_submit " + jdl_fn, shell=True)
         if ret != 0:
             print("WARNING: condor_submit returned %d for %s" % (ret, sig_id))
             return False
-    else:
-        print("  [dry-run] %s  (%d cards: %s)" % (sig_id, len(cards), ", ".join(sorted(cards))))
 
 
 def main():
@@ -321,7 +343,12 @@ def main():
                          "used for makeLimitsInputROOT.py. Defaults to this ForLimits directory.")
     ap.add_argument("--method", default="hybridnew", choices=["hybridnew", "asymptotic"],
                     help="Which combine method to run: hybridnew (default) or asymptotic")
+    ap.add_argument("--local", action="store_true",
+                    help="Run combine here instead of submitting to Condor (asymptotic only)")
     args = ap.parse_args()
+
+    if args.local and args.method != "asymptotic":
+        raise SystemExit("--local only supports --method asymptotic")
 
     if args.tag:
         _apply_tag(args.tag, base=args.out_dir)
@@ -367,6 +394,13 @@ def main():
         raise SystemExit("%d hypotheses do not have a datacard for every era; nothing submitted"
                          % len(incomplete))
 
+    no_signal = [s for s in selected if sum(_signal_rate(c) for c in hyps[s].values()) <= 0]
+    if no_signal:
+        print("Skipping %d hypotheses with zero signal in every era (no sensitivity):" % len(no_signal))
+        for sig_id in no_signal:
+            print("  %s" % sig_id)
+        selected = [s for s in selected if s not in no_signal]
+
     n = 0
     n_skip = 0
     for sig_id in selected:
@@ -380,7 +414,7 @@ def main():
             if os.path.exists(out_fn):
                 n_skip += 1
                 continue
-        if _write_job(sig_id, hyps[sig_id], args.dry_run, method=args.method) is not False:
+        if _write_job(sig_id, hyps[sig_id], args.dry_run, method=args.method, local=args.local) is not False:
             n += 1
         if args.limit and n >= args.limit:
             break
@@ -388,7 +422,8 @@ def main():
     if n_skip:
         print("Skipped %d already-completed hypotheses (--skip-existing)" % n_skip)
 
-    status = "queued (dry-run, job files written)" if args.dry_run else "submitted to Condor"
+    status = ("queued (dry-run, job files written)" if args.dry_run
+              else "run locally" if args.local else "submitted to Condor")
     print("\n%d hypotheses %s" % (n, status))
 
 

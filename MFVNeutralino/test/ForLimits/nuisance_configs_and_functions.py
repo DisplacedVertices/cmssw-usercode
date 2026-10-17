@@ -277,6 +277,11 @@ def get_bkg_shape_closure(nuis_name, debug_mode=False):
                              sep_yrs=False, corr=False, nbins=nbins, ana_spec=True, extrapolate_last=False)]
 
 
+def get_bkg_stat(nuis_name, bkg_stat, debug_mode=False):
+    return [sth.NuisanceInfo(nuis_name + "_" + sig_type, [1 + r for r in bkg_stat], make_updn=False,
+                             sep_yrs=False, corr=False, nbins=nbins, ana_spec=True, extrapolate_last=False)]
+
+
 def get_bkg_n2v_unc(nuis_name, debug_mode=False):
     frac_unc = sb_conf.n2v_uncs[sig_type][year_id] / sb_conf.template_norms["n2v"][sig_type][year_id]
     return [sth.NuisanceInfo(nuis_name, 1 + frac_unc, make_updn=False,

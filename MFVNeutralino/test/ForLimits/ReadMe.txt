@@ -51,24 +51,19 @@ Under --out-dir you get LimitsInput_4bin/<channel>/ (ROOT histograms) and
 Datacards_4bin/<channel>/ (combine .txt cards). Both are created if missing.
 
     python makeLimitsInputROOT.py --year 2018 --channel lep \
-        --minitree-dir     /path/to/MiniTree_tag001Lepm_VH \
-        --bkg-template-dir /path/to/templates/lep \
+        --minitree-dir     /uscms_data/d3/joeyr/crabdirs/MiniTree_tag004Lepm \
+        --bkg-template-dir /path/to/templates \
         --out-dir          /path/to/output
 
-    bash run_limits_bjet_allyears.sh <minitree-dir> <bkg-template-dir> <out-dir>  # bjet, all years
+    bash run_limits_bjet_allyears.sh /uscms_data/d3/joeyr/crabdirs/MiniTree_tag004BvetoLHTm <bkg-template-dir> <out-dir>  # bjet, all years
 
-BackgroundTemplates_EXAMPLE/ in this directory is a reference copy showing the expected
-file names and layout. It is not an input; point --bkg-template-dir at your own set.
+Signals are the files in tag004_signal_minitrees.txt under --minitree-dir, so pass the folder exactly as written there.
 
-The rest of limits_config.yaml (bins, observations, default year/channel, file-name
-patterns) is shared config and normally does not need editing. The 4-bin setup is
-[0, 0.1, 0.4, 2.0, 4.0] cm and is the default.
+--bkg-template-dir holds ULV30Lepm_5track_background_template.root and ULV30BvetoLHTm_5track_background_template.root, each with one histogram, h_1: the 4 bins and their stat errors. The normalization (Run 2 5x5 prediction and its per-era split) goes in template_norms in sig_and_bkg_configs.py.
 
-If you only have some of the signals that is fine, the code runs over whatever it finds.
-Signal clusters like VH are the exception: all four of ZH, W+H, W-H and ggZH are summed into
-one process, so two or three of the four present is an error rather than a silent skip. A point
-where only ggZH exists is skipped with a message, since ggZH is generated at more lifetimes than
-ZH and W+-H (7 for 4d and 10 for 4b, vs 6), so those are simply not VH points.
+The rest of limits_config.yaml (bins, observations, default year/channel, file names) is shared config and normally does not need editing. The 4-bin setup is [0, 0.1, 0.4, 2.0, 4.0] cm and is the default.
+
+VH sums ZH, W+H, W-H and ggZH, so a VH point missing any of them is an error. ggZH-only lifetimes are skipped with a message.
 
 
 RUNNING COMBINE (el9, CMSSW_14_1_0_pre4)

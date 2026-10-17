@@ -6,7 +6,7 @@ import sys
 import ROOT
 import numpy as np
 
-from JMTucker.Tools.ROOTTools import to_TH1D, move_overflow_into_last_bin
+from JMTucker.Tools.ROOTTools import move_overflow_into_last_bin
 
 import script_configs as config
 import sig_and_bkg_configs as sb_conf
@@ -100,15 +100,12 @@ def check_config(yr):
 # ---------------------------------------------------------------------------
 def make_bkg(f):
     """
-    Write: lumi, observations, rebinned sum_dBV. Nuisance parameters are added elsewhere.
+    Write: lumi, observations, sum_dBV. Nuisance parameters are added elsewhere.
 
     -INPUTS-
     f: ROOT file to write into
     """
-    bkg_fn = os.path.join(
-        config.bkg[sig_type]["folder"],
-        config.bkg[sig_type]["fn"].format("run2")
-    )
+    bkg_fn = os.path.join(config.bkg[sig_type]["folder"], config.bkg[sig_type]["fn"])
     if debug:
         print("Opening bkg file:", bkg_fn)
     bkg_f = ROOT.TFile.Open(bkg_fn)
@@ -128,7 +125,13 @@ def make_bkg(f):
             print("  observed bin %d = %d" % (i, v))
     new_bkg_hs.append(h_observed)
 
-    h_bkg_sumdbv = to_TH1D(bkg_f.Get("h_c1v_sumdbv_w_errorbars"), "h_bkg_sumdbv_%s" % year)
+    h_tmpl = bkg_f.Get("h_1")
+    h_bkg_sumdbv = ROOT.TH1D("bkg" + year_tag, "", nbins, bins)
+    for i in range(1, nbins + 2):
+        h_bkg_sumdbv.SetBinContent(i, h_tmpl.GetBinContent(i))
+        h_bkg_sumdbv.SetBinError(i, h_tmpl.GetBinError(i))
+    move_overflow_into_last_bin(h_bkg_sumdbv)
+    bkg_stat = [float(h_bkg_sumdbv.GetBinError(i)) / h_bkg_sumdbv.GetBinContent(i) for i in range(1, nbins + 1)]
     n2v_run2 = sb_conf.template_norms["n2v_5x5_run2"][sig_type]
     split_region, era_split = sb_conf.template_norms["n2v_era_split"][sig_type]
     if n2v_run2 is None or era_split is None:
@@ -146,9 +149,7 @@ def make_bkg(f):
         h_bkg_sumdbv.Scale(config.debug_settings["bkg_fake_sf"])
         print("WARNING: scaled bkg by fake factor", config.debug_settings["bkg_fake_sf"])
 
-    h_bkg_sumdbv_rebin = h_bkg_sumdbv.Rebin(nbins, "bkg" + year_tag, bins)
-    move_overflow_into_last_bin(h_bkg_sumdbv_rebin)
-    new_bkg_hs.append(h_bkg_sumdbv_rebin)
+    new_bkg_hs.append(h_bkg_sumdbv)
 
     f.cd()
     for h in new_bkg_hs:
@@ -158,6 +159,7 @@ def make_bkg(f):
             print("  wrote:", h.GetName())
 
     print("BACKGROUND processing complete")
+    return bkg_stat
 
 
 # ---------------------------------------------------------------------------
@@ -512,7 +514,7 @@ def run_one_year(yr):
 
     if debug:
         print("\n--- Background ---")
-    make_bkg(f)
+    bkg_stat = make_bkg(f)
 
     sig_nums   = {}  # signal obj to number dictionary
     sig_scales = {}  # store scalings for signals, preventing repeated calculations
@@ -525,7 +527,7 @@ def run_one_year(yr):
     if debug:
         print("\n--- Background nuisances ---")
     nuis_bkg_ls = []
-    getns.get_nuis_frombkg(nuis_bkg_ls, debug_mode=debug)
+    getns.get_nuis_frombkg(nuis_bkg_ls, bkg_stat, debug_mode=debug)
 
     if debug:
         print("\n--- Signal nuisances + datacards ---")
