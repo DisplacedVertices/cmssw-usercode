@@ -11,6 +11,7 @@ Output (in LimitPlots/):
   <proc>_1D_vsmass.pdf                  -- mass on x, all ctau values overlaid
   <proc>_1D_vsmass_<c1>_vs_<c2>.pdf    -- mass on x, one plot per adjacent ctau pair
   <proc>_2D.pdf                         -- ctau vs mass 2D color map + r=1 exclusion contour
+  higgs_overlay_<4d|4b>_M<m>.pdf        -- ctau on x, one curve per Higgs production mode (each fitted on its own)
   <proc>_1D_hepcomp_M<m1>vsM<m2>.pdf   -- ctau on x, Low-HT vs High-HT (HepData) per mass pair
   <proc>_1D_hepcomp_vsmass_<c1>vs<c2>.pdf  -- mass on x, Low-HT vs High-HT per ctau pair
 
@@ -79,19 +80,29 @@ _EXTRA_THEORY_CSV = {
     "mfv_neu": os.path.join(_ONE2TWO, "higgsino_N2N1.csv"),
 }
 
+# Per theory CSV: (key of its twiki line in xsec_info.txt, process symbol, perturbative order).
+_XSEC_INFO = os.path.join(_ONE2TWO, "xsec_info.txt")
+_THEORY = {
+    "gluglu.csv":        ("gluinos",     r"\tilde{g}\tilde{g}",                     r"NNLO$_\mathrm{approx}$+NNLL"),
+    "stopstop.csv":      ("stops",       r"\tilde{t}\bar{\tilde{t}}",                r"NNLO$_\mathrm{approx}$+NNLL"),
+    "higgsino_N2N1.csv": ("neutralinos", r"\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}", r"aNNLO+NNLL, higgsino-like"),
+}
 
+
+_HSS_4D = r"H$\to$SS$\to$d$\bar{\mathrm{d}}$d$\bar{\mathrm{d}}$"
+_HSS_4B = r"H$\to$SS$\to$b$\bar{\mathrm{b}}$b$\bar{\mathrm{b}}$"
 PROC_LABELS = {
-    "VHToSSTodddd":        r"WH + ZH (incl. gg),  H$\to$SS$\to$dddd",
-    "ggZHToSSTobbbb":      r"ggZH,  H$\to$SS$\to$bbbb",
-    "VHToSSTobbbb":        r"WH + ZH (incl. gg),  H$\to$SS$\to$bbbb",
-    "ggHToSSTodddd":       r"ggH,  H$\to$SS$\to$dddd",
-    "ggHToSSTobbbb":       r"ggH,  H$\to$SS$\to$bbbb",
-    "ttHToSSTo4b_lep":     r"ttH (lepton-triggered),  H$\to$SS$\to$bbbb",
-    "ttHToSSTo4d_lep":     r"ttH (lepton-triggered),  H$\to$SS$\to$dddd",
-    "ttHToSSTo4b_bjet":    r"ttH (displacement-triggered),  H$\to$SS$\to$bbbb",
-    "ttHToSSTo4d_bjet":    r"ttH (displacement-triggered),  H$\to$SS$\to$dddd",
-    "VBFHToSSTo4b":        r"VBF H,  H$\to$SS$\to$bbbb",
-    "VBFHToSSTo4d":        r"VBF H,  H$\to$SS$\to$dddd",
+    "VHToSSTodddd":        r"WH + ZH (incl. gg),  " + _HSS_4D,
+    "ggZHToSSTobbbb":      r"ggZH,  " + _HSS_4B,
+    "VHToSSTobbbb":        r"WH + ZH (incl. gg),  " + _HSS_4B,
+    "ggHToSSTodddd":       r"ggH,  " + _HSS_4D,
+    "ggHToSSTobbbb":       r"ggH,  " + _HSS_4B,
+    "ttHToSSTo4b_lep":     r"ttH (lepton-triggered),  " + _HSS_4B,
+    "ttHToSSTo4d_lep":     r"ttH (lepton-triggered),  " + _HSS_4D,
+    "ttHToSSTo4b_bjet":    r"ttH (displacement-triggered),  " + _HSS_4B,
+    "ttHToSSTo4d_bjet":    r"ttH (displacement-triggered),  " + _HSS_4D,
+    "VBFHToSSTo4b":        r"VBF H,  " + _HSS_4B,
+    "VBFHToSSTo4d":        r"VBF H,  " + _HSS_4D,
     "mfv_neu":             r"RPV SUSY,  $\tilde{g}\to tbs$",
     "mfv_stopdbardbar":    r"RPV SUSY,  $\tilde{t}\to\bar{d}\bar{d}$",
     "mfv_stopbbarbbar":    r"RPV SUSY,  $\tilde{t}\to\bar{b}\bar{b}$",
@@ -103,9 +114,6 @@ _EWK_LABEL = r"RPV SUSY,  $\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$,  $\tilde{\
 # (vmin, vref, vmax) in fb for the 2D color scale; vref is the white pivot on RdBu_r.
 # Unspecified processes fall back to geometric-mean auto-scaling.
 _2D_VSCALE = {
-    "mfv_neu":          (0.1,   10.0,  1e5),
-    "mfv_stopdbardbar": (0.1,   10.0,  1e5),
-    "mfv_stopbbarbbar": (0.1,   10.0,  1e5),
     # Higgs: pivot at SM benchmark BR=1%; range covers 0.1%-100% (well beyond any limit)
     "VHToSSTodddd":     (1e-3,  0.01,  1.0),
     "ggZHToSSTobbbb":   (1e-3,  0.01,  1.0),
@@ -306,13 +314,13 @@ def load_hepdata():
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-def _format_ctau(ctau_mm):
-    """Format a ctau float for labels and filenames, e.g. 0.3 -> '0.3mm'."""
+def _format_ctau(ctau_mm, sep=""):
+    """Format a ctau float for labels and filenames, e.g. 0.3 -> '0.3mm' (sep=" " gives '0.3 mm')."""
     if ctau_mm < 1.0:
         s = "%.3g" % ctau_mm
     else:
         s = "%.4g" % ctau_mm
-    return s + "mm"
+    return s + sep + "mm"
 
 
 def _pair_list(items):
@@ -362,27 +370,37 @@ def _hepdata_slice_at_ctau(hd, ctau_mm):
     return hd_masses, r
 
 
-def _draw_ref_curve_vsmass(ax, proc):
+def _theory_curve(csv_path, xlim=None):
+    """(mass, σ [fb], fractional unc) from a theory CSV, cut to xlim [GeV] if given."""
+    masses, xsec_fb = _load_theory_xsec_csv(csv_path)
+    unc = _load_theory_unc_frac(csv_path)
+    if xlim is None:
+        return masses, xsec_fb, unc
+    keep = (masses >= xlim[0]) & (masses <= xlim[1])
+    return masses[keep], xsec_fb[keep], unc[keep]
+
+
+def _draw_ref_curve_vsmass(ax, proc, xlim=None):
     """Draw theory/benchmark reference curves vs mass. Returns True if anything drawn."""
     if proc in _SUSY_PROCS:
         csv_path = _HEPDATA_THEORY_CSV.get(proc)
         if not csv_path or not os.path.exists(csv_path):
             return False
-        masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
-        label = r"$\tilde{g}\tilde{g}$ NNLO$_{\mathrm{approx}}$+NNLL" if proc == "mfv_neu" else r"Theory $\sigma\mathcal{B}^{2}$"
-        unc = _load_theory_unc_frac(csv_path)
+        masses_csv, xsec_fb_csv, unc = _theory_curve(csv_path, xlim)
+        label = r"$\sigma_\mathrm{theory}(%s)$" % _theory_symbol(csv_path)
         ax.fill_between(masses_csv, xsec_fb_csv * (1 - unc), xsec_fb_csv * (1 + unc),
                         color="black", alpha=0.15, lw=0, zorder=2)
         ax.plot(masses_csv, xsec_fb_csv, color="black", lw=1.5, ls="--",
                 label=label, zorder=3)
+        _theory_footnote(ax, csv_path)
         extra_path = _EXTRA_THEORY_CSV.get(proc)
         if extra_path and os.path.exists(extra_path):
-            em, exs = _load_theory_xsec_csv(extra_path)
-            eunc = _load_theory_unc_frac(extra_path)
+            em, exs, eunc = _theory_curve(extra_path, xlim)
             ax.fill_between(em, exs * (1 - eunc), exs * (1 + eunc),
                             color="dimgray", alpha=0.15, lw=0, zorder=2)
             ax.plot(em, exs, color="dimgray", lw=1.5, ls=":",
-                    label=r"$\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$ aNNLO+NNLL", zorder=3)
+                    label=r"$\sigma_\mathrm{theory}(%s)$" % _theory_symbol(extra_path), zorder=3)
+            _theory_footnote(ax, extra_path, row=1)
         return True
     # Higgs: reference line at BR benchmark
     if proc not in _SUSY_PROCS:
@@ -400,6 +418,40 @@ def _draw_ref_lines_ctau(ax, proc, masses_sorted, color_list):
     ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
                label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
     return True
+
+
+def _theory_url(csv_path):
+    key = _THEORY[os.path.basename(csv_path)][0]
+    for line in open(_XSEC_INFO):
+        if line.startswith(key + ":"):
+            return line.split()[1]
+    return None
+
+
+def _theory_symbol(csv_path):
+    return _THEORY[os.path.basename(csv_path)][1]
+
+
+def _theory_footnote(ax, csv_path, row=0):
+    """Clickable footnote (in the PDF) naming the theory cross section and linking its twiki."""
+    _, sym, order = _THEORY[os.path.basename(csv_path)]
+    ax.text(0.0, -0.20 - 0.05 * row,
+            r"$\sigma_\mathrm{theory}(%s)$: %s, PDF4LHC21, $\mathcal{B} = 100\%%$ "
+            r"(LHC SUSY Cross Section WG twiki)" % (sym, order),
+            transform=ax.transAxes, fontsize=9, ha="left", va="top", clip_on=False,
+            color="#1f4e9c", url=_theory_url(csv_path))
+
+
+def _excl_label(proc, csv_path=None):
+    if proc in _SUSY_PROCS:
+        return r"Expected exclusion: $\sigma\mathcal{B}^{2} = \sigma_\mathrm{theory}(%s)$" % _theory_symbol(csv_path)
+    return r"Expected exclusion at $\mathcal{B}(H{\to}SS) = 1\%$"
+
+
+def _mass_label(proc, mass):
+    if proc in _SUSY_PROCS:
+        return "m = %s GeV" % mass
+    return r"$m_{S}$ = %s GeV" % mass
 
 
 def _annotate_proc(ax, proc, label=None):
@@ -464,24 +516,16 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
             continue
         lims_c = [cdict[c] for c in ctaus]
         exp    = [l["exp"] * scale for l in lims_c]
-        _raw1  = _band(lims_c, "dn1"); dn1 = [v * scale for v in _raw1] if _raw1 else None
-        _raw2  = _band(lims_c, "up1"); up1 = [v * scale for v in _raw2] if _raw2 else None
-        _raw3  = _band(lims_c, "dn2", "dn1"); dn2 = [v * scale for v in _raw3] if _raw3 else None
-        _raw4  = _band(lims_c, "up2", "up1"); up2 = [v * scale for v in _raw4] if _raw4 else None
 
         col = _COLORS[i % len(_COLORS)]
-        if dn2 and up2:
-            ax.fill_between(ctaus, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        if dn1 and up1:
-            ax.fill_between(ctaus, dn1, up1, alpha=0.35, color=col, edgecolor="none")
-        ax.plot(ctaus, exp, color=col, lw=2, ls="--",
-                label="m = %s GeV (exp)" % mass)
+        ax.plot(ctaus, exp, color=col, lw=2, ls="--", marker="o", ms=5,
+                label=_mass_label(proc, mass))
 
         _obs_raw = _band(lims_c, "obs")
         if _obs_raw:
             obs = [v * scale for v in _obs_raw]
             ax.plot(ctaus, obs, color=col, lw=2, ls="-",
-                    label="m = %s GeV (obs)" % mass)
+                    label=_mass_label(proc, mass) + " (observed)")
 
     if not _draw_ref_lines_ctau(ax, proc, masses, _COLORS):
         pass
@@ -489,7 +533,7 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
     ax.set_yscale("log")
     ax.set_xlabel(r"$c\tau$ [mm]")
     ax.set_ylabel(_ylabel(proc))
-    ax.legend(fontsize=9, ncol=2)
+    ax.legend(fontsize=9, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
     ax.grid(True, which="both", ls=":", alpha=0.4)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc)
@@ -514,32 +558,29 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
 
         lims_m = [mdict[m] for m in masses]
         exp  = [l["exp"] * s for l, s in zip(lims_m, scales)]
-        _r1  = _band(lims_m, "dn1"); dn1 = [v * s for v, s in zip(_r1, scales)] if _r1 else None
-        _r2  = _band(lims_m, "up1"); up1 = [v * s for v, s in zip(_r2, scales)] if _r2 else None
-        _r3  = _band(lims_m, "dn2", "dn1"); dn2 = [v * s for v, s in zip(_r3, scales)] if _r3 else None
-        _r4  = _band(lims_m, "up2", "up1"); up2 = [v * s for v, s in zip(_r4, scales)] if _r4 else None
 
         col = _COLORS[i % len(_COLORS)]
-        lbl = _format_ctau(ctau)
-        if dn2 and up2:
-            ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        if dn1 and up1:
-            ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
-        ax.plot(mass_vals, exp, color=col, lw=2, ls="--",
-                label=r"$c\tau$ = %s (exp)" % lbl)
+        lbl = _format_ctau(ctau, " ")
+        ax.plot(mass_vals, exp, color=col, lw=2, ls="--", marker="o", ms=5,
+                label=r"$c\tau$ = %s" % lbl)
 
         _obs_raw = _band(lims_m, "obs")
         if _obs_raw:
             obs = [v * s for v, s in zip(_obs_raw, scales)]
             ax.plot(mass_vals, obs, color=col, lw=2, ls="-",
-                    label=r"$c\tau$ = %s (obs)" % lbl)
+                    label=r"$c\tau$ = %s (observed)" % lbl)
 
-    if not _draw_ref_curve_vsmass(ax, proc):
+    xlim = None
+    if proc in _SUSY_PROCS:
+        all_masses = [int(m) for m in _sorted_masses(mass_data)]
+        xlim = (all_masses[0] - 100, all_masses[-1] + 100)
+        ax.set_xlim(*xlim)
+    if not _draw_ref_curve_vsmass(ax, proc, xlim):
         pass
     ax.set_yscale("log")
     ax.set_xlabel(_mass_xlabel(proc))
     ax.set_ylabel(_ylabel(proc))
-    ax.legend(fontsize=9, ncol=2)
+    ax.legend(fontsize=9, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
     ax.grid(True, which="both", ls=":", alpha=0.4)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc)
@@ -551,7 +592,7 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
 # ---------------------------------------------------------------------------
 
 def _draw_lowht_pair(ax, proc, ctau_data, c1, c2):
-    """Draw Low-HT exp+bands+obs for two ctau values, scaled to σ×B² [fb]."""
+    """Draw Low-HT exp+obs for two ctau values, scaled to σ×B² [fb]."""
     for i, ctau in enumerate([c1, c2]):
         mdict     = ctau_data[ctau]
         masses    = _sorted_masses(mdict)
@@ -559,23 +600,15 @@ def _draw_lowht_pair(ax, proc, ctau_data, c1, c2):
         scales    = [_sig_scale_fb(proc, m) for m in masses]
         lims_m = [mdict[m] for m in masses]
         exp  = [l["exp"] * s for l, s in zip(lims_m, scales)]
-        _r1  = _band(lims_m, "dn1"); dn1 = [v * s for v, s in zip(_r1, scales)] if _r1 else None
-        _r2  = _band(lims_m, "up1"); up1 = [v * s for v, s in zip(_r2, scales)] if _r2 else None
-        _r3  = _band(lims_m, "dn2", "dn1"); dn2 = [v * s for v, s in zip(_r3, scales)] if _r3 else None
-        _r4  = _band(lims_m, "up2", "up1"); up2 = [v * s for v, s in zip(_r4, scales)] if _r4 else None
         col = _COLORS[i]
-        lbl = _format_ctau(ctau)
-        if dn2 and up2:
-            ax.fill_between(mass_vals, dn2, up2, alpha=0.15, color=col, edgecolor="none")
-        if dn1 and up1:
-            ax.fill_between(mass_vals, dn1, up1, alpha=0.35, color=col, edgecolor="none")
-        ax.plot(mass_vals, exp, color=col, lw=2, ls="--",
-                label=r"$c\tau$ = %s  Low-HT exp." % lbl)
+        lbl = _format_ctau(ctau, " ")
+        ax.plot(mass_vals, exp, color=col, lw=2, ls="--", marker="o", ms=5,
+                label=r"$c\tau$ = %s, Low-HT expected" % lbl)
         _obs_raw = _band(lims_m, "obs")
         if _obs_raw:
             obs = [v * s for v, s in zip(_obs_raw, scales)]
             ax.plot(mass_vals, obs, color=col, lw=2, ls="-",
-                    label=r"$c\tau$ = %s  Low-HT obs." % lbl)
+                    label=r"$c\tau$ = %s, Low-HT observed" % lbl)
 
 
 def _draw_hepdata_pair(ax, hd, c1, c2):
@@ -591,9 +624,9 @@ def _draw_hepdata_pair(ax, hd, c1, c2):
         if not np.any(keep):
             continue
         col = _COLORS[i + 2]
-        lbl = _format_ctau(ctau)
+        lbl = _format_ctau(ctau, " ")
         ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color=col, lw=2, ls="-",
-                label=r"$c\tau$ = %s  High-HT obs. (EXO-19-013)" % lbl)
+                label=r"$c\tau$ = %s, High-HT observed (EXO-19-013)" % lbl)
 
 
 def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
@@ -692,6 +725,25 @@ def _interp_grid(log_ctaus, mass_vals, grid, fine_lct, fine_mass):
     return 10.0 ** sp(fine_lct, fine_mass)
 
 
+def _color_scale(proc, grid_fb, thresholds):
+    """(vmin, vref, vmax, cmap, levels) for the 2D colour map of the limit in physical units.
+    SUSY: sequential map over the decades spanned by the limits. H→SS: RdBu_r with the white
+    pivot at the BR benchmark.
+    """
+    if proc in _SUSY_PROCS:
+        v = grid_fb[np.isfinite(grid_fb) & (grid_fb > 0)]
+        vmin = 10.0 ** np.floor(np.log10(v.min()))
+        vmax = 10.0 ** np.ceil(np.log10(v.max()))
+        return vmin, None, vmax, plt.get_cmap("viridis"), np.logspace(np.log10(vmin), np.log10(vmax), 61)
+    vmin, vref, vmax = _2D_VSCALE.get(proc, (None, None, None))
+    if vref is None:
+        vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
+        vmin, vmax = vref * 0.05, vref * 200.0
+    levels = np.concatenate([np.logspace(np.log10(vmin), np.log10(vref), 31)[:-1],
+                             np.logspace(np.log10(vref), np.log10(vmax), 31)])
+    return vmin, vref, vmax, plt.get_cmap("RdBu_r"), levels
+
+
 def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix=""):
     masses    = _sorted_masses(mass_data)
 
@@ -752,31 +804,14 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     fine_ratio_exp = _interp_grid(log_ctaus, mass_vals, ratio_exp, fine_lct, fine_mass)
     fine_ratio_obs = _interp_grid(log_ctaus, mass_vals, ratio_obs, fine_lct, fine_mass)
 
-    # Colormap: SUSY uses ratio = σ×B²_limit / σ_theory (pivot=1 = exclusion boundary).
-    # Higgs uses absolute BR limit (pivot at benchmark BR=1%).
-    if proc in _SUSY_PROCS:
-        cmap_data_exp = fine_ratio_exp
-        cmap_data_obs = fine_ratio_obs
-        vmin, vref, vmax = 0.01, 1.0, 100.0
-        cbar_label = r"$\sigma\mathcal{B}^{2}\ /\ \sigma_\mathrm{theory}$"
-    else:
-        cmap_data_exp = fine_exp_s
-        cmap_data_obs = fine_obs_s
-        vmin, vref, vmax = _2D_VSCALE.get(proc, (None, None, None))
-        if vref is None:
-            vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
-            vmin, vmax = vref * 0.05, vref * 200.0
-        cbar_label = _ylabel(proc)
+    cmap_data_exp = fine_exp_s
+    cmap_data_obs = fine_obs_s
+    vmin, vref, vmax, cmap, levels = _color_scale(proc, grid_exp_s, thresholds)
+    cbar_label = _ylabel(proc)
 
     fig, ax = plt.subplots(figsize=(9, 6))
 
-    n_half = 30
-    levels = np.concatenate([
-        np.logspace(np.log10(vmin), np.log10(vref), n_half + 1)[:-1],
-        np.logspace(np.log10(vref), np.log10(vmax), n_half + 1),
-    ])
     norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
-    cmap = plt.get_cmap("RdBu_r")   # blue=excluded (ratio<1), red=not excluded
 
     _all_nice = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
                  1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
@@ -786,23 +821,26 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     if cmap_data_exp is not None:
         cf = ax.contourf(fine_ctau, fine_mass, cmap_data_exp.T,
                          levels=levels, norm=norm, cmap=cmap, extend="both")
+        cf.set_edgecolor("face")
         cbar = plt.colorbar(cf, ax=ax, pad=0.02)
         cbar.set_label(cbar_label, fontsize=11)
         cbar.set_ticks(_nice_ticks)
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-        cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+        if vref is not None:
+            cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
 
         # Exclusion contours on the ratio grid (= 1.0 where limit = theory/SM benchmark)
         ax.contour(fine_ctau, fine_mass, fine_ratio_exp.T, levels=[1.0],
                    colors=["black"], linewidths=[2.5], linestyles=["dashed"])
-        ax.plot([], [], color="black", lw=2.5, ls="--", label="Exp. excl.")
+        ax.plot([], [], color="black", lw=2.5, ls="--",
+                label=_excl_label(proc, theory_csv or _HEPDATA_THEORY_CSV.get(proc)))
 
         if fine_ratio_obs is not None:
             ax.contour(fine_ctau, fine_mass, fine_ratio_obs.T, levels=[1.0],
                        colors=["black"], linewidths=[2.5], linestyles=["solid"])
             ax.plot([], [], color="black", lw=2.5, ls="-", label="Obs. excl.")
     else:
-        grid_cmap = ratio_exp if proc in _SUSY_PROCS else grid_exp_s
+        grid_cmap = grid_exp_s
         xs, ys, cs = [], [], []
         for j, mass in enumerate(masses):
             for i, ctau in enumerate(ctau_vals):
@@ -818,14 +856,15 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
             cbar.set_label(cbar_label, fontsize=11)
             cbar.set_ticks(_nice_ticks)
             cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-            cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+            if vref is not None:
+                cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
 
     for j, mass in enumerate(masses):
         for i, ctau in enumerate(ctau_vals):
             ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
 
     y_pad = max(3.0, (mass_vals[-1] - mass_vals[0]) * 0.08)
-    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + y_pad)
+    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + 2.5 * y_pad)
     ax.set_xscale("log")
     ax.set_xlim(10.0 ** log_ctau_lo, 10.0 ** (log_ctaus[-1] + 0.25))
     ax.set_xlabel(r"$c\tau$ [mm]")
@@ -834,6 +873,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
+    if proc in _SUSY_PROCS:
+        _theory_footnote(ax, theory_csv or _HEPDATA_THEORY_CSV.get(proc))
     _save(fig, os.path.join(out_dir, "%s_2D%s.pdf" % (proc, fname_suffix)))
 
 
@@ -1046,21 +1087,10 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     # Color map: HybridNew where available, fill Asymptotic for missing cells
     grid_cmap = np.where(np.isnan(grid_hn_s), grid_as_s, grid_hn_s)
 
-    if proc in _SUSY_PROCS:
-        ratio_cmap = grid_cmap / thresholds[np.newaxis, :]
-        ratio_hn   = grid_hn_s / thresholds[np.newaxis, :]
-        ratio_as   = grid_as_s / thresholds[np.newaxis, :]
-        vmin, vref, vmax = 0.01, 1.0, 100.0
-        cbar_label = r"$\sigma\mathcal{B}^{2}\ /\ \sigma_\mathrm{theory}$  [HybridNew]"
-    else:
-        ratio_cmap = grid_cmap
-        ratio_hn   = grid_hn_s / thresholds[np.newaxis, :]
-        ratio_as   = grid_as_s / thresholds[np.newaxis, :]
-        vmin, vref, vmax = _2D_VSCALE.get(proc, (None, None, None))
-        if vref is None:
-            vref = float(np.exp(np.mean(np.log(thresholds[thresholds > 0]))))
-            vmin, vmax = vref * 0.05, vref * 200.0
-        cbar_label = _ylabel(proc) + "  [HybridNew]"
+    ratio_hn = grid_hn_s / thresholds[np.newaxis, :]
+    ratio_as = grid_as_s / thresholds[np.newaxis, :]
+    vmin, vref, vmax, cmap, levels = _color_scale(proc, grid_cmap, thresholds)
+    cbar_label = _ylabel(proc) + "  [HybridNew]"
 
     log_ctaus   = np.log10(ctau_vals)
     log_ctau_lo = log_ctaus[0]
@@ -1068,17 +1098,11 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     fine_mass   = np.linspace(mass_vals[0], mass_vals[-1], 200)
     fine_ctau   = 10.0 ** fine_lct
 
-    fine_cmap    = _interp_grid(log_ctaus, mass_vals, ratio_cmap, fine_lct, fine_mass)
+    fine_cmap    = _interp_grid(log_ctaus, mass_vals, grid_cmap, fine_lct, fine_mass)
     fine_ratio_hn = _interp_grid(log_ctaus, mass_vals, ratio_hn,   fine_lct, fine_mass)
     fine_ratio_as = _interp_grid(log_ctaus, mass_vals, ratio_as,   fine_lct, fine_mass)
 
-    n_half = 30
-    levels = np.concatenate([
-        np.logspace(np.log10(vmin), np.log10(vref), n_half + 1)[:-1],
-        np.logspace(np.log10(vref), np.log10(vmax), n_half + 1),
-    ])
     norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
-    cmap = plt.get_cmap("RdBu_r")
     _all_nice = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
                  1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
                  10000, 20000, 50000, 100000]
@@ -1089,28 +1113,30 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     if fine_cmap is not None:
         cf = ax.contourf(fine_ctau, fine_mass, fine_cmap.T,
                          levels=levels, norm=norm, cmap=cmap, extend="both")
+        cf.set_edgecolor("face")
         cbar = plt.colorbar(cf, ax=ax, pad=0.02)
         cbar.set_label(cbar_label, fontsize=11)
         cbar.set_ticks(_nice_ticks)
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-        cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+        if vref is not None:
+            cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
 
     if fine_ratio_hn is not None:
         ax.contour(fine_ctau, fine_mass, fine_ratio_hn.T, levels=[1.0],
                    colors=[_HN_COLOR], linewidths=[2.5], linestyles=["solid"])
-        ax.plot([], [], color=_HN_COLOR, lw=2.5, ls="-", label="HybridNew exp.")
+        ax.plot([], [], color=_HN_COLOR, lw=2.5, ls="-", label="Expected exclusion (HybridNew)")
 
     if fine_ratio_as is not None:
         ax.contour(fine_ctau, fine_mass, fine_ratio_as.T, levels=[1.0],
                    colors=[_AS_COLOR], linewidths=[2.0], linestyles=["dashed"])
-        ax.plot([], [], color=_AS_COLOR, lw=2.0, ls="--", label="Asymptotic exp.")
+        ax.plot([], [], color=_AS_COLOR, lw=2.0, ls="--", label="Expected exclusion (asymptotic)")
 
     for j, mass in enumerate(masses):
         for i, ctau in enumerate(ctau_vals):
             ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
 
     y_pad = max(3.0, (mass_vals[-1] - mass_vals[0]) * 0.08)
-    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + y_pad)
+    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + 3.5 * y_pad)
     ax.set_xscale("log")
     ax.set_xlim(10.0 ** log_ctau_lo, 10.0 ** (log_ctaus[-1] + 0.25))
     ax.set_xlabel(r"$c\tau$ [mm]")
@@ -1119,12 +1145,89 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
+    if proc in _SUSY_PROCS:
+        _theory_footnote(ax, theory_csv or _HEPDATA_THEORY_CSV.get(proc))
     _save(fig, os.path.join(out_dir, "%s_2D_compare%s.pdf" % (proc, fname_suffix)))
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Higgs: every production mode overlaid (each fitted on its own), ctau on x
+# ---------------------------------------------------------------------------
+
+_OVERLAY_FINAL_STATES = {
+    "4d": ("dddd", "4d", r"S$\to$d$\bar{\mathrm{d}}$"),
+    "4b": ("bbbb", "4b", r"S$\to$b$\bar{\mathrm{b}}$"),
+}
+_OVERLAY_MODES = [
+    ("VHToSSTo%s",       False, "VH (lepton)"),
+    ("ggHToSSTo%s",      False, "ggH (displacement)"),
+    ("ttHToSSTo%s_lep",  True,  "ttH (lepton)"),
+    ("ttHToSSTo%s_bjet", True,  "ttH (displacement)"),
+    ("VBFHToSSTo%s",     True,  "VBF (displacement, 2016 only)"),
+]
+_OVERLAY_EXTRAS_M55 = [
+    ("ttHToSSTo2b2d_lep",  2, "D", r"ttH (lepton), mixed b$\bar{\mathrm{b}}$/d$\bar{\mathrm{d}}$"),
+    ("ttHToSSTo2b2d_bjet", 3, "D", r"ttH (displacement), mixed b$\bar{\mathrm{b}}$/d$\bar{\mathrm{d}}$"),
+    ("VBFHToSSTo2b2d",     4, "D", r"VBF (displacement), mixed b$\bar{\mathrm{b}}$/d$\bar{\mathrm{d}}$"),
+    ("ttHToSSTo4s_lep",    2, "s", r"ttH (lepton), S$\to$s$\bar{\mathrm{s}}$"),
+    ("ttHToSSTo4s_bjet",   3, "s", r"ttH (displacement), S$\to$s$\bar{\mathrm{s}}$"),
+    ("VBFHToSSTo4s",       4, "s", r"VBF (displacement), S$\to$s$\bar{\mathrm{s}}$"),
+]
+
+
+def plot_higgs_overlay(data, out_dir):
+    all_ctaus = []
+    for long_tag, short_tag, _ in _OVERLAY_FINAL_STATES.values():
+        for pattern, use_short, _ in _OVERLAY_MODES:
+            for cdict in data.get(pattern % (short_tag if use_short else long_tag), {}).values():
+                all_ctaus += list(cdict)
+    if not all_ctaus:
+        return
+    xlim = (min(all_ctaus) / 1.5, max(all_ctaus) * 1.5)
+    for fs, (long_tag, short_tag, fs_label) in sorted(_OVERLAY_FINAL_STATES.items()):
+        for mass in ("15", "40", "55"):
+            fig, ax = plt.subplots(figsize=(8, 6))
+            drawn = False
+            for j, (pattern, use_short, label) in enumerate(_OVERLAY_MODES):
+                cdict = data.get(pattern % (short_tag if use_short else long_tag), {}).get(mass)
+                if not cdict:
+                    continue
+                ctaus = sorted(cdict)
+                ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], color=_COLORS[j],
+                        lw=2, ls="--", marker="o", ms=5, label=label)
+                drawn = True
+            if not drawn:
+                plt.close(fig)
+                continue
+            if mass == "55":
+                for proc, j, marker, label in _OVERLAY_EXTRAS_M55:
+                    cdict = data.get(proc, {}).get(mass)
+                    if not cdict:
+                        continue
+                    ctaus = sorted(cdict)
+                    ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], ls="none", marker=marker,
+                            ms=7, markerfacecolor="none", markeredgecolor=_COLORS[j], markeredgewidth=1.5,
+                            label=label)
+            ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
+                       label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_xlim(*xlim)
+            ax.set_xlabel(r"$c\tau$ [mm]")
+            ax.set_ylabel(r"95% CL upper limit on $\mathcal{B}(H{\to}SS)$")
+            ax.legend(fontsize=8, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
+            ax.grid(True, which="both", ls=":", alpha=0.4)
+            if _HAS_MPLHEP:
+                hep.cms.label("Preliminary", data=False, ax=ax, fontsize=12,
+                              rlabel=r"36.3$-$137.9 fb$^{-1}$ (13 TeV)")
+            ax.text(0.0, -0.13, r"H$\to$SS, %s, $m_{S}$ = %s GeV (no combination)" % (fs_label, mass),
+                    transform=ax.transAxes, fontsize=10, ha="left", va="top", clip_on=False)
+            _save(fig, os.path.join(out_dir, "higgs_overlay_%s_M%s.pdf" % (fs, mass)))
+
 
 def main():
     global COMBINE_OUT
@@ -1184,6 +1287,8 @@ def main():
             plot_2d(proc, data[proc], args.out_dir, hepdata,
                     theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
                     fname_suffix="_ewk")
+
+    plot_higgs_overlay(data, args.out_dir)
 
     print("\nDone. Plots saved to %s" % args.out_dir)
 
