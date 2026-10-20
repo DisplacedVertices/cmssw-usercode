@@ -18,12 +18,12 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm'
 
 #lepton triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
 
 #btag triggers
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
@@ -35,8 +35,8 @@ varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations t
 print("variation: %s" % varname)
 
 if data:
-    fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
-    #fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
+    #fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
+    fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
 else:
     #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
@@ -129,7 +129,7 @@ for ntk in ntk_ls:
     else:
         err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
     if ntk not in ntk_ls_2v:
-        print "Printing predicted and error for %s-trk 2-vtx events: %9.5f +- %6.5f" % (ntk, pred, err_pred)
+        print "Printing predicted and error for %s-trk 2-vtx events: %9.7f +- %6.7f" % (ntk, pred, err_pred)
         continue
     effn2v = n2v/tot_n2v
     if err_n2v == 0: err_n2v = 1.0
@@ -148,7 +148,7 @@ for ntk in ntk_ls:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / 1 for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
     else:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
-    print '%5d %11.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%5d %11.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
 print '%8s %16s %16s %19s %15s %35s' % ('ntracks', 'n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
@@ -188,4 +188,4 @@ for ntk in ntk2_ls:
         err_rat = np.sqrt((1/pred)**2 + (n2v/pred**2)**2 * err_pred**2)
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
-    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
