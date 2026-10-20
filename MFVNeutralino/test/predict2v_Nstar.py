@@ -99,13 +99,19 @@ print 'Warning: do NOT use the values marked PI (Poissonian Interval) for anythi
 
 for ntk in ntk_ls_2v:
     n1v, err_n1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    if ntk in ntk_ls_2v:
+        n2v, err_n2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_n_vertex_seed_tracks' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    else:
+        n2v, err_n2v = 0.0, 0.0
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1v = n1v/tot_n1v
     err_effn1v = np.sqrt(((1.0-2*effn1v)*err_n1v**2+effn1v**2*var_n1v) / tot_n1v**2)
     pred = (effn1v**2) * tot_n2v
     var_fracvNN = (2*(effn1v**2)*(err_effn1v/effn1v))**2
     err_pred = pred * (np.sqrt( ( np.sqrt(var_n2v)/tot_n2v)**2 + (np.sqrt(var_fracvNN)/(effn1v**2))**2))
+    if ntk not in ntk_ls_2v:
+        print "Printing predicted and error for %s-trk 2-vtx events: %9.7f +- %6.7f" % (ntk, pred, err_pred)
+        continue
     effn2v = n2v/tot_n2v
     if err_n2v == 0: err_n2v = 1.0
     if effn2v!=1:
@@ -120,7 +126,7 @@ for ntk in ntk_ls_2v:
     else:
         err_rat = np.sqrt((1/pred)**2 + (n2v/pred**2)**2 * err_pred**2)
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
-    print '%8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%8.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
 print '%16s %16s %19s %15s %35s' % ('n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
@@ -153,4 +159,4 @@ for ntk in ntk2_ls:
         err_rat = np.sqrt((1/pred)**2 + (n2v/pred**2)**2 * err_pred**2)
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
-    print '%8.0f +- %4.0f %8.0f +- %4.0f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%8.0f +- %4.0f %8.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
