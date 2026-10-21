@@ -375,8 +375,9 @@ def _hepdata_slice_at_ctau(hd, ctau_mm):
     if ctau_mm < hd_ctaus[0] or ctau_mm > hd_ctaus[-1]:
         return None, None
     log_ctaus = np.log(hd_ctaus)
-    r = np.array([np.interp(np.log(ctau_mm), log_ctaus, hd_obs[:, j])
-                  for j in range(len(hd_masses))])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = np.array([np.exp(np.interp(np.log(ctau_mm), log_ctaus, np.log(hd_obs[:, j])))
+                      for j in range(len(hd_masses))])
     return hd_masses, r
 
 
@@ -554,12 +555,42 @@ def plot_1d(proc, mass_data, out_dir, hepdata):
 # 1D: mass on x-axis, ctau as overlaid lines — all ctau in one plot
 # ---------------------------------------------------------------------------
 
-def plot_1d_vs_mass_all(proc, mass_data, out_dir):
+def _published_vs_mass(proc, ctau, published, hepdata):
+    """Published observed limits at one ctau as a function of mass, in our y units:
+    [(name, masses, limits)]. Higgs: each analysis's B(H->SS) curves read off at this ctau
+    (log-log within each curve's own ctau range; ATLAS has a single mass and is skipped).
+    SUSY: the EXO-19-013 sigma x B^2 grid at this ctau."""
+    out = []
+    if proc in _SUSY_PROCS:
+        hd = (hepdata or {}).get(proc)
+        if hd:
+            m, v = _hepdata_slice_at_ctau(hd, ctau)
+            if m is not None:
+                m, v = np.asarray(m, float), np.asarray(v, float)
+                out.append(("EXO-19-013", m[v > 0], v[v > 0]))
+        return out
+    fs = "4d" if ("dddd" in proc or "4d" in proc) else "4b"
+    for name in [n for n in ("EXO-19-021", "EXO-23-013") if n in published[fs]]:
+        pts = [(m, 10.0 ** np.interp(np.log10(ctau), np.log10(c), np.log10(b)))
+               for m, (c, b) in sorted(published[fs][name].items()) if c[0] <= ctau <= c[-1]]
+        if len(pts) > 1:
+            out.append((name, np.array([p[0] for p in pts], float), np.array([p[1] for p in pts])))
+    return out
+
+
+def _cut_vs_mass(m, v, xlim):
+    """A published (mass, limit) curve restricted to [xlim], ending on the edges (log in the limit)."""
+    x = np.union1d(m[(m >= xlim[0]) & (m <= xlim[1])], [e for e in xlim if m[0] < e < m[-1]])
+    return x, 10.0 ** np.interp(x, m, np.log10(v))
+
+
+def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
     ctau_data    = _invert_mass_data(mass_data)
     ctaus_sorted = sorted(ctau_data.keys())
 
     fig, ax = plt.subplots(figsize=(8, 6))
 
+    ours, pub_lines, pub_names = [], [], []
     for i, ctau in enumerate(ctaus_sorted):
         mdict     = ctau_data[ctau]
         masses    = _sorted_masses(mdict)
@@ -571,8 +602,8 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
 
         col = _COLORS[i % len(_COLORS)]
         lbl = _format_ctau(ctau, " ")
-        ax.plot(mass_vals, exp, color=col, lw=2, ls="--", marker="o", ms=5,
-                label=r"$c\tau$ = %s" % lbl)
+        ours += ax.plot(mass_vals, exp, color=col, lw=2, ls="--", marker="o", ms=5,
+                        label=r"$c\tau$ = %s" % lbl)
 
         _obs_raw = _band(lims_m, "obs")
         if _obs_raw:
@@ -580,21 +611,39 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir):
             ax.plot(mass_vals, obs, color=col, lw=2, ls="-",
                     label=r"$c\tau$ = %s (observed)" % lbl)
 
+    all_masses = [int(m) for m in _sorted_masses(mass_data)]
     xlim = None
     if proc in _SUSY_PROCS:
-        all_masses = [int(m) for m in _sorted_masses(mass_data)]
         xlim = (all_masses[0] - 100, all_masses[-1] + 100)
         ax.set_xlim(*xlim)
+    n_lines = len(ax.lines)
     if not _draw_ref_curve_vsmass(ax, proc, xlim):
         pass
+    refs = ax.lines[n_lines:]
+    if published:
+        cut = xlim or (all_masses[0], all_masses[-1])
+        for i, ctau in enumerate(ctaus_sorted):
+            for name, m, v in _published_vs_mass(proc, ctau, published, hepdata):
+                x, y = _cut_vs_mass(m, v, cut)
+                if len(x) > 1:
+                    pub_lines += ax.plot(x, y, color=_COLORS[i % len(_COLORS)], lw=1.6, ls=_PUB_STYLE[name][1],
+                                         dash_capstyle="butt", solid_capstyle="butt", zorder=1.9)
+                    pub_names.append(name)
     ax.set_yscale("log")
     ax.set_xlabel(_mass_xlabel(proc))
     ax.set_ylabel(_ylabel(proc))
-    ax.legend(fontsize=9, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
     ax.grid(True, which="both", ls=":", alpha=0.4)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc)
-    _save(fig, os.path.join(out_dir, "%s_1D_vsmass.pdf" % proc))
+    if published:
+        keys = [Line2D([], [], color="black", lw=1.6, ls=_PUB_STYLE[n][1], label=_PUB_STYLE[n][0])
+                for n in ("EXO-19-021", "EXO-23-013", "EXO-19-013") if n in pub_names]
+        _place_overlay_legends(fig, ax, ours, [], keys, refs,
+                               ours + pub_lines + (refs if proc in _SUSY_PROCS else []), allow_stack=True,
+                               compact=True)
+    else:
+        ax.legend(fontsize=9, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
+    _save(fig, os.path.join(out_dir, "%s_1D_vsmass%s.pdf" % (proc, "_published" if published else "")))
 
 
 # ---------------------------------------------------------------------------
@@ -636,7 +685,7 @@ def _draw_hepdata_pair(ax, hd, c1, c2):
         col = _COLORS[i + 2]
         lbl = _format_ctau(ctau, " ")
         ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color=col, lw=2, ls="-",
-                label=r"$c\tau$ = %s, High-HT observed (EXO-19-013)" % lbl)
+                label=r"$c\tau$ = %s, %s" % (lbl, _PUB_STYLE["EXO-19-013"][0]))
 
 
 def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
@@ -655,7 +704,7 @@ def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
         ax.set_yscale("log")
         ax.set_xlabel(_mass_xlabel(proc))
         ax.set_ylabel(_ylabel(proc))
-        ax.legend(fontsize=9)
+        ax.legend(fontsize=9, borderaxespad=1.5)
         ax.grid(True, which="both", ls=":", alpha=0.4)
         _cms_label(ax, proc)
         _annotate_proc(ax, proc)
@@ -689,7 +738,7 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
     ax.set_yscale("log")
     ax.set_xlabel(_mass_xlabel(proc))
     ax.set_ylabel(_ylabel(proc))
-    ax.legend(fontsize=9)
+    ax.legend(fontsize=9, borderaxespad=1.5)
     ax.grid(True, which="both", ls=":", alpha=0.4)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc)
@@ -1061,7 +1110,7 @@ def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir, hepdata=None):
                 keep = hd_r_sl > 0
                 if np.any(keep):
                     ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color="black", lw=1.5, ls="-",
-                            label="High-HT obs. (EXO-19-013)", zorder=3)
+                            label=_PUB_STYLE["EXO-19-013"][0], zorder=3)
                     drew = True
 
         if not drew:
@@ -1400,67 +1449,79 @@ _OVERLAY_LEGEND_KW = dict(fontsize=7.5, handlelength=3.5, handleheight=2.4, labe
                           handler_map={Line2D: _RowLine()})
 
 
-def _overlay_legends(fig, ax, ours, points, pubs, ref, loc):
-    """Our curves (1% line on their last row) and the M55 points under one title, the published
-    curves under another, placed side by side as one block at the top of the axes."""
-    nrows = max(len(ours) + 1, len(points))
-    cols = [ours + [Line2D([], [], ls="none") for _ in range(nrows - 1 - len(ours))] + [ref]]
+def _overlay_legends(fig, ax, ours, points, pubs, refs, loc, stack=False, compact=False):
+    """Our curves (reference lines on their last rows) and the M55 points under one title, the
+    published curves under another, placed side by side (or the second under the first when
+    stack is set) as one block at the top of the axes."""
+    nrows = max(len(ours) + len(refs), len(points))
+    cols = [ours + [Line2D([], [], ls="none") for _ in range(nrows - len(refs) - len(ours))] + refs]
     if points:
         cols.append(points + [Line2D([], [], ls="none") for _ in range(nrows - len(points))])
-    handles = [h for c in cols for h in c]
-    l1 = ax.legend(handles, [h.get_label() for h in handles], ncol=len(cols), title="Expected limits (blinded)",
-                   loc="upper left", **_OVERLAY_LEGEND_KW)
+    handles, ncol, kw = [h for c in cols for h in c], len(cols), _OVERLAY_LEGEND_KW
+    if compact:
+        handles, ncol, kw = ours + refs, 2, dict(_OVERLAY_LEGEND_KW, handleheight=1.0, labelspacing=0.3)
+    l1 = ax.legend(handles, [h.get_label() for h in handles], ncol=ncol, title="Expected limits (blinded)",
+                   loc="upper left", **kw)
     ax.add_artist(l1)
-    l2 = ax.legend(pubs, [p.get_label() for p in pubs], title="Published (observed)", loc="upper left",
-                   **_OVERLAY_LEGEND_KW)
+    l2 = ax.legend(pubs, [p.get_label() for p in pubs], title="Published (observed)", loc="upper left", **kw)
     r = fig.canvas.get_renderer()
-    w1, w2 = [l.get_window_extent(r).transformed(ax.transAxes.inverted()).width for l in (l1, l2)]
-    x0 = {"upper left": 0.02, "upper center": 0.5 - (w1 + w2) / 2.0, "upper right": 0.98 - w1 - w2}[loc]
+    b1, b2 = [l.get_window_extent(r).transformed(ax.transAxes.inverted()) for l in (l1, l2)]
+    w = max(b1.width, b2.width) if stack else b1.width + b2.width
+    pad = 0.02
+    if compact:
+        pad = (plt.rcParams["ytick.major.size"] + 4.0) * fig.dpi / 72.0 / ax.get_window_extent(r).width
+    x0 = {"upper left": pad, "upper center": 0.5 - w / 2.0, "upper right": 1.0 - pad - w}[loc]
     l1.set_bbox_to_anchor((x0, 0.964), transform=ax.transAxes)
-    l2.set_bbox_to_anchor((x0 + w1, 0.964), transform=ax.transAxes)
+    if stack:
+        l2.set_bbox_to_anchor((x0, 0.964 - b1.height), transform=ax.transAxes)
+    else:
+        l2.set_bbox_to_anchor((x0 + b1.width, 0.964), transform=ax.transAxes)
     return [l1, l2]
 
 
 def _overlay_top(fig, ax, legends, lines, lo, margin_pt=6.0):
-    """Smallest y top of the log axis that keeps every data line below the legend block."""
+    """Smallest y top of the log y axis that keeps every data line below the legend block
+    (any x scale)."""
     r = fig.canvas.get_renderer()
     boxes = [l.get_window_extent(r).transformed(ax.transAxes.inverted()) for l in legends]
     x0, x1, y0 = min(b.x0 for b in boxes), max(b.x1 for b in boxes), min(b.y0 for b in boxes)
     bb = ax.get_window_extent(r)
     mx, my = margin_pt * fig.dpi / 72.0 / bb.width, margin_pt * fig.dpi / 72.0 / bb.height
-    lxlo, lxhi = np.log10(ax.get_xlim())
-    lxa, lxb = lxlo + (x0 - mx) * (lxhi - lxlo), lxlo + (x1 + mx) * (lxhi - lxlo)
+    to_axes = ax.transData + ax.transAxes.inverted()
     ys = []
     for line in lines:
-        lx, ly = np.log10(np.asarray(line.get_xdata(), float)), np.log10(np.asarray(line.get_ydata(), float))
-        ys += list(ly[(lx >= lxa) & (lx <= lxb)])
-        if line.get_linestyle() not in ("None", "none", "", " ") and len(lx) > 1:
-            ys += [np.interp(e, lx, ly) for e in (lxa, lxb) if lx[0] <= e <= lx[-1]]
+        x, y = np.asarray(line.get_xdata(), float), np.asarray(line.get_ydata(), float)
+        fx = to_axes.transform(np.column_stack([x, y]))[:, 0]
+        ly = np.log10(y)
+        ys += list(ly[(fx >= x0 - mx) & (fx <= x1 + mx)])
+        if line.get_linestyle() not in ("None", "none", "", " ") and len(fx) > 1:
+            ys += [np.interp(e, fx, ly) for e in (x0 - mx, x1 + mx) if fx[0] <= e <= fx[-1]]
     if not ys:
         return lo
     llo = np.log10(lo)
     return 10.0 ** (llo + (max(ys) - llo) / (y0 - my))
 
 
-def _place_overlay_legends(fig, ax, ours, points, pubs, ref):
-    """Put the legend block where it needs the least headroom, then raise the y top so no data
-    sit under it."""
-    lines = ours + points + pubs
+def _place_overlay_legends(fig, ax, ours, points, pubs, refs, fit_lines, allow_stack=False, compact=False):
+    """Put the legend block where it needs the least headroom, then raise the y top so none of
+    fit_lines sit under it."""
+    ax.set_xlim(ax.get_xlim())
     lo, hi = ax.get_ylim()
-    hi = max(hi, 10.0 ** (max(np.log10(np.asarray(l.get_ydata(), float)).max() for l in lines) + 0.25))
+    hi = max(hi, 10.0 ** (max(np.log10(np.asarray(l.get_ydata(), float)).max() for l in fit_lines) + 0.25))
     fig.tight_layout()
     best = None
-    for loc in ("upper center", "upper right", "upper left"):
-        legs = _overlay_legends(fig, ax, ours, points, pubs, ref, loc)
-        top = _overlay_top(fig, ax, legs, lines, lo)
-        for l in legs:
-            l.remove()
-        ax.legend_ = None
-        if best is None or np.log10(top) < np.log10(best[1]) - 0.02:
-            best = (loc, top)
-    legs = _overlay_legends(fig, ax, ours, points, pubs, ref, best[0])
+    for stack in ((False, True) if allow_stack else (False,)):
+        for loc in ("upper center", "upper right", "upper left"):
+            legs = _overlay_legends(fig, ax, ours, points, pubs, refs, loc, stack, compact)
+            top = _overlay_top(fig, ax, legs, fit_lines, lo)
+            for l in legs:
+                l.remove()
+            ax.legend_ = None
+            if best is None or np.log10(top) < np.log10(best[2]) - 0.02:
+                best = (loc, stack, top)
+    legs = _overlay_legends(fig, ax, ours, points, pubs, refs, best[0], best[1], compact)
     for _ in range(3):
-        ax.set_ylim(lo, max(hi, _overlay_top(fig, ax, legs, lines, lo)))
+        ax.set_ylim(lo, max(hi, _overlay_top(fig, ax, legs, fit_lines, lo)))
         fig.tight_layout()
 
 
@@ -1517,7 +1578,7 @@ def plot_higgs_overlay(data, out_dir, published=None):
             ax.text(0.0, -0.13, r"H$\to$SS, %s, $m_{S}$ = %s GeV (no combination)" % (fs_label, mass),
                     transform=ax.transAxes, fontsize=10, ha="left", va="top", clip_on=False)
             if published:
-                _place_overlay_legends(fig, ax, ours, points, pubs, ref)
+                _place_overlay_legends(fig, ax, ours, points, pubs, [ref], ours + points + pubs)
             _save(fig, os.path.join(out_dir, "higgs_overlay_%s_M%s%s.pdf"
                                     % (fs, mass, "_published" if published else "")))
 
@@ -1576,6 +1637,8 @@ def main():
 
         plot_1d(proc, data[proc], args.out_dir, hepdata)
         plot_1d_vs_mass_all(proc, data[proc], args.out_dir)
+        if published and (proc not in _SUSY_PROCS or proc in _PUB_SUSY_CURVE):
+            plot_1d_vs_mass_all(proc, data[proc], args.out_dir, published, hepdata)
         plot_1d_vs_mass_pairs(proc, data[proc], args.out_dir, hepdata)
         if proc in ("ggHToSSTodddd", "VHToSSTodddd"):
             plot_1d_vs_mass_ctau_pair(proc, data[proc], args.out_dir, 1.0, 10.0)
