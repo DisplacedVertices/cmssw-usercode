@@ -12,6 +12,8 @@ Output (in LimitPlots/):
   <proc>_1D_vsmass_<c1>_vs_<c2>.pdf    -- mass on x, one plot per adjacent ctau pair
   <proc>_2D.pdf                         -- ctau vs mass 2D color map + r=1 exclusion contour
   higgs_overlay_<4d|4b>_M<m>.pdf        -- ctau on x, one curve per Higgs production mode (each fitted on its own)
+  *_published.pdf                       -- with --published-dir: the overlays and 2D maps with published
+                                           observed limits from other analyses drawn on them
   <proc>_1D_hepcomp_M<m1>vsM<m2>.pdf   -- ctau on x, Low-HT vs High-HT (HepData) per mass pair
   <proc>_1D_hepcomp_vsmass_<c1>vs<c2>.pdf  -- mass on x, Low-HT vs High-HT per ctau pair
 
@@ -26,8 +28,11 @@ Usage
   python3 plotLimits.py [--subset VHToSSTodddd,mfv_neu] [--out-dir LimitPlots]
 """
 import os
+import re
 import sys
+import csv
 import json
+import tarfile
 import argparse
 import numpy as np
 
@@ -39,6 +44,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.patheffects as patheffects
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
+from matplotlib.legend_handler import HandlerLine2D
+import contourpy
 
 try:
     import mplhep as hep
@@ -744,7 +754,7 @@ def _color_scale(proc, grid_fb, thresholds):
     return vmin, vref, vmax, plt.get_cmap("RdBu_r"), levels
 
 
-def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix=""):
+def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="", published=None):
     masses    = _sorted_masses(mass_data)
 
     # Rectangular grid with NaN for missing cells (capped to "not excluded" in _interp_grid).
@@ -810,6 +820,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
     cbar_label = _ylabel(proc)
 
     fig, ax = plt.subplots(figsize=(9, 6))
+    if published:
+        ax.set_facecolor(_OUTSIDE_FC)
 
     norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
 
@@ -825,19 +837,20 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
         cbar = plt.colorbar(cf, ax=ax, pad=0.02)
         cbar.set_label(cbar_label, fontsize=11)
         cbar.set_ticks(_nice_ticks)
+        cbar.minorticks_off()
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
         if vref is not None:
             cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
 
         # Exclusion contours on the ratio grid (= 1.0 where limit = theory/SM benchmark)
         ax.contour(fine_ctau, fine_mass, fine_ratio_exp.T, levels=[1.0],
-                   colors=["black"], linewidths=[2.5], linestyles=["dashed"])
+                   colors=["black"], linewidths=[2.5], linestyles=["dashed"], zorder=5)
         ax.plot([], [], color="black", lw=2.5, ls="--",
                 label=_excl_label(proc, theory_csv or _HEPDATA_THEORY_CSV.get(proc)))
 
         if fine_ratio_obs is not None:
             ax.contour(fine_ctau, fine_mass, fine_ratio_obs.T, levels=[1.0],
-                       colors=["black"], linewidths=[2.5], linestyles=["solid"])
+                       colors=["black"], linewidths=[2.5], linestyles=["solid"], zorder=5)
             ax.plot([], [], color="black", lw=2.5, ls="-", label="Obs. excl.")
     else:
         grid_cmap = grid_exp_s
@@ -855,27 +868,49 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="")
             cbar = plt.colorbar(sc, ax=ax, pad=0.02)
             cbar.set_label(cbar_label, fontsize=11)
             cbar.set_ticks(_nice_ticks)
+            cbar.minorticks_off()
             cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
             if vref is not None:
                 cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
 
     for j, mass in enumerate(masses):
         for i, ctau in enumerate(ctau_vals):
-            ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
+            if not np.isnan(grid_exp[i, j]):
+                ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
 
     y_pad = max(3.0, (mass_vals[-1] - mass_vals[0]) * 0.08)
-    ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + 2.5 * y_pad)
     ax.set_xscale("log")
-    ax.set_xlim(10.0 ** log_ctau_lo, 10.0 ** (log_ctaus[-1] + 0.25))
+    x_hi = 10.0 ** (log_ctaus[-1] + 0.25)
+    y_lo, y_top = mass_vals[0] - y_pad, mass_vals[-1]
+    n_pub = 0
+    if published:
+        ax.add_patch(Rectangle((ctau_vals[0], mass_vals[0]), ctau_vals[-1] - ctau_vals[0],
+                               mass_vals[-1] - mass_vals[0], fill=False, edgecolor="#303030", lw=1.2, zorder=3))
+        if proc in _SUSY_PROCS:
+            n_pub = _draw_pub_lines(ax, "EXO-19-013", [published["susy"][_PUB_SUSY_CURVE[proc + fname_suffix]]])
+        else:
+            n_pub = _draw_published_2d(ax, "4d" if ("dddd" in proc or "4d" in proc) else "4b", published)
+        x_hi = _nice_ceil(max(x_hi, 10.0 ** (np.log10(ax.dataLim.x1) + 0.25)))
+        y_lo = min(y_lo, ax.dataLim.y0 - y_pad)
+        y_top = max(y_top, ax.dataLim.y1)
+    ax.set_xlim(10.0 ** log_ctau_lo, x_hi)
+    ax.set_ylim(y_lo, y_top + (2.5 + 0.8 * n_pub) * y_pad)
     ax.set_xlabel(r"$c\tau$ [mm]")
     ax.set_ylabel("Mass [GeV]")
-    ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
+    if published:
+        leg = ax.legend(fontsize=9, loc="upper right", handlelength=4.0, borderaxespad=1.5,
+                        ncol=2 if proc in _SUSY_PROCS else 1, columnspacing=1.5, frameon=True,
+                        framealpha=1.0, facecolor=_OUTSIDE_FC, edgecolor=_OUTSIDE_FC)
+    else:
+        ax.legend(fontsize=11, loc="upper right", framealpha=0.92, edgecolor="0.7")
     ax.grid(True, which="both", ls=":", alpha=0.3)
     _cms_label(ax, proc)
     _annotate_proc(ax, proc, _EWK_LABEL if fname_suffix == "_ewk" else None)
     if proc in _SUSY_PROCS:
         _theory_footnote(ax, theory_csv or _HEPDATA_THEORY_CSV.get(proc))
-    _save(fig, os.path.join(out_dir, "%s_2D%s.pdf" % (proc, fname_suffix)))
+    if published:
+        _fit_legend_top(ax, leg, y_top)
+    _save(fig, os.path.join(out_dir, "%s_2D%s%s.pdf" % (proc, fname_suffix, "_published" if published else "")))
 
 
 
@@ -1133,7 +1168,8 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
 
     for j, mass in enumerate(masses):
         for i, ctau in enumerate(ctau_vals):
-            ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
+            if not np.isnan(grid_cmap[i, j]):
+                ax.scatter(ctau, mass_vals[j], color="black", s=20, zorder=6)
 
     y_pad = max(3.0, (mass_vals[-1] - mass_vals[0]) * 0.08)
     ax.set_ylim(mass_vals[0] - y_pad, mass_vals[-1] + 3.5 * y_pad)
@@ -1179,7 +1215,256 @@ _OVERLAY_EXTRAS_M55 = [
 ]
 
 
-def plot_higgs_overlay(data, out_dir):
+_PUB_STYLE = {
+    "EXO-19-021": ("CMS Displaced Jets, ggH, 13 TeV (obs.)", "-"),
+    "EXO-23-013": ("CMS Displaced Jets, ggH, 13.6 TeV (obs.)", (0, (4.0, 1.5, 1.0, 1.5))),
+    "ATLAS":      ("ATLAS Inner Detector DVs, VH+VBF, $m_{s}$ = 16 GeV (obs.)", (0, (0.01, 2.2))),
+    "EXO-19-013": ("CMS High-HT Tracker DVs, 13 TeV (obs.)", "-"),
+}
+_PUB_COLOR_2D = {"EXO-19-021": "#ff3cff", "EXO-23-013": "#ffd60a", "ATLAS": "#18e0ff", "EXO-19-013": "#ff8c1a"}
+_PUB_SUSY_CURVE = {"mfv_neu": "gluino", "mfv_neu_ewk": "neutralino", "mfv_stopdbardbar": "stop"}
+_OUTSIDE_FC = "#e0e0e0"
+_PUB_OVERLAY_PANELS = {
+    ("4d", "55"): [("EXO-19-021", 55), ("EXO-23-013", 55)],
+    ("4d", "40"): [("EXO-19-021", 40), ("EXO-23-013", 40)],
+    ("4d", "15"): [("EXO-23-013", 15), ("ATLAS", 16)],
+    ("4b", "55"): [("EXO-23-013", 55)],
+    ("4b", "40"): [("EXO-23-013", 40)],
+    ("4b", "15"): [("EXO-23-013", 15)],
+}
+
+
+def _read_hepdata_blocks(text):
+    """[(header, rows)] for each table in a HEPData CSV export."""
+    blocks = []
+    for chunk in text.replace("\r", "").split("\n\n"):
+        lines = [l for l in chunk.splitlines() if l.strip() and not l.startswith("#")]
+        if lines:
+            blocks.append((lines[0], [[float(x) for x in l.split(",")] for l in lines[1:]]))
+    return blocks
+
+
+def _tar_text(tar_path, name):
+    with tarfile.open(tar_path) as tf:
+        member = [m for m in tf.getmembers() if os.path.basename(m.name) == name][0]
+        return tf.extractfile(member).read().decode()
+
+
+def load_published(pub_dir):
+    """Published observed limits from the overlay handoff folder:
+    {"4d"/"4b": {name: {m_S: (ctau_mm, B)}}, "contours": {"4d"/"4b": {name: (ctau_mm, m_S)}},
+     "susy": {"neutralino"/"gluino"/"stop": (ctau_mm, excluded mass in GeV)}}. "contours" holds an
+    analysis's own published B(H->SS) = 1% exclusion in the (ctau, m_S) plane, used on the 2D maps
+    instead of a rebuilt one; "susy" holds the EXO-19-013 observed mass-lifetime exclusion curves."""
+    out = {"4d": {}, "4b": {}, "contours": {"4d": {}, "4b": {}}}
+    tar = os.path.join(pub_dir, "hepdata", "HEPData-ins2829524-v2-csv.tar.gz")
+    for fs, name, contour in (("4b", "Figure4a.csv", "Figure6a.csv"), ("4d", "Figure4b.csv", "Figure6b.csv")):
+        out[fs]["EXO-23-013"] = {}
+        for header, rows in _read_hepdata_blocks(_tar_text(tar, name)):
+            if "observed" in header:
+                pts = [r for r in rows if not np.isnan(r[1])]
+                out[fs]["EXO-23-013"][int(re.search(r"=(\d+)~", header).group(1))] = tuple(np.array(pts).T)
+        rows = [r for h, r in _read_hepdata_blocks(_tar_text(tar, contour)) if "observed" in h][0]
+        out["contours"][fs]["EXO-23-013"] = tuple(np.array(rows).T)
+    rows = list(csv.DictReader(open(os.path.join(pub_dir, "digitized", "EXO-19-021_Fig8a_SToDD.csv"))))
+    out["4d"]["EXO-19-021"] = {}
+    for m in set(int(r["m_S_GeV"]) for r in rows):
+        pts = sorted((float(r["ctau_mm"]), float(r["B"])) for r in rows
+                     if int(r["m_S_GeV"]) == m and r["limit"] == "observed")
+        out["4d"]["EXO-19-021"][m] = tuple(np.array(pts).T)
+    rows = csv.DictReader(open(os.path.join(pub_dir, "digitized", "ATLAS_2403.15332_4u_ms16_AuxTable1.csv")))
+    out["4d"]["ATLAS"] = {16: tuple(np.array(sorted((float(r["ctau_mm"]), float(r["B"])) for r in rows)).T)}
+    tar = os.path.join(pub_dir, "hepdata", "HEPData-ins1861146-v3-csv.tar.gz")
+    out["susy"] = {}
+    for key, name in (("neutralino", "Figure7a(left),neutralinoexclusioncurve.csv"),
+                      ("gluino", "Figure7a(left),gluinoexclusioncurve.csv"),
+                      ("stop", "Figure7b(right),topsquarkexclusioncurve.csv")):
+        rows = np.array([r for h, r in _read_hepdata_blocks(_tar_text(tar, name)) if "Observed" in h][0])
+        out["susy"][key] = (rows[:, 0], rows[:, 1])
+    return out
+
+
+def _cut_curve(ctau, b, xlim):
+    """A published (ctau, B) curve restricted to the axis ctau range, ending on the axis edges."""
+    lc, lb = np.log10(ctau), np.log10(b)
+    lo, hi = np.log10(xlim)
+    x = np.union1d(lc[(lc >= lo) & (lc <= hi)], [e for e in (lo, hi) if lc[0] < e < lc[-1]])
+    return 10.0 ** x, 10.0 ** np.interp(x, lc, lb)
+
+
+def _pub_kw(name, on_map):
+    """Line settings of a published curve: black on the 1D overlays, a bright colour with a black
+    edge on the 2D maps so it reads on every heatmap colour."""
+    ls = _PUB_STYLE[name][1]
+    cap = "round" if name == "ATLAS" else "butt"
+    lw = 2.4 if (name == "ATLAS" or not on_map) else 1.8
+    kw = dict(ls=ls, lw=lw, dash_capstyle=cap, solid_capstyle=cap)
+    if on_map:
+        kw.update(color=_PUB_COLOR_2D[name], zorder=4,
+                  path_effects=[patheffects.withStroke(linewidth=lw + 1.2, foreground="black", capstyle=cap)])
+    else:
+        kw.update(color="black", zorder=1.9)
+    return kw
+
+
+def _draw_pub_lines(ax, name, lines):
+    """Draw the (ctau, mass) pieces of a published curve in its map style and add its legend entry
+    if anything is drawn. Returns 1 or 0."""
+    kw = _pub_kw(name, True)
+    for x, y in lines:
+        ax.plot(x, y, **kw)
+    if lines:
+        ax.plot([], [], label=_PUB_STYLE[name][0], **kw)
+    return 1 if lines else 0
+
+
+def _excluded_window(ctau, b):
+    """(lo, hi) ctau where a single-mass curve is at or below B(H->SS) = 1%, log-log interpolated
+    at the crossings; None if it never is."""
+    lc, lb = np.log10(ctau), np.log10(b) - np.log10(_BR_HSS)
+    inside = np.where(lb <= 1e-9)[0]
+    if not inside.size:
+        return None
+    i0, i1 = inside[0], inside[-1]
+    lo = lc[i0] if i0 == 0 else lc[i0 - 1] + (0.0 - lb[i0 - 1]) / (lb[i0] - lb[i0 - 1]) * (lc[i0] - lc[i0 - 1])
+    hi = lc[i1] if i1 == len(lc) - 1 else lc[i1] + (0.0 - lb[i1]) / (lb[i1 + 1] - lb[i1]) * (lc[i1 + 1] - lc[i1])
+    return 10.0 ** lo, 10.0 ** hi
+
+
+def _draw_published_2d(ax, fs, published):
+    """B(H->SS) = 1% exclusion of each published analysis: its own published contour when it has one;
+    otherwise a contour built across its m_S curves (log-bilinear, as for our map) between the lowest
+    and highest m_S that exclude B = 1% anywhere, with B = 100% outside each curve's own ctau range so
+    the contour closes where its data end; or the excluded ctau window when it has a single m_S.
+    Returns the number drawn."""
+    level = np.log10(_BR_HSS)
+    n_drawn = 0
+    for name in [n for n in ("EXO-19-021", "EXO-23-013", "ATLAS") if n in published[fs]]:
+        if name in published["contours"][fs]:
+            n_drawn += _draw_pub_lines(ax, name, [published["contours"][fs][name]])
+            continue
+        curves = published[fs][name]
+        excl = [m for m in sorted(curves) if np.min(curves[m][1]) <= _BR_HSS * (1 + 1e-9)]
+        masses = [m for m in sorted(curves) if excl and excl[0] <= m <= excl[-1]]
+        if not masses:
+            continue
+        if len(masses) == 1:
+            ctau, b = curves[masses[0]]
+            lo, hi = _excluded_window(ctau, b)
+            lines = [(np.array([lo, hi]), np.array([masses[0]] * 2, dtype=float))]
+        else:
+            edges = np.log10([curves[m][0][i] for m in masses for i in (0, -1)])
+            lct = np.union1d(np.linspace(edges.min() - 0.02, edges.max() + 0.02, 400),
+                             np.concatenate([edges - 1e-6, edges]))
+            rows = []
+            for m in masses:
+                lc, lb = np.log10(curves[m][0]), np.log10(curves[m][1])
+                rows.append(np.where((lct >= lc[0]) & (lct <= lc[-1]), np.interp(lct, lc, lb), 0.0))
+            fm = np.linspace(masses[0], masses[-1], 200)
+            grid = np.array([np.interp(fm, masses, col) for col in np.array(rows).T])
+            segs = contourpy.contour_generator(lct, fm, grid.T, line_type="Separate").lines(level)
+            lines = [(10.0 ** s[:, 0], s[:, 1]) for s in segs]
+        n_drawn += _draw_pub_lines(ax, name, lines)
+    return n_drawn
+
+
+def _nice_ceil(x):
+    e = 10.0 ** np.floor(np.log10(x))
+    return next(f * e for f in (1, 2, 3, 5, 10) if f * e >= x * (1 - 1e-9))
+
+
+def _fit_legend_top(ax, leg, y_data_top, gap=0.035):
+    """Raise the y-axis top until the legend's bottom edge clears y_data_top."""
+    for _ in range(2):
+        plt.tight_layout()
+        ax.figure.canvas.draw()
+        y0 = leg.get_window_extent().transformed(ax.transAxes.inverted()).y0
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, max(hi, lo + (y_data_top - lo) / (y0 - gap)))
+
+
+class _RowLine(HandlerLine2D):
+    """Legend line or marker drawn at a fixed height above the label baseline, so rows of equal
+    height line up across columns."""
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        artists = HandlerLine2D.create_artists(self, legend, orig_handle, xdescent, ydescent, width, height,
+                                               fontsize, trans)
+        for a in artists:
+            a.set_ydata(np.full(len(a.get_xdata()), 0.36 * fontsize))
+        return artists
+
+
+_OVERLAY_LEGEND_KW = dict(fontsize=7.5, handlelength=3.5, handleheight=2.4, labelspacing=0.05, columnspacing=0.8,
+                          handletextpad=0.45, borderpad=0.4, borderaxespad=0.0, frameon=False,
+                          title_fontproperties={"size": 8.5, "weight": "bold"}, alignment="center",
+                          handler_map={Line2D: _RowLine()})
+
+
+def _overlay_legends(fig, ax, ours, points, pubs, ref, loc):
+    """Our curves (1% line on their last row) and the M55 points under one title, the published
+    curves under another, placed side by side as one block at the top of the axes."""
+    nrows = max(len(ours) + 1, len(points))
+    cols = [ours + [Line2D([], [], ls="none") for _ in range(nrows - 1 - len(ours))] + [ref]]
+    if points:
+        cols.append(points + [Line2D([], [], ls="none") for _ in range(nrows - len(points))])
+    handles = [h for c in cols for h in c]
+    l1 = ax.legend(handles, [h.get_label() for h in handles], ncol=len(cols), title="Expected limits (blinded)",
+                   loc="upper left", **_OVERLAY_LEGEND_KW)
+    ax.add_artist(l1)
+    l2 = ax.legend(pubs, [p.get_label() for p in pubs], title="Published (observed)", loc="upper left",
+                   **_OVERLAY_LEGEND_KW)
+    r = fig.canvas.get_renderer()
+    w1, w2 = [l.get_window_extent(r).transformed(ax.transAxes.inverted()).width for l in (l1, l2)]
+    x0 = {"upper left": 0.02, "upper center": 0.5 - (w1 + w2) / 2.0, "upper right": 0.98 - w1 - w2}[loc]
+    l1.set_bbox_to_anchor((x0, 0.964), transform=ax.transAxes)
+    l2.set_bbox_to_anchor((x0 + w1, 0.964), transform=ax.transAxes)
+    return [l1, l2]
+
+
+def _overlay_top(fig, ax, legends, lines, lo, margin_pt=6.0):
+    """Smallest y top of the log axis that keeps every data line below the legend block."""
+    r = fig.canvas.get_renderer()
+    boxes = [l.get_window_extent(r).transformed(ax.transAxes.inverted()) for l in legends]
+    x0, x1, y0 = min(b.x0 for b in boxes), max(b.x1 for b in boxes), min(b.y0 for b in boxes)
+    bb = ax.get_window_extent(r)
+    mx, my = margin_pt * fig.dpi / 72.0 / bb.width, margin_pt * fig.dpi / 72.0 / bb.height
+    lxlo, lxhi = np.log10(ax.get_xlim())
+    lxa, lxb = lxlo + (x0 - mx) * (lxhi - lxlo), lxlo + (x1 + mx) * (lxhi - lxlo)
+    ys = []
+    for line in lines:
+        lx, ly = np.log10(np.asarray(line.get_xdata(), float)), np.log10(np.asarray(line.get_ydata(), float))
+        ys += list(ly[(lx >= lxa) & (lx <= lxb)])
+        if line.get_linestyle() not in ("None", "none", "", " ") and len(lx) > 1:
+            ys += [np.interp(e, lx, ly) for e in (lxa, lxb) if lx[0] <= e <= lx[-1]]
+    if not ys:
+        return lo
+    llo = np.log10(lo)
+    return 10.0 ** (llo + (max(ys) - llo) / (y0 - my))
+
+
+def _place_overlay_legends(fig, ax, ours, points, pubs, ref):
+    """Put the legend block where it needs the least headroom, then raise the y top so no data
+    sit under it."""
+    lines = ours + points + pubs
+    lo, hi = ax.get_ylim()
+    hi = max(hi, 10.0 ** (max(np.log10(np.asarray(l.get_ydata(), float)).max() for l in lines) + 0.25))
+    fig.tight_layout()
+    best = None
+    for loc in ("upper center", "upper right", "upper left"):
+        legs = _overlay_legends(fig, ax, ours, points, pubs, ref, loc)
+        top = _overlay_top(fig, ax, legs, lines, lo)
+        for l in legs:
+            l.remove()
+        ax.legend_ = None
+        if best is None or np.log10(top) < np.log10(best[1]) - 0.02:
+            best = (loc, top)
+    legs = _overlay_legends(fig, ax, ours, points, pubs, ref, best[0])
+    for _ in range(3):
+        ax.set_ylim(lo, max(hi, _overlay_top(fig, ax, legs, lines, lo)))
+        fig.tight_layout()
+
+
+def plot_higgs_overlay(data, out_dir, published=None):
     all_ctaus = []
     for long_tag, short_tag, _ in _OVERLAY_FINAL_STATES.values():
         for pattern, use_short, _ in _OVERLAY_MODES:
@@ -1191,16 +1476,15 @@ def plot_higgs_overlay(data, out_dir):
     for fs, (long_tag, short_tag, fs_label) in sorted(_OVERLAY_FINAL_STATES.items()):
         for mass in ("15", "40", "55"):
             fig, ax = plt.subplots(figsize=(8, 6))
-            drawn = False
+            ours, points = [], []
             for j, (pattern, use_short, label) in enumerate(_OVERLAY_MODES):
                 cdict = data.get(pattern % (short_tag if use_short else long_tag), {}).get(mass)
                 if not cdict:
                     continue
                 ctaus = sorted(cdict)
-                ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], color=_COLORS[j],
-                        lw=2, ls="--", marker="o", ms=5, label=label)
-                drawn = True
-            if not drawn:
+                ours += ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], color=_COLORS[j],
+                                lw=2, ls="--", marker="o", ms=5, label=label)
+            if not ours:
                 plt.close(fig)
                 continue
             if mass == "55":
@@ -1209,24 +1493,33 @@ def plot_higgs_overlay(data, out_dir):
                     if not cdict:
                         continue
                     ctaus = sorted(cdict)
-                    ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], ls="none", marker=marker,
-                            ms=7, markerfacecolor="none", markeredgecolor=_COLORS[j], markeredgewidth=1.5,
-                            label=label)
-            ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
-                       label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+                    points += ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], ls="none", marker=marker,
+                                      ms=7, markerfacecolor="none", markeredgecolor=_COLORS[j], markeredgewidth=1.5,
+                                      label=label)
+            ref = ax.axhline(_BR_HSS, color="0.5" if published else "black", lw=1.5, ls="--",
+                             label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=1.8 if published else 3)
             ax.set_xscale("log")
             ax.set_yscale("log")
             ax.set_xlim(*xlim)
             ax.set_xlabel(r"$c\tau$ [mm]")
             ax.set_ylabel(r"95% CL upper limit on $\mathcal{B}(H{\to}SS)$")
-            ax.legend(fontsize=8, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
+            pubs = []
+            if published:
+                for name, m in _PUB_OVERLAY_PANELS[(fs, mass)]:
+                    ctau, b = published[fs][name][m]
+                    pubs += ax.plot(*_cut_curve(ctau, b, xlim), label=_PUB_STYLE[name][0], **_pub_kw(name, False))
+            else:
+                ax.legend(fontsize=8, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
             ax.grid(True, which="both", ls=":", alpha=0.4)
             if _HAS_MPLHEP:
                 hep.cms.label("Preliminary", data=False, ax=ax, fontsize=12,
                               rlabel=r"36.3$-$137.9 fb$^{-1}$ (13 TeV)")
             ax.text(0.0, -0.13, r"H$\to$SS, %s, $m_{S}$ = %s GeV (no combination)" % (fs_label, mass),
                     transform=ax.transAxes, fontsize=10, ha="left", va="top", clip_on=False)
-            _save(fig, os.path.join(out_dir, "higgs_overlay_%s_M%s.pdf" % (fs, mass)))
+            if published:
+                _place_overlay_legends(fig, ax, ours, points, pubs, ref)
+            _save(fig, os.path.join(out_dir, "higgs_overlay_%s_M%s%s.pdf"
+                                    % (fs, mass, "_published" if published else "")))
 
 
 def main():
@@ -1239,6 +1532,9 @@ def main():
                     help="Comma-separated process names to plot")
     ap.add_argument("--comparison-dir", default=None,
                     help="If set, write HybridNew vs Asymptotic comparison plots here")
+    ap.add_argument("--published-dir", default=None,
+                    help="Folder with the published limits (hepdata/, digitized/); if set, also write the "
+                         "*_published plots with them overlaid")
     args = ap.parse_args()
 
     COMBINE_OUT = args.combine_out
@@ -1260,6 +1556,7 @@ def main():
     if not data:
         print("No limit results found in %s" % COMBINE_OUT)
         sys.exit(0)
+    published = load_published(args.published_dir) if args.published_dir else None
 
     # ggZH is always grouped into VH; never plot it standalone
     _skip_procs = {"ggZHToSSTodddd", "ggZHToSSTobbbb"}
@@ -1283,12 +1580,20 @@ def main():
         if proc in ("ggHToSSTodddd", "VHToSSTodddd"):
             plot_1d_vs_mass_ctau_pair(proc, data[proc], args.out_dir, 1.0, 10.0)
         plot_2d(proc, data[proc], args.out_dir, hepdata)
+        if published and (proc not in _SUSY_PROCS or proc in _PUB_SUSY_CURVE):
+            plot_2d(proc, data[proc], args.out_dir, hepdata, published=published)
         if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
             plot_2d(proc, data[proc], args.out_dir, hepdata,
                     theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
                     fname_suffix="_ewk")
+            if published:
+                plot_2d(proc, data[proc], args.out_dir, hepdata,
+                        theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
+                        fname_suffix="_ewk", published=published)
 
     plot_higgs_overlay(data, args.out_dir)
+    if published:
+        plot_higgs_overlay(data, args.out_dir, published)
 
     print("\nDone. Plots saved to %s" % args.out_dir)
 
