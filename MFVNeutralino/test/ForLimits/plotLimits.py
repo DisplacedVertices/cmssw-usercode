@@ -10,10 +10,13 @@ Output (in LimitPlots/):
   <proc>_1D.pdf                         -- ctau on x, one curve per mass
   <proc>_1D_vsmass.pdf                  -- mass on x, all ctau values overlaid
   <proc>_1D_vsmass_<c1>_vs_<c2>.pdf    -- mass on x, one plot per adjacent ctau pair
-  <proc>_2D.pdf                         -- ctau vs mass 2D color map + r=1 exclusion contour
+  <proc>_2D.pdf                         -- ctau vs mass 2D color map + expected exclusion contour
   higgs_overlay_<4d|4b>_M<m>.pdf        -- ctau on x, one curve per Higgs production mode (each fitted on its own)
-  *_published.pdf                       -- with --published-dir: the overlays and 2D maps with published
-                                           observed limits from other analyses drawn on them
+  *_published.pdf                       -- with --published-dir: the overlays, 1D vs-mass plots and 2D maps with
+                                           published observed limits from other analyses drawn on them
+  *_paper.pdf                           -- with --published-dir: Presentation/Paper versions of the AN figures;
+                                           the Higgs 1D vs-mass plots leave out the ctau in _PAPER_DROP_CTAU and
+                                           the overlays leave out the single points
   <proc>_1D_hepcomp_M<m1>vsM<m2>.pdf   -- ctau on x, Low-HT vs High-HT (HepData) per mass pair
   <proc>_1D_hepcomp_vsmass_<c1>vs<c2>.pdf  -- mass on x, Low-HT vs High-HT per ctau pair
 
@@ -124,7 +127,7 @@ _EWK_LABEL = r"RPV SUSY,  $\tilde{\chi}^{0}_{1}\tilde{\chi}^{0}_{2}$,  $\tilde{\
 # (vmin, vref, vmax) in fb for the 2D color scale; vref is the white pivot on RdBu_r.
 # Unspecified processes fall back to geometric-mean auto-scaling.
 _2D_VSCALE = {
-    # Higgs: pivot at SM benchmark BR=1%; range covers 0.1%-100% (well beyond any limit)
+    # Higgs: pivot at BR = 1%; range covers 0.1%-100% (well beyond any limit)
     "VHToSSTodddd":     (1e-3,  0.01,  1.0),
     "ggZHToSSTobbbb":   (1e-3,  0.01,  1.0),
     "ggHToSSTodddd":    (1e-3,  0.01,  1.0),
@@ -138,8 +141,10 @@ _2D_VSCALE = {
     "VBFHToSSTo4d":     (1e-3,  0.01,  1.0),
 }
 
-# BR(H→SS) benchmark used as datacard normalization and as reference line on plots.
-_BR_HSS = 0.01
+# BR(H→SS) the Higgs datacards are normalized to: BR(H→SS) = r × _BR_CARD.
+_BR_CARD = 0.01
+# BR(H→SS) benchmark for the Higgs reference lines and exclusion contours.
+_BR_REF = 0.11
 
 
 def _sig_scale_fb(proc, mass=None):
@@ -148,11 +153,11 @@ def _sig_scale_fb(proc, mass=None):
     SUSY: σ_ref = 1 fb → r = σ×B² [fb] → return 1.0.
     H→SS: σ_ref = σ_SM_H × BR(H→SS=1%) [× filter_eff, which cancels].
           r = σ(H)×BR(H→SS) / (σ_SM × 0.01), so BR(H→SS) = r × 0.01.
-          σ_SM cancels regardless of production mode → return _BR_HSS for all Higgs.
+          σ_SM cancels regardless of production mode → return _BR_CARD for all Higgs.
     """
     if proc in _SUSY_PROCS:
         return 1.0
-    return _BR_HSS
+    return _BR_CARD
 
 
 _COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
@@ -415,8 +420,7 @@ def _draw_ref_curve_vsmass(ax, proc, xlim=None):
         return True
     # Higgs: reference line at BR benchmark
     if proc not in _SUSY_PROCS:
-        ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
-                   label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+        ax.axhline(_BR_REF, color="black", lw=1.5, ls="--", label=_br_ref_text(), zorder=3)
         return True
     return False
 
@@ -425,9 +429,8 @@ def _draw_ref_lines_ctau(ax, proc, masses_sorted, color_list):
     """Draw theory/benchmark reference lines on ctau plots. Returns True if anything drawn."""
     if proc in _SUSY_PROCS:
         return False  # theory curve shown on vsmass plots; per-mass lines clutter ctau plots
-    # Higgs: single benchmark line at BR = 1%
-    ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
-               label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+    # Higgs: single benchmark line at the BR benchmark
+    ax.axhline(_BR_REF, color="black", lw=1.5, ls="--", label=_br_ref_text(), zorder=3)
     return True
 
 
@@ -453,10 +456,14 @@ def _theory_footnote(ax, csv_path, row=0):
             color="#1f4e9c", url=_theory_url(csv_path))
 
 
+def _br_ref_text():
+    return r"$\mathcal{B}(H{\to}SS) = %.3g\%%$" % (100.0 * _BR_REF)
+
+
 def _excl_label(proc, csv_path=None):
     if proc in _SUSY_PROCS:
         return r"Expected exclusion: $\sigma\mathcal{B}^{2} = \sigma_\mathrm{theory}(%s)$" % _theory_symbol(csv_path)
-    return r"Expected exclusion at $\mathcal{B}(H{\to}SS) = 1\%$"
+    return "Expected exclusion at " + _br_ref_text()
 
 
 def _mass_label(proc, mass):
@@ -584,14 +591,32 @@ def _cut_vs_mass(m, v, xlim):
     return x, 10.0 ** np.interp(x, m, np.log10(v))
 
 
-def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
+# ctau [mm] left out of the Presentation/Paper (*_paper) 1D vs-mass plots.
+_PAPER_DROP_CTAU = {
+    "VHToSSTodddd":     (10.0, 30.0),
+    "VHToSSTobbbb":     (10.0, 30.0),
+    "ggHToSSTodddd":    (100.0,),
+    "ggHToSSTobbbb":    (100.0,),
+    "ttHToSSTo4d_lep":  (10.0, 30.0),
+    "ttHToSSTo4d_bjet": (10.0, 30.0),
+    "ttHToSSTo4b_lep":  (10.0, 30.0),
+    "ttHToSSTo4b_bjet": (10.0, 30.0),
+    "VBFHToSSTo4d":     (10.0, 30.0),
+    "VBFHToSSTo4b":     (10.0, 30.0),
+}
+
+
+def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None, paper=False):
     ctau_data    = _invert_mass_data(mass_data)
     ctaus_sorted = sorted(ctau_data.keys())
+    drop         = _PAPER_DROP_CTAU.get(proc, ()) if paper else ()
 
     fig, ax = plt.subplots(figsize=(8, 6))
 
     ours, pub_lines, pub_names = [], [], []
     for i, ctau in enumerate(ctaus_sorted):
+        if ctau in drop:
+            continue
         mdict     = ctau_data[ctau]
         masses    = _sorted_masses(mdict)
         mass_vals = [int(m) for m in masses]
@@ -623,6 +648,8 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
     if published:
         cut = xlim or (all_masses[0], all_masses[-1])
         for i, ctau in enumerate(ctaus_sorted):
+            if ctau in drop:
+                continue
             for name, m, v in _published_vs_mass(proc, ctau, published, hepdata):
                 x, y = _cut_vs_mass(m, v, cut)
                 if len(x) > 1:
@@ -644,7 +671,8 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
                                compact=True)
     else:
         ax.legend(fontsize=9, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
-    _save(fig, os.path.join(out_dir, "%s_1D_vsmass%s.pdf" % (proc, "_published" if published else "")))
+    _save(fig, os.path.join(out_dir, "%s_1D_vsmass%s.pdf"
+                            % (proc, "_paper" if paper else ("_published" if published else ""))))
 
 
 # ---------------------------------------------------------------------------
@@ -748,12 +776,12 @@ def plot_1d_vs_mass_ctau_pair(proc, mass_data, out_dir, c1_mm, c2_mm, hepdata=No
 
 
 # ---------------------------------------------------------------------------
-# 2D: ctau vs mass color map + r=1 contour  (no HepData overlay)
+# 2D: ctau vs mass color map + exclusion contour  (no HepData overlay)
 # ---------------------------------------------------------------------------
 
 def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
-    """Per-mass σ×B² [fb] threshold where r=1 is the physical exclusion boundary.
-    SUSY: σ_theory from CSV. H→SS: σ_ref_fb (_sig_scale_fb), so r=1 = SM boundary.
+    """Per-mass limit value that the exclusion contour marks (σ×B² [fb] for SUSY, BR(H→SS) for H→SS).
+    SUSY: σ_theory from CSV. H→SS: the BR benchmark _BR_REF.
     theory_csv overrides the SUSY default (for EWK variant plots).
     """
     if proc in _SUSY_PROCS:
@@ -762,7 +790,8 @@ def _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=None):
             masses_csv, xsec_fb_csv = _load_theory_xsec_csv(csv_path)
             return np.array([_interp_theory_xsec_fb(m, masses_csv, xsec_fb_csv)
                              for m in mass_vals])
-    return np.array([_sig_scale_fb(proc, m) for m in masses])
+        return np.array([_sig_scale_fb(proc, m) for m in masses])
+    return np.full(len(masses), _BR_REF)
 
 
 def _interp_grid(log_ctaus, mass_vals, grid, fine_lct, fine_mass):
@@ -804,7 +833,7 @@ def _color_scale(proc, grid_fb, thresholds):
     return vmin, vref, vmax, plt.get_cmap("RdBu_r"), levels
 
 
-def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="", published=None):
+def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="", published=None, paper=False):
     masses    = _sorted_masses(mass_data)
 
     # Rectangular grid with NaN for missing cells (capped to "not excluded" in _interp_grid).
@@ -853,8 +882,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="",
     fine_exp_s = fine_exp * scale_fine[np.newaxis, :] if fine_exp is not None else None
     fine_obs_s = fine_obs * scale_fine[np.newaxis, :] if fine_obs is not None else None
 
-    # Exclusion threshold per mass: σ×B² [fb] value at which r=1 boundary is physical.
-    # For SUSY this is σ_theory(mass); for H→SS it equals σ_ref_fb (= scales).
+    # Exclusion threshold per mass: the limit value the exclusion contour marks.
+    # For SUSY this is σ_theory(mass); for H→SS it is the BR benchmark _BR_REF.
     thresholds  = _excl_thresholds_2d(proc, masses, mass_vals, theory_csv=theory_csv)
     thresh_fine = np.interp(fine_mass, mass_vals, thresholds)
 
@@ -889,8 +918,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="",
         cbar.set_ticks(_nice_ticks)
         cbar.minorticks_off()
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-        if vref is not None:
-            cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+        if proc not in _SUSY_PROCS:
+            cbar.ax.axhline(y=_BR_REF, color="black", lw=1.0, ls="--")
 
         # Exclusion contours on the ratio grid (= 1.0 where limit = theory/SM benchmark)
         ax.contour(fine_ctau, fine_mass, fine_ratio_exp.T, levels=[1.0],
@@ -920,8 +949,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="",
             cbar.set_ticks(_nice_ticks)
             cbar.minorticks_off()
             cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-            if vref is not None:
-                cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+            if proc not in _SUSY_PROCS:
+                cbar.ax.axhline(y=_BR_REF, color="black", lw=1.0, ls="--")
 
     for j, mass in enumerate(masses):
         for i, ctau in enumerate(ctau_vals):
@@ -960,7 +989,8 @@ def plot_2d(proc, mass_data, out_dir, hepdata, theory_csv=None, fname_suffix="",
         _theory_footnote(ax, theory_csv or _HEPDATA_THEORY_CSV.get(proc))
     if published:
         _fit_legend_top(ax, leg, y_top)
-    _save(fig, os.path.join(out_dir, "%s_2D%s%s.pdf" % (proc, fname_suffix, "_published" if published else "")))
+    _save(fig, os.path.join(out_dir, "%s_2D%s%s.pdf"
+                            % (proc, fname_suffix, "_paper" if paper else ("_published" if published else ""))))
 
 
 
@@ -1203,8 +1233,8 @@ def plot_comparison_2d(proc, mass_data_m, out_dir, hepdata, theory_csv=None, fna
         cbar.set_label(cbar_label, fontsize=11)
         cbar.set_ticks(_nice_ticks)
         cbar.set_ticklabels(["%g" % t for t in _nice_ticks])
-        if vref is not None:
-            cbar.ax.axhline(y=vref, color="black", lw=1.0, ls="--")
+        if proc not in _SUSY_PROCS:
+            cbar.ax.axhline(y=_BR_REF, color="black", lw=1.0, ls="--")
 
     if fine_ratio_hn is not None:
         ax.contour(fine_ctau, fine_mass, fine_ratio_hn.T, levels=[1.0],
@@ -1274,6 +1304,7 @@ _PUB_LABEL = {
 _PUB_COLOR = {"EXO-19-021": "#ff3cff", "EXO-23-013": "#ffd60a", "ATLAS": "#18e0ff", "EXO-19-013": "#ff8c1a"}
 _PUB_MARKER = {"EXO-19-021": "s", "EXO-23-013": "^", "EXO-19-013": "D"}
 _PUB_SUSY_CURVE = {"mfv_neu": "gluino", "mfv_neu_ewk": "neutralino", "mfv_stopdbardbar": "stop"}
+_PUB_CONTOUR_BR = 0.01
 _OUTSIDE_FC = "#e0e0e0"
 _PUB_OVERLAY_PANELS = {
     ("4d", "55"): [("EXO-19-021", 55), ("EXO-23-013", 55)],
@@ -1305,8 +1336,9 @@ def load_published(pub_dir):
     """Published observed limits from the overlay handoff folder:
     {"4d"/"4b": {name: {m_S: (ctau_mm, B)}}, "contours": {"4d"/"4b": {name: (ctau_mm, m_S)}},
      "susy": {"neutralino"/"gluino"/"stop": (ctau_mm, excluded mass in GeV)}}. "contours" holds an
-    analysis's own published B(H->SS) = 1% exclusion in the (ctau, m_S) plane, used on the 2D maps
-    instead of a rebuilt one; "susy" holds the EXO-19-013 observed mass-lifetime exclusion curves."""
+    analysis's own published B(H->SS) = _PUB_CONTOUR_BR exclusion in the (ctau, m_S) plane, used on the
+    2D maps instead of a rebuilt one when _BR_REF is that B; "susy" holds the EXO-19-013 observed
+    mass-lifetime exclusion curves."""
     out = {"4d": {}, "4b": {}, "contours": {"4d": {}, "4b": {}}}
     tar = os.path.join(pub_dir, "hepdata", "HEPData-ins2829524-v2-csv.tar.gz")
     for fs, name, contour in (("4b", "Figure4a.csv", "Figure6a.csv"), ("4d", "Figure4b.csv", "Figure6b.csv")):
@@ -1362,9 +1394,9 @@ def _draw_pub_lines(ax, name, lines):
 
 
 def _excluded_window(ctau, b):
-    """(lo, hi) ctau where a single-mass curve is at or below B(H->SS) = 1%, log-log interpolated
-    at the crossings; None if it never is."""
-    lc, lb = np.log10(ctau), np.log10(b) - np.log10(_BR_HSS)
+    """(lo, hi) ctau where a single-mass curve is at or below the BR benchmark _BR_REF, log-log
+    interpolated at the crossings; None if it never is."""
+    lc, lb = np.log10(ctau), np.log10(b) - np.log10(_BR_REF)
     inside = np.where(lb <= 1e-9)[0]
     if not inside.size:
         return None
@@ -1375,20 +1407,21 @@ def _excluded_window(ctau, b):
 
 
 def _draw_published_2d(ax, fs, published):
-    """B(H->SS) = 1% exclusion of each published analysis: its own published contour when it has one;
-    otherwise one contour built across its m_S curves (log-bilinear, as for our map) between the lowest
-    and highest m_S that exclude B = 1% anywhere, with B = 100% outside each curve's own ctau range and
-    below the lowest of those m_S, so the line closes where its data end and along that lowest m_S and
-    stays open at the highest; or the excluded ctau window when it has a single m_S.
+    """Exclusion of each published analysis at the BR benchmark _BR_REF: its own published contour when
+    it has one at that B; otherwise one contour built across its m_S curves (log-bilinear, as for our
+    map) between the lowest and highest m_S that exclude _BR_REF anywhere, with B = 100% outside each
+    curve's own ctau range and below the lowest of those m_S, so the line closes where its data end and
+    along that lowest m_S and stays open at the highest; or the excluded ctau window when it has a
+    single m_S.
     Returns the number drawn."""
-    level = np.log10(_BR_HSS)
+    level = np.log10(_BR_REF)
     n_drawn = 0
     for name in [n for n in ("EXO-19-021", "EXO-23-013", "ATLAS") if n in published[fs]]:
-        if name in published["contours"][fs]:
+        if name in published["contours"][fs] and np.isclose(_BR_REF, _PUB_CONTOUR_BR):
             n_drawn += _draw_pub_lines(ax, name, [published["contours"][fs][name]])
             continue
         curves = published[fs][name]
-        excl = [m for m in sorted(curves) if np.min(curves[m][1]) <= _BR_HSS * (1 + 1e-9)]
+        excl = [m for m in sorted(curves) if np.min(curves[m][1]) <= _BR_REF * (1 + 1e-9)]
         masses = [m for m in sorted(curves) if excl and excl[0] <= m <= excl[-1]]
         if not masses:
             continue
@@ -1520,7 +1553,7 @@ def _place_overlay_legends(fig, ax, ours, points, pubs, refs, fit_lines, allow_s
         fig.tight_layout()
 
 
-def plot_higgs_overlay(data, out_dir, published=None):
+def plot_higgs_overlay(data, out_dir, published=None, paper=False):
     all_ctaus = []
     for long_tag, short_tag, _ in _OVERLAY_FINAL_STATES.values():
         for pattern, use_short, _ in _OVERLAY_MODES:
@@ -1538,22 +1571,21 @@ def plot_higgs_overlay(data, out_dir, published=None):
                 if not cdict:
                     continue
                 ctaus = sorted(cdict)
-                ours += ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], color=_COLORS[j],
+                ours += ax.plot(ctaus, [cdict[c]["exp"] * _BR_CARD for c in ctaus], color=_COLORS[j],
                                 lw=2, ls="--", marker="o", ms=5, label=label)
             if not ours:
                 plt.close(fig)
                 continue
-            if mass == "55":
+            if mass == "55" and not paper:
                 for proc, j, marker, label in _OVERLAY_EXTRAS_M55:
                     cdict = data.get(proc, {}).get(mass)
                     if not cdict:
                         continue
                     ctaus = sorted(cdict)
-                    points += ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], ls="none", marker=marker,
+                    points += ax.plot(ctaus, [cdict[c]["exp"] * _BR_CARD for c in ctaus], ls="none", marker=marker,
                                       ms=7, markerfacecolor="none", markeredgecolor=_COLORS[j], markeredgewidth=1.5,
                                       label=label)
-            ref = ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
-                             label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
+            ref = ax.axhline(_BR_REF, color="black", lw=1.5, ls="--", label=_br_ref_text(), zorder=3)
             ax.set_xscale("log")
             ax.set_yscale("log")
             ax.set_xlim(*xlim)
@@ -1575,7 +1607,7 @@ def plot_higgs_overlay(data, out_dir, published=None):
             if published:
                 _place_overlay_legends(fig, ax, ours, points, pubs, [ref], ours + points + pubs)
             _save(fig, os.path.join(out_dir, "higgs_overlay_%s_M%s%s.pdf"
-                                    % (fs, mass, "_published" if published else "")))
+                                    % (fs, mass, "_paper" if paper else ("_published" if published else ""))))
 
 
 def main():
@@ -1590,7 +1622,7 @@ def main():
                     help="If set, write HybridNew vs Asymptotic comparison plots here")
     ap.add_argument("--published-dir", default=None,
                     help="Folder with the published limits (hepdata/, digitized/); if set, also write the "
-                         "*_published plots with them overlaid")
+                         "*_published plots with them overlaid and the *_paper set")
     args = ap.parse_args()
 
     COMBINE_OUT = args.combine_out
@@ -1630,16 +1662,21 @@ def main():
         n_pts    = sum(len(v) for v in data[proc].values())
         print("\n%s:  %d masses,  %d total hypotheses" % (proc, n_masses, n_pts))
 
+        pub = published if (proc not in _SUSY_PROCS or proc in _PUB_SUSY_CURVE) else None
         plot_1d(proc, data[proc], args.out_dir, hepdata)
         plot_1d_vs_mass_all(proc, data[proc], args.out_dir)
-        if published and (proc not in _SUSY_PROCS or proc in _PUB_SUSY_CURVE):
-            plot_1d_vs_mass_all(proc, data[proc], args.out_dir, published, hepdata)
+        if pub:
+            plot_1d_vs_mass_all(proc, data[proc], args.out_dir, pub, hepdata)
+        if published:
+            plot_1d_vs_mass_all(proc, data[proc], args.out_dir, pub, hepdata, paper=True)
         plot_1d_vs_mass_pairs(proc, data[proc], args.out_dir, hepdata)
         if proc in ("ggHToSSTodddd", "VHToSSTodddd"):
             plot_1d_vs_mass_ctau_pair(proc, data[proc], args.out_dir, 1.0, 10.0)
         plot_2d(proc, data[proc], args.out_dir, hepdata)
-        if published and (proc not in _SUSY_PROCS or proc in _PUB_SUSY_CURVE):
-            plot_2d(proc, data[proc], args.out_dir, hepdata, published=published)
+        if pub:
+            plot_2d(proc, data[proc], args.out_dir, hepdata, published=pub)
+        if published:
+            plot_2d(proc, data[proc], args.out_dir, hepdata, published=pub, paper=True)
         if proc == "mfv_neu" and "mfv_neu" in _EXTRA_THEORY_CSV:
             plot_2d(proc, data[proc], args.out_dir, hepdata,
                     theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
@@ -1648,10 +1685,14 @@ def main():
                 plot_2d(proc, data[proc], args.out_dir, hepdata,
                         theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
                         fname_suffix="_ewk", published=published)
+                plot_2d(proc, data[proc], args.out_dir, hepdata,
+                        theory_csv=_EXTRA_THEORY_CSV["mfv_neu"],
+                        fname_suffix="_ewk", published=published, paper=True)
 
     plot_higgs_overlay(data, args.out_dir)
     if published:
         plot_higgs_overlay(data, args.out_dir, published)
+        plot_higgs_overlay(data, args.out_dir, published, paper=True)
 
     print("\nDone. Plots saved to %s" % args.out_dir)
 
