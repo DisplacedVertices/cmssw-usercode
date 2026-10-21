@@ -626,8 +626,9 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
             for name, m, v in _published_vs_mass(proc, ctau, published, hepdata):
                 x, y = _cut_vs_mass(m, v, cut)
                 if len(x) > 1:
-                    pub_lines += ax.plot(x, y, color=_COLORS[i % len(_COLORS)], lw=1.6, ls=_PUB_STYLE[name][1],
-                                         dash_capstyle="butt", solid_capstyle="butt", zorder=1.9)
+                    pub_lines += ax.plot(x, y, marker=_PUB_MARKER[name], ms=4,
+                                         markevery=list(np.where(np.isin(x, m))[0]),
+                                         **_pub_kw(name, _COLORS[i % len(_COLORS)], 1.3, 0.9))
                     pub_names.append(name)
     ax.set_yscale("log")
     ax.set_xlabel(_mass_xlabel(proc))
@@ -636,7 +637,7 @@ def plot_1d_vs_mass_all(proc, mass_data, out_dir, published=None, hepdata=None):
     _cms_label(ax, proc)
     _annotate_proc(ax, proc)
     if published:
-        keys = [Line2D([], [], color="black", lw=1.6, ls=_PUB_STYLE[n][1], label=_PUB_STYLE[n][0])
+        keys = [Line2D([], [], label=_PUB_LABEL[n], marker=_PUB_MARKER[n], ms=4, **_pub_kw(n, "0.8", 1.3, 0.9))
                 for n in ("EXO-19-021", "EXO-23-013", "EXO-19-013") if n in pub_names]
         _place_overlay_legends(fig, ax, ours, [], keys, refs,
                                ours + pub_lines + (refs if proc in _SUSY_PROCS else []), allow_stack=True,
@@ -685,7 +686,7 @@ def _draw_hepdata_pair(ax, hd, c1, c2):
         col = _COLORS[i + 2]
         lbl = _format_ctau(ctau, " ")
         ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color=col, lw=2, ls="-",
-                label=r"$c\tau$ = %s, %s" % (lbl, _PUB_STYLE["EXO-19-013"][0]))
+                label=r"$c\tau$ = %s, %s" % (lbl, _PUB_LABEL["EXO-19-013"]))
 
 
 def plot_1d_vs_mass_pairs(proc, mass_data, out_dir, hepdata=None):
@@ -1110,7 +1111,7 @@ def plot_comparison_1d_per_ctau(proc, mass_data_m, out_dir, hepdata=None):
                 keep = hd_r_sl > 0
                 if np.any(keep):
                     ax.plot(hd_masses_sl[keep], hd_r_sl[keep], color="black", lw=1.5, ls="-",
-                            label=_PUB_STYLE["EXO-19-013"][0], zorder=3)
+                            label=_PUB_LABEL["EXO-19-013"], zorder=3)
                     drew = True
 
         if not drew:
@@ -1264,13 +1265,14 @@ _OVERLAY_EXTRAS_M55 = [
 ]
 
 
-_PUB_STYLE = {
-    "EXO-19-021": ("CMS Displaced Jets, ggH, 13 TeV (obs.)", "-"),
-    "EXO-23-013": ("CMS Displaced Jets, ggH, 13.6 TeV (obs.)", (0, (4.0, 1.5, 1.0, 1.5))),
-    "ATLAS":      ("ATLAS Inner Detector DVs, VH+VBF, $m_{s}$ = 16 GeV (obs.)", (0, (0.01, 2.2))),
-    "EXO-19-013": ("CMS High-HT Tracker DVs, 13 TeV (obs.)", "-"),
+_PUB_LABEL = {
+    "EXO-19-021": "CMS Displaced Jets, ggH, 13 TeV (obs.)",
+    "EXO-23-013": "CMS Displaced Jets, ggH, 13.6 TeV (obs.)",
+    "ATLAS":      "ATLAS Inner Detector DVs, VH+VBF, $m_{s}$ = 16 GeV (obs.)",
+    "EXO-19-013": "CMS High-HT Tracker DVs, 13 TeV (obs.)",
 }
-_PUB_COLOR_2D = {"EXO-19-021": "#ff3cff", "EXO-23-013": "#ffd60a", "ATLAS": "#18e0ff", "EXO-19-013": "#ff8c1a"}
+_PUB_COLOR = {"EXO-19-021": "#ff3cff", "EXO-23-013": "#ffd60a", "ATLAS": "#18e0ff", "EXO-19-013": "#ff8c1a"}
+_PUB_MARKER = {"EXO-19-021": "s", "EXO-23-013": "^", "EXO-19-013": "D"}
 _PUB_SUSY_CURVE = {"mfv_neu": "gluino", "mfv_neu_ewk": "neutralino", "mfv_stopdbardbar": "stop"}
 _OUTSIDE_FC = "#e0e0e0"
 _PUB_OVERLAY_PANELS = {
@@ -1341,29 +1343,21 @@ def _cut_curve(ctau, b, xlim):
     return 10.0 ** x, 10.0 ** np.interp(x, lc, lb)
 
 
-def _pub_kw(name, on_map):
-    """Line settings of a published curve: black on the 1D overlays, a bright colour with a black
-    edge on the 2D maps so it reads on every heatmap colour."""
-    ls = _PUB_STYLE[name][1]
-    cap = "round" if name == "ATLAS" else "butt"
-    lw = 2.4 if (name == "ATLAS" or not on_map) else 1.8
-    kw = dict(ls=ls, lw=lw, dash_capstyle=cap, solid_capstyle=cap)
-    if on_map:
-        kw.update(color=_PUB_COLOR_2D[name], zorder=4,
-                  path_effects=[patheffects.withStroke(linewidth=lw + 1.2, foreground="black", capstyle=cap)])
-    else:
-        kw.update(color="black", zorder=1.9)
-    return kw
+def _pub_kw(name, color=None, lw=1.8, edge=1.2):
+    """Line settings of a published (observed) curve: solid, in its search's color unless another is
+    given, with a thin black edge, drawn above our curves."""
+    return dict(color=color or _PUB_COLOR[name], ls="-", lw=lw, solid_capstyle="butt", zorder=4,
+                path_effects=[patheffects.withStroke(linewidth=lw + edge, foreground="black")])
 
 
 def _draw_pub_lines(ax, name, lines):
     """Draw the (ctau, mass) pieces of a published curve in its map style and add its legend entry
     if anything is drawn. Returns 1 or 0."""
-    kw = _pub_kw(name, True)
+    kw = _pub_kw(name)
     for x, y in lines:
         ax.plot(x, y, **kw)
     if lines:
-        ax.plot([], [], label=_PUB_STYLE[name][0], **kw)
+        ax.plot([], [], label=_PUB_LABEL[name], **kw)
     return 1 if lines else 0
 
 
@@ -1382,9 +1376,10 @@ def _excluded_window(ctau, b):
 
 def _draw_published_2d(ax, fs, published):
     """B(H->SS) = 1% exclusion of each published analysis: its own published contour when it has one;
-    otherwise a contour built across its m_S curves (log-bilinear, as for our map) between the lowest
-    and highest m_S that exclude B = 1% anywhere, with B = 100% outside each curve's own ctau range so
-    the contour closes where its data end; or the excluded ctau window when it has a single m_S.
+    otherwise one contour built across its m_S curves (log-bilinear, as for our map) between the lowest
+    and highest m_S that exclude B = 1% anywhere, with B = 100% outside each curve's own ctau range and
+    below the lowest of those m_S, so the line closes where its data end and along that lowest m_S and
+    stays open at the highest; or the excluded ctau window when it has a single m_S.
     Returns the number drawn."""
     level = np.log10(_BR_HSS)
     n_drawn = 0
@@ -1409,8 +1404,8 @@ def _draw_published_2d(ax, fs, published):
             for m in masses:
                 lc, lb = np.log10(curves[m][0]), np.log10(curves[m][1])
                 rows.append(np.where((lct >= lc[0]) & (lct <= lc[-1]), np.interp(lct, lc, lb), 0.0))
-            fm = np.linspace(masses[0], masses[-1], 200)
-            grid = np.array([np.interp(fm, masses, col) for col in np.array(rows).T])
+            fm = np.concatenate([[masses[0] - 1e-6], np.linspace(masses[0], masses[-1], 200)])
+            grid = np.array([np.interp(fm, masses, col, left=0.0) for col in np.array(rows).T])
             segs = contourpy.contour_generator(lct, fm, grid.T, line_type="Separate").lines(level)
             lines = [(10.0 ** s[:, 0], s[:, 1]) for s in segs]
         n_drawn += _draw_pub_lines(ax, name, lines)
@@ -1557,8 +1552,8 @@ def plot_higgs_overlay(data, out_dir, published=None):
                     points += ax.plot(ctaus, [cdict[c]["exp"] * _BR_HSS for c in ctaus], ls="none", marker=marker,
                                       ms=7, markerfacecolor="none", markeredgecolor=_COLORS[j], markeredgewidth=1.5,
                                       label=label)
-            ref = ax.axhline(_BR_HSS, color="0.5" if published else "black", lw=1.5, ls="--",
-                             label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=1.8 if published else 3)
+            ref = ax.axhline(_BR_HSS, color="black", lw=1.5, ls="--",
+                             label=r"$\mathcal{B}(H{\to}SS) = 1\%$", zorder=3)
             ax.set_xscale("log")
             ax.set_yscale("log")
             ax.set_xlim(*xlim)
@@ -1568,7 +1563,7 @@ def plot_higgs_overlay(data, out_dir, published=None):
             if published:
                 for name, m in _PUB_OVERLAY_PANELS[(fs, mass)]:
                     ctau, b = published[fs][name][m]
-                    pubs += ax.plot(*_cut_curve(ctau, b, xlim), label=_PUB_STYLE[name][0], **_pub_kw(name, False))
+                    pubs += ax.plot(*_cut_curve(ctau, b, xlim), label=_PUB_LABEL[name], **_pub_kw(name))
             else:
                 ax.legend(fontsize=8, ncol=2, title="Expected limits (blinded)", title_fontsize=9)
             ax.grid(True, which="both", ls=":", alpha=0.4)
