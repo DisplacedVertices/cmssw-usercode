@@ -15,26 +15,19 @@ bins: [0., 0.1, 0.4, 2.0, 4.0]
 nbins: 4
 
 # ---- Input signal MiniTrees ---------------------------------
-# The folder is the required --minitree-dir argument; only the glob pattern lives here.
 signal:
   lep:
-    file_key: "condor_*tau*/minitree_0.root"
+    minitree_list: "tag004_signal_minitrees.txt"
   bjet:
-    file_key: "condor_*tau*/minitree_0.root"
+    minitree_list: "tag004_signal_minitrees.txt"
 
 # ---- Input background paths ---------------------------------
-# Local copies of the MC background templates (copied from alecduqu's One2Two), per year.
-# Per-year files (2v_from_jets_{year}_5track_default_*.root) are also present in
-# BackgroundTemplates/{lep,bjet}/; The code will substitute the year into the filename pattern.
-# TODO: replace with data-driven per-year estimates when available after unblinding.
 # The folder is the required --bkg-template-dir argument; only the filename lives here.
-# BackgroundTemplates_EXAMPLE/ in this directory is a reference copy, not an input --
-# point --bkg-template-dir at your own templates.
 background:
   lep:
-    filename: "2v_from_jets_{}_5track_default_ULV30Lepm.root"
+    filename: "ULV30Lepm_5track_background_template.root"
   bjet:
-    filename: "2v_from_jets_{}_5track_default_ULV30BvetoLHTm.root"
+    filename: "ULV30BvetoLHTm_5track_background_template.root"
 
 # ---- Output paths -------------------------------------------
 # root_output: the intermediate ROOT file holding histograms

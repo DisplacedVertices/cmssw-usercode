@@ -34,3 +34,4 @@ year_remaps = {
 }
 
 fac_scale_VH_csv_path = _ntpaths["fac_scale_VH_csv"]
+fac_scale_VH_flat = 1.04
