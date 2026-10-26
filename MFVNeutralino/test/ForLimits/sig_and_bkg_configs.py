@@ -48,8 +48,8 @@ lumi_lit_corrs = {
 
 
 bkg_norm_uncs = {
-    "lep":  1.19,
-    "bjet": 1.29,
+    "lep":  1.17,
+    "bjet": 1.32,
 }
 
 bkg_shape_uncs = {
