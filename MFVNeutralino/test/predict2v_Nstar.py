@@ -5,8 +5,8 @@ import numpy as np
 
 #lep = 'lep' in sys.argv
 #bjet = 'bjet' in sys.argv
-lep = True
-bjet = False
+lep = False
+bjet = True
 
 if bjet :
     presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-09-07-Histos_tag004BvetoLHTm-NoSumptM5Cuts/' 
@@ -17,7 +17,7 @@ if lep :
 #data = bool_from_argv('data')
 data = False
 year = '2018' if len(sys.argv) < 2 else sys.argv[1]
-trigname = 'NA' if len(sys.argv) < 3 else sys.argv[2] 
+trigname = 'NA' if len(sys.argv) < 3 else sys.argv[2]
 print("trig channel: %s" % trigname)
 if data:
     if bjet :

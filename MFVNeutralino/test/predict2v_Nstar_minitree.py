@@ -22,8 +22,8 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 #sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
 
 #btag triggers
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
 
 #signal samples
 #presel_path = '/uscms/home/alecduqu/crab_dirs'
