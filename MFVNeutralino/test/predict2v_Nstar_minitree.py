@@ -48,7 +48,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'ggHToSSTodddd_tau1mm_M55_%s.root' % year, 1.
+    fn, presel_scale = 'mfv_stopdbardbar_tau001000um_M0200_%s.root' % year, 1.
 
 def propagate_product(x, y, ex, ey):
     p = x * y
@@ -62,12 +62,6 @@ def fb(ft,efft,frt):
 #sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 presel_f = ROOT.TFile.Open(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile.Open(os.path.join(sel_path, fn))
-
-npresel, err_npresel = get_integral(presel_f.Get('mfvMiniTreePreSelEvtFilt/h_nsv'))
-
-print 'year:', year
-print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
-#print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
 if is_signal:
     sample_index = fn.replace('.root','')
@@ -86,6 +80,14 @@ if is_signal:
     print "DEBUG: sumw, xsec, lumi", sumw, xsec, lumi
     presel_scale = sigyield / sumw
     print "DEBUG: presel_scale", presel_scale
+
+npresel, err_npresel = get_integral(presel_f.Get('mfvMiniTreePreSelEvtFilt/h_nsv'))
+npresel *= presel_scale
+err_npresel *= presel_scale
+
+print 'year:', year
+print 'presel events: %8.2f +- %4.2f' % (npresel, err_npresel)
+#print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
 #See these evernotes for an explanation of the calculations:
 #Error of efficiencies (replacement of the Binomial error): https://www.evernote.com/client/web#/notes/b4b263d9-3aef-4116-4c27-0cb66c582ca3
@@ -122,7 +124,7 @@ for ntk in ntk_ls:
     var_n2v += (err_n2v**2)
     var_n1v += (err_n1v**2)
 
-print 'n1 = %8.0f'%(tot_n1v)
+print 'n1 = %8.2f'%(tot_n1v)
 print 'err_n1 = %f'%(math.sqrt(var_n1v)) 
 for ntk in ntk2_ls:
     tracks = [int(i) for i in ntk if i.isdigit()]
@@ -140,7 +142,7 @@ for ntk in ntk2_ls:
     tot_n2v += n2v
     var_n2v += (err_n2v**2) 
 
-print 'n2 = %8.0f'%(tot_n2v)
+print 'n2 = %8.2f'%(tot_n2v)
 print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
@@ -183,7 +185,7 @@ for ntk in ntk_ls:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / 1 for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
     else:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
-    print '%5d %11.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%5d %11.3f +- %4.3f %9.6f +- %6.6f %7.3f +- %4.3f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
 print '%8s %16s %16s %19s %15s %35s' % ('ntracks', 'n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
@@ -229,4 +231,4 @@ for ntk in ntk2_ls:
         err_rat = np.sqrt((1/pred)**2 + (n2v/pred**2)**2 * err_pred**2)
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
-    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%3d %s %d %11.3f +- %4.3f %8.3f +- %4.3f %9.6f +- %6.6f %7.3f +- %4.3f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
