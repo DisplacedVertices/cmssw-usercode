@@ -92,6 +92,8 @@ EOF
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include <TRandom3.h> //Alec added to here
 
 int dvv_nbins = 100;
@@ -102,6 +104,9 @@ const std::string ulversion = "ULV30Lepm"; //Use for Lepton triggered samples
 bool use_signal = false;
 bool use_dvv3D = true;
 bool c1v_vertexer = true;
+bool invert_sumpt_m5_cuts = false;
+bool vertices_w_5tracks = true;
+bool verbose = false;
 
 struct ConstructDvvcParameters {
   int ibkg_begin_;
@@ -123,7 +128,7 @@ struct ConstructDvvcParameters {
     : ibkg_begin_(-999),
       ibkg_end_(-999),
       is_mc_(false),
-      only_20pc_(true),
+      only_20pc_(false),
       inject_signal_(false),
       year_("run2"), //change depending on year run
       ntracks_(5),
@@ -222,8 +227,24 @@ const double merge_shared_sig = 4;
 
 VertexDistanceXY vertex_dist_2d;
 VertexDistance3D vertex_dist_3d;
-std::unique_ptr<KalmanVertexFitter> kv_reco;
 
+struct produce_vertices {
+  //int number_of_vertices;
+  std::vector<int> numbers_of_vertex_tracks;
+  //std::vector<math::XYZPoint> positions;
+  std::vector<reco::Vertex::Point> positions; 
+};
+
+//std::unique_ptr<KalmanVertexFitter> kv_reco;
+/*edm::ParameterSetDescription kvr_desc;
+kvr_desc.add<double>("maxDistance", 0.01);
+kvr_desc.add<int>("maxNbrOfIterations", 10);
+edm::ParameterSet kvr_params;
+kvr_desc.validate(kvr_params);
+bool doSmoothing = true;
+KalmanVertexFitter kv_reco(kvr_params, doSmoothing);*/
+//std::unique_ptr<KalmanVertexFitter> kv_reco = std::make_unique<KalmanVertexFitter>(kvr_params, true);
+//std::unique_ptr<KalmanVertexFitter> kv_reco = std::make_unique<KalmanVertexFitter>(true);
 
 //bool is_track_subset(const track_set & a, const track_set & b) const { //Alec had to remove const here
 bool is_track_subset(const track_set & a, const track_set & b) {
@@ -242,17 +263,32 @@ bool is_track_subset(const track_set & a, const track_set & b) {
 
 //track_set vertex_track_set(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) const { //Alec had to remove const here
 track_set vertex_track_set(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) {
+  //std::cout << "start of vertex_track_set function" << std::endl;
   track_set result;
+  if (verbose) std::cout << "generated vertex # of tracks: " << v.tracksSize() << ", position: " << v.position() << ", chi^2: " << v.chi2() << ", chi^2/ndf: " << v.normalizedChi2() << std::endl;
+  //if (verbose) std::cout << "cov matrix: " << std::endl;
+  //if (verbose) std::cout << v.covariance(0, 0) << ", " << v.covariance(0, 1) << ", " << v.covariance(0, 2) << std::endl;
+  //if (verbose) std::cout << v.covariance(1, 0) << ", " << v.covariance(1, 1) <<	", " <<	v.covariance(1, 2) << std::endl;
+  //if (verbose) std::cout << v.covariance(2, 0) << ", " << v.covariance(2, 1) <<	", " <<	v.covariance(2, 2) << std::endl;
 
   for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+    //std::cout << "start of vertex loop iteration in vertex_track_set" << std::endl;
+    //std::cout << &(it) << std::endl;
+    //std::cout << &(*it) << std::endl;
+    //std::cout << &(**it) << std::endl;
+    double pt = (*it)->pt();
+    double eta = (*it)->eta();
+    if (verbose) std::cout << "pt: " << (*it)->pt() << ", eta: " << (*it)->eta() << ", phi: " << (*it)->phi() << ", dxy: " << (*it)->dxy() << ", dxyerr: " << (*it)->dxyError() << ", dz: " << (*it)->dz() << ", dzerr: " << (*it)->dzError() << std::endl;
     const double w = v.trackWeight(*it);
+    //std::cout << "w = " << w << std::endl;
     const bool use = w >= min_weight;
+    //std::cout << "use = " << use << std::endl;
     assert(use);
-    //if (verbose) ("trk #%2i pt %6.3f eta %6.3f phi %6.3f dxy %6.3f dz %6.3f w %5.3f  use? %i\n", int(it-v.tracks_begin()), (*it)->pt(), (*it)->eta(), (*it)->phi(), (*it)->dxy(), (*it)->dz(), w, use);
     if (use)
       result.insert(it->castTo<reco::TrackRef>());
+    //std::cout << "current size of track set being made by vertex_track_set function: " << result.size() << std::endl; 
   }
-
+  //std::cout << "end of vertex_track_set function" <<std::endl;
   return result;
 }
 
@@ -289,16 +325,34 @@ std::pair<bool, Measurement1D> track_dist2d(const reco::TransientTrack & t, cons
 //std::unique_ptr<KalmanVertexFitter> kv_reco;
 
 std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack>& ttks, double chi2=5) {
+  edm::ParameterSetDescription kvr_desc; //Alec added from here
+  kvr_desc.add<double>("maxDistance", 0.01);
+  kvr_desc.add<int>("maxNbrOfIterations", 10);
+  edm::ParameterSet kvr_params;
+  kvr_desc.validate(kvr_params);
+  bool doSmoothing = true;
+  std::unique_ptr<KalmanVertexFitter> kv_reco = std::make_unique<KalmanVertexFitter>(kvr_params, doSmoothing); //Alec added to here
+
+  //if (ttks.size() < 2) std::cout << "vertex no longer has 2 or more tracks kv_reco_dropin: " << std::endl;
   if (ttks.size() < 2)
     return std::vector<TransientVertex>();
   std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-  //std::cout << "fitted vertex chi2/dof: " << v[0].normalisedChiSquared() << std::endl;
+  if (verbose) std::cout << "chi2/ndf of attempted kv_reco_dropin: " << v[0].normalisedChiSquared() << std::endl;
+  //if (v[0].normalisedChiSquared() > chi2) std::cout << "vertex normalized chi2 was >5 kv_reco_dropin: " << std::endl;
   if (v[0].normalisedChiSquared() > chi2) //15
     return std::vector<TransientVertex>();
   return v;
 }
 
 std::vector<TransientVertex> kv_reco_dropin_nocut(std::vector<reco::TransientTrack> & ttks) {
+  edm::ParameterSetDescription kvr_desc; //Alec added from here
+  kvr_desc.add<double>("maxDistance", 0.01);
+  kvr_desc.add<int>("maxNbrOfIterations", 10);
+  edm::ParameterSet kvr_params;
+  kvr_desc.validate(kvr_params);
+  bool doSmoothing = true;
+  std::unique_ptr<KalmanVertexFitter> kv_reco = std::make_unique<KalmanVertexFitter>(kvr_params, doSmoothing); //Alec added to here
+  
   if (ttks.size() < 2)
     return std::vector<TransientVertex>();
   std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
@@ -311,7 +365,7 @@ struct order_seed_vtx_pt {
   };
 };
 
-void finish(reco::Vertex::Point bs_pos, double bssigma_x, double bssigma_y, double bssigma_z, const std::vector<reco::TransientTrack>& seed_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) { //only used if we are revertexing the constructed events
+produce_vertices finish(reco::Vertex::Point bs_pos, double bssigma_x, double bssigma_y, double bssigma_z, const std::vector<reco::TransientTrack>& seed_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) { //only used if we are revertexing the constructed events
   std::unique_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> tracks_missseed (new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> tracks_all(new reco::TrackCollection);
@@ -347,29 +401,57 @@ void finish(reco::Vertex::Point bs_pos, double bssigma_x, double bssigma_y, doub
       ++count_5trk_vertices;
   }
 
-  /*event.put(std::move(vertices));     //FIGURE OUT HOW TO TRANSLATE THIS INTO HISTOGRAM OUTPUTS AS AFUNCTION OF 3D DVV!!!
+  /*event.put(std::move(vertices));
   event.put(std::move(vpeffs));
   event.put(std::move(tracks_seed),       "seed");
   event.put(std::move(tracks_missseed),       "seed");
   event.put(std::move(tracks_all),        "all");
   event.put(std::move(tracks_inVertices), "inVertices");*/
-  std::cout << "check if 0.5: " << bssigma_x << std::endl;
-  std::cout << "pt of first track of first vertex after revertexing: " << seed_tracks[0].track().pt() << std::endl;
+  //std::cout << "check if 0.5: " << bssigma_x << std::endl;
+  //std::cout << "pt of first track of first vertex after revertexing: " << seed_tracks[0].track().pt() << std::endl;
+  if (verbose) std::cout << "final vertex position(s) after revertexing: " << std::endl;
+  //int number_of_vertices = 0;
+  std::vector<int> numbers_of_vertex_tracks;
+  std::vector<reco::Vertex::Point> positions;
+  for (const reco::Vertex& v : *vertices) {
+    //number_of_vertices += 1;
+    numbers_of_vertex_tracks.push_back(v.tracksSize());
+    positions.push_back(v.position());
+    if (verbose) std::cout << v.position() << " with " << v.tracksSize() << " tracks and " << " chi^2=" << v.chi2() <<  " and chi^2/ndf=" << v.normalizedChi2() << std::endl;
+    for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+      reco::TrackRef tk = it->castTo<reco::TrackRef>();
+      if (verbose) std::cout << "pt: " << tk->pt() << ", eta: " << tk->eta() << ", phi: " << tk->phi() << ", dxy: " << tk->dxy() << ", dxyerr: " << tk->dxyError() << ", dz: " << tk->dz() << ", dzerr: " << tk->dzError() << std::endl;
+      //std::cout << "reco::Track parameters output by produce():: chi^2: " << tk->chi2() << ", ndf: " << tk->ndof() << ", reference point: " << tk->vertex() << ", p: (" << tk->px() << "," << tk->py() << "," << tk->pz() << ", charge: " << tk->charge() << ", cov matrix:" << std::endl << tk->covariance()<< std::endl;
+    }
+  }
+  //return v.position();
+  produce_vertices output = {numbers_of_vertex_tracks,positions};
+  return output;
 }
 
-void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, double bssigma_z, std::vector<reco::TransientTrack> seed_tracks, reco::TrackCollection track_collection) { //only used if we are revertexing the constructed events, CHECK IF THESE INPUTS ARE CORRECT WHEN BUGS ARE GONE
+produce_vertices produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, double bssigma_z, std::vector<reco::TransientTrack> seed_tracks, reco::TrackCollection track_collection) { //only used if we are revertexing the constructed events
   const double bsx = bs_pos[0];
   const double bsy = bs_pos[1];
-  const double bsz = bs_pos[2];
+  const double bsz = bs_pos[2];   //do some sanity checks for this later!!!!!!!!!!!
   reco::Vertex::Point bsposition(bsx, bsy, bsz);
   reco::Vertex::Error bscovariance; //reco::Vertex::Error or CovarianceMatrix, either should work
   bscovariance(0, 0) = bssigma_x * bssigma_x; //this information is currently not stored in the minitrees
   bscovariance(1, 1) = bssigma_y * bssigma_y; //we may need to rerun them to properly define
   bscovariance(2, 2) = bssigma_z * bssigma_z; //these variables
   const reco::Vertex fake_bs_vtx(bsposition, bscovariance);
-  std::cout << "beamspot variables reformatted" << std::endl;
+  //std::cout << "beamspot variables reformatted" << std::endl;
 
-  //edm::ESHandle<TransientTrackBuilder> tt_builder;                              //THIS IS USED A LOT LATER FIND OUT WHY!!!!
+  edm::ParameterSetDescription kvr_desc;
+  kvr_desc.add<double>("maxDistance", 0.01);
+  kvr_desc.add<int>("maxNbrOfIterations", 10);
+  edm::ParameterSet kvr_params;
+  kvr_desc.validate(kvr_params);
+  bool doSmoothing = true;
+  //KalmanVertexFitter kv_reco(kvr_params, doSmoothing);
+  //std::unique_ptr<KalmanVertexFitter> kv_reco(kvr_params, doSmoothing);
+  std::unique_ptr<KalmanVertexFitter> kv_reco = std::make_unique<KalmanVertexFitter>(kvr_params, doSmoothing);
+  
+  //edm::ESHandle<TransientTrackBuilder> tt_builder;                              //THIS IS USED LATER IN SHARED JET MITIGATION FIND OUT WHY!!!!
   //setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   //edm::Handle<std::vector<reco::TrackRef>> quality_track_refs;
@@ -380,14 +462,19 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
   //for (int i = 0; i < seed_tracks.size(); ++i) {
     //track_collection.push_back(seed_tracks[i]); //reco::Tracks must fill a reco::TrackCollection
   //}
-  std::map<reco::TrackRef, size_t> seed_track_ref_map;
+  
+  //std::map<reco::TrackRef, size_t> seed_track_ref_map;
+  std::map<unsigned int, size_t> seed_track_ref_map;
   for (int i = 0; i < seed_tracks.size(); ++i) {
     reco::TrackRef tk(&track_collection, i);
-    seed_track_ref_map[tk] = seed_tracks.size() - 1;
-  }  
+    //seed_track_ref_map[tk.key()] = i;
+    seed_track_ref_map[tk.key()] = i;   //double check this!!!!!!!
+    if (verbose) std::cout << "Starting track mapped to " << i << " in seed_track_ref_map with pt " << seed_tracks[seed_track_ref_map.at(tk.key())].track().pt() << std::endl;
+  }
 
   const size_t ntk = seed_tracks.size();
-  std::cout << "track variables defined" << std::endl;
+  //std::cout << "track ndof: " << seed_tracks[0].ndof() << ", track charge: " << seed_tracks[0].charge() << ", track pt: " << seed_tracks[0].track().pt() << std::endl;
+  //std::cout << "track variables defined" << std::endl;
 
   //////////////////////////////////////////////////////////////////////
   // Form seed vertices from all pairs of tracks whose vertex fit
@@ -400,8 +487,8 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
 
   if (ntk == 0) {
     //finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks); //original Vertexer.cc finish() inputs
-    finish(bsposition, bssigma_x, bssigma_y, bssigma_z, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
-    return;
+    return finish(bsposition, bssigma_x, bssigma_y, bssigma_z, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
+    //return;
   }
 
   std::vector<size_t> itks(n_tracks_per_seed_vertex, 0);
@@ -409,13 +496,16 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
     std::vector<reco::TransientTrack> ttks(n_tracks_per_seed_vertex);
     for (int i = 0; i < n_tracks_per_seed_vertex; ++i)
       ttks[i] = seed_tracks[itks[i]];
+    //std::cout << "after first use of the seed_tracks variable" << std::endl;
 
     TransientVertex seed_vertex = kv_reco->vertex(ttks);
-    if (seed_vertex.isValid() && seed_vertex.normalisedChiSquared() < max_seed_vertex_chi2) {
+    if (verbose) std::cout << "Initial vertex pairing" << std::endl;
+    if (seed_vertex.isValid() && seed_vertex.normalisedChiSquared() < max_seed_vertex_chi2) { //Alec added seed_vertex.normalisedChiSquared() > 0 to fix the bug where occasionally vertices with extreme negative chi^2 were taken to be valid vertices
+      if (verbose) std::cout << "vertex # of tracks: " << reco::Vertex(seed_vertex).tracksSize() << ", position: " << reco::Vertex(seed_vertex).position() << std::endl;
       vertices->push_back(reco::Vertex(seed_vertex));
     }
+    //std::cout << "after try_seed_vertex" << std::endl;    
   };
-  std::cout << "after first use of the seed_tracks variable" << std::endl;
   
   // ha
   for (size_t itk = 0; itk < ntk; ++itk) {
@@ -467,7 +557,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
     //order vertices by pt 
     std::sort(vertices->begin(), vertices->end(), order_seed_vtx_pt());
   }
-  std::cout << "before start of vertex shared track mitigation" << std::endl;
+  //std::cout << "before start of vertex shared track mitigation" << std::endl;
   
   //////////////////////////////////////////////////////////////////////
   // Take care of track sharing. If a track is in two vertices, and
@@ -481,10 +571,13 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
   std::vector<reco::Vertex>::iterator v[2];
   size_t ivtx[2];  
 
+  //std::cout << "Before deciding to merge, refit, or erase" << std::endl;
   for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
     track_set tracks[2];
+    //std::cout << "after defining track_set" << std::endl;
     ivtx[0] = v[0] - vertices->begin();
     tracks[0] = vertex_track_set(*v[0]);
+    if (verbose) std::cout << "after defining tracks[0]" << std::endl;
 
     if (tracks[0].size() < 2) {
       v[0] = vertices->erase(v[0]) - 1;
@@ -492,6 +585,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
       continue;
     }
 
+    //std::cout << "before defining bools for merge and fit" << std::endl;
     bool duplicate = false;
     bool merge = false;
     bool refit = false;
@@ -502,6 +596,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
     for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
       ivtx[1] = v[1] - vertices->begin();
       tracks[1] = vertex_track_set(*v[1]);
+      if (verbose) std::cout << "after defining tracks[1]" << std::endl;
 
       if (tracks[1].size() < 2) {
         v[1] = vertices->erase(v[1]) - 1;
@@ -509,7 +604,9 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
         continue;
       }
 
+      //std::cout << "before deciding if just a duplicate vertices" << std::endl;
       if (is_track_subset(tracks[0], tracks[1])) {
+	//std::cout << "duplicate vertices!" << std::endl;
         duplicate = true;
         break;
       }
@@ -531,6 +628,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
       else
         vpeff = 0;
 
+      //std::cout << "before defining shared tracks" << std::endl;
       reco::TrackRefVector shared_tracks;
       for (auto tk : tracks[0])
         if (tracks[1].count(tk) > 0)
@@ -548,15 +646,22 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
         else
           refit = true;
 
+	//std::cout << "before looping over shared tracks" << std::endl;
         for (auto tk : shared_tracks) {
-          const reco::TransientTrack& ttk = seed_tracks[seed_track_ref_map[tk]];
+          const reco::TransientTrack& ttk = seed_tracks[seed_track_ref_map.at(tk.key())]; //ALEC CHANGED THE VERTEXING ALGORITHM HERE!!!!! was const reco::TransientTrack& ttk = seed_tracks[seed_track_ref_map[tk]];
           std::pair<bool, Measurement1D> t_dist_0 = track_dist(ttk, *v[0]);
           std::pair<bool, Measurement1D> t_dist_1 = track_dist(ttk, *v[1]);
 
           t_dist_0.first = t_dist_0.first && (t_dist_0.second.value() < max_track_vertex_dist || t_dist_0.second.significance() < max_track_vertex_sig);
           t_dist_1.first = t_dist_1.first && (t_dist_1.second.value() < max_track_vertex_dist || t_dist_1.second.significance() < max_track_vertex_sig);
+	  if (verbose) std::cout << "Fit of track to vertex 0 passed?: " << t_dist_0.first << ", dist: " << t_dist_0.second.value() << ", significance: " << t_dist_0.second.significance() << std::endl;
+	  if (verbose) std::cout << "Fit of track to vertex 1 passed?: " << t_dist_1.first << ", dist: " << t_dist_1.second.value() << ", significance: " << t_dist_1.second.significance() << std::endl;
           bool remove_from_0 = !t_dist_0.first;
           bool remove_from_1 = !t_dist_1.first;
+	  if (verbose && remove_from_0 && remove_from_1) std::cout << "Remove track from both vertice since dist sig is " << t_dist_0.second.significance() << " for v[0] and " << t_dist_1.second.significance() << " for v[1]" << std::endl;
+	  else if (verbose && remove_from_0) std::cout << "remove from first vertex because track failed to fit" << std::endl;
+	  else if (verbose && remove_from_1) std::cout << "remove from second vertex because track failed to fit" << std::endl;
+	  //std::cout << "before deciding which vertex the track does not belong to" <<std::endl;
           if (t_dist_0.second.significance() < min_track_vertex_sig_to_remove && t_dist_1.second.significance() < min_track_vertex_sig_to_remove) {
             if (tracks[0].size() > tracks[1].size())
               remove_from_1 = true;
@@ -568,8 +673,22 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
           else
             remove_from_0 = true;
 
+	  if (verbose && t_dist_0.second.significance() < min_track_vertex_sig_to_remove && t_dist_1.second.significance() < min_track_vertex_sig_to_remove) {
+            if (tracks[0].size() > tracks[1].size())
+	      std::cout << "remove from second vertex set to true since both vertices plausible but first has more tracks" << std::endl;
+            else
+              std::cout << "remove from first vertex set to true since both vertices plausible but second has more or equal # of tracks" << std::endl;
+          }
+	  else if (verbose && t_dist_0.second.significance() < t_dist_1.second.significance())
+            std::cout << "remove from second vertex set to true since dist significance less for first" << std::endl;
+	  else if (verbose)
+            std::cout << "remove from first vertex set to true since dist significance less for second" << std::endl;
+
           if (remove_from_0) tracks_to_remove_in_refit[0].insert(tk);
           if (remove_from_1) tracks_to_remove_in_refit[1].insert(tk);
+
+	  if (verbose && remove_from_0) std::cout << "Track with pt " << ttk.track().pt() << " to be removed from the first vertex" << std::endl;
+          if (verbose && remove_from_1) std::cout << "Track with pt " << ttk.track().pt() << " to be removed from the second vertex" << std::endl;
 
           if (remove_one_track_at_a_time) {
             break;
@@ -578,24 +697,40 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
         break;
       }
     }
+    //std::cout << "After deciding merge, refit, or erase" << std::endl;
 
+    if (verbose) std::cout << "tracks[0] size: " << tracks[0].size() << ", tracks[1] size: " << tracks[1].size() << std::endl;
+    if (verbose) std::cout << "duplicate: " << duplicate << ", merge: " << merge << ", refit: " << refit << std::endl;
     if (duplicate) {
       vertices->erase(v[1]);
     }
     else if (merge) {
+      //std::cout << "attempting to merge vertices" << std::endl;
       track_set tracks_to_fit;
       for (int i = 0; i < 2; ++i)
         for (auto tk : tracks[i])
           tracks_to_fit.insert(tk);
 
+      //for (const auto& test : tracks_to_fit)      //This prints incorrect values for unknown reasons, I don't think it matters but figure out later!!!
+      //  std::cout << "pt of track added to tracks_to_fit for merge step: " << test->pt() << std::endl;
+
       std::vector<reco::TransientTrack> ttks;
       for (auto tk : tracks_to_fit)
-        ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
+        ttks.push_back(seed_tracks[seed_track_ref_map.at(tk.key())]); //ALEC CHANGED THE VERTEXING ALGORITHM HERE!!!!! was ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
+
+      if (verbose) std::cout << "size of track vector to be merged into 1 vertex: " << ttks.size() << std::endl;
+      for (int test = 0; test < ttks.size(); ++test) {
+        if (verbose) std::cout << "pt of track " << test << " in track vector to be merged into 1 vertex: " << ttks[test].track().pt() << std::endl;
+      }
 
       reco::VertexCollection new_vertices;
 
+      //std::cout << "before merge revertexing" << std::endl;
       for (const TransientVertex& tv : kv_reco_dropin(ttks))
         new_vertices.push_back(reco::Vertex(tv));
+
+      //std::cout << "after merge revertexing, new_vertices.size() = " << new_vertices.size() << std::endl;
+      //std::cout << vertex_track_set(new_vertices[0], 0).size() << " should equal " << tracks_to_fit.size() << ", otherwise refit" << std::endl;
 
       // If we got two new vertices, maybe it took A B and A C D and made a better one from B C D, and left a broken one A B! C! D!.
       // If we get one that is truly the merger of the track lists, great. If it is just something like A B , A C -> A B C!, or we get nothing, then default to arbitration.
@@ -610,6 +745,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
 
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
+	//std::cout << "vertices merged!" << std::endl;
       }
       else {
         refit = true;
@@ -617,6 +753,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
     }
 
     if (refit) {
+      //std::cout << "attempting to refit vertices" << std::endl;
       bool erase[2] = { false };
       reco::Vertex vsave[2] = { *v[0], *v[1] };
 
@@ -627,15 +764,21 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
         std::vector<reco::TransientTrack> ttks;
         for (auto tk : tracks[i])
           if (tracks_to_remove_in_refit[i].count(tk) == 0)
-            ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
+            ttks.push_back(seed_tracks[seed_track_ref_map.at(tk.key())]); ////ALEC CHANGED THE VERTEXING ALGORITHM HERE!!!!! was ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
 
+	if (verbose) std::cout << "# of tracks to be input to kv_reco_dropin in refit step: " << ttks.size() << std::endl;
+	if (verbose && ttks.size() == 1) std::cout << "only one input track with pt: " << ttks[0].track().pt();
         reco::VertexCollection new_vertices;
         for (const TransientVertex& tv : kv_reco_dropin(ttks))
           new_vertices.push_back(reco::Vertex(tv));
+	if (verbose) std::cout << "new_vertices size in refit step: " << new_vertices.size() << std::endl;
         if (new_vertices.size() == 1)
           * v[i] = new_vertices[0];
         else
           erase[i] = true;
+
+	//if (new_vertices.size() == 1) std::cout << "vertex refit!" << std::endl;
+	//else std::cout << "vertex erased!" << std::endl;
       }
 
       if (vpeff && (erase[0] || erase[1]))
@@ -649,10 +792,12 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
     if (duplicate || merge || refit) {
       v[0] = vertices->begin() - 1;  // -1 because about to ++sv
       ++n_resets;
+      if (verbose) std::cout << "resetting looping through merge, refit, erase because vertices were merged, refit, or erased." << std::endl;
       //if (n_resets == 3000)
       //  throw "I'm dumb";
     }
   }
+  //std::cout << "End of merge, refit, or erase code" << std::endl;
 
   // Debugging plots for track refinement and noshare histos: 
   // These steps are sequential within the loop, but nested in their own `if` statements below.
@@ -988,20 +1133,23 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
           double phi1 = atan2(v1y, v1x);
 
           if (fabs(reco::deltaPhi(phi0, phi1)) < 0.5 && v_dist.value() < 0.0300 && dBV0 > 0.0100 && dBV1 > 0.0100) {
+	    if (verbose) std::cout << "Implementing split vertex mitigation!" << std::endl;
             track_set tracks_to_fit;
             for (int i = 0; i < 2; ++i)
               for (auto tk : tracks[i])
                 tracks_to_fit.insert(tk);
+	    for (const auto& test : tracks_to_fit)
+	      if (verbose) std::cout << "Track added to tracks_to_fit for split vertex step: " << test->pt() << std::endl;
             std::vector<reco::TransientTrack> ttks;
             for (auto tk : tracks_to_fit)
-              ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
+              ttks.push_back(seed_tracks[seed_track_ref_map.at(tk.key())]); //ALEC CHANGED THE VERTEXING ALGORITHM HERE!!!!! was ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
 
             if (investigate_merged_vertices) {
               std::vector<TransientVertex> tv(1, kv_reco->vertex(ttks));
               potential_merged_vertices.push_back(reco::Vertex(tv[0]));
               //std::cout << "ntrack in potental merged: " << potential_merged_vertices.back().nTracks() << std::endl;
             }
-
+	    if (verbose) std::cout << "reco vertices in split vertex mitigation" << std::endl;
             reco::VertexCollection merged_vertices;
             for (const TransientVertex& tv : kv_reco_dropin(ttks)) {
               merged_vertices.push_back(reco::Vertex(tv));
@@ -1221,7 +1369,7 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
       fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::aftersharedjets);
       h_output_aftersharedjets_n_onetracks->Fill(n_output_aftersharedjets_onetracks);
     }
-    }*/ //ADD THIS BACK IN FOR SHARED JET MITIGATION!!!!!!
+  }*/ //ADD THIS BACK IN FOR SHARED JET MITIGATION!!!!!!
 																					  
   // track attachment
   /* Alec not sure what this is, but it is not used in Vertexer_cfi.py
@@ -1289,9 +1437,8 @@ void produce(std::vector<double> bs_pos, double bssigma_x, double bssigma_y, dou
   }
   */
   //finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks); //original Vertexer.cc inputs
-  finish(bsposition, bssigma_x, bssigma_y, bssigma_z, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
+  return finish(bsposition, bssigma_x, bssigma_y, bssigma_z, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
-
 
 
 //constructs the background template
@@ -1308,42 +1455,23 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   const char* file_path_2018;
   if (p.is_mc()) {
     if (ulversion == "ULV30BvetoLHTm") {
-      //file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
-      //file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm"; //Shaun's MiniTrees
-      //file_path_20161 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
-      //file_path_20162 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
-      //file_path_2017 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
-      //file_path_2018 = "/uscms_data/d3/shogan/crab_dirs/MiniTree_FixWP_ULV11Bm";
-      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
-      //file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
-      //file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
-      //file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree__tagTestFixTrigThresholdsBvetoLHTm";
-      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
     }
     else { 
-      //file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
-      //file_path_20161 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_20161correctionsLepm_noef"; //20161
-      //file_path_20162 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_20162correctionsLepm_noef"; //20162
-      //file_path_2017 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_Lepton_SF_correctionsLepm_noef"; //2017 //Alec's MiniTrees
-      //file_path_2018 = "/uscms/home/alecduqu/crab_dirs/MiniTree_LepIPCut_eventweights_Lepton_SF_2018correctionsLepm_noef"; //2018
-      //file_path_20161 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_20161correctionsLepm_noef/"; //20161 moved to eos
-      //file_path_20162 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_20162correctionsLepm_noef/"; //20162 moved to eos
-      //file_path_2017 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_correctionsLepm_noef/"; //2017 moved to eos
-      //file_path_2018 = "root://cmsxrootd.fnal.gov//store/group/lpclonglived/alecduqu/MiniTree_LepIPCut_Lepton_SF_2018correctionsLepm_noef/"; //2018 moved to eos
-      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
-      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
-      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
-      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm";
     }
   } else if (p.only_20pc()) {
     if (ulversion == "ULV30BvetoLHTm") {
-      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
-      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001BvetoLHTm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm";
     }
     else { 
       file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
@@ -1351,12 +1479,51 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
       file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag001Lepm";
     }
-  } else {
+  } else if (vertices_w_5tracks) {
     if (ulversion == "ULV30BvetoLHTm") {
-      file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx";
+      file_path_20162 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx";
+      file_path_2017 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx";
+      file_path_2018 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx";
+      //USE THESE IF WANT INVERTED SUMPT AND M5 CUTS 
+      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_20162 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_2017 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_2018 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+    }
+    else {
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm4_unblind_5trk_1vtx";
+      file_path_20162 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm4_unblind_5trk_1vtx";
+      file_path_2017 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm4_unblind_5trk_1vtx";
+      file_path_2018 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm4_unblind_5trk_1vtx";
+      //USE THESE IF WANT INVERTED SUMPT AND M5 CUTS
+      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_20162 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_2017 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+      //file_path_2018 ="/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt";
+    }
+  } else { //These only have 3 and 4-track vertices for now, no 5-track
+    if (ulversion == "ULV30BvetoLHTm") {
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm2_100pc_3and4trk";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm2_100pc_3and4trk";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm2_100pc_3and4trk";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm2_100pc_3and4trk";
+      //USE THESE IF WANT INVERTED SUMPT AND M5 CUTS
+      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004BvetoLHTm3_100pc_3and4trk_inverted_mass_and_sumpt";
     }
     else { 
-      file_path = "/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm";
+      file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm2_100pc_3and4trk";
+      file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm2_100pc_3and4trk";
+      file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm2_100pc_3and4trk";
+      file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm2_100pc_3and4trk";
+      //USE THESE IF WANT INVERTED SUMPT AND M5 CUTS
+      //file_path_20161 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_20162 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_2017 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt";
+      //file_path_2018 = "/uscms/home/joeyr/crabdirs/MiniTree_tag004Lepm3_100pc_3and4trk_inverted_mass_and_sumpt";
     }
   }
 
@@ -1953,18 +2120,47 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       }
     }
     else { //ADDING 20pc SAMPLES HERE!!!!
-      if (use_2017) {
-	//samples.push_back("JetHT2017B");                      weights.push_back(1);
-	//samples.push_back("JetHT2017C");                      weights.push_back(1);
-	//samples.push_back("JetHT2017D");                      weights.push_back(1);
-	//samples.push_back("JetHT2017E");                      weights.push_back(1);
-	//samples.push_back("JetHT2017F");                      weights.push_back(1);
+      if (use_20161) {
+	samples.push_back("BTagCSV20161B");                      weights.push_back(1);
+	samples.push_back("BTagCSV20161C");                      weights.push_back(1);
+	samples.push_back("BTagCSV20161D");                      weights.push_back(1);
+	samples.push_back("BTagCSV20161E");                      weights.push_back(1);
+	samples.push_back("BTagCSV20161F");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20161B");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20161C");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20161D");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20161E");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20161F");                      weights.push_back(1);
       }
-      if (use_2018) {  
-	//samples.push_back("JetHT2018A");                      weights.push_back(1);
-	//samples.push_back("JetHT2018B");                      weights.push_back(1);
-	//samples.push_back("JetHT2018C");                      weights.push_back(1);
-	//samples.push_back("JetHT2018D");                      weights.push_back(1);
+      if (use_20162) {
+	samples.push_back("BTagCSV20162F");                      weights.push_back(1);
+	samples.push_back("BTagCSV20162G");                      weights.push_back(1);
+	samples.push_back("BTagCSV20162H");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20162F");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20162G");                      weights.push_back(1);
+	samples.push_back("DisplacedJet20162H");                      weights.push_back(1);
+      }
+      if (use_2017) {
+	samples.push_back("BTagCSV2017B");                      weights.push_back(1);
+	samples.push_back("BTagCSV2017C");                      weights.push_back(1);
+	samples.push_back("BTagCSV2017D");                      weights.push_back(1);
+	samples.push_back("BTagCSV2017E");                      weights.push_back(1);
+	samples.push_back("BTagCSV2017F");                      weights.push_back(1);
+	//samples.push_back("DisplacedJet2017B");                      weights.push_back(1); //does not exist
+	samples.push_back("DisplacedJet2017C");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2017D");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2017E");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2017F");                      weights.push_back(1);
+      }
+      if (use_2018) {
+	samples.push_back("DisplacedJet2018A");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2018B");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2018C");                      weights.push_back(1);
+	samples.push_back("DisplacedJet2018D");                      weights.push_back(1);
+	samples.push_back("JetHT2018A");                      weights.push_back(1);
+	samples.push_back("JetHT2018B");                      weights.push_back(1);
+	samples.push_back("JetHT2018C");                      weights.push_back(1);
+	samples.push_back("JetHT2018D");                      weights.push_back(1);
       }
     }
 
@@ -2193,50 +2389,99 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       }  
     }
     else {
-      if (use_20161) {
-	//samples.push_back("Lepton_data_20161_20pc");   weights.push_back(1);
-	samples.push_back("SingleMuon20161B_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20161C_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20161D_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20161E_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20161F_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20161B_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20161C_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20161D_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20161E_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20161F_20pc");    weights.push_back(1);
+      if (p.only_20pc()) {
+	if (use_20161) {
+	  //samples.push_back("Lepton_data_20161_20pc");   weights.push_back(1);
+	  samples.push_back("SingleMuon20161B_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20161C_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20161D_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20161E_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20161F_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20161B_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20161C_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20161D_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20161E_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20161F_20pc");    weights.push_back(1);
+	}
+	if (use_20162) {
+	  //samples.push_back("Lepton_data_20162_20pc");   weights.push_back(1);
+	  samples.push_back("SingleMuon20162F_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20162G_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon20162H_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20162F_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20162G_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron20162H_20pc");    weights.push_back(1);
+	}
+	if (use_2017) {
+	  //samples.push_back("Lepton_data_2017_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron2017B_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron2017D_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron2017F_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2017D_20pc");        weights.push_back(1);
+	  samples.push_back("SingleMuon2017F_20pc");        weights.push_back(1);
+	  samples.push_back("SingleElectron2017C_20pc");    weights.push_back(1);
+	  samples.push_back("SingleElectron2017E_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2017C_20pc");        weights.push_back(1);
+	  samples.push_back("SingleMuon2017E_20pc");        weights.push_back(1);
+	}
+	if (use_2018) {
+	  //samples.push_back("Lepton_data_2018_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2018A_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2018B_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2018C_20pc");    weights.push_back(1);
+	  samples.push_back("SingleMuon2018D_20pc");    weights.push_back(1);
+	  samples.push_back("EGamma2018A_20pc");    weights.push_back(1);
+	  samples.push_back("EGamma2018B_20pc");    weights.push_back(1);
+	  samples.push_back("EGamma2018C_20pc");    weights.push_back(1);
+	  samples.push_back("EGamma2018D_20pc");    weights.push_back(1);
+	}
       }
-      if (use_20162) {
-	//samples.push_back("Lepton_data_20162_20pc");   weights.push_back(1);
-	samples.push_back("SingleMuon20162F_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20162G_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon20162H_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20162F_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20162G_20pc");    weights.push_back(1);
-        samples.push_back("SingleElectron20162H_20pc");    weights.push_back(1);
-      }
-      if (use_2017) {
-	//samples.push_back("Lepton_data_2017_20pc");    weights.push_back(1);
-	samples.push_back("SingleElectron2017B_20pc");    weights.push_back(1);
-	samples.push_back("SingleElectron2017D_20pc");    weights.push_back(1);
-	samples.push_back("SingleElectron2017F_20pc");    weights.push_back(1);
-	samples.push_back("SingleMuon2017D_20pc");        weights.push_back(1);
-	samples.push_back("SingleMuon2017F_20pc");        weights.push_back(1);
-	samples.push_back("SingleElectron2017C_20pc");    weights.push_back(1);
-	samples.push_back("SingleElectron2017E_20pc");    weights.push_back(1);
-	samples.push_back("SingleMuon2017C_20pc");        weights.push_back(1);
-	samples.push_back("SingleMuon2017E_20pc");        weights.push_back(1);
-      }
-      if (use_2018) {
-	//samples.push_back("Lepton_data_2018_20pc");    weights.push_back(1);
-	samples.push_back("SingleMuon2018A_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon2018B_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon2018C_20pc");    weights.push_back(1);
-        samples.push_back("SingleMuon2018D_20pc");    weights.push_back(1);
-        samples.push_back("EGamma2018A_20pc");    weights.push_back(1);
-        samples.push_back("EGamma2018B_20pc");    weights.push_back(1);
-        samples.push_back("EGamma2018C_20pc");    weights.push_back(1);
-        samples.push_back("EGamma2018D_20pc");    weights.push_back(1);
+      else {
+	if (use_20161) {
+          //samples.push_back("Lepton_data_20161");   weights.push_back(1);
+          samples.push_back("SingleMuon20161B");    weights.push_back(1);
+          samples.push_back("SingleMuon20161C");    weights.push_back(1);
+          samples.push_back("SingleMuon20161D");    weights.push_back(1);
+          samples.push_back("SingleMuon20161E");    weights.push_back(1);
+          samples.push_back("SingleMuon20161F");    weights.push_back(1);
+          samples.push_back("SingleElectron20161B");    weights.push_back(1);
+          samples.push_back("SingleElectron20161C");    weights.push_back(1);
+          samples.push_back("SingleElectron20161D");    weights.push_back(1);
+          samples.push_back("SingleElectron20161E");    weights.push_back(1);
+          samples.push_back("SingleElectron20161F");    weights.push_back(1);
+        }
+	if (use_20162) {
+          //samples.push_back("Lepton_data_20162");   weights.push_back(1);
+          samples.push_back("SingleMuon20162F");    weights.push_back(1);
+          samples.push_back("SingleMuon20162G");    weights.push_back(1);
+          samples.push_back("SingleMuon20162H");    weights.push_back(1);
+          samples.push_back("SingleElectron20162F");    weights.push_back(1);
+          samples.push_back("SingleElectron20162G");    weights.push_back(1);
+          samples.push_back("SingleElectron20162H");    weights.push_back(1);
+        }
+	if (use_2017) {
+          //samples.push_back("Lepton_data_2017");    weights.push_back(1);
+          samples.push_back("SingleElectron2017B");    weights.push_back(1);
+          samples.push_back("SingleElectron2017D");    weights.push_back(1);
+          samples.push_back("SingleElectron2017F");    weights.push_back(1);
+          samples.push_back("SingleMuon2017D");        weights.push_back(1);
+          samples.push_back("SingleMuon2017F");        weights.push_back(1);
+          samples.push_back("SingleElectron2017C");    weights.push_back(1);
+          samples.push_back("SingleElectron2017E");    weights.push_back(1);
+          samples.push_back("SingleMuon2017C");        weights.push_back(1);
+          samples.push_back("SingleMuon2017E");        weights.push_back(1);
+        }
+	if (use_2018) {
+          //samples.push_back("Lepton_data_2018");    weights.push_back(1);
+          samples.push_back("SingleMuon2018A");    weights.push_back(1);
+          samples.push_back("SingleMuon2018B");    weights.push_back(1);
+          samples.push_back("SingleMuon2018C");    weights.push_back(1);
+          samples.push_back("SingleMuon2018D");    weights.push_back(1);
+          samples.push_back("EGamma2018A");    weights.push_back(1);
+          samples.push_back("EGamma2018B");    weights.push_back(1);
+          samples.push_back("EGamma2018C");    weights.push_back(1);
+          samples.push_back("EGamma2018D");    weights.push_back(1);
+        }
       }
     }
 
@@ -2287,9 +2532,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   }
   //TString eff_file_name_2d = TString::Format("/afs/cern.ch/user/p/pekotamn/crabdirs/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
   //TString eff_file_name_2d = TString::Format("/uscms/home/alecduqu/mfv_ScaleFactors/src/JMTucker/MFVNeutralino/test/One2Two/vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
-  TString eff_file_name_2d = TString::Format("./vpeffsd2d%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
-  TString eff_file_name_3d = TString::Format("./vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
-  TString jet_angle_fname = TString::Format("background_lw_2017.root"); //This is not ultimately used anywhere
+  //TString eff_file_name_2d = TString::Format("./vpeffsd2d%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  //TString eff_file_name_3d = TString::Format("./vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
+  //TString jet_angle_fname = TString::Format("background_lw_2017.root"); //This is not ultimately used anywhere
 
   const char* eff_hist = "maxtk3";
   if (p.vary_eff()) {
@@ -2313,13 +2558,15 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1D* h_1v_w = new TH1D("h_1v__w", ";event weight;events", 100, 0, 10); //Alec added
   TH2D* h_1v_xy  = new TH2D("h_1v_xy", "only-one-vertex events;x0 (cm);y0 (cm)", 250, -1.0, 1.0, 250, -1.0, 1.0);
   TH1D* h_1v_z = new TH1D("h_1v_z", ";z (cm);events", 250, -1, 1); //Alec added
-  TH1D* h_1v_dz = new TH1D("h_1v_dz", ";z distance from pv to sv (cm);events", 250, -1, 1); //Alec added
+  TH1D* h_1v_dz = new TH1D("h_1v_dz", "only-one-vertex events;z distance from pv to sv (cm);events", 1000, -10, 10); //Alec added
+  TH1F* h_1v_dpvsv = new TH1F("h_1v_dpvsv", "only-one-vertex events;3D distance from pv to sv (cm);events", 500, 0, 10); //Alec added 
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1000, 0, 2.0);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1000, 0, 2.0);
   TH2D* h_1v_dbv_dz = new TH2D("h_1v_dbv_dz", "only-one-vertex events;d_{BV} (cm); d_{z} (cm)", 1000, 0, 2.0, 1000, 0, 2.0);
   TH2D* h_1v_dbv_bs2derr = new TH2D("h_1v_dbv_bs2derr", "only-one-vertex events;d_{BV} (cm); #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 2.0, 100, 0, 0.005); //Alec added
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1D* h_1v_npu = new TH1D("h_1v_npu", "only-one-vertex events;# PU interactions;events", 100, 0, 100);
+  TH1D* h_1v_npv = new TH1D("h_1v_npv", "only-one-vertex events;# reconstructed pv;events", 100, 0, 100);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
   TH1F* h_1v_ht40 = new TH1F("h_1v_ht40", "only-one-vertex events;H_{T} of jets with p_{T} > 40 GeV;events", 200, 0, 5000);
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
@@ -2337,9 +2584,12 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
-  //checkpoint
+  TH1D* h_2v_npv = new TH1D("h_2v_npv", "two-vertex events;# reconstructed pv;events", 100, 0, 100);
+  
   std::vector<double>  dbv_value_vector; //background template construction npu correction: define vectors for making a list of dbv values and errors
-  std::vector<double>  z_value_vector;
+  std::vector<double> x_value_vector;
+  std::vector<double> y_value_vector;
+  std::vector<double> z_value_vector;
   //std::vector<double>  dbv_value_vector_npult20;
   //std::vector<double>  dbv_value_vector_npugt20lt30;
   //std::vector<double>  dbv_value_vector_npugt30lt40;
@@ -2360,6 +2610,24 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   std::vector<double>  dbv_value_vector_nobtag_npugt30lt40;
   std::vector<double>  dbv_value_vector_nobtag_npugt40;
 
+  std::vector<double>  x_value_vector_btag_npult20;
+  std::vector<double>  x_value_vector_btag_npugt20lt30;
+  std::vector<double>  x_value_vector_btag_npugt30lt40;
+  std::vector<double>  x_value_vector_btag_npugt40;
+  std::vector<double>  x_value_vector_nobtag_npult20;
+  std::vector<double>  x_value_vector_nobtag_npugt20lt30;
+  std::vector<double>  x_value_vector_nobtag_npugt30lt40;
+  std::vector<double>  x_value_vector_nobtag_npugt40;
+
+  std::vector<double>  y_value_vector_btag_npult20;
+  std::vector<double>  y_value_vector_btag_npugt20lt30;
+  std::vector<double>  y_value_vector_btag_npugt30lt40;
+  std::vector<double>  y_value_vector_btag_npugt40;
+  std::vector<double>  y_value_vector_nobtag_npult20;
+  std::vector<double>  y_value_vector_nobtag_npugt20lt30;
+  std::vector<double>  y_value_vector_nobtag_npugt30lt40;
+  std::vector<double>  y_value_vector_nobtag_npugt40;
+  
   std::vector<double>  z_value_vector_btag_npult20;
   std::vector<double>  z_value_vector_btag_npugt20lt30;
   std::vector<double>  z_value_vector_btag_npugt30lt40;
@@ -2378,11 +2646,107 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   std::vector<double>  dbv_weight_vector_nobtag_npugt30lt40;
   std::vector<double>  dbv_weight_vector_nobtag_npugt40;
 
+  std::vector<double> bsx_vector;
+  std::vector<double> bsx_vector_btag_npult20;
+  std::vector<double> bsx_vector_btag_npugt20lt30;
+  std::vector<double> bsx_vector_btag_npugt30lt40;
+  std::vector<double> bsx_vector_btag_npugt40;
+  std::vector<double> bsx_vector_nobtag_npult20;
+  std::vector<double> bsx_vector_nobtag_npugt20lt30;
+  std::vector<double> bsx_vector_nobtag_npugt30lt40;
+  std::vector<double> bsx_vector_nobtag_npugt40;
+  
+  std::vector<double> bsy_vector;
+  std::vector<double> bsy_vector_btag_npult20;
+  std::vector<double> bsy_vector_btag_npugt20lt30;
+  std::vector<double> bsy_vector_btag_npugt30lt40;
+  std::vector<double> bsy_vector_btag_npugt40;
+  std::vector<double> bsy_vector_nobtag_npult20;
+  std::vector<double> bsy_vector_nobtag_npugt20lt30;
+  std::vector<double> bsy_vector_nobtag_npugt30lt40;
+  std::vector<double> bsy_vector_nobtag_npugt40;
+  
+  std::vector<double> bsz_vector;
+  std::vector<double> bsz_vector_btag_npult20;
+  std::vector<double> bsz_vector_btag_npugt20lt30;
+  std::vector<double> bsz_vector_btag_npugt30lt40;
+  std::vector<double> bsz_vector_btag_npugt40;
+  std::vector<double> bsz_vector_nobtag_npult20;
+  std::vector<double> bsz_vector_nobtag_npugt20lt30;
+  std::vector<double> bsz_vector_nobtag_npugt30lt40;
+  std::vector<double> bsz_vector_nobtag_npugt40;
+
+  std::vector<double> pvx_vector;
+  std::vector<double> pvx_vector_btag_npult20;
+  std::vector<double> pvx_vector_btag_npugt20lt30;
+  std::vector<double> pvx_vector_btag_npugt30lt40;
+  std::vector<double> pvx_vector_btag_npugt40;
+  std::vector<double> pvx_vector_nobtag_npult20;
+  std::vector<double> pvx_vector_nobtag_npugt20lt30;
+  std::vector<double> pvx_vector_nobtag_npugt30lt40;
+  std::vector<double> pvx_vector_nobtag_npugt40;
+
+  std::vector<double> pvy_vector;
+  std::vector<double> pvy_vector_btag_npult20;
+  std::vector<double> pvy_vector_btag_npugt20lt30;
+  std::vector<double> pvy_vector_btag_npugt30lt40;
+  std::vector<double> pvy_vector_btag_npugt40;
+  std::vector<double> pvy_vector_nobtag_npult20;
+  std::vector<double> pvy_vector_nobtag_npugt20lt30;
+  std::vector<double> pvy_vector_nobtag_npugt30lt40;
+  std::vector<double> pvy_vector_nobtag_npugt40;
+
+  std::vector<double> pvz_vector;
+  std::vector<double> pvz_vector_btag_npult20;
+  std::vector<double> pvz_vector_btag_npugt20lt30;
+  std::vector<double> pvz_vector_btag_npugt30lt40;
+  std::vector<double> pvz_vector_btag_npugt40;
+  std::vector<double> pvz_vector_nobtag_npult20;
+  std::vector<double> pvz_vector_nobtag_npugt20lt30;
+  std::vector<double> pvz_vector_nobtag_npugt30lt40;
+  std::vector<double> pvz_vector_nobtag_npugt40;
+  
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_btag_npult20;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_btag_npugt20lt30;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_btag_npugt30lt40;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_btag_npugt40;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_nobtag_npult20;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_nobtag_npugt20lt30;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_nobtag_npugt30lt40;
+  std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector_nobtag_npugt40;
+  
+  std::vector<reco::TrackCollection> vertex_track_collection_vector;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_btag_npult20;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_btag_npugt20lt30;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_btag_npugt30lt40;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_btag_npugt40;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_nobtag_npult20;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_nobtag_npugt20lt30;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_nobtag_npugt30lt40;
+  std::vector<reco::TrackCollection> vertex_track_collection_vector_nobtag_npugt40;
+
+  std::vector<bool> pass_pvsvdz_cut_vector;
+  std::vector<bool> pass_pvsvdz_cutz_vector_btag_npult20;
+  std::vector<bool> pass_pvsvdz_cut_vector_btag_npugt20lt30;
+  std::vector<bool> pass_pvsvdz_cut_vector_btag_npugt30lt40;
+  std::vector<bool> pass_pvsvdz_cut_vector_btag_npugt40;
+  std::vector<bool> pass_pvsvdz_cut_vector_nobtag_npult20;
+  std::vector<bool> pass_pvsvdz_cut_vector_nobtag_npugt20lt30;
+  std::vector<bool> pass_pvsvdz_cut_vector_nobtag_npugt30lt40;
+  std::vector<bool> pass_pvsvdz_cut_vector_nobtag_npugt40;
+
+  //std::vector<double> bsx_vector;
+  //std::vector<double> bsy_vector;
+  //std::vector<double> bsz_vector;
+  //std::vector<std::vector<reco::TransientTrack>> vertex_tracks_vector;
+  //std::vector<reco::TrackCollection> vertex_track_collection_vector;
+
   std::vector<std::vector<reco::TransientTrack>> reco_vertices;
   std::vector<int> reco_vertices_ntk;
-  double bssigma_x = 0.5; //FIX THESE LATER                                                                                                                                  
-  double bssigma_y = 0.5;
-  double bssigma_z = 0.5;
+  double bssigma_x = 0.00000005; //FIX THESE LATER                                                                                                                                  
+  double bssigma_y = 0.00000005;
+  double bssigma_z = 0.000005;
 
   //loops over each sample defined above 
   int ns = (int)samples.size();
@@ -2431,7 +2795,6 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     } 
     //std::cout << "b discrimination value: " << bdisc_cut_value << std::endl;
     mfv::read_from_tree(t, nt);
-    //std::cout << "read from minitree" << std::endl;
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
@@ -2439,11 +2802,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       //if (nt.rescale_bs2derr1 > 0.0035) continue; //Alec added
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
       //if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value,-1) < 1)) continue; //nbtags calls CSV we want DeepJet, see MiniNtuple.h
-      if ((p.btags() == 0 && nt.nbtags_old(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags_old(bdisc_cut_value,-1) < 1)) continue; //nbtags_old correctly calls DeepJet
+      if ((p.btags() == 0 && nt.nbtags_old(bdisc_cut_value,-1) >= 1) || (p.btags() == 1 && nt.nbtags_old(bdisc_cut_value,-1) < 1)) continue; //nbtags_old correctly calls DeepJet, this has been fixed in most recent UL_Lepton!!!!!!!!!!!!!!!!
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
-      //std::cout << "established cuts" << std::endl;
       const float w = weights[i] * nt.weight; //THIS IS WHERE THE WEIGHTS ARE APPLIED
-      //std::cout << "sample weight: " << weights[i] << ", event weight: " << nt.weight << std::endl;
 
       double v0_track_sumpt = 0; //start of sumpt & m5 variables for cuts
       double v1_track_sumpt = 0;
@@ -2466,13 +2827,11 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	//std::cout << "before initializing reco variables" << std::endl;
 	std::vector<reco::TransientTrack> seed_tracks;
 	//std::map<reco::TrackRef, size_t> seed_track_ref_map;
+	std::vector<reco::TrackRef> track_refs;
 	reco::TrackCollection track_collection;
 	reco::Track reco_track;
 	reco::TrackBase::Point referencePoint; //track's closest point of approach to the center of CMS
 	math::XYZVector track_p_vector;
-	//std::cout << "after initializing reco variables" << std::endl;
-	int track_q;
-	//std::vector<double> B_field(0,0,3.8);
 	GlobalVector constantField(0.0, 0.0, 3.8);
 	UniformMagneticField uniformField(constantField);
 	const MagneticField* B_field = &uniformField;
@@ -2485,36 +2844,35 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	  v0_track_sumpy += nt.p_tk0_py->at(k);
 	  v0_track_sumpz += nt.p_tk0_pz->at(k);
 	  v0_track_sumE += sqrt(nt.p_tk0_px->at(k)*nt.p_tk0_px->at(k) + nt.p_tk0_py->at(k)*nt.p_tk0_py->at(k) + nt.p_tk0_pz->at(k)*nt.p_tk0_pz->at(k) + 0.13957*0.13957); //0.13957 is pi+- mass
-	  if (c1v_vertexer and j == 0) {
-	    //FINISH HERE FOR THE VERTEXER ON CONSTRUCTED C1V EVENTS!!!!!!!!!
-	    referencePoint = reco::TrackBase::Point(nt.p_tk0_vx->at(k),nt.p_tk0_vy->at(k),nt.p_tk0_vz->at(k));
-	    track_p_vector = math::XYZVector(nt.p_tk0_px->at(k), nt.p_tk0_py->at(k), nt.p_tk0_pz->at(k));
-	    reco_track = reco::Track(fabs(nt.p_tk0_qchi2->at(k)), nt.p_tk0_ndof->at(k), referencePoint, track_p_vector, sgn(nt.p_tk0_qchi2->at(k)), nt.p_tk0_cov->at(k));
-	    track_collection.push_back(reco_track);
-	    seed_tracks.push_back(reco::TransientTrack(reco_track, B_field));
-	    //seed_track_ref_map[k] = seed_tracks.size() - 1;
-	  }
 	}
-	if (c1v_vertexer and j == 0) std::cout << "finished looping through tracks" << std::endl;
 	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sumpx*v0_track_sumpx - v0_track_sumpy*v0_track_sumpy - v0_track_sumpz*v0_track_sumpz);
-	if (v0_track_sumpt < 10) continue;
-	if (v0_track_m5 < 5.5) continue; //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
-
-	if (c1v_vertexer and j == 0) { //test of the revertexer
-	  std::cout << "start of assigning track vectors that we will plug into produce()" << std::endl;
-	  const size_t ntk = seed_tracks.size();
-	  reco_vertices.push_back(seed_tracks);
-	  reco_vertices_ntk.push_back(ntk);
-	  std::cout << "finished assigning track vectors that we will plug into produce()" << std::endl;
-	  double bsx = nt.bsx;
-	  double bsy = nt.bsy;
-	  double bsz = nt.bsz;
-	  std::vector<double> bs_position = {bsx,bsy,bsz};
-	  //double bssigma_x = 0.5; //FIX THESE LATER
-	  //double bssigma_y = 0.5;
-	  //double bssigma_z = 0.5;
-	  std::cout << "pt of first track of first vertex before revertexing: " << seed_tracks[0].track().pt() << std::endl;
-	  produce(bs_position, bssigma_x, bssigma_y, bssigma_z, seed_tracks, track_collection);
+	if (invert_sumpt_m5_cuts) { //invert should keep events where at least one cut failed, orthogonal but still similar to nominal 
+	  if (v0_track_sumpt > 10 and v0_track_m5 > 5.5) continue;
+	}
+	else {
+	  if (v0_track_sumpt < 10) continue;
+	  if (v0_track_m5 < 5.5) continue; //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	}
+	
+	if (c1v_vertexer) {
+	  //std::cout << "beamspot position: (" << nt.bsx << ", " << nt.bsy << ", " << nt.bsz << ")" <<std::endl;
+	  //std::cout << "SV position (relative to beamspot): (" << nt.x0 << ", " << nt.y0 << ", " << nt.z0 << ")" <<std::endl;
+	  //std::cout << "primary vertex position: (" << nt.pvx << ", " << nt.pvy << ", " << nt.pvz << ")" <<std::endl;
+          for (int k = 0; k < nt.ntk0; ++k) {
+	    //FINISH HERE FOR THE VERTEXER ON CONSTRUCTED C1V EVENTS!!!!!!!!!
+            referencePoint = reco::TrackBase::Point(nt.p_tk0_vx->at(k),nt.p_tk0_vy->at(k),nt.p_tk0_vz->at(k));
+	    //std::cout << "track reference point: (" << nt.p_tk0_vx->at(k) << ", " << nt.p_tk0_vy->at(k) << ", " << nt.p_tk0_vz->at(k) << ")" <<std::endl;
+            track_p_vector = math::XYZVector(nt.p_tk0_px->at(k), nt.p_tk0_py->at(k), nt.p_tk0_pz->at(k));
+	    const int track_q = std::signbit(nt.p_tk0_qchi2->at(k)) ? -1 : 1;
+            reco_track = reco::Track(fabs(nt.p_tk0_qchi2->at(k)), nt.p_tk0_ndof->at(k), referencePoint, track_p_vector, track_q, nt.p_tk0_cov->at(k));
+            track_collection.push_back(reco_track);
+          }
+	  for (size_t k = 0; k < track_collection.size(); ++k) {
+	    reco::TrackRef ref(&track_collection, k);
+	    track_refs.push_back(ref);
+	    seed_tracks.push_back(reco::TransientTrack(ref, B_field));
+	  }
+	  //std::cout << "finished looping through tracks" << std::endl;
 	}
 	
 	//std::cout << "finished sumpt and m5 cut" << std::endl;
@@ -2523,12 +2881,30 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         float temp_dbv_pv   = sqrt((nt.x0-nt.pvx)*(nt.x0-nt.pvx) + (nt.y0-nt.pvy)*(nt.y0-nt.pvy));
 
 	dbv_value_vector.push_back(temp_dbv);
+	x_value_vector.push_back(nt.x0-nt.pvx);
+	y_value_vector.push_back(nt.y0-nt.pvy);
 	z_value_vector.push_back(nt.z0-nt.pvz);
 	dbv_weight_vector.push_back(w);
-
-	/*if (temp_dbv > 0.6 and tree_path == "mfvMiniTree/t") {
-	  std::cout<< "dbv > 0.6 1-vertex event in btag=" << p.btags() << " category!" <<std::endl;
-	  std::cout << "dbv: " << temp_dbv << ", run: " << nt.run << ", lumi: " << nt.lumi << ", event: " << nt.event << std::endl;
+	if (c1v_vertexer) {
+	  bsx_vector.push_back(nt.bsx);
+	  bsy_vector.push_back(nt.bsy);
+	  bsz_vector.push_back(nt.bsz);
+	  pvx_vector.push_back(nt.pvx);
+          pvy_vector.push_back(nt.pvy);
+          pvz_vector.push_back(nt.pvz);
+	  vertex_tracks_vector.push_back(seed_tracks);
+	  vertex_track_collection_vector.push_back(track_collection);
+	  if (abs(nt.z0 - nt.pvz) < 1) {
+	    pass_pvsvdz_cut_vector.push_back(true);
+	  }
+	  else {
+	    pass_pvsvdz_cut_vector.push_back(false);
+	  }
+	}
+	/*
+	if (dbv_value_vector.size()==372) {
+	  std::cout<< "SV entry 371 is from " << iteration_sample_name << " with: " << std::endl;
+	  std::cout << "position: (" << nt.x0 << "," << nt.y0 << "," << nt.z0 << "), " << "dbv: " << temp_dbv << ", run: " << nt.run << ", lumi: " << nt.lumi << ", event: " << nt.event << std::endl;
 	}*/
 	//std::cout << "starting npu and btag binning" << std::endl;
         h_1v_dbv->Fill(temp_dbv, w);
@@ -2561,53 +2937,149 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	//if (j<10) {
 	//  std::cout << "npu: " << nt.npu << ", p.btags: " << p.btags() << std::endl;
 	//}
-	if (nt.npu <= 20 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) { //originally used nt.nbtags but this calls CSV, we want DeepJet which is called by nt.nbtags_old
+	if (nt.npv <= 20 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) { //originally used nt.nbtags but this calls CSV, we want DeepJet which is called by nt.nbtags_old
           dbv_value_vector_btag_npult20.push_back(temp_dbv);
+	  x_value_vector_btag_npult20.push_back(nt.x0-nt.pvx);
+	  y_value_vector_btag_npult20.push_back(nt.y0-nt.pvy);
 	  z_value_vector_btag_npult20.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npult20.push_back(w);
           dbv_npubinid_vector.push_back(1);
+	  if (c1v_vertexer) {
+	    bsx_vector_btag_npult20.push_back(nt.bsx);
+	    bsy_vector_btag_npult20.push_back(nt.bsy);
+	    bsz_vector_btag_npult20.push_back(nt.bsz);
+	    pvx_vector_btag_npult20.push_back(nt.pvx);
+            pvy_vector_btag_npult20.push_back(nt.pvy);
+            pvz_vector_btag_npult20.push_back(nt.pvz);
+	    vertex_tracks_vector_btag_npult20.push_back(seed_tracks);
+	    vertex_track_collection_vector_btag_npult20.push_back(track_collection);
+	  }
         }
-        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npv > 20 and nt.npv <= 30 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt20lt30.push_back(temp_dbv);
+	  x_value_vector_btag_npugt20lt30.push_back(nt.x0-nt.pvx);
+	  y_value_vector_btag_npugt20lt30.push_back(nt.y0-nt.pvy);
 	  z_value_vector_btag_npugt20lt30.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt20lt30.push_back(w);
           dbv_npubinid_vector.push_back(2);
+	  if (c1v_vertexer) {
+            bsx_vector_btag_npugt20lt30.push_back(nt.bsx);
+            bsy_vector_btag_npugt20lt30.push_back(nt.bsy);
+            bsz_vector_btag_npugt20lt30.push_back(nt.bsz);
+	    pvx_vector_btag_npugt20lt30.push_back(nt.pvx);
+            pvy_vector_btag_npugt20lt30.push_back(nt.pvy);
+            pvz_vector_btag_npugt20lt30.push_back(nt.pvz);
+            vertex_tracks_vector_btag_npugt20lt30.push_back(seed_tracks);
+            vertex_track_collection_vector_btag_npugt20lt30.push_back(track_collection);
+          }
         }
-        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npv > 30 and nt.npv <= 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt30lt40.push_back(temp_dbv);
+	  x_value_vector_btag_npugt30lt40.push_back(nt.x0-nt.pvx);
+	  y_value_vector_btag_npugt30lt40.push_back(nt.y0-nt.pvy);
 	  z_value_vector_btag_npugt30lt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt30lt40.push_back(w);
           dbv_npubinid_vector.push_back(3);
+	  if (c1v_vertexer) {
+            bsx_vector_btag_npugt30lt40.push_back(nt.bsx);
+            bsy_vector_btag_npugt30lt40.push_back(nt.bsy);
+            bsz_vector_btag_npugt30lt40.push_back(nt.bsz);
+	    pvx_vector_btag_npugt30lt40.push_back(nt.pvx);
+            pvy_vector_btag_npugt30lt40.push_back(nt.pvy);
+            pvz_vector_btag_npugt30lt40.push_back(nt.pvz);
+            vertex_tracks_vector_btag_npugt30lt40.push_back(seed_tracks);
+            vertex_track_collection_vector_btag_npugt30lt40.push_back(track_collection);
+          }
         }
-        else if (nt.npu > 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
+        else if (nt.npv > 40 and nt.nbtags_old(bdisc_cut_value,-1) >= 1) {
           dbv_value_vector_btag_npugt40.push_back(temp_dbv);
+	  x_value_vector_btag_npugt40.push_back(nt.x0-nt.pvx);
+	  y_value_vector_btag_npugt40.push_back(nt.y0-nt.pvy);
 	  z_value_vector_btag_npugt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_btag_npugt40.push_back(w);
           dbv_npubinid_vector.push_back(4);
+	  if (c1v_vertexer) {
+            bsx_vector_btag_npugt40.push_back(nt.bsx);
+            bsy_vector_btag_npugt40.push_back(nt.bsy);
+            bsz_vector_btag_npugt40.push_back(nt.bsz);
+	    pvx_vector_btag_npugt40.push_back(nt.pvx);
+            pvy_vector_btag_npugt40.push_back(nt.pvy);
+            pvz_vector_btag_npugt40.push_back(nt.pvz);
+            vertex_tracks_vector_btag_npugt40.push_back(seed_tracks);
+            vertex_track_collection_vector_btag_npugt40.push_back(track_collection);
+          }
         }
-	else if (nt.npu <= 20 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
+	else if (nt.npv <= 20 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npult20.push_back(temp_dbv);
+	  x_value_vector_nobtag_npult20.push_back(nt.x0-nt.pvx);
+	  y_value_vector_nobtag_npult20.push_back(nt.y0-nt.pvy);
 	  z_value_vector_nobtag_npult20.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npult20.push_back(w);
           dbv_npubinid_vector.push_back(5);
+	  if (c1v_vertexer) {
+            bsx_vector_nobtag_npult20.push_back(nt.bsx);
+            bsy_vector_nobtag_npult20.push_back(nt.bsy);
+            bsz_vector_nobtag_npult20.push_back(nt.bsz);
+	    pvx_vector_nobtag_npult20.push_back(nt.pvx);
+            pvy_vector_nobtag_npult20.push_back(nt.pvy);
+            pvz_vector_nobtag_npult20.push_back(nt.pvz);
+            vertex_tracks_vector_nobtag_npult20.push_back(seed_tracks);
+            vertex_track_collection_vector_nobtag_npult20.push_back(track_collection);
+          }
         }
-        else if (nt.npu > 20 and nt.npu <= 30 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
+        else if (nt.npv > 20 and nt.npv <= 30 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt20lt30.push_back(temp_dbv);
+	  x_value_vector_nobtag_npugt20lt30.push_back(nt.x0-nt.pvx);
+	  y_value_vector_nobtag_npugt20lt30.push_back(nt.y0-nt.pvy);
 	  z_value_vector_nobtag_npugt20lt30.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt20lt30.push_back(w);
           dbv_npubinid_vector.push_back(6);
+	  if (c1v_vertexer) {
+            bsx_vector_nobtag_npugt20lt30.push_back(nt.bsx);
+            bsy_vector_nobtag_npugt20lt30.push_back(nt.bsy);
+            bsz_vector_nobtag_npugt20lt30.push_back(nt.bsz);
+	    pvx_vector_nobtag_npugt20lt30.push_back(nt.pvx);
+            pvy_vector_nobtag_npugt20lt30.push_back(nt.pvy);
+            pvz_vector_nobtag_npugt20lt30.push_back(nt.pvz);
+            vertex_tracks_vector_nobtag_npugt20lt30.push_back(seed_tracks);
+            vertex_track_collection_vector_nobtag_npugt20lt30.push_back(track_collection);
+          }
         }
-        else if (nt.npu > 30 and nt.npu <= 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
+        else if (nt.npv > 30 and nt.npv <= 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt30lt40.push_back(temp_dbv);
+	  x_value_vector_nobtag_npugt30lt40.push_back(nt.x0-nt.pvx);
+	  y_value_vector_nobtag_npugt30lt40.push_back(nt.y0-nt.pvy);
 	  z_value_vector_nobtag_npugt30lt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt30lt40.push_back(w);
           dbv_npubinid_vector.push_back(7);
+	  if (c1v_vertexer) {
+            bsx_vector_nobtag_npugt30lt40.push_back(nt.bsx);
+            bsy_vector_nobtag_npugt30lt40.push_back(nt.bsy);
+            bsz_vector_nobtag_npugt30lt40.push_back(nt.bsz);
+	    pvx_vector_nobtag_npugt30lt40.push_back(nt.pvx);
+            pvy_vector_nobtag_npugt30lt40.push_back(nt.pvy);
+            pvz_vector_nobtag_npugt30lt40.push_back(nt.pvz);
+            vertex_tracks_vector_nobtag_npugt30lt40.push_back(seed_tracks);
+            vertex_track_collection_vector_nobtag_npugt30lt40.push_back(track_collection);
+          }
         }
-        else if (nt.npu > 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
+        else if (nt.npv > 40 and nt.nbtags_old(bdisc_cut_value,-1) < 1) {
           dbv_value_vector_nobtag_npugt40.push_back(temp_dbv);
+	  x_value_vector_nobtag_npugt40.push_back(nt.x0-nt.pvx);
+	  y_value_vector_nobtag_npugt40.push_back(nt.y0-nt.pvy);
 	  z_value_vector_nobtag_npugt40.push_back(nt.z0-nt.pvz);
           dbv_weight_vector_nobtag_npugt40.push_back(w);
           dbv_npubinid_vector.push_back(8);
+	  if (c1v_vertexer) {
+            bsx_vector_nobtag_npugt40.push_back(nt.bsx);
+            bsy_vector_nobtag_npugt40.push_back(nt.bsy);
+            bsz_vector_nobtag_npugt40.push_back(nt.bsz);
+	    pvx_vector_nobtag_npugt40.push_back(nt.pvx);
+            pvy_vector_nobtag_npugt40.push_back(nt.pvy);
+            pvz_vector_nobtag_npugt40.push_back(nt.pvz);
+            vertex_tracks_vector_nobtag_npugt40.push_back(seed_tracks);
+            vertex_track_collection_vector_nobtag_npugt40.push_back(track_collection);
+          }
         }
 
 	h_1v_bs2derr->Fill(nt.bs2derr0, w);
@@ -2615,6 +3087,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	h_1v_w->Fill(nt.weight);
 	h_1v_z->Fill(nt.z0, w);
 	h_1v_dz->Fill(nt.z0 - nt.pvz, w);
+	h_1v_dpvsv->Fill(sqrt( (nt.x0-nt.pvx)*(nt.x0-nt.pvx) + (nt.y0-nt.pvy)*(nt.y0-nt.pvy) + (nt.z0-nt.pvz)*(nt.z0-nt.pvz) ), w);
         h_1v_xy->Fill(nt.x0, nt.y0, w);
 	h_1v_dbv_bs2derr->Fill(temp_dbv, nt.bs2derr0, w);
 
@@ -2639,6 +3112,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 	if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(temp_dbv_pv, w);
 	h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
 	h_1v_npu->Fill(nt.npu, w);
+	h_1v_npv->Fill(nt.npv, w);
 	h_1v_njets->Fill(nt.njets, w);
 	h_1v_ht40->Fill(nt.ht(40.), w);
         double dphijvmin = M_PI;
@@ -2676,15 +3150,21 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         }
 	v0_track_m5 = sqrt(v0_track_sumE*v0_track_sumE - v0_track_sumpx*v0_track_sumpx - v0_track_sumpy*v0_track_sumpy - v0_track_sumpz*v0_track_sumpz);
 	v1_track_m5 = sqrt(v1_track_sumE*v1_track_sumE - v1_track_sumpx*v1_track_sumpx - v1_track_sumpy*v1_track_sumpy - v1_track_sumpz*v1_track_sumpz);
-        if (v0_track_sumpt < 10 || v1_track_sumpt < 10) continue;
-	if (v0_track_m5 < 5.5 || v1_track_m5 < 5.5) continue;  //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	if (invert_sumpt_m5_cuts) { //invert should keep events where at least one cut failed, orthogonal but still similar to nominal
+	  if (v0_track_sumpt > 10 and v1_track_sumpt > 10 and v0_track_m5 > 5.5 and v1_track_m5 > 5.5) continue;
+	}
+	else {
+	  if (v0_track_sumpt < 10 || v1_track_sumpt < 10) continue;
+	  if (v0_track_m5 < 5.5 || v1_track_m5 < 5.5) continue;  //Alec added SUMPT & m5 CUT, this will not be needed once implemented in minitree step
+	}
 	
         double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
         h_2v_dbv->Fill(dbv1, w);
         h_2v_dbv1_dbv0->Fill(dbv0, dbv1, w);
-        double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
+	double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
+	//std::cout << "2v dvv = " << dvv << std::endl;
         if (dvv > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_2v_dvv->Fill(dvv, w);
 	double dvv3D = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1) + (nt.z0-nt.z1)*(nt.z0-nt.z1)); //Alec added
@@ -2696,6 +3176,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
         h_2v_npu->Fill(nt.npu, w);
+	h_2v_npv->Fill(nt.npv, w);
         //printf("ibkg %i %s 2v event j %i weight %f * %f = %f dbv %f %f dvv %f npu %i\n", i, samples[i], j, weights[i], nt.weight, w, dbv0, dbv1, dvv, nt.npu);
       }
     }
@@ -2713,15 +3194,19 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       }
 
   //construct dvvc
-  TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 200, 0, 2.0); //was 1250, 0, 2.5
-  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 100, 0, M_PI); //was (100, 0, 1.) changed during dphijj fit addition
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0); //was 100, 0 ,4.0
+  //TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 200, 0, 2.0); //was 1250, 0, 2.5
+  //TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 100, 0, M_PI); //was (100, 0, 1.) changed during dphijj fit addition
+  //TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0); //was 100, 0 ,4.0
+  TH1F* h_c1v_dvv3D_w_errorbars = new TH1F("h_c1v_dvv3D_w_errorbars", "constructed from only-one-vertex events;3D d_{VV} (cm);events", 800, 0, 4);
+  TH1F* h_c1v_dvv3D_revertexed_w_errorbars = new TH1F("h_c1v_dvv3D_revertexed_w_errorbars", "constructed from only-one-vertex events;3D d_{VV} (cm);events", 800, 0, 4);
+  TH1F* h_c1v_sumdbv_revertexed_w_errorbars = new TH1F("h_c1v_sumdbv_revertexed_w_errorbars", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0);
   TH1F* h_c1v_sumdbv_w_errorbars = new TH1F("h_c1v_sumdbv_w_errorbars", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 200, 0, 4.0);
-  TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
-  TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
-  TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
-  TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
-
+  TH1F* h_c1v_absdphivv_revertexed_w_errorbars = new TH1F("h_c1v_absdphivv_revertexed_w_errorbars", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
+  //TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
+  //TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
+  //TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
+  //TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
+  TH2F* h_c1v_ntrk0_ntrk1 = new TH2F("h_c1v_ntrk0_ntrk1", "constructed from only-one-vertex events;# vtx0 trks;# vtx1 trks", 11, 0 , 11, 11, 0, 11);
 
   //TF1* f_dphi = new TF1("f_dphi", "(abs(x)-[0])**[1] + [2]", 0, M_PI);
   //f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
@@ -2749,7 +3234,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   //TFile* jet_angle_file = TFile::Open(jet_angle_fname); //This is not used in this file
 
-  TH1F* h_eff_3d = 0; //background template construction: create vertexing efficiency histogram from the vpeffs files based on number max number of tracks
+  /*TH1F* h_eff_3d = 0; //background template construction: create vertexing efficiency histogram from the vpeffs files based on number max number of tracks
   if (p.clearing_from_eff()) {
     TFile* eff_file = TFile::Open(eff_file_name_3d);
     if (!eff_file || !eff_file->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
@@ -2763,7 +3248,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     if (!eff_file || !eff_file->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
     h_eff_2d = (TH1F*)eff_file->Get(eff_hist);
     h_eff_2d->SetBinContent(h_eff_2d->GetNbinsX()+1, h_eff_2d->GetBinContent(h_eff_2d->GetNbinsX()));
-  }
+  }*/
 
   int bin1 = 0;
   int bin2 = 0;
@@ -2822,6 +3307,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   //std::vector<std::string>  dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
   std::vector<std::vector<int>> dbv_check_vector(h_c1v_sumdbv_w_errorbars->GetNbinsX());
   //double sumdbv_test = 0;
+  //double vertexer_passes = 0;
+  //double vertexer_trials = 0;
   for (int ij = 0; ij < nsamples; ++ij) {
     if (ij == 500000) {std::cout << "made it to 500,000th sample" << std::endl;}
     if (ij == 1000000) {std::cout << "made it to 1,000,000th sample" << std::endl;}
@@ -2842,74 +3329,293 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     //
     //random sampling for sumdbv background template
     int randomIndex0 = dist(gen);
-    //int randomIndex1 = dist(gen);
     double dbv0_entry = dbv_value_vector[ij];
+    double x0_entry = x_value_vector[ij];
+    double y0_entry = y_value_vector[ij];
     double z0_entry = z_value_vector[ij];
-    //double dbv1_entry = dbv_value_vector[randomIndex1];
     double dbv0_weight_entry = dbv_weight_vector[ij];
-    //double dbv1_weight_entry = dbv_weight_vector[randomIndex1];
+
+    double bsx0;
+    double bsy0;
+    double bsz0;
+    double pvx0;
+    double pvy0;
+    double pvz0;
+    //std::vector<reco::TransientTrack> seed_tracks0;
+    reco::TrackCollection track_collection0;
+    double bsx1;
+    double bsy1;
+    double bsz1;
+    double pvx1;
+    double pvy1;
+    double pvz1;
+    //std::vector<reco::TransientTrack> seed_tracks1;
+    reco::TrackCollection track_collection1;
+    reco::TrackCollection track_collection_c1v;
+    std::vector<reco::TransientTrack> seed_tracks_c1v;
+    if (c1v_vertexer) {
+      bsx0 = bsx_vector[ij];
+      bsy0 = bsy_vector[ij];
+      bsz0 = bsz_vector[ij];
+      pvx0 = pvx_vector[ij];
+      pvy0 = pvy_vector[ij];
+      pvz0 = pvz_vector[ij];
+      //seed_tracks_c1v = vertex_tracks_vector[ij];
+      track_collection0 = vertex_track_collection_vector[ij];
+    }
 
     //pileup study
     double dbv1_entry;
+    double x1_entry;
+    double y1_entry;
     double z1_entry;
     double dbv1_weight_entry;
+    int randomIndex1;
+    
     //std::cout << "Start of dbv1 assignment if statements." << std::endl;
     //std::cout << "npuid: " << dbv_npubinid_vector[ij] << std::endl;
     if (dbv_npubinid_vector[ij] == 1) {
-      int randomIndex1 = dist1(gen);
+      if (dbv_value_vector_btag_npult20.size() < 2) {
+	randomIndex1 = dist1(gen);
+      }
+      else {
+	do {randomIndex1 = dist1(gen);} while (dbv0_entry == dbv_value_vector_btag_npult20[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npult20[randomIndex1];
+      x1_entry = x_value_vector_btag_npult20[randomIndex1];
+      y1_entry = y_value_vector_btag_npult20[randomIndex1];
       z1_entry = z_value_vector_btag_npult20[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npult20[randomIndex1];
+      if (c1v_vertexer) {
+	bsx1 = bsx_vector_btag_npult20[randomIndex1];
+	bsy1 = bsy_vector_btag_npult20[randomIndex1];
+	bsz1 = bsz_vector_btag_npult20[randomIndex1];
+	pvx1 = pvx_vector_btag_npult20[randomIndex1];
+        pvy1 = pvy_vector_btag_npult20[randomIndex1];
+        pvz1 = pvz_vector_btag_npult20[randomIndex1];
+	//seed_tracks1 = vertex_tracks_vector_btag_npult20[randomIndex1];
+	track_collection1 = vertex_track_collection_vector_btag_npult20[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 2) {
-      int randomIndex1 = dist2(gen);
+      //randomIndex1 = dist2(gen);
+      if (dbv_value_vector_btag_npugt20lt30.size() < 2) {
+        randomIndex1 = dist2(gen);
+      }
+      else {
+        do {randomIndex1 = dist2(gen);} while (dbv0_entry == dbv_value_vector_btag_npugt20lt30[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt20lt30[randomIndex1];
+      x1_entry = x_value_vector_btag_npugt20lt30[randomIndex1];
+      y1_entry = y_value_vector_btag_npugt20lt30[randomIndex1];
       z1_entry = z_value_vector_btag_npugt20lt30[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt20lt30[randomIndex1];
+      if (c1v_vertexer) {
+	bsx1 = bsx_vector_btag_npugt20lt30[randomIndex1];
+        bsy1 = bsy_vector_btag_npugt20lt30[randomIndex1];
+	bsz1 = bsz_vector_btag_npugt20lt30[randomIndex1];
+	pvx1 = pvx_vector_btag_npugt20lt30[randomIndex1];
+        pvy1 = pvy_vector_btag_npugt20lt30[randomIndex1];
+        pvz1 = pvz_vector_btag_npugt20lt30[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_btag_npugt20lt30[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_btag_npugt20lt30[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 3) {
-      int randomIndex1 = dist3(gen);
+      //randomIndex1 = dist3(gen);
+      if (dbv_value_vector_btag_npugt30lt40.size() < 2) {
+        randomIndex1 = dist3(gen);
+      }
+      else {
+        do {randomIndex1 = dist3(gen);} while (dbv0_entry == dbv_value_vector_btag_npugt30lt40[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt30lt40[randomIndex1];
+      x1_entry = x_value_vector_btag_npugt30lt40[randomIndex1];
+      y1_entry = y_value_vector_btag_npugt30lt40[randomIndex1];
       z1_entry = z_value_vector_btag_npugt30lt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt30lt40[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_btag_npugt30lt40[randomIndex1];
+        bsy1 = bsy_vector_btag_npugt30lt40[randomIndex1];
+        bsz1 = bsz_vector_btag_npugt30lt40[randomIndex1];
+	pvx1 = pvx_vector_btag_npugt30lt40[randomIndex1];
+        pvy1 = pvy_vector_btag_npugt30lt40[randomIndex1];
+        pvz1 = pvz_vector_btag_npugt30lt40[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_btag_npugt30lt40[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_btag_npugt30lt40[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 4) {
-      int randomIndex1 = dist4(gen);
+      //randomIndex1 = dist4(gen);
+      if (dbv_value_vector_btag_npugt40.size() < 2) {
+        randomIndex1 = dist4(gen);
+      }
+      else {
+        do {randomIndex1 = dist4(gen);} while (dbv0_entry == dbv_value_vector_btag_npugt40[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_btag_npugt40[randomIndex1];
+      x1_entry = x_value_vector_btag_npugt40[randomIndex1];
+      y1_entry = y_value_vector_btag_npugt40[randomIndex1];
       z1_entry = z_value_vector_btag_npugt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_btag_npugt40[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_btag_npugt40[randomIndex1];
+        bsy1 = bsy_vector_btag_npugt40[randomIndex1];
+        bsz1 = bsz_vector_btag_npugt40[randomIndex1];
+	pvx1 = pvx_vector_btag_npugt40[randomIndex1];
+        pvy1 = pvy_vector_btag_npugt40[randomIndex1];
+        pvz1 = pvz_vector_btag_npugt40[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_btag_npugt40[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_btag_npugt40[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 5) {
-      int randomIndex1 = dist5(gen);
+      //randomIndex1 = dist5(gen);
+      if (dbv_value_vector_nobtag_npult20.size() < 2) {
+        randomIndex1 = dist5(gen);
+      }
+      else {
+        do {randomIndex1 = dist5(gen);} while (dbv0_entry == dbv_value_vector_nobtag_npult20[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npult20[randomIndex1];
+      x1_entry = x_value_vector_nobtag_npult20[randomIndex1];
+      y1_entry = y_value_vector_nobtag_npult20[randomIndex1];
       z1_entry = z_value_vector_nobtag_npult20[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npult20[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_nobtag_npult20[randomIndex1];
+        bsy1 = bsy_vector_nobtag_npult20[randomIndex1];
+        bsz1 = bsz_vector_nobtag_npult20[randomIndex1];
+	pvx1 = pvx_vector_nobtag_npult20[randomIndex1];
+        pvy1 = pvy_vector_nobtag_npult20[randomIndex1];
+        pvz1 = pvz_vector_nobtag_npult20[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_nobtag_npult20[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_nobtag_npult20[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 6) {
-      int randomIndex1 = dist6(gen);
+      //randomIndex1 = dist6(gen);
+      if (dbv_value_vector_nobtag_npugt20lt30.size() < 2) {
+        randomIndex1 = dist6(gen);
+      }
+      else {
+        do {randomIndex1 = dist6(gen);} while (dbv0_entry == dbv_value_vector_nobtag_npugt20lt30[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt20lt30[randomIndex1];
+      x1_entry = x_value_vector_nobtag_npugt20lt30[randomIndex1];
+      y1_entry = y_value_vector_nobtag_npugt20lt30[randomIndex1];
       z1_entry = z_value_vector_nobtag_npugt20lt30[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt20lt30[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_nobtag_npugt20lt30[randomIndex1];
+        bsy1 = bsy_vector_nobtag_npugt20lt30[randomIndex1];
+        bsz1 = bsz_vector_nobtag_npugt20lt30[randomIndex1];
+	pvx1 = pvx_vector_nobtag_npugt20lt30[randomIndex1];
+        pvy1 = pvy_vector_nobtag_npugt20lt30[randomIndex1];
+        pvz1 = pvz_vector_nobtag_npugt20lt30[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_nobtag_npugt20lt30[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_nobtag_npugt20lt30[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 7) {
-      int randomIndex1 = dist7(gen);
+      //randomIndex1 = dist7(gen);
+      if (dbv_value_vector_nobtag_npugt30lt40.size() < 2) {
+        randomIndex1 = dist7(gen);
+      }
+      else {
+        do {randomIndex1 = dist7(gen);} while (dbv0_entry == dbv_value_vector_nobtag_npugt30lt40[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt30lt40[randomIndex1];
+      x1_entry = x_value_vector_nobtag_npugt30lt40[randomIndex1];
+      y1_entry = y_value_vector_nobtag_npugt30lt40[randomIndex1];
       z1_entry = z_value_vector_nobtag_npugt30lt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt30lt40[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_nobtag_npugt30lt40[randomIndex1];
+        bsy1 = bsy_vector_nobtag_npugt30lt40[randomIndex1];
+        bsz1 = bsz_vector_nobtag_npugt30lt40[randomIndex1];
+	pvx1 = pvx_vector_nobtag_npugt30lt40[randomIndex1];
+        pvy1 = pvy_vector_nobtag_npugt30lt40[randomIndex1];
+        pvz1 = pvz_vector_nobtag_npugt30lt40[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_nobtag_npugt30lt40[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_nobtag_npugt30lt40[randomIndex1];
+      }
     }
     else if (dbv_npubinid_vector[ij] == 8) {
-      int randomIndex1 = dist8(gen);
+      //randomIndex1 = dist8(gen);
+      if (dbv_value_vector_nobtag_npugt40.size() < 2) {
+        randomIndex1 = dist8(gen);
+      }
+      else {
+        do {randomIndex1 = dist8(gen);} while (dbv0_entry == dbv_value_vector_nobtag_npugt40[randomIndex1]);
+      }
       //std::cout << "randomIndex1 assigned with npuid " << dbv_npubinid_vector[ij] << ": " << randomIndex1 << std::endl;
       dbv1_entry = dbv_value_vector_nobtag_npugt40[randomIndex1];
+      x1_entry = x_value_vector_nobtag_npugt40[randomIndex1];
+      y1_entry = y_value_vector_nobtag_npugt40[randomIndex1];
       z1_entry = z_value_vector_nobtag_npugt40[randomIndex1];
       dbv1_weight_entry = dbv_weight_vector_nobtag_npugt40[randomIndex1];
+      if (c1v_vertexer) {
+        bsx1 = bsx_vector_nobtag_npugt40[randomIndex1];
+        bsy1 = bsy_vector_nobtag_npugt40[randomIndex1];
+        bsz1 = bsz_vector_nobtag_npugt40[randomIndex1];
+	pvx1 = pvx_vector_nobtag_npugt40[randomIndex1];
+        pvy1 = pvy_vector_nobtag_npugt40[randomIndex1];
+        pvz1 = pvz_vector_nobtag_npugt40[randomIndex1];
+        //seed_tracks1= vertex_tracks_vector_nobtag_npugt40[randomIndex1];
+        track_collection1 = vertex_track_collection_vector_nobtag_npugt40[randomIndex1];
+      }
+    }
+    else {
+      std::cout << "Error: Improper btagging/pileup binning id" << std::endl;
+    }
+
+    std::vector<reco::TrackRef> track_refs_c1v;
+    GlobalVector constantField(0.0, 0.0, 3.8);
+    UniformMagneticField uniformField(constantField);
+    const MagneticField* B_field = &uniformField;
+    produce_vertices produce_output;
+    if (c1v_vertexer) {
+      std::vector<double> bs_position_c1v = {bsx0,bsy0,bsz0};
+      std::vector<double> pv_position_c1v = {pvx0,pvy0,pvz0}; //with respect to the beamspot!!!!
+      //std::cout << "beamspot position: (" << bsx0 << ", " << bsy0 << ", " << bsz0 << ")" <<std::endl;
+      for (int k = 0; k < track_collection0.size(); ++k) {
+	track_collection_c1v.push_back(track_collection0[k]);
+	//std::cout << "one of the track reference points: " << track_collection0[k].vertex() << std::endl;
+      }
+      for (int k = 0; k < track_collection1.size(); ++k) {
+        //track_collection_c1v.push_back(track_collection1[k]); //all this for loop functioned with before the z-shift
+	reco::TrackBase::Point referencePoint1_zshifted = reco::TrackBase::Point(track_collection1[k].vx() - (pvx1+bsx1) + (pvx0+bsx0),
+										 track_collection1[k].vy() - (pvy1+bsy1) + (pvy0+bsy0),
+										 track_collection1[k].vz() - (pvz1+bsz1) + (pvz0+bsz0));
+	if (verbose and ij < 10) std::cout << "track reference point for track in v0: (" << track_collection0[k].vx() << ", " << track_collection0[k].vy() << ", " << track_collection0[k].vz() << "), for track preshifted pv v1: (" << track_collection1[k].vx() << ", " << track_collection1[k].vy() << ", " << track_collection1[k].vz() << "), for track in shifted pv v1: (" << track_collection1[k].vx() - (pvx1+bsx1) + (pvx0+bsx0) << ", " << track_collection1[k].vy() - (pvy1+bsy1) + (pvy0+bsy0) << ", " << track_collection1[k].vz() - (pvz1+bsz1) + (pvz0+bsz0) << ")" << std::endl;
+	reco::Track reco_track1_zshifted = reco::Track(track_collection1[k].chi2(), track_collection1[k].ndof(), referencePoint1_zshifted, track_collection1[k].momentum(), track_collection1[k].charge(), track_collection1[k].covariance());
+	track_collection_c1v.push_back(reco_track1_zshifted);
+      }
+      for (size_t k = 0; k < track_collection_c1v.size(); ++k) {
+	reco::TrackRef ref_c1v(&track_collection_c1v, k);
+	track_refs_c1v.push_back(ref_c1v);
+	seed_tracks_c1v.push_back(reco::TransientTrack(ref_c1v, B_field));
+      }
+      //seed_tracks_c1v.insert(seed_tracks_c1v.end(), seed_tracks1.begin(), seed_tracks1.end());  //ADD THESE BACK TO MERGE TRACKS FROM BOTH VERTICES!!!!!!
+      //track_collection_c1v.insert(track_collection_c1v.end(), track_collection1.begin(), track_collection1.end());
+      //produce_vertices output = {number_of_vertices,numbers_of_vertex_tracks,positions};
+      if (verbose) std::cout << "START OF NEW C1V VERTEX PAIR REVERTEXING!!!" << std::endl;
+      if (verbose) std::cout << "# of tracks in seed_tracks vector: " <<  seed_tracks_c1v.size() << ", # of tracks in track_collection: " << track_collection_c1v.size() << std::endl;
+      for (int t = 0; t < seed_tracks_c1v.size(); ++t) {
+	if (verbose) std::cout << "before input to produce(), track pt: " << seed_tracks_c1v[t].track().pt() << std::endl;
+	//std::cout << "reco::Track parameters input to produce():: chi^2: " << seed_tracks_c1v[t].track().chi2() << ", ndf: " << seed_tracks_c1v[t].track().ndof() << ", reference point: " << seed_tracks_c1v[t].track().vertex() << ", p: (" << seed_tracks_c1v[t].track().px() << "," << seed_tracks_c1v[t].track().py() << "," << seed_tracks_c1v[t].track().pz() << ", charge: " << seed_tracks_c1v[t].track().charge() << ", cov matrix:" << std::endl << seed_tracks_c1v[t].track().covariance() << std::endl; 
+      }
+      produce_output = produce(bs_position_c1v, bssigma_x, bssigma_y, bssigma_z, seed_tracks_c1v, track_collection_c1v); //use beamspot value for event0 rather than event1
+      if (p.ntracks() == 5 && verbose && (produce_output.numbers_of_vertex_tracks.size() != 2 or produce_output.numbers_of_vertex_tracks[0] < p.ntracks() or produce_output.numbers_of_vertex_tracks[1] < p.ntracks())) std::cout << "BAD REVERTEXING SINCE VERTICES NOW BELOW 5 TRACKS OUTPUT AT EVENT " << ij << " or " << randomIndex1 << "!!!" << std::endl;
+      else if (verbose && (produce_output.numbers_of_vertex_tracks.size() != 2 or produce_output.numbers_of_vertex_tracks[0] != p.ntracks() or produce_output.numbers_of_vertex_tracks[1] != p.ntracks())) std::cout << "BAD REVERTEXING OUTPUT AT EVENT " << ij << " or " << randomIndex1 << "!!!  Input 3D dvv: " << sqrt((x0_entry - x1_entry)*(x0_entry - x1_entry) + (y0_entry - y1_entry)*(y0_entry - y1_entry) + (z0_entry - z1_entry)*(z0_entry - z1_entry)) << std::endl;
     }
 
     double sumdbv_entry = dbv0_entry + dbv1_entry;
@@ -2935,13 +3641,30 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     double sumdbv_entry;
     double sumdbv_w_entry;*/
 
-    h_c1v_dbv->Fill(dbv0_entry);
-    h_c1v_dbv->Fill(dbv1_entry);
+    //h_c1v_dbv->Fill(dbv0_entry);
+    //h_c1v_dbv->Fill(dbv1_entry);
 
+    //double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1)); //definition used in the 2v case
     double dphi   = f_dphi->GetRandom(); //background template construction: get random angle (dphi) between the random dbv pair, always 1/pi (set above)
-
+    double phi0 = std::atan2(y0_entry,x0_entry);
+    double phi1 = std::atan2(y1_entry,x1_entry);
+    double absdphi_revertexed;
+    if (M_PI < phi1-phi0) {
+      absdphi_revertexed = 2*M_PI - (phi1-phi0);
+    }
+    else if(-M_PI > phi1-phi0) {
+      absdphi_revertexed = 2*M_PI + (phi1-phi0);
+    }
+    else {
+      absdphi_revertexed = fabs(phi1-phi0);
+    }
+    //if (ij < 20) {
+    //  std::cout << "vertex 0: (" << x0_entry << "," << y0_entry << "), phi0: " << phi0 << ", vertex 1: (" << x1_entry << "," << y1_entry << "), phi1: " << phi1 << ", |dphi_revertexed|: " << absdphi_revertexed << ", dphi using 2v definition: " << TVector2::Phi_mpi_pi(atan2(y0_entry,x0_entry)-atan2(y1_entry,x1_entry)) << std::endl;
+    //}
+    
     double dvv_entry = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi));
     double dvv3D_entry = sqrt(dbv0_entry*dbv0_entry + dbv1_entry*dbv1_entry - 2*dbv0_entry*dbv1_entry*cos(dphi) + (z0_entry - z1_entry)*(z0_entry - z1_entry));
+    double dvv3D_entry_exact = sqrt((x0_entry - x1_entry)*(x0_entry - x1_entry) + (y0_entry - y1_entry)*(y0_entry - y1_entry) + (z0_entry - z1_entry)*(z0_entry - z1_entry));
     double dvvc   = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi)); //background template construction: compute 2D distance between 2 random dbv pair vertices with dphi angular separation (1/pi)
     double sumdbv = dbv0 + dbv1; //background template construction: sum random dbv pair to find sumdbv
 
@@ -2963,20 +3686,20 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       dvv_entry = dvvc2;
     }
 
-    double prob  = 1; //background template construction: 
+    /*double prob  = 1; //background template construction: 
     if (p.clearing_from_eff()) {
       prob = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvvc));
       prob *= p.extra_eff_2d(dvvc);
     }
-    double prob_sumdbv_w_errorbars  = 1; //background template construction:
+    double prob_w_errorbars  = 1; //background template construction:
     if (p.clearing_from_eff() and use_dvv3D) {
-      prob_sumdbv_w_errorbars = h_eff_3d->GetBinContent(h_eff_3d->FindBin(dvv3D_entry));
+      prob_w_errorbars = h_eff_3d->GetBinContent(h_eff_3d->FindBin(dvv3D_entry_exact));
       //prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
     }
     else if (p.clearing_from_eff()) {
-      prob_sumdbv_w_errorbars = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvv_entry));
+      prob_w_errorbars = h_eff_2d->GetBinContent(h_eff_2d->FindBin(dvv_entry));
       //prob_sumdbv_w_errorbars *= p.extra_eff_2d(dvv_entry);
-    }
+    }*/
 
     double btag_weight = 1; //REMEMBER TO FINISH/ADJUST THIS!!!!!!!!!
     if (dbv_npubinid_vector[ij] < 5) {
@@ -2987,10 +3710,79 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     }
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-    h_c1v_dvv->Fill(dvv_entry, prob);  //errors not propagated properly just for dvv here
-    h_c1v_sumdbv->Fill(sumdbv_entry, prob); //background template construction: fill histogram with constructed value and weight
+    //h_c1v_dvv->Fill(dvv_entry, prob);  //errors not propagated properly just for dvv here
+    //h_c1v_sumdbv->Fill(sumdbv_entry, prob); //background template construction: fill histogram with constructed value and weight
     //h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, sqrt(prob_sumdbv_w_errorbars*prob_sumdbv_w_errorbars + sumdbv_w_entry*sumdbv_w_entry));
-    h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, btag_weight*prob_sumdbv_w_errorbars*sumdbv_w_entry);
+    //h_c1v_dvv3D_w_errorbars->Fill(dvv3D_entry, btag_weight*sumdbv_w_entry); //sumdbv_w_entry is the event and sample weight here and is correct, not just for dbv
+    //h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+    if (c1v_vertexer) { //compare z0_entry < 1 and z1_entry < 1 to without it
+      //now we perform a coordinate transformation for our vertex points to be with respect to the beamspot for xy and pv for z rather than (0,0,0)
+      double ntx0_revertexed = produce_output.positions[0].x() - bsx0 - pvx0;
+      double nty0_revertexed = produce_output.positions[0].y() - bsy0 - pvy0;
+      double ntz0_revertexed = produce_output.positions[0].z() - bsz0 - pvz0;
+      //double ntx1_revertexed = produce_output.positions[1].x() - bsx0;
+      //double nty1_revertexed = produce_output.positions[1].y() - bsy0;
+      //double ntz1_revertexed = produce_output.positions[1].z() - bsz0 - pvz0;
+      double ntx1_revertexed = produce_output.positions[1].x() - bsx0 - pvx0;
+      double nty1_revertexed = produce_output.positions[1].y() - bsy0 - pvy0;
+      double ntz1_revertexed = produce_output.positions[1].z() - bsz0 - pvz0;
+      double dvv3D_revertexed = sqrt( (produce_output.positions[0].x()-produce_output.positions[1].x())*(produce_output.positions[0].x()-produce_output.positions[1].x())
+      			      + (produce_output.positions[0].y()-produce_output.positions[1].y())*(produce_output.positions[0].y()-produce_output.positions[1].y())
+      			      + (produce_output.positions[0].z()-produce_output.positions[1].z())*(produce_output.positions[0].z()-produce_output.positions[1].z()) );
+      //double dvv3D_revertexed = sqrt((ntx0_revertexed-ntx1_revertexed)*(ntx0_revertexed-ntx1_revertexed) + (nty0_revertexed-nty1_revertexed)*(nty0_revertexed-nty1_revertexed) + (ntz0_revertexed-ntz1_revertexed)*(ntz0_revertexed-ntz1_revertexed));
+      
+      if (verbose and ij < 10 and produce_output.numbers_of_vertex_tracks.size() == 2 and produce_output.numbers_of_vertex_tracks[0] == p.ntracks() and produce_output.numbers_of_vertex_tracks[1] == p.ntracks()) {
+	double dbv0_revertexed = sqrt(ntx0_revertexed*ntx0_revertexed + nty0_revertexed*nty0_revertexed);
+	double dbv1_revertexed = sqrt(ntx1_revertexed*ntx1_revertexed + nty1_revertexed*nty1_revertexed);
+	std::cout << "dvv3D: " << dvv3D_entry_exact << ", attempted recreation of dvv3D with dbv0/1 revertexed and phi: " << sqrt(dbv0_revertexed*dbv0_revertexed + dbv1_revertexed*dbv1_revertexed - 2*dbv0_revertexed*dbv1_revertexed*cos(dphi) + (ntz0_revertexed - ntz1_revertexed)*(ntz0_revertexed - ntz1_revertexed)) << ", dvv3D revertexed: " << dvv3D_revertexed << std::endl;
+	std::cout << "dbv0: " << dbv0_entry << ", dbv0 revertexed: " << sqrt(ntx0_revertexed*ntx0_revertexed + nty0_revertexed*nty0_revertexed) << std::endl;
+	std::cout << "z0: " << z0_entry << ", produce output z0: " << produce_output.positions[0].z() << ", z0 revertexed: " << ntz0_revertexed << std::endl;
+	std::cout << "z1: " << z1_entry << ", produce output z1: " << produce_output.positions[1].z() << ", z1 revertexed: " << ntz1_revertexed << std::endl;
+	std::cout << "attempted recreation of nt.z1 using produce outputs: " << z1_entry + pvz1  << std::endl;
+	std::cout << "bsx0: " << bsx0 << ", bsx1: " << bsx1 << std::endl;
+	std::cout << "bsy0: " << bsy0 << ", bsy1: " << bsy1 << std::endl;
+	std::cout << "bsz0: " << bsz0 << ", bsz1: " << bsz1 << std::endl;
+	std::cout << "pvx0: " << pvx0 << ", pvx1: " << pvx1 << std::endl;
+	std::cout << "pvy0: " << pvy0 << ", pvy1: " << pvy1 << std::endl;
+	std::cout << "pvz0: " << pvz0 << ", pvz1: " << pvz1 << std::endl;
+	std::cout << std::endl;
+      }
+     
+      double ntrk0 = 0;
+      double ntrk1 = 0;
+      if (produce_output.numbers_of_vertex_tracks.size() == 2) {ntrk0 = produce_output.numbers_of_vertex_tracks[0]; ntrk1 = produce_output.numbers_of_vertex_tracks[1];}
+      if (produce_output.numbers_of_vertex_tracks.size() == 1) {ntrk0 = produce_output.numbers_of_vertex_tracks[0];}
+      h_c1v_ntrk0_ntrk1->Fill(ntrk0, ntrk1, btag_weight*sumdbv_w_entry);
+
+      //h_c1v_dvv3D_w_errorbars->Fill(dvv3D_entry, btag_weight*sumdbv_w_entry); //sumdbv_w_entry is the event and sample weight here and is correct, not just for dbv
+      h_c1v_dvv3D_w_errorbars->Fill(dvv3D_entry_exact, btag_weight*sumdbv_w_entry); //changed to this to use the same dvv3D definition as the revertexed histogram since using a new definition for dvv including cut < 1 between SV and PV, while not including beamspot dependence, DOUBLE CHECK THIS!!!!!
+      h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+      if (p.ntracks() == 5 and produce_output.numbers_of_vertex_tracks.size() == 2 and produce_output.numbers_of_vertex_tracks[0] >= p.ntracks() and produce_output.numbers_of_vertex_tracks[1] >= p.ntracks()) {
+	//h_c1v_dvv3D_revertexed_w_errorbars->Fill(dvv3D_entry, btag_weight*sumdbv_w_entry);
+	h_c1v_dvv3D_revertexed_w_errorbars->Fill(dvv3D_revertexed, btag_weight*sumdbv_w_entry);
+	h_c1v_sumdbv_revertexed_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+	h_c1v_absdphivv_revertexed_w_errorbars->Fill(absdphi_revertexed, btag_weight*sumdbv_w_entry);
+      }
+      else if (p.ntracks() > 5 and produce_output.numbers_of_vertex_tracks.size() == 2 and p.ntracks() == (produce_output.numbers_of_vertex_tracks[0]+produce_output.numbers_of_vertex_tracks[1]) and produce_output.numbers_of_vertex_tracks[0] != produce_output.numbers_of_vertex_tracks[1] and produce_output.numbers_of_vertex_tracks[0] > 2 and produce_output.numbers_of_vertex_tracks[1] > 2) { //This should work for 3x4, 3x5, or 4x5 vertices
+	h_c1v_dvv3D_revertexed_w_errorbars->Fill(dvv3D_revertexed, btag_weight*sumdbv_w_entry);
+        h_c1v_sumdbv_revertexed_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+	h_c1v_absdphivv_revertexed_w_errorbars->Fill(absdphi_revertexed, btag_weight*sumdbv_w_entry);
+      }
+      else if (produce_output.numbers_of_vertex_tracks.size() == 2 and produce_output.numbers_of_vertex_tracks[0] == p.ntracks() and produce_output.numbers_of_vertex_tracks[1] == p.ntracks()) {
+        h_c1v_dvv3D_revertexed_w_errorbars->Fill(dvv3D_revertexed, btag_weight*sumdbv_w_entry);
+        h_c1v_sumdbv_revertexed_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+	h_c1v_absdphivv_revertexed_w_errorbars->Fill(absdphi_revertexed, btag_weight*sumdbv_w_entry);
+      }
+    }
+    else if (!c1v_vertexer) {
+      h_c1v_dvv3D_w_errorbars->Fill(dvv3D_entry_exact, btag_weight*sumdbv_w_entry); //sumdbv_w_entry is the event and sample weight here and is correct, not just for dbv
+      h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, btag_weight*sumdbv_w_entry);
+    }
+    //vertexer_trials += 1;
+    //if (produce_output.numbers_of_vertex_tracks.size() == 1 and produce_output.numbers_of_vertex_tracks[0] == p.ntracks()) {
+    //  vertexer_passes += 1;
+    //}
+
     //random sampling for sumdbv background template
     /*if (std::find(dbv_check_vector[sumdbv_bin].begin(), dbv_check_vector[sumdbv_bin].end(), randomIndex0) != dbv_check_vector[sumdbv_bin].end()) {
       h_c1v_sumdbv_w_errorbars->Fill(sumdbv_entry, prob_sumdbv_w_errorbars*pow(2*h_c1v_sumdbv_w_errorbars->GetBinError(sumdbv_bin)*sumdbv_w_entry+pow(sumdbv_w_entry,2),0.5));
@@ -3015,15 +3807,16 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       }
     }*/
 
-    h_c1v_absdphivv->Fill(fabs(dphi), prob);
-    h_c1v_dbv0->Fill(dbv0_entry, prob);
-    h_c1v_dbv1->Fill(dbv1_entry, prob);
-    h_c1v_dbv1_dbv0->Fill(dbv0_entry, dbv1_entry, prob);
+    //h_c1v_absdphivv->Fill(fabs(dphi), prob);
+    //h_c1v_dbv0->Fill(dbv0_entry, prob);
+    //h_c1v_dbv1->Fill(dbv1_entry, prob);
+    //h_c1v_dbv1_dbv0->Fill(dbv0_entry, dbv1_entry, prob);
 
-    events_after_eff += prob;
+    //events_after_eff += prob;
   }
   //set bin errors for constructed sumdbv histogram
-  std::cout << "End looping through samples" << std::endl;
+  if (verbose) std::cout << "End looping through samples" << std::endl;
+  //std::cout << "Percentage of single vertex inputs passing the vertexer: " << 100*vertexer_passes/vertexer_trials << "%" << std::endl;
 
 
   printf("events before efficiency correction = %d, events after efficiency correction = %f, integrated efficiency correction = %f\n", nsamples, events_after_eff, events_after_eff/nsamples);
@@ -3058,6 +3851,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_1v_w->Write(); //Alec added
   h_1v_z->Write();
   h_1v_dz->Write();
+  h_1v_dpvsv->Write();
   h_1v_xy->Write();
   h_1v_dbv0->Write();
   h_1v_dbv1->Write();
@@ -3065,6 +3859,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_1v_dbv_bs2derr->Write(); //Alec added
   h_1v_phiv->Write();
   h_1v_npu->Write();
+  h_1v_npv->Write();
   h_1v_njets->Write();
   h_1v_ht40->Write();
   h_1v_phij->Write();
@@ -3080,19 +3875,26 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
   h_2v_npu->Write();
+  h_2v_npv->Write();
 
-  h_c1v_dbv->Write();
+  //h_c1v_dbv->Write();
   //h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
-  h_c1v_dvv->Write();
+  //h_c1v_dvv->Write();
   //h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
-  h_c1v_sumdbv->Write();
+  //h_c1v_sumdbv->Write();
+  h_c1v_dvv3D_w_errorbars->Write();
+  h_c1v_dvv3D_revertexed_w_errorbars->Write();
+  h_c1v_sumdbv_revertexed_w_errorbars->Write();
+  h_c1v_absdphivv_revertexed_w_errorbars->Write();
   h_c1v_sumdbv_w_errorbars->Write();
-  h_c1v_absdphivv->Write();
-  h_c1v_dbv0->Write();
-  h_c1v_dbv1->Write();
-  h_c1v_dbv1_dbv0->Write();
+  h_c1v_absdphivv_revertexed_w_errorbars->Write();
+  h_c1v_ntrk0_ntrk1->Write();
+  //h_c1v_absdphivv->Write();
+  //h_c1v_dbv0->Write();
+  //h_c1v_dbv1->Write();
+  //h_c1v_dbv1_dbv0->Write();
 
-  TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
+  /*TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
   TLegend* l_dvv = new TLegend(0.35,0.75,0.85,0.85);
   h_2v_dvv->SetTitle(";d_{VV} (cm);events");
   h_2v_dvv->SetLineColor(kBlue);
@@ -3132,7 +3934,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   l_sumdbv->Draw();
   c_sumdbv->SetTickx();
   c_sumdbv->SetTicky();
-  c_sumdbv->Write();
+  c_sumdbv->Write();*/
 
   TCanvas* c_sumdbv_w_errorbars = new TCanvas("c_sumdbv_w_errorbars", "c_sumdbv_w_errorbars", 700, 700);
   TLegend* l_sumdbv_w_errorbars = new TLegend(0.35,0.75,0.85,0.85);
@@ -3155,7 +3957,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   c_sumdbv_w_errorbars->SetTicky();
   c_sumdbv_w_errorbars->Write();
 
-  TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
+  /*TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
   TLegend* l_absdphivv = new TLegend(0.25,0.75,0.75,0.85);
   h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
   h_2v_absdphivv->SetLineColor(kBlue);
@@ -3174,13 +3976,13 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   l_absdphivv->Draw();
   c_absdphivv->SetTickx();
   c_absdphivv->SetTicky();
-  c_absdphivv->Write();
+  c_absdphivv->Write();*/
 
   f_dphi->Write();
-  if (p.clearing_from_eff()) {
-    h_eff_2d->SetName("h_eff_2d");
-    h_eff_2d->Write();
-  }
+  //if (p.clearing_from_eff()) {
+  //  h_eff_2d->SetName("h_eff_2d");
+  //  h_eff_2d->Write();
+  //}
   if (p.vary_dphi()) {
     //i_dphi->Write();
     //i_dphi2->Write();
@@ -3202,6 +4004,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_1v_w; //Alec added
   delete h_1v_z;
   delete h_1v_dz;
+  delete h_1v_dpvsv;
   delete h_1v_xy;
   delete h_1v_dbv0;
   delete h_1v_dbv1;
@@ -3209,6 +4012,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_1v_dbv_bs2derr; //Alec added
   delete h_1v_phiv;
   delete h_1v_npu;
+  delete h_1v_npv;
   delete h_1v_njets;
   delete h_1v_ht40;
   delete h_1v_phij;
@@ -3224,18 +4028,24 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_2v_dphivv;
   delete h_2v_absdphivv;
   delete h_2v_npu;
-  delete c_dvv;
-  delete c_sumdbv;
+  delete h_2v_npv;
+  //delete c_dvv;
+  //delete c_sumdbv;
   delete c_sumdbv_w_errorbars;
-  delete c_absdphivv;
-  delete h_c1v_dbv;
-  delete h_c1v_dvv;
-  delete h_c1v_sumdbv;
+  //delete c_absdphivv;
+  //delete h_c1v_dbv;
+  //delete h_c1v_dvv;
+  //delete h_c1v_sumdbv;
+  delete h_c1v_dvv3D_w_errorbars;
+  delete h_c1v_dvv3D_revertexed_w_errorbars;
+  delete h_c1v_sumdbv_revertexed_w_errorbars;
+  delete h_c1v_absdphivv_revertexed_w_errorbars;
   delete h_c1v_sumdbv_w_errorbars;
-  delete h_c1v_absdphivv;
-  delete h_c1v_dbv0;
-  delete h_c1v_dbv1;
-  delete h_c1v_dbv1_dbv0;
+  delete h_c1v_ntrk0_ntrk1;
+  //delete h_c1v_absdphivv;
+  //delete h_c1v_dbv0;
+  //delete h_c1v_dbv1;
+  //delete h_c1v_dbv1_dbv0;
 }
 
 int main(int argc, const char* argv[]) {
@@ -3297,10 +4107,10 @@ int main(int argc, const char* argv[]) {
       version = "ULV30Lepm";
   }  
  
-  // This for loop runs over simulated background 
+  // This for loop runs over simulated background
   
   for (const char* year : { "run2",}) { //{"20161", "20162", "2017", "2018", "2017p8", "run2"}) { //change depending on year run
-    for (int ntracks : { 3, 4, 5, 7}) {
+    for (int ntracks : { 3,4,5,7,8,9}) { // use 3 for 3x3, 4 for 4x4, 5 for 5x5, 7 for 3x4, 8 for 3x5, and 9 for 4x5; multiple can be run at a time with e.g. 3,4,5,7,8,9
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
 
       construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_%s.root", year, ntracks, version));
