@@ -31,8 +31,10 @@ is_signal = False
 
 #signal samples
 is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 
 data = False
 year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
@@ -48,7 +50,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'mfv_stopdbardbar_tau001000um_M0200_%s.root' % year, 1.
+    fn, presel_scale = 'VHToSSTodddd_tau1mm_M55_%s.root' % year, 1.
 
 def propagate_product(x, y, ex, ey):
     p = x * y
@@ -65,15 +67,15 @@ sel_f = ROOT.TFile.Open(os.path.join(sel_path, fn))
 
 if is_signal:
     sample_index = fn.replace('.root','')
-    mcsample = eval("Samples." + sample_index)
+    mcsample = eval("Samples." + sample_index.replace('run2','20161')) # Apparently ttHToSSTo4d_tau10mm_M55_run2 isn't a thing?
     mcsample_forxsec = eval("Samples." + sample_index.replace('run2','20161'))
     #Samples._set_signal_stuff(mcsample) # crashes if name includes "run2"
     Samples._set_signal_stuff(mcsample_forxsec)
     sumw = mcsample.sumw(presel_f)
     xsec = mcsample_forxsec.xsec
     if "run2" in sample_index:
-        #lumi = AnalysisConstants.int_lumi_run2
-        lumi = AnalysisConstants.int_lumi_bjet_trig_run2
+        lumi = AnalysisConstants.int_lumi_run2
+        #lumi = AnalysisConstants.int_lumi_bjet_trig_run2
     else:
         raise NotImplementedError("Have not defined lumi for non-Run2 sample")
     sigyield = xsec * lumi
