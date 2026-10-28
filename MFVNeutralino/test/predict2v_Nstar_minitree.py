@@ -4,11 +4,7 @@ import pandas as pd
 import numpy as np
 
 from JMTucker.Tools import Samples
-from JMTucker.Tools.Sample import MCSample
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
-from JMTucker.MFVNeutralino.UtilitiesBase import *
-
-is_signal = False
 
 #presel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_FixHT2016_OnnormdzULV30BvetoLHTm' #FIXME 
 #presel_path = '/eos/user/p/pekotamn/MiniTree_LepIPCut_OnnormdzULV30Lepm'
@@ -26,17 +22,14 @@ is_signal = False
 #sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-19-MiniTree_tag004Lepm5_unblind_5trk_1vtx_inverted_mass_and_sumpt'
 
 #btag triggers
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-15-MiniTree_tag004BvetoLHTm4_unblind_5trk_1vtx-Joey-Data'
 
 #signal samples
-is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+#presel_path = '/uscms/home/alecduqu/crab_dirs'
+#sel_path = '/uscms/home/alecduqu/crab_dirs'
 
-data = False
+data = True
 year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
 print("variation: %s" % varname)
@@ -44,14 +37,12 @@ print("variation: %s" % varname)
 if data:
     #fn, presel_scale = 'Lepton_data_%s.root' % year, 1.
     fn, presel_scale = 'Bjet_data_%s.root' % year, 1.
-elif not is_signal:
+else:
     #fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
-    fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
+    #fn, presel_scale = 'background_btagpresel_%s.root' % year, 1.
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
-else:
-    fn, presel_scale = 'ttHToSSTo4d_tau10mm_M55_%s.root' % year, 1.
-
+    fn, presel_scale = 'ggHToSSTodddd_tau1mm_M55_%s.root' % year, 1.
 def propagate_product(x, y, ex, ey):
     p = x * y
     e = p * ((ex / x)**2 + (ey / y)**2)**0.5
@@ -65,35 +56,10 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile.Open(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile.Open(os.path.join(sel_path, fn))
 
-if is_signal:
-    sample_index = fn.replace('.root','')
-    mcsample = eval("Samples." + sample_index.replace('run2','20161').replace("VHToSS","ggZHToSS")) # Need run2 sub because apparently ttHToSSTo4d_tau10mm_M55_run2 isn't a thing?
-    Samples._set_signal_stuff(mcsample)
-    sumw = mcsample.sumw(presel_f)
-    xsec = 0
-    if "VHToSS" in sample_index:
-        substitutions = ["ggZHToSS", "WplusHToSS", "WminusHToSS", "ZHToSS"]
-        for sub in substitutions:
-            mcsample_temp = eval("Samples." + sample_index.replace('VHToSS',sub).replace('run2','20161'))
-            xsec += mcsample_temp.xsec
-    else:
-        xsec = mcsample.xsec
-    if "run2" in sample_index:
-        lumi = AnalysisConstants.int_lumi_run2
-        #lumi = AnalysisConstants.int_lumi_bjet_trig_run2
-    else:
-        raise NotImplementedError("Have not defined lumi for non-Run2 sample")
-    sigyield = xsec * lumi
-    print "DEBUG: sumw, xsec, lumi", sumw, xsec, lumi
-    presel_scale = sigyield / sumw
-    print "DEBUG: presel_scale", presel_scale
-
 npresel, err_npresel = get_integral(presel_f.Get('mfvMiniTreePreSelEvtFilt/h_nsv'))
-npresel *= presel_scale
-err_npresel *= presel_scale
 
 print 'year:', year
-print 'presel events: %8.2f +- %4.2f' % (npresel, err_npresel)
+print 'presel events: %8.0f +- %4.0f' % (npresel, err_npresel)
 #print '%16s %19s %15s %35s' % ('n1v', 'pred n2v', 'n2v', 'ratio')
 
 #See these evernotes for an explanation of the calculations:
@@ -117,12 +83,8 @@ else:
 
 for ntk in ntk_ls:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
-    n1v *= presel_scale
-    err_n1v *= presel_scale
     if ntk in ntk_ls_2v:
         n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
-        n2v *= presel_scale
-        err_n2v *= presel_scale
     else:
         n2v, err_n2v = 0.0, 0.0
     
@@ -131,7 +93,7 @@ for ntk in ntk_ls:
     var_n2v += (err_n2v**2)
     var_n1v += (err_n1v**2)
 
-print 'n1 = %8.2f'%(tot_n1v)
+print 'n1 = %8.0f'%(tot_n1v)
 print 'err_n1 = %f'%(math.sqrt(var_n1v)) 
 for ntk in ntk2_ls:
     tracks = [int(i) for i in ntk if i.isdigit()]
@@ -143,24 +105,18 @@ for ntk in ntk2_ls:
             tracks[i] = 'Ntk%s' % n
     
     n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('%sexact' % ntk)))
-    n2v *= presel_scale
-    err_n2v *= presel_scale
 
     tot_n2v += n2v
     var_n2v += (err_n2v**2) 
 
-print 'n2 = %8.2f'%(tot_n2v)
+print 'n2 = %8.0f'%(tot_n2v)
 print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
 for ntk in ntk_ls:
     n1v, err_n1v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 2, 2, x_are_bins=True)
-    n1v *= presel_scale
-    err_n1v *= presel_scale
     if ntk in ntk_ls_2v:
         n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if ntk == 5 else 'Ntk%s' % ntk)), 3, 999, x_are_bins=True)
-        n2v *= presel_scale
-        err_n2v *= presel_scale
     else:
         n2v, err_n2v = 0.0, 0.0
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
@@ -192,7 +148,7 @@ for ntk in ntk_ls:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / 1 for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
     else:
         err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
-    print '%5d %11.3f +- %4.3f %9.6f +- %6.6f %7.3f +- %4.3f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%5d %11.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]' % (ntk, n1v, err_n1v, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
 print
 print '%8s %16s %16s %19s %15s %35s' % ('ntracks', 'n1vN', 'n1vM', 'pred n2v', 'n2v', 'ratio')
 
@@ -208,16 +164,10 @@ for ntk in ntk2_ls:
 
     n1vN, err_n1vN = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[0] == 5 else '%s' % tracks[0])), 2, 2, x_are_bins=True)
     n1vM, err_n1vM = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('' if tracks[1] == 5 else '%s' % tracks[1])), 2, 2, x_are_bins=True)
-    n1vN *= presel_scale
-    n1vM *= presel_scale
-    err_n1vN *= presel_scale
-    err_n1vM *= presel_scale
     n1v_oth = tot_n1v - n1vN - n1vM
     err_n1v_oth = np.sqrt(var_n1v - err_n1vN**2 - err_n1vM**2)
     
     n2v, err_n2v = get_integral(sel_f.Get('mfvMiniTree%s/h_nsv' % ('%sexact' % ntk)))
-    n2v *= presel_scale
-    err_n2v *= presel_scale
 
     n2v_poiss = poisson_interval(n2v) # FIXME - Do NOT use for MC
     effn1vN = n1vN/tot_n1v
@@ -238,4 +188,4 @@ for ntk in ntk2_ls:
         err_rat = np.sqrt((1/pred)**2 + (n2v/pred**2)**2 * err_pred**2)
     err_ratl_poiss, err_rath_poiss =  [n2v_temp / pred for n2v_temp in n2v_poiss] # FIXME - Do NOT use for MC
 
-    print '%3d %s %d %11.3f +- %4.3f %8.3f +- %4.3f %9.6f +- %6.6f %7.3f +- %4.3f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
+    print '%3d %s %d %11.0f +- %4.0f %8.0f +- %4.0f %9.6f +- %6.6f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.4f +- %.4f PI: [%4.2f, %4.2f]'% (ntkspervtx[0], 'x', ntkspervtx[1], n1vN, err_n1vN, n1vM, err_n1vM, pred, err_pred, n2v, err_n2v, n2v_poiss[0], n2v_poiss[1], rat, err_rat, err_ratl_poiss, err_rath_poiss)
