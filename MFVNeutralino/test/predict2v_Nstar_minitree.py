@@ -50,7 +50,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'VHToSSTodddd_tau1mm_M55_%s.root' % year, 1.
+    fn, presel_scale = 'ttHToSSTo4d_tau10mm_M55_%s.root' % year, 1.
 
 def propagate_product(x, y, ex, ey):
     p = x * y
@@ -67,12 +67,17 @@ sel_f = ROOT.TFile.Open(os.path.join(sel_path, fn))
 
 if is_signal:
     sample_index = fn.replace('.root','')
-    mcsample = eval("Samples." + sample_index.replace('run2','20161')) # Apparently ttHToSSTo4d_tau10mm_M55_run2 isn't a thing?
-    mcsample_forxsec = eval("Samples." + sample_index.replace('run2','20161'))
-    #Samples._set_signal_stuff(mcsample) # crashes if name includes "run2"
-    Samples._set_signal_stuff(mcsample_forxsec)
+    mcsample = eval("Samples." + sample_index.replace('run2','20161').replace("VHToSS","ggZHToSS")) # Need run2 sub because apparently ttHToSSTo4d_tau10mm_M55_run2 isn't a thing?
+    Samples._set_signal_stuff(mcsample)
     sumw = mcsample.sumw(presel_f)
-    xsec = mcsample_forxsec.xsec
+    xsec = 0
+    if "VHToSS" in sample_index:
+        substitutions = ["ggZHToSS", "WplusHToSS", "WminusHToSS", "ZHToSS"]
+        for sub in substitutions:
+            mcsample_temp = eval("Samples." + sample_index.replace('VHToSS',sub).replace('run2','20161'))
+            xsec += mcsample_temp.xsec
+    else:
+        xsec = mcsample.xsec
     if "run2" in sample_index:
         lumi = AnalysisConstants.int_lumi_run2
         #lumi = AnalysisConstants.int_lumi_bjet_trig_run2
