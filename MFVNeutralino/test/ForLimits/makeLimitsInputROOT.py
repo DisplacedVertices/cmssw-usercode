@@ -2,12 +2,11 @@ from __future__ import print_function
 import argparse
 import os
 import sys
-from glob import glob
 
 import ROOT
 import numpy as np
 
-from JMTucker.Tools.ROOTTools import to_TH1D, move_overflow_into_last_bin
+from JMTucker.Tools.ROOTTools import move_overflow_into_last_bin
 
 import script_configs as config
 import sig_and_bkg_configs as sb_conf
@@ -101,15 +100,12 @@ def check_config(yr):
 # ---------------------------------------------------------------------------
 def make_bkg(f):
     """
-    Write: lumi, observations, rebinned sum_dBV. Nuisance parameters are added elsewhere.
+    Write: lumi, observations, sum_dBV. Nuisance parameters are added elsewhere.
 
     -INPUTS-
     f: ROOT file to write into
     """
-    bkg_fn = os.path.join(
-        config.bkg[sig_type]["folder"],
-        config.bkg[sig_type]["fn"].format(year)
-    )
+    bkg_fn = os.path.join(config.bkg[sig_type]["folder"], config.bkg[sig_type]["fn"])
     if debug:
         print("Opening bkg file:", bkg_fn)
     bkg_f = ROOT.TFile.Open(bkg_fn)
@@ -129,21 +125,31 @@ def make_bkg(f):
             print("  observed bin %d = %d" % (i, v))
     new_bkg_hs.append(h_observed)
 
-    # Full Run 2 MC background -- shape normalized to per-year n2v from sig_and_bkg_configs.py
-    h_bkg_sumdbv = to_TH1D(bkg_f.Get("h_c1v_sumdbv_w_errorbars"), "h_bkg_sumdbv_%s" % year)
-    scale_num = sb_conf.template_norms["n2v"][sig_type][year_id]
+    h_tmpl = bkg_f.Get("h_1")
+    h_bkg_sumdbv = ROOT.TH1D("bkg" + year_tag, "", nbins, bins)
+    for i in range(1, nbins + 2):
+        h_bkg_sumdbv.SetBinContent(i, h_tmpl.GetBinContent(i))
+        h_bkg_sumdbv.SetBinError(i, h_tmpl.GetBinError(i))
+    move_overflow_into_last_bin(h_bkg_sumdbv)
+    bkg_stat = [float(h_bkg_sumdbv.GetBinError(i)) / h_bkg_sumdbv.GetBinContent(i) for i in range(1, nbins + 1)]
+    n2v_run2 = sb_conf.template_norms["n2v_5x5_run2"][sig_type]
+    split_region, era_split = sb_conf.template_norms["n2v_era_split"][sig_type]
+    if n2v_run2 is None or era_split is None:
+        raise ValueError("Set the Run 2 5x5 and per-era %s predicted yields for %s in sig_and_bkg_configs.py"
+                         % (split_region, sig_type))
+    era_frac = float(era_split[year_id]) / sum(era_split)
+    scale_num = n2v_run2 * era_frac
     scale_den = h_bkg_sumdbv.Integral()
     h_bkg_sumdbv.Scale(scale_num / scale_den)
     if debug:
-        print("Bkg Sum_dBV rescaled %.3g -> %.3g" % (scale_den, scale_num))
+        print("Bkg Sum_dBV rescaled %.3g -> %.3g (%s share %.4f of Run 2 %.4g)"
+              % (scale_den, scale_num, split_region, era_frac, n2v_run2))
 
     if config.debug_settings["scale_bkg_fake"]:
         h_bkg_sumdbv.Scale(config.debug_settings["bkg_fake_sf"])
         print("WARNING: scaled bkg by fake factor", config.debug_settings["bkg_fake_sf"])
 
-    h_bkg_sumdbv_rebin = h_bkg_sumdbv.Rebin(nbins, "bkg" + year_tag, bins)
-    move_overflow_into_last_bin(h_bkg_sumdbv_rebin)
-    new_bkg_hs.append(h_bkg_sumdbv_rebin)
+    new_bkg_hs.append(h_bkg_sumdbv)
 
     f.cd()
     for h in new_bkg_hs:
@@ -153,6 +159,7 @@ def make_bkg(f):
             print("  wrote:", h.GetName())
 
     print("BACKGROUND processing complete")
+    return bkg_stat
 
 
 # ---------------------------------------------------------------------------
@@ -171,12 +178,13 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
     -OUTPUTS-
     f will store new histograms; sig_nums, sig_scales and sig_fake_corrs will be added to
     """
-    # Intentional stop: adapt to the new MiniTree layout so every MiniTree file of a sample is read, then remove this raise.
-    raise NotImplementedError(
-        "Signal MiniTree input must be adapted before producing limits: MiniTree jobs write several files "
-        "per sample, but file_key in limits_config.yaml reads only minitree_0.root, which drops MC events.")
-    sig_fn_syntax = config.sig[sig_type]["folder"] + config.sig[sig_type]["file_key"]
-    candidate_files = sorted(glob(sig_fn_syntax))
+    with open(config.sig[sig_type]["minitree_list"]) as fh:
+        listed = [line.strip() for line in fh if line.strip()]
+    folder = os.path.join(os.path.normpath(config.sig[sig_type]["folder"]), "")
+    candidate_files = sorted(p for p in listed if p.startswith(folder))
+    if not candidate_files:
+        raise Exception("No MiniTrees under %s are listed in %s"
+                        % (folder, config.sig[sig_type]["minitree_list"]))
     sig_id = 0
     built_clusters = set()
     wrong_channel = 0   # samples found that belong to the other trigger channel
@@ -280,6 +288,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         ROOT.TH1.AddDirectory(1)
         h_sumdbv_tot    = ROOT.TH1D(n(sig_id, "sumdbv"),       "", 800, 0, 8)
         h_sumdbv_nw_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_nw", "", 800, 0, 8)  # No-weight version
+        h_sumdbv_w2_tot = ROOT.TH1D(n(sig_id, "sumdbv") + "_w2", "", 800, 0, 8)
 
         h_allw_tot = ROOT.TH1D(n(sig_id, "allw"),       "", 400, 0, 0.004) # All events in MiniTree
         h_sigw_tot = ROOT.TH1D(n(sig_id, "sigw"),       "", 400, 0, 0.004) # All signal region events
@@ -306,6 +315,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             ROOT.TH1.AddDirectory(1)
             h_child    = ROOT.TH1D(n(sig_id, "child_sumdbv"),       "", 800, 0, 8)
             h_child_nw = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_nw", "", 800, 0, 8)
+            h_child_w2 = ROOT.TH1D(n(sig_id, "child_sumdbv") + "_w2", "", 800, 0, 8)
             h_allw_subsig = ROOT.TH1D(n(sig_id, "allw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
             h_sigw_subsig = ROOT.TH1D(n(sig_id, "sigw_subsig") + "_sig" + str(wt_id),       "", 400, 0, 0.004)
             h_allw_subsig.SetStatOverflows(ROOT.kTRUE)
@@ -313,6 +323,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
 
             t.Draw("sumdbv>>%s" % n(sig_id, "child_sumdbv"),       "weight*(nvtx>=2)")
             t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_nw"), "1.0*(nvtx>=2)")
+            t.Draw("sumdbv>>%s" % (n(sig_id, "child_sumdbv") + "_w2"), "weight*weight*(nvtx>=2)")
 
             t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "allw_subsig") + "_sig" + str(wt_id)), "1.0")
             t.Draw(str(this_scale)+"*weight>>%s" % (n(sig_id, "sigw_subsig") + "_sig" + str(wt_id)), "1.0*(nvtx>=2)")
@@ -320,10 +331,13 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             ROOT.TH1.AddDirectory(0)
             h_child.SetDirectory(0)
             h_child_nw.SetDirectory(0)
+            h_child_w2.SetDirectory(0)
             h_child.Scale(this_scale)
+            h_child_w2.Scale(this_scale * this_scale)
 
             h_sumdbv_tot.Add(h_child)
             h_sumdbv_nw_tot.Add(h_child_nw)
+            h_sumdbv_w2_tot.Add(h_child_w2)
             h_allw_tot.Add(h_allw_subsig)
             h_sigw_tot.Add(h_sigw_subsig)
 
@@ -337,6 +351,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
             t.Reset()
             h_child    = ROOT.TH1D()
             h_child_nw = ROOT.TH1D()
+            h_child_w2 = ROOT.TH1D()
             h_allw_subsig = ROOT.TH1D()
             h_sigw_subsig = ROOT.TH1D()
 
@@ -349,6 +364,14 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
 
         h_sig_nw = h_sumdbv_nw_tot.Rebin(nbins, n(sig_id, "ngen_perbin"), bins)
         move_overflow_into_last_bin(h_sig_nw)
+
+        h_sig_w2 = h_sumdbv_w2_tot.Rebin(nbins, n(sig_id, "sumw2_perbin"), bins)
+        move_overflow_into_last_bin(h_sig_w2)
+        h_sig_neff = h_sig_nw.Clone(n(sig_id, "neff_perbin"))
+        for i in range(1, nbins + 1):
+            sw, sw2 = h_sig.GetBinContent(i), h_sig_w2.GetBinContent(i)
+            h_sig_neff.SetBinContent(i, sw * sw / sw2 if sw > 0 and sw2 > 0 else 0.0)
+            h_sig_neff.SetBinError(i, 0.0)
 
         if r_f_corr is not None:
             h_sig.Scale(float(r_f_corr))
@@ -375,7 +398,7 @@ def make_sigs(f, sig_nums, sig_scales, sig_fake_corrs):
         move_overflow_into_last_bin(h_allw_tot)
         move_overflow_into_last_bin(h_sigw_tot)
         f.cd()
-        for h in [h_sig, h_sig_nw, h_sumw_hist, h_ngen_hist, h_sigyield_hist, h_allw_tot, h_sigw_tot]:
+        for h in [h_sig, h_sig_nw, h_sig_neff, h_sumw_hist, h_ngen_hist, h_sigyield_hist, h_allw_tot, h_sigw_tot]:
             h.SetTitle(siggrp.proc + "_" + year)
             h.Write()
             if debug:
@@ -491,7 +514,7 @@ def run_one_year(yr):
 
     if debug:
         print("\n--- Background ---")
-    make_bkg(f)
+    bkg_stat = make_bkg(f)
 
     sig_nums   = {}  # signal obj to number dictionary
     sig_scales = {}  # store scalings for signals, preventing repeated calculations
@@ -504,7 +527,7 @@ def run_one_year(yr):
     if debug:
         print("\n--- Background nuisances ---")
     nuis_bkg_ls = []
-    getns.get_nuis_frombkg(nuis_bkg_ls, debug_mode=debug)
+    getns.get_nuis_frombkg(nuis_bkg_ls, bkg_stat, debug_mode=debug)
 
     if debug:
         print("\n--- Signal nuisances + datacards ---")
