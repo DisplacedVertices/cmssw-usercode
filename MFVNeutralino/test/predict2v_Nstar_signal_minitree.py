@@ -9,8 +9,8 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 from JMTucker.MFVNeutralino.UtilitiesBase import *
 import glob
 
-lep = True
-bjet = False
+lep = False
+bjet = True
 
 is_signal = False
 
@@ -24,8 +24,8 @@ is_signal = False
 
 #signal samples
 is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M55_run2'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M55_run2'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 #presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 #sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 
@@ -43,7 +43,8 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = '*HToSSTodddd_tau10mm_M55_201*.root', 1.
+    fn, presel_scale = 'ggHToSSTodddd_tau1mm_M55_201*.root', 1.
+    print 'Note: years are inferred from matched signal files from wildcard'
 
 signal_fns = sorted(glob.glob(os.path.join(presel_path, fn)))
 if not signal_fns:
@@ -95,7 +96,7 @@ for fn in signal_fns:
 
     print "Signal file:", fn
     print "   sumw, xsec, lumi:", sumw, mcsample.xsec, lumi
-    print "   presel_scale:", scale
+    print "   scale:", scale
     print ""
 
 def get_scaled_integral(signal_fs, signal_scales, hist_path, **kwargs):
