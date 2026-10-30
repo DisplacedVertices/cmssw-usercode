@@ -11,6 +11,8 @@ import glob
 
 lep = False
 bjet = True
+if (lep and bjet) or (not lep and not bjet):
+    raise Exception('Invalid lep and bjet trigger combination')
 
 is_signal = False
 
@@ -43,7 +45,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'ggHToSSTodddd_tau1mm_M55_201*.root', 1.
+    fn, presel_scale = 'mfv_neu_tau001000um_M0400_201*.root', 1.
     print 'Note: years are inferred from matched signal files from wildcard'
 
 signal_fns = sorted(glob.glob(os.path.join(presel_path, fn)))
@@ -138,6 +140,7 @@ print 'presel events: %8.2f +- %4.2f' % (npresel, err_npresel)
 #Evernotes written by previous authors of this code: https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579
 tot_n1v = 0 #total input(MC or observed) 1-vtx events
 tot_n2v = 0 #total input(MC or observed) 2-vtx events
+tot_n2v_no5x5 = 0 #total input(MC or observed) 2-vtx events without 5x5
 var_n1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed)
 var_n2v = 0 #the quadratic sum of errors due each 2-vtx input(MC or observed)
 
@@ -159,6 +162,7 @@ for ntk in ntk_ls:
     
     tot_n1v += n1v
     tot_n2v += n2v 
+    tot_n2v_no5x5 += n2v if ntk != 5 else 0.0
     var_n2v += (err_n2v**2)
     var_n1v += (err_n1v**2)
 
@@ -176,9 +180,11 @@ for ntk in ntk2_ls:
     n2v, err_n2v = get_scaled_integral(signal_fs, signal_scales, 'mfvMiniTree%s/h_nsv' % ('%sexact' % ntk))
 
     tot_n2v += n2v
+    tot_n2v_no5x5 += n2v
     var_n2v += (err_n2v**2) 
 
 print 'n2 = %8.2f'%(tot_n2v)
+print 'n2 (no 5x5) = %8.2f'%(tot_n2v_no5x5)
 print 'err_n2 = %f'%(math.sqrt(var_n2v)) 
 print '%8s %16s %19s %15s %35s' % ('ntracks', 'n1v', 'pred n2v', 'n2v', 'ratio')
 
