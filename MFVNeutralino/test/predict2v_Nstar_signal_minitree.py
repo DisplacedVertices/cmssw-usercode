@@ -74,7 +74,7 @@ lit_BRs = {
 }
 lit_XSs = {
   'mfv_stopdbardbar_tau001000um_M0200': 8e4,
-  'mfv_stopdbardbar_tau000300um_M0400': 2.0,
+  'mfv_stopdbardbar_tau000300um_M0400': 1.5,
   'mfv_neu_tau001000um_M0400': 1.0,
 }
 
@@ -124,8 +124,8 @@ for fn in signal_fns:
                     new_scale = lit_BRs[sampname]
                     break
         elif any(os.path.basename(fn).startswith(s) for s in ['mfv_stopdbardbar', 'mfv_neu']):
-            old_scale = 1e-3
-            new_scale = 1e-3
+            old_scale = 1
+            new_scale = 1
             for sampname in lit_XSs.keys():
                 if os.path.basename(fn).startswith(sampname):
                     new_scale = lit_XSs[sampname]
