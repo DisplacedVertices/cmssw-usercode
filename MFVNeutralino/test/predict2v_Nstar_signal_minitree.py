@@ -55,6 +55,29 @@ if not signal_fns:
 signal_fs = []
 signal_scales = []
 
+rescale_xsec = True # If True, scale factors will be corrected from old_scale to new_scale
+old_scale = 1.0
+new_scale = 1.0
+lit_BRs = {
+  'ttHToSSTo4d_tau10mm_M55': 1e-3,
+  'VHToSSTodddd_tau1mm_M55': 7e-3,
+  'WplusHToSSTodddd_tau1mm_M55': 7e-3,
+  'WminusHToSSTodddd_tau1mm_M55': 7e-3,
+  'ZHToSSTodddd_tau1mm_M55': 7e-3,
+  'ggZHToSSTodddd_tau1mm_M55': 7e-3,
+  'VHToSSTodddd_tau10mm_M55': 1e-3,
+  'WplusHToSSTodddd_tau10mm_M55': 1e-3,
+  'WminusHToSSTodddd_tau10mm_M55': 1e-3,
+  'ZHToSSTodddd_tau10mm_M55': 1e-3,
+  'ggZHToSSTodddd_tau10mm_M55': 1e-3,
+  'ggHToSSTodddd_tau1mm_M55': 7e-3,
+}
+lit_XSs = {
+  'mfv_stopdbardbar_tau001000um_M0200': 8e4,
+  'mfv_stopdbardbar_tau000300um_M0400': 2.0,
+  'mfv_neu_tau001000um_M0400': 1.0,
+}
+
 def propagate_product(x, y, ex, ey):
     p = x * y
     e = p * ((ex / x)**2 + (ey / y)**2)**0.5
@@ -92,14 +115,36 @@ for fn in signal_fns:
     else:
         raise NotImplementedError("Lumi not defined for sample %s" % sample_index)
     
+    if rescale_xsec:
+        if any(os.path.basename(fn).startswith(s) for s in ['WplusH', 'WminusH', 'ggZH', 'ZH', 'ttHToSSTo', 'VBFHToSSTo', 'ggHToSS']):
+            old_scale = 1e-2
+            new_scale = 1e-2 # do nothing if not matched
+            for sampname in lit_BRs.keys():
+                if os.path.basename(fn).startswith(sampname):
+                    new_scale = lit_BRs[sampname]
+                    break
+        elif any(os.path.basename(fn).startswith(s) for s in ['mfv_stopdbardbar', 'mfv_neu']):
+            old_scale = 1e-3
+            new_scale = 1e-3
+            for sampname in lit_XSs.keys():
+                if os.path.basename(fn).startswith(sampname):
+                    new_scale = lit_XSs[sampname]
+                    break
+    
     scale = mcsample.xsec * lumi / sumw
+    if rescale_xsec:
+        scale *= new_scale / old_scale
     signal_fs.append(signal_f)
     signal_scales.append(scale)
 
     print "Signal file:", fn
     print "   sumw, xsec, lumi:", sumw, mcsample.xsec, lumi
-    print "   scale:", scale
+    if rescale_xsec:
+        print "   applied xsec correction: %.4f to %.4f" % (old_scale, new_scale)
+    print "   overall scale:", scale
     print ""
+    old_scale = 1.0
+    new_scale = 1.0
 
 def get_scaled_integral(signal_fs, signal_scales, hist_path, **kwargs):
     """
