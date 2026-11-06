@@ -9,8 +9,8 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 from JMTucker.MFVNeutralino.UtilitiesBase import *
 import glob
 
-lep = False
-bjet = True
+lep = True
+bjet = False
 if (lep and bjet) or (not lep and not bjet):
     raise Exception('Invalid lep and bjet trigger combination')
 
@@ -26,8 +26,8 @@ is_signal = False
 
 #signal samples
 is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M40_run2'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M40_run2'
 #presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 #sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 
@@ -45,7 +45,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'mfv_neu_tau001000um_M0400_201*.root', 1.
+    fn, presel_scale = '*HToSSTodddd_tau10mm_M40_201*.root', 1.
     print 'Note: years are inferred from matched signal files from wildcard'
 
 signal_fns = sorted(glob.glob(os.path.join(presel_path, fn)))
@@ -60,16 +60,55 @@ old_scale = 1.0
 new_scale = 1.0
 lit_BRs = {
   'ttHToSSTo4d_tau10mm_M55': 1e-3,
+
+  'VHToSSTodddd_tau100um_M55': 0.11,
+  'WplusHToSSTodddd_tau100um_M55': 0.11,
+  'WminusHToSSTodddd_tau100um_M55': 0.11,
+  'ZHToSSTodddd_tau100um_M55': 0.11,
+  'ggZHToSSTodddd_tau100um_M55': 0.11,
+
   'VHToSSTodddd_tau1mm_M55': 7e-3,
   'WplusHToSSTodddd_tau1mm_M55': 7e-3,
   'WminusHToSSTodddd_tau1mm_M55': 7e-3,
   'ZHToSSTodddd_tau1mm_M55': 7e-3,
   'ggZHToSSTodddd_tau1mm_M55': 7e-3,
+
+  'VHToSSTodddd_tau3mm_M55': 2e-3,
+  'WplusHToSSTodddd_tau3mm_M55': 2e-3,
+  'WminusHToSSTodddd_tau3mm_M55': 2e-3,
+  'ZHToSSTodddd_tau3mm_M55': 2e-3,
+  'ggZHToSSTodddd_tau3mm_M55': 2e-3,
+
   'VHToSSTodddd_tau10mm_M55': 1e-3,
   'WplusHToSSTodddd_tau10mm_M55': 1e-3,
   'WminusHToSSTodddd_tau10mm_M55': 1e-3,
   'ZHToSSTodddd_tau10mm_M55': 1e-3,
   'ggZHToSSTodddd_tau10mm_M55': 1e-3,
+
+  'VHToSSTodddd_tau100um_M40': 0.11,
+  'WplusHToSSTodddd_tau100um_M40': 0.11,
+  'WminusHToSSTodddd_tau100um_M40': 0.11,
+  'ZHToSSTodddd_tau100um_M40': 0.11,
+  'ggZHToSSTodddd_tau100um_M40': 0.11,
+
+  'VHToSSTodddd_tau1mm_M40': 1e-2,
+  'WplusHToSSTodddd_tau1mm_M40': 1e-2,
+  'WminusHToSSTodddd_tau1mm_M40': 1e-2,
+  'ZHToSSTodddd_tau1mm_M40': 1e-2,
+  'ggZHToSSTodddd_tau1mm_M40': 1e-2,
+
+  'VHToSSTodddd_tau3mm_M40': 3e-3,
+  'WplusHToSSTodddd_tau3mm_M40': 3e-3,
+  'WminusHToSSTodddd_tau3mm_M40': 3e-3,
+  'ZHToSSTodddd_tau3mm_M40': 3e-3,
+  'ggZHToSSTodddd_tau3mm_M40': 3e-3,
+
+  'VHToSSTodddd_tau10mm_M40': 2e-3,
+  'WplusHToSSTodddd_tau10mm_M40': 2e-3,
+  'WminusHToSSTodddd_tau10mm_M40': 2e-3,
+  'ZHToSSTodddd_tau10mm_M40': 2e-3,
+  'ggZHToSSTodddd_tau10mm_M40': 2e-3,
+
   'ggHToSSTodddd_tau1mm_M55': 7e-3,
 }
 lit_XSs = {
