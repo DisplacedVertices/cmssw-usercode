@@ -26,8 +26,8 @@ is_signal = False
 
 #signal samples
 is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M40_run2'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal/VHToSSTodddd_tau10mm_M40_run2'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
 #presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 #sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 
@@ -45,7 +45,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = '*HToSSTodddd_tau10mm_M40_201*.root', 1.
+    fn, presel_scale = 'ttHToSSTo4d_tau300um_M55_201*.root', 1.
     print 'Note: years are inferred from matched signal files from wildcard'
 
 signal_fns = sorted(glob.glob(os.path.join(presel_path, fn)))
@@ -59,13 +59,27 @@ rescale_xsec = True # If True, scale factors will be corrected from old_scale to
 old_scale = 1.0
 new_scale = 1.0
 lit_BRs = {
+  'ttHToSSTo4d_tau300um_M55': 0.11,
+  'ttHToSSTo4d_tau1mm_M55': 7e-3,
+  'ttHToSSTo4d_tau3mm_M55': 2e-3,
   'ttHToSSTo4d_tau10mm_M55': 1e-3,
+
+  'ttHToSSTo4d_tau300um_M40': 0.11,
+  'ttHToSSTo4d_tau1mm_M40': 9e-3,
+  'ttHToSSTo4d_tau3mm_M40': 3e-3,
+  'ttHToSSTo4d_tau10mm_M40': 2e-3,
 
   'VHToSSTodddd_tau100um_M55': 0.11,
   'WplusHToSSTodddd_tau100um_M55': 0.11,
   'WminusHToSSTodddd_tau100um_M55': 0.11,
   'ZHToSSTodddd_tau100um_M55': 0.11,
   'ggZHToSSTodddd_tau100um_M55': 0.11,
+
+  'VHToSSTodddd_tau300um_M55': 0.11,
+  'WplusHToSSTodddd_tau300um_M55': 0.11,
+  'WminusHToSSTodddd_tau300um_M55': 0.11,
+  'ZHToSSTodddd_tau300um_M55': 0.11,
+  'ggZHToSSTodddd_tau300um_M55': 0.11,
 
   'VHToSSTodddd_tau1mm_M55': 7e-3,
   'WplusHToSSTodddd_tau1mm_M55': 7e-3,
@@ -91,6 +105,12 @@ lit_BRs = {
   'ZHToSSTodddd_tau100um_M40': 0.11,
   'ggZHToSSTodddd_tau100um_M40': 0.11,
 
+  'VHToSSTodddd_tau300um_M40': 0.11,
+  'WplusHToSSTodddd_tau300um_M40': 0.11,
+  'WminusHToSSTodddd_tau300um_M40': 0.11,
+  'ZHToSSTodddd_tau300um_M40': 0.11,
+  'ggZHToSSTodddd_tau300um_M40': 0.11,
+
   'VHToSSTodddd_tau1mm_M40': 1e-2,
   'WplusHToSSTodddd_tau1mm_M40': 1e-2,
   'WminusHToSSTodddd_tau1mm_M40': 1e-2,
@@ -112,7 +132,7 @@ lit_BRs = {
   'ggHToSSTodddd_tau1mm_M55': 7e-3,
 }
 lit_XSs = {
-  'mfv_stopdbardbar_tau001000um_M0200': 8e4,
+  'mfv_stopdbardbar_tau001000um_M0200': 2,
   'mfv_stopdbardbar_tau000300um_M0400': 1.5,
   'mfv_neu_tau001000um_M0400': 1.0,
 }
