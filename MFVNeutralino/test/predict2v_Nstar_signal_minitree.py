@@ -59,15 +59,21 @@ rescale_xsec = True # If True, scale factors will be corrected from old_scale to
 old_scale = 1.0
 new_scale = 1.0
 lit_BRs = {
-  'ttHToSSTo4d_tau300um_M55': 0.11,
-  'ttHToSSTo4d_tau1mm_M55': 7e-3,
+  'ttHToSSTo4d_tau300um_M55': 3e-2,
+  'ttHToSSTo4d_tau1mm_M55': 5e-3,
   'ttHToSSTo4d_tau3mm_M55': 2e-3,
   'ttHToSSTo4d_tau10mm_M55': 1e-3,
 
-  'ttHToSSTo4d_tau300um_M40': 0.11,
-  'ttHToSSTo4d_tau1mm_M40': 9e-3,
+  'ttHToSSTo4d_tau300um_M40': 3e-2,
+  'ttHToSSTo4d_tau1mm_M40': 7e-3,
   'ttHToSSTo4d_tau3mm_M40': 3e-3,
   'ttHToSSTo4d_tau10mm_M40': 2e-3,
+
+  'ttHToSSTo4d_tau300um_M15': 0.11,
+  'ttHToSSTo4d_tau1mm_M15': 0.11,
+  'ttHToSSTo4d_tau3mm_M15': 4e-2,
+  'ttHToSSTo4d_tau10mm_M15': 1.5e-2,
+  
 
   'VHToSSTodddd_tau100um_M55': 0.11,
   'WplusHToSSTodddd_tau100um_M55': 0.11,
@@ -75,17 +81,17 @@ lit_BRs = {
   'ZHToSSTodddd_tau100um_M55': 0.11,
   'ggZHToSSTodddd_tau100um_M55': 0.11,
 
-  'VHToSSTodddd_tau300um_M55': 0.11,
-  'WplusHToSSTodddd_tau300um_M55': 0.11,
-  'WminusHToSSTodddd_tau300um_M55': 0.11,
-  'ZHToSSTodddd_tau300um_M55': 0.11,
-  'ggZHToSSTodddd_tau300um_M55': 0.11,
+  'VHToSSTodddd_tau300um_M55': 2e-2,
+  'WplusHToSSTodddd_tau300um_M55': 2e-2,
+  'WminusHToSSTodddd_tau300um_M55': 2e-2,
+  'ZHToSSTodddd_tau300um_M55': 2e-2,
+  'ggZHToSSTodddd_tau300um_M55': 2e-2,
 
-  'VHToSSTodddd_tau1mm_M55': 7e-3,
-  'WplusHToSSTodddd_tau1mm_M55': 7e-3,
-  'WminusHToSSTodddd_tau1mm_M55': 7e-3,
-  'ZHToSSTodddd_tau1mm_M55': 7e-3,
-  'ggZHToSSTodddd_tau1mm_M55': 7e-3,
+  'VHToSSTodddd_tau1mm_M55': 3e-3,
+  'WplusHToSSTodddd_tau1mm_M55': 3e-3,
+  'WminusHToSSTodddd_tau1mm_M55': 3e-3,
+  'ZHToSSTodddd_tau1mm_M55': 3e-3,
+  'ggZHToSSTodddd_tau1mm_M55': 3e-3,
 
   'VHToSSTodddd_tau3mm_M55': 2e-3,
   'WplusHToSSTodddd_tau3mm_M55': 2e-3,
@@ -99,23 +105,24 @@ lit_BRs = {
   'ZHToSSTodddd_tau10mm_M55': 1e-3,
   'ggZHToSSTodddd_tau10mm_M55': 1e-3,
 
+
   'VHToSSTodddd_tau100um_M40': 0.11,
   'WplusHToSSTodddd_tau100um_M40': 0.11,
   'WminusHToSSTodddd_tau100um_M40': 0.11,
   'ZHToSSTodddd_tau100um_M40': 0.11,
   'ggZHToSSTodddd_tau100um_M40': 0.11,
 
-  'VHToSSTodddd_tau300um_M40': 0.11,
-  'WplusHToSSTodddd_tau300um_M40': 0.11,
-  'WminusHToSSTodddd_tau300um_M40': 0.11,
-  'ZHToSSTodddd_tau300um_M40': 0.11,
-  'ggZHToSSTodddd_tau300um_M40': 0.11,
+  'VHToSSTodddd_tau300um_M40': 3e-2,
+  'WplusHToSSTodddd_tau300um_M40': 3e-2,
+  'WminusHToSSTodddd_tau300um_M40': 3e-2,
+  'ZHToSSTodddd_tau300um_M40': 3e-2,
+  'ggZHToSSTodddd_tau300um_M40': 3e-2,
 
-  'VHToSSTodddd_tau1mm_M40': 1e-2,
-  'WplusHToSSTodddd_tau1mm_M40': 1e-2,
-  'WminusHToSSTodddd_tau1mm_M40': 1e-2,
-  'ZHToSSTodddd_tau1mm_M40': 1e-2,
-  'ggZHToSSTodddd_tau1mm_M40': 1e-2,
+  'VHToSSTodddd_tau1mm_M40': 5e-3,
+  'WplusHToSSTodddd_tau1mm_M40': 5e-3,
+  'WminusHToSSTodddd_tau1mm_M40': 5e-3,
+  'ZHToSSTodddd_tau1mm_M40': 5e-3,
+  'ggZHToSSTodddd_tau1mm_M40': 5e-3,
 
   'VHToSSTodddd_tau3mm_M40': 3e-3,
   'WplusHToSSTodddd_tau3mm_M40': 3e-3,
@@ -129,7 +136,44 @@ lit_BRs = {
   'ZHToSSTodddd_tau10mm_M40': 2e-3,
   'ggZHToSSTodddd_tau10mm_M40': 2e-3,
 
-  'ggHToSSTodddd_tau1mm_M55': 7e-3,
+
+  'VHToSSTodddd_tau300um_M15': 0.11,
+  'WplusHToSSTodddd_tau300um_M15': 0.11,
+  'WminusHToSSTodddd_tau300um_M15': 0.11,
+  'ZHToSSTodddd_tau300um_M15': 0.11,
+  'ggZHToSSTodddd_tau300um_M15': 0.11,
+
+  'VHToSSTodddd_tau1mm_M15': 0.11,
+  'WplusHToSSTodddd_tau1mm_M15': 0.11,
+  'WminusHToSSTodddd_tau1mm_M15': 0.11,
+  'ZHToSSTodddd_tau1mm_M15': 0.11,
+  'ggZHToSSTodddd_tau1mm_M15': 0.11,
+
+  'VHToSSTodddd_tau3mm_M15': 4e-2,
+  'WplusHToSSTodddd_tau3mm_M15': 4e-2,
+  'WminusHToSSTodddd_tau3mm_M15': 4e-2,
+  'ZHToSSTodddd_tau3mm_M15': 4e-2,
+  'ggZHToSSTodddd_tau3mm_M15': 4e-2,
+
+  'VHToSSTodddd_tau10mm_M15': 1.5e-2,
+  'WplusHToSSTodddd_tau10mm_M15': 1.5e-2,
+  'WminusHToSSTodddd_tau10mm_M15': 1.5e-2,
+  'ZHToSSTodddd_tau10mm_M15': 1.5e-2,
+  'ggZHToSSTodddd_tau10mm_M15': 1.5e-2,
+
+
+  'ggHToSSTodddd_tau100um_M55': 8e-2,
+  'ggHToSSTodddd_tau1mm_M55': 1.5e-3,
+  'ggHToSSTodddd_tau10mm_M55': 1e-3,
+  'ggHToSSTodddd_tau100mm_M55': 1.5e-3,
+
+  'ggHToSSTodddd_tau100um_M40': 0.11,
+  'ggHToSSTodddd_tau1mm_M40': 3e-3,
+  'ggHToSSTodddd_tau10mm_M40': 2e-3,
+  'ggHToSSTodddd_tau100mm_M40': 3e-3,
+
+  'ggHToSSTodddd_tau1mm_M15': 0.11,
+  'ggHToSSTodddd_tau10mm_M15': 1.5e-2,
 }
 lit_XSs = {
   'mfv_stopdbardbar_tau001000um_M0200': 2,
