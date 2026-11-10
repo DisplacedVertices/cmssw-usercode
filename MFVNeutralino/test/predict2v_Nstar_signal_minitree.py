@@ -9,8 +9,8 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 from JMTucker.MFVNeutralino.UtilitiesBase import *
 import glob
 
-lep = True
-bjet = False
+lep = False
+bjet = True
 if (lep and bjet) or (not lep and not bjet):
     raise Exception('Invalid lep and bjet trigger combination')
 
@@ -26,10 +26,10 @@ is_signal = False
 
 #signal samples
 is_signal = True
-presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
-sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
-#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
-#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+#presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
+#sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004Lepm-Signal'
+presel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
+sel_path = '/uscms/home/yuqingwu/nobackup/crabdirs/26-10-26-MiniTree_tag004BvetoLHTm-Signal'
 
 data = False
 year = 'run2' if len(sys.argv) < 2 else sys.argv[1]
@@ -45,7 +45,7 @@ elif not is_signal:
     #fn, presel_scale = 'dyjets_leptonpresel_%s.root' % year, 1.
     #fn, presel_scale = 'ttbar_btagpresel_%s.root' % year, 1.
 else:
-    fn, presel_scale = 'ttHToSSTo4d_tau300um_M55_201*.root', 1.
+    fn, presel_scale = 'ggHToSSTodddd_tau100um_M40_201*.root', 1.
     print 'Note: years are inferred from matched signal files from wildcard'
 
 signal_fns = sorted(glob.glob(os.path.join(presel_path, fn)))
@@ -176,9 +176,9 @@ lit_BRs = {
   'ggHToSSTodddd_tau10mm_M15': 1.5e-2,
 }
 lit_XSs = {
-  'mfv_stopdbardbar_tau001000um_M0200': 2,
-  'mfv_stopdbardbar_tau000300um_M0400': 1.5,
-  'mfv_neu_tau001000um_M0400': 1.0,
+  'mfv_stopdbardbar_tau001000um_M0200': 0.3,
+  'mfv_stopdbardbar_tau000300um_M0400': 0.6,
+  'mfv_neu_tau001000um_M0400': 0.4,
 }
 
 def propagate_product(x, y, ex, ey):
