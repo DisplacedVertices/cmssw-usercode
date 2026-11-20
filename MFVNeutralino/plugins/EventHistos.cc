@@ -255,7 +255,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_dau_genele_dBV;
   */
 
-  TH2F* h_vertex_seed_track_corr_2d[corr_2d_num_axes][corr_2d_num_axes];
+  // TH2F* h_vertex_seed_track_corr_2d[corr_2d_num_axes][corr_2d_num_axes];
   
   TH1F* h_n_vertex_seed_tracks[eta_num_regions];
   TH1F* h_vertex_seed_track_chi2dof[eta_num_regions];
@@ -427,11 +427,13 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   // pT filtering
   const std::string seed_track_pt_tag = filter_seed_tracks_w_low_pt ? pt_region_tags[int(pt_keep)] : "";
+  /*
   for (int i=0; i < corr_2d_num_axes; ++i) {
     for (int j=0; j < corr_2d_num_axes; ++j) {
       h_vertex_seed_track_corr_2d[i][j] = fs->make<TH2F>(TString::Format("h_vertex_seed_track_corr_2d%s_vs%s%s", corr_2d_tags[i], corr_2d_tags[j], seed_track_pt_tag.c_str()), TString::Format(";all seed track %s;all seed track %s", corr_2d_ax_labels[i], corr_2d_ax_labels[j]), corr_2d_bins[i][0], corr_2d_bins[i][1], corr_2d_bins[i][2], corr_2d_bins[j][0], corr_2d_bins[j][1], corr_2d_bins[j][2]);
     }
   }
+  */
   h_vertex_seed_track_eta = fs->make<TH1F>(TString::Format("h_vertex_seed_track_eta%s", seed_track_pt_tag.c_str()), ";all seed track #eta;tracks/0.052", 100, -2.6, 2.6);
   for (int i = 0; i < eta_num_regions; ++i) {
     h_n_vertex_seed_tracks[i] = fs->make<TH1F>(TString::Format("h_n_vertex_seed_tracks%s%s", eta_region_tags[i], seed_track_pt_tag.c_str()), TString::Format(";%s # all seed tracks;events", eta_region_names[i]), 100, 0, 100);
@@ -1267,6 +1269,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (filter_seed_tracks_w_low_pt && get_general_pt_region(mevent->vertex_seed_track_pt(i)) == pt_none) {
       continue;
     }
+    /*
     const double corr_2d_entries[corr_2d_num_axes] = { // Fill the 2D plots
       mevent->vertex_seed_track_dxy[i],
       mevent->vertex_seed_track_err_dxy[i],
@@ -1286,6 +1289,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_vertex_seed_track_corr_2d[j][k]->Fill(corr_2d_entries[j], corr_2d_entries[k], w);
       }
     }
+    */
     fill_general_eta(h_vertex_seed_track_chi2dof, mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_chi2dof[i], w);
     fill_general_eta(h_vertex_seed_track_q, mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_q(i), w);
     fill_general_eta(h_vertex_seed_track_pt, mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_pt(i), w);

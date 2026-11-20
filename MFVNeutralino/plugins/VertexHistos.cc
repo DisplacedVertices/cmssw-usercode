@@ -88,7 +88,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_absdeltaphi01_no_shared_jets;
   */
 
-  TH2F* h_sv_track_corr_2d[sv_num_indices][corr_2d_num_axes][corr_2d_num_axes];
+  // TH2F* h_sv_track_corr_2d[sv_num_indices][corr_2d_num_axes][corr_2d_num_axes];
 
   TH1F* h_sv_track_weight[sv_num_indices][eta_num_regions];
   TH1F* h_sv_track_q[sv_num_indices][eta_num_regions];
@@ -368,11 +368,13 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     */
 
     const std::string vtx_pt_tag = remove_vertex_w_low_pt_track ? pt_region_tags[int(pt_keep)] : ""; // Throw out vtx with low-pT tracks?
+    /*
     for (int i = 0; i < corr_2d_num_axes; ++i) {
       for (int k = 0; k < corr_2d_num_axes; ++k) {
         h_sv_track_corr_2d[j][i][k] = fs->make<TH2F>(TString::Format("h_sv_%s_track_corr_2d%s_vs%s%s", exc, corr_2d_tags[i], corr_2d_tags[k], vtx_pt_tag.c_str()), TString::Format("%s SV tracks %s;SV tracks %s", exc, corr_2d_ax_labels[i], corr_2d_ax_labels[k]), corr_2d_bins[i][0], corr_2d_bins[i][1], corr_2d_bins[i][2], corr_2d_bins[k][0], corr_2d_bins[k][1], corr_2d_bins[k][2]);
       };
     };
+    */
     h_sv_track_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_eta%s", exc, vtx_pt_tag.c_str()), TString::Format(";%s SV tracks #eta;arb. units", exc), 50, -4, 4);
     // h_sv_track_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_eta", exc), TString::Format(";%s SV tracks #eta;arb. units", exc), 50, -4, 4);
     for (int i = 0; i < eta_num_regions; ++i) {
@@ -805,6 +807,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     // fill(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
     // fill(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
 
+    /*
     for (int i = 0; i < ntracks; ++i) {
       if (remove_vertex(aux)) {
         break;
@@ -828,7 +831,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           h_sv_track_corr_2d[sv_all][j][k]->Fill(corr_2d_entries[j], corr_2d_entries[k], w);
         }
       }
-      /*
       vtx_hist_fill_eta(h_sv_track_weight[sv_all], aux.track_eta[i], aux.track_weight(i), w);
       vtx_hist_fill_eta(h_sv_track_q[sv_all], aux.track_eta[i], aux.track_q(i), w);
       vtx_hist_fill_eta(h_sv_track_pt[sv_all], aux.track_eta[i], aux.track_pt(i), w);
@@ -855,8 +857,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       vtx_hist_fill_eta(h_sv_track_nstlayers[sv_all], aux.track_eta[i], aux.track_nstlayers(i), w);
       vtx_hist_fill_eta(h_sv_track_injet[sv_all], aux.track_eta[i], aux.track_injet[i], w);
       vtx_hist_fill_eta(h_sv_track_inpv[sv_all], aux.track_eta[i], aux.track_inpv[i], w);
-      */
     }
+    */
 
     if (max_ntrackplots > 0) {
       std::vector<std::pair<int,float>> itk_pt;

@@ -47,13 +47,13 @@ process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process
 
 nm1s = []
 
-ntks = [5,3,4,7,8,9]
+ntks = [3]
 nvs = [0,1,2]
 
 # blind data events with >= 4 tracks per vertex until we're ready
-if not is_mc :
-    ntks = [3,4,7]
-    nvs = [0,1,2]
+#if not is_mc :
+#    ntks = [3,4,7]
+#    nvs = [0,1,2]
 
 for ntk in ntks:
     if ntk == 5:
@@ -149,7 +149,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if  use_BTagDispJet_vetoLepHT_triggers:
         if is_mc :
-            samples = pick_samples(dataset, custom_bjet_signal=True, qcd=True, ttbar=True)
+            samples = pick_samples(dataset, custom_bjet_signal=False, qcd=True, ttbar=True)
             pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), ttH_duplicate_check_modifier)
         else :
             samples = pick_samples(dataset, BTagCSV_data=True, DisplacedJet_data=True)
