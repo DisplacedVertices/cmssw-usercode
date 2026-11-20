@@ -184,6 +184,118 @@ namespace corr_2d_helpers {
 }
 
 
+
+namespace hlt_trig_helpers {
+
+  struct hlt_trig_info { // struct storing HLT trigger information
+    int year;
+    std::string path;
+    std::string display_name;
+  };
+
+  static const int hlt_trig_year = MFVNEUTRALINO_YEAR == 20161 || MFVNEUTRALINO_YEAR == 20162 ? 2016 : MFVNEUTRALINO_YEAR; // Which year is stored in Year.h?
+
+  static const int hlt_trig_num = hlt_trig_year == 2016 ? 5 : 4; // #triggers is hard-coded to match AN
+  // static const int hlt_trig_num = 11;
+
+  static const int hlt_trig_nentries = hlt_trig_num + 1; // +1 for the "all" entry
+
+
+  static const vector<hlt_trig_info> hlt_trig_AN_list = { // Store the HLT trigger information: year applicable, path, and display name
+    { 2016, "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v", "di-bjet" },
+    { 2016, "HLT_QuadJet45_TripleBTagCSV_p087_v", "symmetric tri-bjet" },
+    { 2016, "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v", "skewed tri-bjet" },
+    { 2016, "HLT_HT350_DisplacedDijet40_DisplacedTrack_v", "default displaced" },
+    { 2016, "HLT_HT650_DisplacedDijet80_Inclusive_v", "inclusive displaced" },
+
+    { 2017, "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v", "di-bjet" },
+    { 2017, "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v", "tri-bjet" },
+    { 2017, "HLT_HT430_DisplacedDijet40_DisplacedTrack_v", "default displaced" },
+    { 2017, "HLT_HT650_DisplacedDijet60_Inclusive_v", "inclusive displaced" },
+
+    { 2018, "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v", "di-bjet" },
+    { 2018, "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v", "tri-bjet" },
+    { 2018, "HLT_HT430_DisplacedDijet40_DisplacedTrack_v", "default displaced" },
+    { 2018, "HLT_HT650_DisplacedDijet60_Inclusive_v", "inclusive displaced" },
+  };
+
+  /* // Previous implementation:
+  static const vector<std::string> hlt_trig_names = {
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v", // 2016
+    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    "HLT_QuadJet45_TripleBTagCSV_p087_v",
+    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v",
+    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v",
+
+    "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v", // 2017
+    "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v",
+    "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet60_Inclusive_v",
+
+    "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v", // 2018
+    "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v",
+    // "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
+    // "HLT_HT650_DisplacedDijet60_Inclusive_v",
+  };
+  */
+
+  inline vector<hlt_trig_info> get_hlt_trig_list() { // Get the list of HLT triggers for the year specified in Year.h
+    vector<hlt_trig_info> result;
+    for (const hlt_trig_info& trig : hlt_trig_AN_list) {
+      if (trig.year == hlt_trig_year) {
+        result.push_back(trig);
+      }
+    }
+    return result;
+  }
+
+  static const vector<hlt_trig_info> hlt_trig_list = get_hlt_trig_list();
+
+  inline std::string get_nth_hlt_tag(const int n) { // Obtain nth tag (not display_name), padded with "_". Used for histogram names.
+    if (n==0) {return "";}
+    std::string tag = hlt_trig_list[n-1].display_name; // 0th entry is "all"
+    std::replace(tag.begin(), tag.end(), ' ', '_');
+    return "_" + tag;
+  }
+
+  inline int which_hlt_trig(const hlt_trig_info& trig) { // Given a trigger object, find the index
+    for (int i = 0; i < hlt_trig_num; ++i) {
+      if (trig.path == hlt_trig_list[i].path) {
+        return i + 1; // 0 represents "all" triggers
+      }
+    }
+    return -1;
+  }
+
+
+  template <typename EventT>
+  inline void fill_by_hlt(TH1F** hs, const EventT& event, const double val, const double w) {
+    hs[0]->Fill(val, w);
+    bool found_trig = false;
+
+    for (const hlt_trig_info& trig : hlt_trig_list) {
+      for (int i = 0; i < mfv::n_hlt_paths; ++i) {
+        const std::string hlt_path = mfv::hlt_paths[i]; // It's an array of const char*
+        if (hlt_path.find(trig.path) != std::string::npos) {
+
+          const int hist_position = which_hlt_trig(trig);
+          if (event.found_hlt(i) && event.pass_hlt(i)) {
+            hs[hist_position]->Fill(val, w);
+            found_trig = true;
+          }
+
+          break;
+        }
+      }
+    }
+    if (found_trig == false) {
+      throw ("Error: event does not fire any specified HLT trigger.");
+    }
+  }
+
+}
+
+
 #endif
 
 
