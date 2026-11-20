@@ -23,6 +23,7 @@
 using namespace pt_helpers; // Newly defined file
 using namespace eta_helpers;
 using namespace corr_2d_helpers;
+using namespace hlt_trig_helpers;
 using namespace std;
 
 // NOTE we had many histograms related to the b-jet triggers that were dropped at some point. If we need them again for future diagnostics, look through the changes in
@@ -137,19 +138,19 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvsmaxdz_minscore;
 
   */
-  TH1F* h_njets;
-  TH1F* h_njets20;
+  TH1F* h_njets[hlt_trig_nentries];
+  TH1F* h_njets20[hlt_trig_nentries];
   static const int MAX_NJETS = 10;
-  TH1F* h_jet_pt[MAX_NJETS+1];
-  TH1F* h_jet_eta[MAX_NJETS+1];
-  TH1F* h_jet_phi[MAX_NJETS+1];
-  TH1F* h_jet_nseedtrack[MAX_NJETS+1];
-  TH1F* h_jet_energy;
-  TH1F* h_jet_ht;
-  TH1F* h_jet_ht_40;
+  TH1F* h_jet_pt[MAX_NJETS+1][hlt_trig_nentries];
+  TH1F* h_jet_eta[MAX_NJETS+1][hlt_trig_nentries];
+  TH1F* h_jet_phi[MAX_NJETS+1][hlt_trig_nentries];
+  TH1F* h_jet_nseedtrack[MAX_NJETS+1][hlt_trig_nentries];
+  TH1F* h_jet_energy[hlt_trig_nentries];
+  TH1F* h_jet_ht[hlt_trig_nentries];
+  TH1F* h_jet_ht_40[hlt_trig_nentries];
 
-  TH1F* h_jet_pairdphi;
-  TH1F* h_jet_pairdr;
+  TH1F* h_jet_pairdphi[hlt_trig_nentries];
+  TH1F* h_jet_pairdr[hlt_trig_nentries];
   TH1F* h_jetel_pairdphi;
   TH1F* h_jetel_pairdr;
   TH1F* h_jetmu_pairdphi;
@@ -162,18 +163,18 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_metnomuphi;
   */
 
-  TH1F* h_nbtags[3];
+  TH1F* h_nbtags[3][hlt_trig_nentries];
   TH2F* h_nbtags_v_bquark_code[3];
-  TH1F* h_jet_bdisc_csv;
-  TH1F* h_jet_bdisc_deepcsv;
+  TH1F* h_jet_bdisc_csv[hlt_trig_nentries];
+  TH1F* h_jet_bdisc_deepcsv[hlt_trig_nentries];
   static const int MAX_NJETS_FOR_BDISC = 4;
-  TH1F* h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC+1];
+  TH1F* h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC+1][hlt_trig_nentries];
   TH2F* h_jet_bdisc_deepflav_v_bquark_code;
-  TH1F* h_bjet_pt;
-  TH1F* h_bjet_eta;
-  TH1F* h_bjet_phi;
-  TH1F* h_bjet_energy;
-  TH1F* h_bjet_pairdphi;
+  TH1F* h_bjet_pt[hlt_trig_nentries];
+  TH1F* h_bjet_eta[hlt_trig_nentries];
+  TH1F* h_bjet_phi[hlt_trig_nentries];
+  TH1F* h_bjet_energy[hlt_trig_nentries];
+  TH1F* h_bjet_pairdphi[hlt_trig_nentries];
   /*
 
 
@@ -402,21 +403,23 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvsmaxdz_minscore = fs->make<TH1F>("h_pvmaxdz_minscore", ";max primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
 
   */
-  h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
-  h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
-  for (int i = 0; i < MAX_NJETS+1; ++i) {
-    TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
-    h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
-    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
-    h_jet_nseedtrack[i] = fs->make<TH1F>(TString::Format("h_jet_nseedtrack_%s", ijet.Data()), TString::Format(";jet #%s number of seed tracks;arb. units", ijet.Data()), 50, 0, 50);
-  }
-  h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
-  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
+  for (int j = 0; j < hlt_trig_nentries; ++j) {
+    h_njets[j] = fs->make<TH1F>(TString::Format("h_njets%s", get_nth_hlt_tag(j).c_str()), TString::Format(";# of jets%s;events", get_nth_hlt_axislabel(j).c_str()), 30, 0, 30);
+    h_njets20[j] = fs->make<TH1F>(TString::Format("h_njets20%s", get_nth_hlt_tag(j).c_str()), TString::Format(";# of jets w. p_{T} > 20 GeV%s;events", get_nth_hlt_axislabel(j).c_str()), 20, 0, 20);
+    for (int i = 0; i < MAX_NJETS+1; ++i) {
+      TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
+      h_jet_pt[i][j] = fs->make<TH1F>(TString::Format("h_jet_pt_%s%s", ijet.Data(), get_nth_hlt_tag(j).c_str()), TString::Format(";p_{T} of jet #%s (GeV)%s;events/10 GeV", ijet.Data(), get_nth_hlt_axislabel(j).c_str()), 200, 0, 2000);
+      h_jet_eta[i][j] = fs->make<TH1F>(TString::Format("h_jet_eta_%s%s", ijet.Data(), get_nth_hlt_tag(j).c_str()), TString::Format(";#eta of jet #%s%s;events/0.05", ijet.Data(), get_nth_hlt_axislabel(j).c_str()), 120, -3, 3);
+      h_jet_phi[i][j] = fs->make<TH1F>(TString::Format("h_jet_phi_%s%s", ijet.Data(), get_nth_hlt_tag(j).c_str()), TString::Format(";#phi of jet #%s%s;events/0.063", ijet.Data(), get_nth_hlt_axislabel(j).c_str()), 100, -3.1416, 3.1416);
+      h_jet_nseedtrack[i][j] = fs->make<TH1F>(TString::Format("h_jet_nseedtrack_%s%s", ijet.Data(), get_nth_hlt_tag(j).c_str()), TString::Format(";jet #%s number of seed tracks%s;arb. units", ijet.Data(), get_nth_hlt_axislabel(j).c_str()), 50, 0, 50);
+    }
+    h_jet_energy[j] = fs->make<TH1F>(TString::Format("h_jet_energy%s", get_nth_hlt_tag(j).c_str()), TString::Format(";jets energy (GeV)%s;jets/10 GeV", get_nth_hlt_axislabel(j).c_str()), 200, 0, 2000);
+    h_jet_ht[j] = fs->make<TH1F>(TString::Format("h_jet_ht%s", get_nth_hlt_tag(j).c_str()), TString::Format(";H_{T} of jets (GeV)%s;events/25 GeV", get_nth_hlt_axislabel(j).c_str()), 200, 0, 5000);
+    h_jet_ht_40[j] = fs->make<TH1F>(TString::Format("h_jet_ht_40%s", get_nth_hlt_tag(j).c_str()), TString::Format(";H_{T} of jets with p_{T} > 40 GeV%s;events/25 GeV", get_nth_hlt_axislabel(j).c_str()), 200, 0, 5000);
 
-  h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
-  h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.063", 100, 0, 6.3);
+    h_jet_pairdphi[j] = fs->make<TH1F>(TString::Format("h_jet_pairdphi%s", get_nth_hlt_tag(j).c_str()), TString::Format(";jet pair #Delta#phi (rad)%s;jet pairs/.063", get_nth_hlt_axislabel(j).c_str()), 100, -3.1416, 3.1416);
+    h_jet_pairdr[j] = fs->make<TH1F>(TString::Format("h_jet_pairdr%s", get_nth_hlt_tag(j).c_str()), TString::Format(";jet pair #DeltaR (rad)%s;jet pairs/.063", get_nth_hlt_axislabel(j).c_str()), 100, 0, 6.3);
+  }
   h_jetel_pairdphi = fs->make<TH1F>("h_jetel_pairdphi", ";jet electron pair #Delta#phi (rad);jetel pairs/.063", 100, -3.1416, 3.1416);
   h_jetel_pairdr = fs->make<TH1F>("h_jetel_pairdr", ";jet electron pair #DeltaR (rad);jetel pairs/.063", 100, 0, 6.3);
   h_jetmu_pairdphi = fs->make<TH1F>("h_jetmu_pairdphi", ";jet muon pair #Delta#phi (rad);jetmu pairs/.063", 100, -3.1416, 3.1416);
@@ -466,23 +469,27 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   */
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
-  for (int i = 0; i < 3; ++i) {
-    h_nbtags[i] = fs->make<TH1F>(TString::Format("h_nbtags_%i", i), TString::Format(";# of %s b tags;events", lmt_ex[i]), 10, 0, 10);
-    h_nbtags_v_bquark_code[i] = fs->make<TH2F>(TString::Format("h_nbtags_v_bquark_code_%i", i), TString::Format(";bquark code;# of %s b tags", lmt_ex[i]), 3, 0, 3, 3, 0, 3);
+  for (int j = 0; j < hlt_trig_nentries; ++j) {
+    for (int i = 0; i < 3; ++i) {
+      h_nbtags[i][j] = fs->make<TH1F>(TString::Format("h_nbtags_%i%s", i, get_nth_hlt_tag(j).c_str()), TString::Format(";# of %s b tags%s;events", lmt_ex[i], get_nth_hlt_axislabel(j).c_str()), 10, 0, 10);
+      if (j==0) {
+        h_nbtags_v_bquark_code[i] = fs->make<TH2F>(TString::Format("h_nbtags_v_bquark_code_%i", i), TString::Format(";bquark code;# of %s b tags", lmt_ex[i]), 3, 0, 3, 3, 0, 3);
+      }
+    }
+    h_jet_bdisc_csv[j] = fs->make<TH1F>(TString::Format("h_jet_bdisc_csv%s", get_nth_hlt_tag(j).c_str()), TString::Format(";jets' csv score%s;jets/0.02", get_nth_hlt_axislabel(j).c_str()), 51, 0, 1.02);
+    h_jet_bdisc_deepcsv[j] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepcsv%s", get_nth_hlt_tag(j).c_str()), TString::Format(";jets' deepcsv score%s;jets/0.02", get_nth_hlt_axislabel(j).c_str()), 51, 0, 1.02);
+    for (int i = 0; i < MAX_NJETS_FOR_BDISC+1; ++i) {
+      TString ijet = i == MAX_NJETS_FOR_BDISC ? TString("all") : TString::Format("%i", i);
+      h_jet_bdisc_deepflav[i][j] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepflav_%s%s", ijet.Data(), get_nth_hlt_tag(j).c_str()), TString::Format(";deepflavour score of jet #%s%s;jets/0.02", ijet.Data(), get_nth_hlt_axislabel(j).c_str()), 51, 0, 1.02);
+    }
+    //h_jet_bdisc_deepflav = fs->make<TH1F>("h_jet_bdisc_deepflav", ";jets' deepflavour score;jets/0.02", 51, 0, 1.02);
+    h_bjet_pt[j] = fs->make<TH1F>(TString::Format("h_bjet_pt%s", get_nth_hlt_tag(j).c_str()), TString::Format(";bjets p_{T} (GeV)%s;bjets/10 GeV", get_nth_hlt_axislabel(j).c_str()), 150, 0, 1500);
+    h_bjet_eta[j] = fs->make<TH1F>(TString::Format("h_bjet_eta%s", get_nth_hlt_tag(j).c_str()), TString::Format(";bjets #eta (rad)%s;bjets/.05", get_nth_hlt_axislabel(j).c_str()), 120, -3, 3);
+    h_bjet_phi[j] = fs->make<TH1F>(TString::Format("h_bjet_phi%s", get_nth_hlt_tag(j).c_str()), TString::Format(";bjets #phi (rad)%s;bjets/.063", get_nth_hlt_axislabel(j).c_str()), 100, -3.1416, 3.1416);
+    h_bjet_energy[j] = fs->make<TH1F>(TString::Format("h_bjet_energy%s", get_nth_hlt_tag(j).c_str()), TString::Format(";bjets E (GeV)%s;bjets/10 GeV", get_nth_hlt_axislabel(j).c_str()), 150, 0, 1500);
+    h_bjet_pairdphi[j] = fs->make<TH1F>(TString::Format("h_bjet_pairdphi%s", get_nth_hlt_tag(j).c_str()), TString::Format(";bjet pair #Delta#phi (rad)%s;bjet pairs/.063", get_nth_hlt_axislabel(j).c_str()), 100, -3.1416, 3.1416);
   }
-  h_jet_bdisc_csv = fs->make<TH1F>("h_jet_bdisc_csv", ";jets' csv score;jets/0.02", 51, 0, 1.02);
-  h_jet_bdisc_deepcsv = fs->make<TH1F>("h_jet_bdisc_deepcsv", ";jets' deepcsv score;jets/0.02", 51, 0, 1.02);
-  for (int i = 0; i < MAX_NJETS_FOR_BDISC+1; ++i) {
-    TString ijet = i == MAX_NJETS_FOR_BDISC ? TString("all") : TString::Format("%i", i);
-    h_jet_bdisc_deepflav[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepflav_%s", ijet.Data()), TString::Format(";deepflavour score of jet #%s;jets/0.02", ijet.Data()), 51, 0, 1.02);
-  }
-  //h_jet_bdisc_deepflav = fs->make<TH1F>("h_jet_bdisc_deepflav", ";jets' deepflavour score;jets/0.02", 51, 0, 1.02);
   h_jet_bdisc_deepflav_v_bquark_code = fs->make<TH2F>("h_jet_bdisc_deepflav_v_bquark_code", ";b quark code;jets' b discriminator", 3, 0, 3, 51, 0, 1.02);
-  h_bjet_pt = fs->make<TH1F>("h_bjet_pt", ";bjets p_{T} (GeV);bjets/10 GeV", 150, 0, 1500);
-  h_bjet_eta = fs->make<TH1F>("h_bjet_eta", ";bjets #eta (rad);bjets/.05", 120, -3, 3);
-  h_bjet_phi = fs->make<TH1F>("h_bjet_phi", ";bjets #phi (rad);bjets/.063", 100, -3.1416, 3.1416);
-  h_bjet_energy = fs->make<TH1F>("h_bjet_energy", ";bjets E (GeV);bjets/10 GeV", 150, 0, 1500);
-  h_bjet_pairdphi = fs->make<TH1F>("h_bjet_pairdphi", ";bjet pair #Delta#phi (rad);bjet pairs/.063", 100, -3.1416, 3.1416);
   /*
 
   //lepton histos
@@ -934,29 +941,29 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   */
-  h_njets->Fill(mevent->njets(), w);
-  h_njets20->Fill(mevent->njets(20), w);
+  fill_by_hlt(h_njets, mevent, mevent->njets(), w); // h_njets->Fill(mevent->njets(), w);
+  fill_by_hlt(h_njets20, mevent, mevent->njets(20), w); // h_njets20->Fill(mevent->njets(20), w);
 
   for (int i = 0; i < MAX_NJETS; ++i) {
-    h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
-    h_jet_eta[i]->Fill(mevent->nth_jet_eta(i), w);
-    h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
+    fill_by_hlt(h_jet_pt[i], mevent, mevent->nth_jet_pt(i), w);
+    fill_by_hlt(h_jet_eta[i], mevent, mevent->nth_jet_eta(i), w);
+    fill_by_hlt(h_jet_phi[i], mevent, mevent->nth_jet_phi(i), w);
   }
-  h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
-  h_jet_ht_40->Fill(mevent->jet_ht(40), w);
+  fill_by_hlt(h_jet_ht, mevent, mevent->jet_ht(mfv::min_jet_pt), w); // h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
+  fill_by_hlt(h_jet_ht_40, mevent, mevent->jet_ht(40), w); // h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
-    h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
-    h_jet_eta[MAX_NJETS]->Fill(mevent->jet_eta[ijet], w);
-    h_jet_phi[MAX_NJETS]->Fill(mevent->jet_phi[ijet], w);
-    h_jet_energy->Fill(mevent->jet_energy[ijet], w);
+    fill_by_hlt(h_jet_pt[MAX_NJETS], mevent, mevent->jet_pt[ijet], w);
+    fill_by_hlt(h_jet_eta[MAX_NJETS], mevent, mevent->jet_eta[ijet], w);
+    fill_by_hlt(h_jet_phi[MAX_NJETS], mevent, mevent->jet_phi[ijet], w);
+    fill_by_hlt(h_jet_energy, mevent, mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
         continue;
-      h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
-      h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
+      fill_by_hlt(h_jet_pairdphi, mevent, reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
+      fill_by_hlt(h_jet_pairdr, mevent, reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }
   /*
@@ -1206,30 +1213,30 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   */
 
   for (int i = 0; i < 3; ++i) {
-    h_nbtags[i]->Fill(mevent->nbtags(i), w);
+    fill_by_hlt(h_nbtags[i], mevent, mevent->nbtags(i), w);
     h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
   }
   const int ibtag = 2; // tight only
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
-    h_jet_bdisc_csv->Fill(mevent->jet_bdisc_csv[ijet], w);
-    h_jet_bdisc_deepcsv->Fill(mevent->jet_bdisc_deepcsv[ijet], w);
-    h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC]->Fill(mevent->jet_bdisc_deepflav[ijet], w);
+    fill_by_hlt(h_jet_bdisc_csv, mevent, mevent->jet_bdisc_csv[ijet], w);
+    fill_by_hlt(h_jet_bdisc_deepcsv, mevent, mevent->jet_bdisc_deepcsv[ijet], w);
+    fill_by_hlt(h_jet_bdisc_deepflav[MAX_NJETS_FOR_BDISC], mevent, mevent->jet_bdisc_deepflav[ijet], w);
     if (ijet < MAX_NJETS_FOR_BDISC) {
-      h_jet_bdisc_deepflav[ijet]->Fill(mevent->jet_bdisc_deepflav[ijet], w);
+      fill_by_hlt(h_jet_bdisc_deepflav[ijet], mevent, mevent->jet_bdisc_deepflav[ijet], w);
     };
     h_jet_bdisc_deepflav_v_bquark_code->Fill(mevent->gen_flavor_code, mevent->jet_bdisc_deepflav[ijet], w);
     if (mevent->is_btagged(ijet, ibtag)) {
-      h_bjet_pt->Fill(mevent->jet_pt[ijet], w);
-      h_bjet_eta->Fill(mevent->jet_eta[ijet], w);
-      h_bjet_phi->Fill(mevent->jet_phi[ijet], w);
-      h_bjet_energy->Fill(mevent->jet_energy[ijet], w);
+      fill_by_hlt(h_bjet_pt, mevent, mevent->jet_pt[ijet], w);
+      fill_by_hlt(h_bjet_eta, mevent, mevent->jet_eta[ijet], w);
+      fill_by_hlt(h_bjet_phi, mevent, mevent->jet_phi[ijet], w);
+      fill_by_hlt(h_bjet_energy, mevent, mevent->jet_energy[ijet], w);
       for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
         if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
           continue;
         if (mevent->is_btagged(jjet, ibtag)) {
-          h_bjet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
+          fill_by_hlt(h_bjet_pairdphi, mevent, reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
         }
       }
     }
@@ -1333,9 +1340,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     int n_seedtrack = std::count(track_which_jet.begin(), track_which_jet.end(), i);
     njet_seedtrack += n_seedtrack;
     if (i<MAX_NJETS)
-      h_jet_nseedtrack[i]->Fill(n_seedtrack, w);
+      fill_by_hlt(h_jet_nseedtrack[i], mevent, n_seedtrack, w);
   }
-  h_jet_nseedtrack[MAX_NJETS]->Fill(njet_seedtrack, w);
+  fill_by_hlt(h_jet_nseedtrack[MAX_NJETS], mevent, njet_seedtrack, w);
 }
 
 DEFINE_FWK_MODULE(MFVEventHistos);

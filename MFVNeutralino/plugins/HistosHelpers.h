@@ -252,10 +252,15 @@ namespace hlt_trig_helpers {
   static const vector<hlt_trig_info> hlt_trig_list = get_hlt_trig_list();
 
   inline std::string get_nth_hlt_tag(const int n) { // Obtain nth tag (not display_name), padded with "_". Used for histogram names.
-    if (n==0) {return "";}
-    std::string tag = hlt_trig_list[n-1].display_name; // 0th entry is "all"
+    if (n==0) {return "";} // 0th entry is "all"
+    std::string tag = "_" + hlt_trig_list[n-1].display_name;
     std::replace(tag.begin(), tag.end(), ' ', '_');
-    return "_" + tag;
+    return tag;
+  }
+
+  inline std::string get_nth_hlt_axislabel(const int n) {
+    if (n==0) {return "";}
+    return " (" + hlt_trig_list[n-1].display_name + " trig)"; // return the " (___ trig)" label, if applicable
   }
 
   inline int which_hlt_trig(const hlt_trig_info& trig) { // Given a trigger object, find the index
@@ -279,7 +284,7 @@ namespace hlt_trig_helpers {
         if (hlt_path.find(trig.path) != std::string::npos) {
 
           const int hist_position = which_hlt_trig(trig);
-          if (event.found_hlt(i) && event.pass_hlt(i)) {
+          if (event->found_hlt(i) && event->pass_hlt(i)) {
             hs[hist_position]->Fill(val, w);
             found_trig = true;
           }
